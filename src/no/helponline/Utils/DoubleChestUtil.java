@@ -1,10 +1,18 @@
 package no.helponline.Utils;
 
+import no.helponline.OddJob;
 import org.bukkit.Location;
 import org.bukkit.block.*;
+import org.bukkit.block.data.type.Door;
 
 
 public class DoubleChestUtil {
+    public static Location getLowerLeftDoor(Block block) {
+        Door door = (Door) block;
+        OddJob.getInstance().log(door.getAsString());
+
+        return block.getLocation();
+    }
     public static Location getTopLocation(Block block) {
         Chest chest = (Chest) block.getState();
         if (chest.getInventory().getHolder() instanceof DoubleChest) {

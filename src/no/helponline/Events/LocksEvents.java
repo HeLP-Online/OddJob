@@ -4,6 +4,7 @@ import no.helponline.Managers.LockManager;
 import no.helponline.Managers.MessageManager;
 import no.helponline.Managers.PlayerManager;
 import no.helponline.OddJob;
+import no.helponline.Utils.DoubleChestUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,9 +40,13 @@ public class LocksEvents implements Listener {
             Material t = b.getType();
 
             OddJob.getInstance().log(b.getState().getBlockData().getAsString());
-            if (t.equals(Material.CHEST) || t.equals(Material.FURNACE)) {
+            if (t.equals(Material.CHEST) || t.equals(Material.FURNACE) || t.equals(Material.IRON_DOOR)) {
                 try {
-                    uuid = LockManager.isLocked(b.getLocation());
+                    if (t.equals(Material.IRON_DOOR)) {
+                        uuid = LockManager.isLocked(DoubleChestUtil.getLowerLeftDoor(b));
+                    } else {
+                        uuid = LockManager.isLocked(b.getLocation());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

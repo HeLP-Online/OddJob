@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.*;
 
 public class ConfigManager {
-    private static OddJob plugin;
     private static int generatedID = 100;
     public static YamlConfiguration guildStatusConfig;
     public static File guildStatus;
@@ -31,20 +30,20 @@ public class ConfigManager {
     private static File locksFile;
 
     public static void load() {
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
+        if (!OddJob.getInstance().getDataFolder().exists()) {
+            OddJob.getInstance().getDataFolder().mkdirs();
         }
 
-        if (plugin.getConfig().contains("generatedID")) {
-            generatedID = plugin.getConfig().getInt("generatedID");
+        if (OddJob.getInstance().getConfig().contains("generatedID")) {
+            generatedID = OddJob.getInstance().getConfig().getInt("generatedID");
         }
 
-        balanceFile = new File(plugin.getDataFolder(), "balances.yml");
+        balanceFile = new File(OddJob.getInstance().getDataFolder(), "balances.yml");
 
 
-        playerFile = new File(plugin.getDataFolder(), "players.yml");
-        homesFile = new File(plugin.getDataFolder(), "homes.yml");
-        locksFile = new File(plugin.getDataFolder(), "chest.yml");
+        playerFile = new File(OddJob.getInstance().getDataFolder(), "players.yml");
+        homesFile = new File(OddJob.getInstance().getDataFolder(), "homes.yml");
+        locksFile = new File(OddJob.getInstance().getDataFolder(), "chest.yml");
 
 
         if (!balanceFile.exists()) {
@@ -120,9 +119,9 @@ public class ConfigManager {
     public static void loadLocks() {
         if (locksConfig.contains("locks")) {
             int iLocks = 0;
-            HashMap<Location, UUID> chest = new HashMap<Location, UUID>();
-            HashMap<Location, Location> two = new HashMap<Location, Location>();
-            HashMap<UUID, UUID> armor = new HashMap<UUID, UUID>();
+            HashMap<Location, UUID> chest = new HashMap<>();
+            HashMap<Location, Location> two = new HashMap<>();
+            HashMap<UUID, UUID> armor = new HashMap<>();
 
             for (String a : locksConfig.getConfigurationSection("armors").getKeys(false)) {
                 UUID uuid = UUID.fromString(a);
@@ -159,7 +158,6 @@ public class ConfigManager {
 
                 UUID uuid = UUID.fromString(s);
                 Set<String> st = homesConfig.getConfigurationSection("homes." + uuid).getKeys(false);
-                HashMap<String, Location> loc = new HashMap<String, Location>();
                 if (!st.isEmpty()) {
                     for (String str : st) {
 
@@ -180,8 +178,8 @@ public class ConfigManager {
     }
 
     public static void save() {
-        plugin.getConfig().set("generatedID", generatedID);
-        plugin.saveConfig();
+        OddJob.getInstance().getConfig().set("generatedID", generatedID);
+        OddJob.getInstance().saveConfig();
         saveBalances();
         savePlayers();
         saveHomes();
