@@ -6,7 +6,6 @@ import no.helponline.Managers.PlayerManager;
 import no.helponline.OddJob;
 import no.helponline.Utils.DoubleChestUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -26,26 +25,27 @@ public class LocksEvents implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteractEvent(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        Location top = null;
-        Location bottom = null;
+        boolean door = false;
         UUID uuid = null;
-        if (event.getHand().equals(EquipmentSlot.HAND)) {
-            return;
-        }
-        if (event.getClickedBlock() == null) {
+
+        if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null)) {
             return;
         }
         if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            Block b = event.getClickedBlock();
-            Material t = b.getType();
+            Block block = event.getClickedBlock();
+            Material t = block.getType();
 
-            OddJob.getInstance().log(b.getState().getBlockData().getAsString());
+            OddJob.getInstance().log(block.getState().getBlockData().getAsString());
             if (t.equals(Material.CHEST) || t.equals(Material.FURNACE) || t.equals(Material.IRON_DOOR)) {
                 try {
                     if (t.equals(Material.IRON_DOOR)) {
-                        uuid = LockManager.isLocked(DoubleChestUtil.getLowerLeftDoor(b));
+                        block = DoubleChestUtil.getLowerLeftDoor(block).getBlock();
+                        OddJob.getInstance().log("Block " + block.getLocation().serialize().toString());
+                        uuid = LockManager.isLocked(block.getLocation());
+                        OddJob.getInstance().log("UUID : " + uuid.toString() + " : " + PlayerManager.getName(uuid));
+                        door = true;
                     } else {
-                        uuid = LockManager.isLocked(b.getLocation());
+                        uuid = LockManager.isLocked(block.getLocation());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -65,6 +65,10 @@ public class LocksEvents implements Listener {
                                         return;
                                     }
                                     player.sendMessage(ChatColor.YELLOW + "Lock open by key!");
+                                    if (door) {
+                                        DoubleChestUtil.doorToggle(block);
+                                        event.setCancelled(true);
+                                    }
                                     return;
                                 }
                             }
@@ -100,7 +104,7 @@ public class LocksEvents implements Listener {
                             MessageManager.sendMessage(player, ChatColor.RED + "A lock is already set on this.");
                             return;
                         }
-                        LockManager.lock(player.getUniqueId(), event.getClickedBlock().getLocation());
+                        LockManager.lock(player.getUniqueId(), block.getLocation());
                         LockManager.remove(player.getUniqueId());
                         MessageManager.sendMessage(player, ChatColor.GREEN + "Secured!");
                         OddJob.getInstance().log("clicked block locked");
@@ -118,7 +122,7 @@ public class LocksEvents implements Listener {
                             MessageManager.sendMessage(player, ChatColor.RED + "A lock is set by someone else.");
                             return;
                         }
-                        LockManager.unlock(event.getClickedBlock().getLocation());
+                        LockManager.unlock(block.getLocation());
                         LockManager.remove(player.getUniqueId());
                         MessageManager.sendMessage(player, ChatColor.YELLOW + "Unsecured!");
                         OddJob.getInstance().log("clicked block unlocked");

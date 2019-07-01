@@ -7,6 +7,7 @@ import no.helponline.Managers.PlayerManager;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -68,6 +69,19 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
                     Player player = (Player) sender;
                     LockManager.infolock(player.getUniqueId());
+                } else if (args[0].equalsIgnoreCase("show") && sender.hasPermission(cmd.getName() + "." + args[0])) {
+                    if (!(sender instanceof Player)) {
+                        return true;
+                    }
+                    Player player = (Player) sender;
+                    int i = 0;
+                    for (Location location : LockManager.getLocks().keySet()) {
+                        if (LockManager.getLocks().get(location) == player.getUniqueId()) {
+                            i++;
+                            sender.sendMessage(i + ") X=" + location.getBlockX() + "; Y=" + location.getBlockY() + "; Z=" + location.getBlockZ() + "; W=" + location.getWorld().getName() + ";");
+                        }
+                    }
+
                 } else if (args[0].equalsIgnoreCase("list") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     Collection<UUID> locking = LockManager.getLocking();
                     Collection<UUID> unlocking = LockManager.getUnlocking();

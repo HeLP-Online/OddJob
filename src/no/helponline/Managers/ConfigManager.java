@@ -43,7 +43,7 @@ public class ConfigManager {
 
         playerFile = new File(OddJob.getInstance().getDataFolder(), "players.yml");
         homesFile = new File(OddJob.getInstance().getDataFolder(), "homes.yml");
-        locksFile = new File(OddJob.getInstance().getDataFolder(), "chest.yml");
+        locksFile = new File(OddJob.getInstance().getDataFolder(), "locks.yml");
 
 
         if (!balanceFile.exists()) {
@@ -75,7 +75,7 @@ public class ConfigManager {
                 locksFile.createNewFile();
                 Bukkit.getConsoleSender().sendMessage("List of secured locks created!");
             } catch (Exception e) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Could not create the chest.yml file");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Could not create the locks.yml file");
             }
         }
 
@@ -207,22 +207,24 @@ public class ConfigManager {
 
             int i = 0;
 
-            for (UUID uuid : PlayerManager.getPlayersMap().keySet()) {
-                List<String> list = new ArrayList<String>();
-                for (UUID entity : armor.keySet()) {
-                    if (((UUID) armor.get(entity)).equals(uuid)) list.add(entity.toString());
+            if (armor != null && !armor.isEmpty()) {
+                for (UUID uuid : PlayerManager.getPlayersMap().keySet()) {
+                    List<String> list = new ArrayList<>();
+                    for (UUID entity : armor.keySet()) {
+                        if ((armor.get(entity)).equals(uuid)) list.add(entity.toString());
+                    }
+                    locksConfig.set("armors." + uuid.toString(), list);
                 }
-                locksConfig.set("armors." + uuid.toString(), list);
             }
 
             for (Location location : locks.keySet()) {
-                UUID uuid = (UUID) locks.get(location);
+                UUID uuid = locks.get(location);
                 locksConfig.set("locks." + uuid + "." + i + ".world", location.getWorld().getUID().toString());
                 locksConfig.set("locks." + uuid + "." + i + ".x", location.getBlockX());
                 locksConfig.set("locks." + uuid + "." + i + ".y", location.getBlockY());
                 locksConfig.set("locks." + uuid + "." + i + ".z", location.getBlockZ());
                 if (two != null && two.containsKey(location)) {
-                    Location t = (Location) two.get(location);
+                    Location t = two.get(location);
                     locksConfig.set("locks." + uuid + "." + i + ".a", t.getBlockX());
                     locksConfig.set("locks." + uuid + "." + i + ".b", t.getBlockY());
                     locksConfig.set("locks." + uuid + "." + i + ".c", t.getBlockZ());

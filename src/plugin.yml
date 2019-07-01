@@ -53,6 +53,7 @@ permissions:
       locks.save: false
       locks.load: false
       locks.make: true
+      locks.show: true
       locks.make.skeleton: false
   locks.lock:
     default: true
@@ -74,3 +75,5 @@ permissions:
     default: true
   locks.make.skeleton:
     default: op
+  locks.show:
+    default: true

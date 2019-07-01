@@ -29,7 +29,7 @@ public class PlayerJoin implements Listener {
             OddJob.getInstance().log("Initializing account for " + player.getName());
         }
 
-        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"�aWelcome to HeLP\"}"), 40, 20, 20);
+        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
         (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
 
         LockManager.remove(uuid);
