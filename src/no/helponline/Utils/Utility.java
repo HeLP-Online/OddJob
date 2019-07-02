@@ -129,7 +129,6 @@ public class Utility {
                     break;
             }
             if (test != null && LockManager.getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.LEFT)) {
-                //TODO doors
                 OddJob.getInstance().log("has right");
                 block = test;
             }
@@ -173,9 +172,7 @@ public class Utility {
                     test = block.getRelative(BlockFace.NORTH);
                     break;
             }
-            OddJob.getInstance().log(test.getLocation().serialize().toString());
             if (test != null && LockManager.getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.RIGHT)) {
-                //TODO doors
                 OddJob.getInstance().log("has left");
                 block = test;
             }

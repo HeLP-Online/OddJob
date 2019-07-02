@@ -29,21 +29,21 @@ public class LockManager {
     public LockManager() {
         ItemMeta meta = lockWand.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + "Locking tool");
-        List<String> lore = new ArrayList<String>();
+        List<String> lore = new ArrayList<>();
         lore.add("Right click a chest to lock it to you.");
         meta.setLore(lore);
         lockWand.setItemMeta(meta);
 
         meta = lockWand.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + "Unlocking tool");
-        lore = new ArrayList<String>();
+        lore = new ArrayList<>();
         lore.add("Right click a chest of yours to unlock it.");
         meta.setLore(lore);
         unlockWand.setItemMeta(meta);
 
         meta = lockWand.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + "Lock info tool");
-        lore = new ArrayList<String>();
+        lore = new ArrayList<>();
         lore.add("Right click a chest to see who owns it.");
         meta.setLore(lore);
         infoWand.setItemMeta(meta);
