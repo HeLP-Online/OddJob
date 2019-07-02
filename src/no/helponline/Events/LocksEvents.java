@@ -6,6 +6,7 @@ import no.helponline.Managers.PlayerManager;
 import no.helponline.OddJob;
 import no.helponline.Utils.DoubleChestUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -67,6 +68,7 @@ public class LocksEvents implements Listener {
                                     player.sendMessage(ChatColor.YELLOW + "Lock open by key!");
                                     if (door) {
                                         DoubleChestUtil.doorToggle(block);
+                                        player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
                                         event.setCancelled(true);
                                     }
                                     return;

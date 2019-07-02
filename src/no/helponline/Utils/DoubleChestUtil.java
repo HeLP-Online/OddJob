@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.Openable;
 import org.bukkit.block.data.type.Door;
 
 import java.util.HashMap;
@@ -70,9 +71,15 @@ public class DoubleChestUtil {
         OddJob.getInstance().log("Doors: " + doors.size());
         for (Block bl : doors.keySet()) {
             OddJob.getInstance().log("Toggle doors!");
-            if (open) doors.get(bl).setOpen(false);
-            else doors.get(bl).setOpen(true);
-            bl.getState().update();
+            Openable o = (Openable) bl.getState().getBlockData();
+            OddJob.getInstance().log(o.getAsString());
+            o.setOpen(!open);
+            OddJob.getInstance().log(o.getAsString());
+            bl.setBlockData(o);
+            OddJob.getInstance().log(bl.getBlockData().getAsString());
+            bl.getState().update(true, false);
+            OddJob.getInstance().log(bl.getBlockData().getAsString());
+
         }
     }
 
