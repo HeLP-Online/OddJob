@@ -157,7 +157,6 @@ public class ConfigManager {
 
     public static void save() {
         OddJob.getInstance().getConfig().set("generatedID", generatedID);
-        OddJob.getInstance().saveConfig();
         saveBalances();
         savePlayers();
         saveHomes();
@@ -167,11 +166,10 @@ public class ConfigManager {
             playerConfig.save(playerFile);
             homesConfig.save(homesFile);
             locksConfig.save(locksFile);
-
-
         } catch (Exception e) {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Error while saving!");
         }
+        OddJob.getInstance().saveConfig();
     }
 
     public static void saveLocks() {
@@ -179,21 +177,19 @@ public class ConfigManager {
             locksConfig.set("locks." + uuid, null);
         }
         if (LockManager.getLocks() != null && LockManager.getLocks().size() > 0) {
-            HashMap<Location, UUID> locks = LockManager.getLocks();
-
             int i = 0;
-
+            HashMap<Location, UUID> locks = LockManager.getLocks();
             for (Location location : locks.keySet()) {
                 UUID uuid = locks.get(location);
                 locksConfig.set("locks." + uuid + "." + i + ".world", location.getWorld().getUID().toString());
                 locksConfig.set("locks." + uuid + "." + i + ".x", location.getBlockX());
                 locksConfig.set("locks." + uuid + "." + i + ".y", location.getBlockY());
                 locksConfig.set("locks." + uuid + "." + i + ".z", location.getBlockZ());
-
                 i++;
             }
+            Bukkit.getConsoleSender().sendMessage("Secured " + i + " locks saved!");
         }
-        Bukkit.getConsoleSender().sendMessage("Secured locks saved!");
+
     }
 
     private static void saveBalances() {

@@ -9,7 +9,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,16 +37,16 @@ public class LocksEvents implements Listener {
         if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null)) {
             return;
         }
-        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+
+        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || event.getAction().equals(Action.PHYSICAL)) {
             Block block = event.getClickedBlock();
             Material t = block.getType();
 
             OddJob.getInstance().log(block.getState().getBlockData().getAsString());
-            if (t.equals(Material.CHEST) || t.equals(Material.FURNACE) || LockManager.getDoors().contains(t)) {
+            if (LockManager.getLockable().contains(t)) {
                 try {
                     if (LockManager.getDoors().contains(t)) {
                         door = true;
-                        Door d = (Door) block.getBlockData();
                         // changing <block>
                         block = Utility.getLowerLeftDoor(block).getBlock();
                         uuid = LockManager.isLocked(block.getLocation());
@@ -66,6 +65,15 @@ public class LocksEvents implements Listener {
                     e.printStackTrace();
                 }
                 if (uuid != null) {
+                    if (player.getInventory().getItemInMainHand().equals(LockManager.makeSkeletonKey())) {
+                        if (door) {
+                            Utility.doorToggle(block);
+                            player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
+                            event.setCancelled(true);
+                        }
+                        player.sendMessage(ChatColor.RED + "! " + ChatColor.RESET + "Lock open by the awesome Skeletonkey!");
+                        return;
+                    }
                     if (player.getInventory().getItemInMainHand().getType().equals(Material.TRIPWIRE_HOOK)) {
                         ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
                         try {
@@ -96,14 +104,12 @@ public class LocksEvents implements Listener {
                     event.setCancelled(true);
                 }
 
-
                 if (player.getInventory().getItemInMainHand().equals(LockManager.infoWand)) {
                     OddJob.getInstance().log("Info Wand");
                     if (LockManager.isLockInfo(player.getUniqueId())) {
                         MessageManager.sendMessage(player, ChatColor.YELLOW + "The lock is owned by " + PlayerManager.getName(uuid));
                         OddJob.getInstance().log("clicked block info");
                         event.setCancelled(true);
-
                         return;
                     }
                 }

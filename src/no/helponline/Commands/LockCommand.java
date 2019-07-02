@@ -123,8 +123,10 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
                 }
             } else if (args.length == 2 &&
-                    args[0].equalsIgnoreCase("make") && args[1].equalsIgnoreCase("skeleton") && sender.hasPermission(cmd.getName() + "." + args[0] + "." + args[1]) &&
-                    !sender.hasPermission("locks.skeletonkey")) {
+                    args[0].equalsIgnoreCase("make") &&
+                    args[1].equalsIgnoreCase("skeleton") &&
+                    sender.hasPermission(cmd.getName() + "." + args[0] + "." + args[1]) &&
+                    sender.hasPermission("locks.skeletonkey")) {
                 if (!(sender instanceof Player)) {
                     return true;
                 }
