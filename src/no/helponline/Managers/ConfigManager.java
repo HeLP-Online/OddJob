@@ -87,7 +87,7 @@ public class ConfigManager {
         homesConfig = YamlConfiguration.loadConfiguration(homesFile);
         locksConfig = YamlConfiguration.loadConfiguration(locksFile);
 
-        loadGuilds();
+        //loadGuilds(); TODO
         loadBalances();
         loadPlayers();
         loadHomes();
