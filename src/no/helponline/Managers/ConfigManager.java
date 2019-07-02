@@ -8,7 +8,10 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class ConfigManager {
     private static int generatedID = 100;
@@ -39,8 +42,6 @@ public class ConfigManager {
         }
 
         balanceFile = new File(OddJob.getInstance().getDataFolder(), "balances.yml");
-
-
         playerFile = new File(OddJob.getInstance().getDataFolder(), "players.yml");
         homesFile = new File(OddJob.getInstance().getDataFolder(), "homes.yml");
         locksFile = new File(OddJob.getInstance().getDataFolder(), "locks.yml");
@@ -80,8 +81,6 @@ public class ConfigManager {
         }
 
         balanceConfig = YamlConfiguration.loadConfiguration(balanceFile);
-
-
         playerConfig = YamlConfiguration.loadConfiguration(playerFile);
         homesConfig = YamlConfiguration.loadConfiguration(homesFile);
         locksConfig = YamlConfiguration.loadConfiguration(locksFile);
@@ -120,54 +119,33 @@ public class ConfigManager {
         if (locksConfig.contains("locks")) {
             int iLocks = 0;
             HashMap<Location, UUID> chest = new HashMap<>();
-            HashMap<Location, Location> two = new HashMap<>();
-            HashMap<UUID, UUID> armor = new HashMap<>();
-
-            for (String a : locksConfig.getConfigurationSection("armors").getKeys(false)) {
-                UUID uuid = UUID.fromString(a);
-                for (String b : locksConfig.getStringList("armors." + uuid)) {
-                    armor.put(UUID.fromString(b), uuid);
-                }
-            }
 
             for (String s : locksConfig.getConfigurationSection("locks").getKeys(false)) {
                 UUID uuid = UUID.fromString(s);
                 for (String c : locksConfig.getConfigurationSection("locks." + uuid).getKeys(false)) {
-                    OddJob.getInstance().log(locksConfig.getString("locks." + uuid + "." + c + ".world"));
-
-
                     Location l = new Location(Bukkit.getWorld(UUID.fromString(locksConfig.getString("locks." + uuid + "." + c + ".world"))), locksConfig.getInt("locks." + uuid + "." + c + ".x"), locksConfig.getInt("locks." + uuid + "." + c + ".y"), locksConfig.getInt("locks." + uuid + "." + c + ".z"));
                     chest.put(l, uuid);
-                    if (locksConfig.getBoolean("locks." + uuid + "." + c + ".d")) {
-
-
-                        Location o = new Location(Bukkit.getWorld(UUID.fromString(locksConfig.getString("locks" + uuid + "." + c + ".world"))), locksConfig.getInt("locks." + uuid + "." + c + ".a"), locksConfig.getInt("locks." + uuid + "." + c + ".b"), locksConfig.getInt("locks." + uuid + "." + c + ".c"));
-                        two.put(l, o);
-                    }
                     iLocks++;
                 }
             }
             OddJob.getInstance().log("loaded " + iLocks + " locks.");
-            LockManager.setLocks(chest, two, armor);
+            LockManager.setLocks(chest);
         }
     }
 
     private static void loadHomes() {
         if (homesConfig.contains("homes")) {
             for (String s : homesConfig.getConfigurationSection("homes").getKeys(false)) {
-
                 UUID uuid = UUID.fromString(s);
                 Set<String> st = homesConfig.getConfigurationSection("homes." + uuid).getKeys(false);
                 if (!st.isEmpty()) {
                     for (String str : st) {
-
                         String worldUUID = homesConfig.getString("homes." + uuid + "." + str + ".world");
                         int x = homesConfig.getInt("homes." + uuid + "." + str + ".x");
                         int y = homesConfig.getInt("homes." + uuid + "." + str + ".y");
                         int z = homesConfig.getInt("homes." + uuid + "." + str + ".z");
                         float yaw = homesConfig.getInt("homes." + uuid + "." + str + ".yaw");
                         float pitch = homesConfig.getInt("homes." + uuid + "." + str + ".pitch");
-
                         Location location = new Location(Bukkit.getWorld(UUID.fromString(worldUUID)), x, y, z, yaw, pitch);
                         HomesManager.add(uuid, str, location);
                     }
@@ -202,20 +180,8 @@ public class ConfigManager {
         }
         if (LockManager.getLocks() != null && LockManager.getLocks().size() > 0) {
             HashMap<Location, UUID> locks = LockManager.getLocks();
-            HashMap<Location, Location> two = LockManager.getTwo();
-            HashMap<UUID, UUID> armor = LockManager.getArmor();
 
             int i = 0;
-
-            if (armor != null && !armor.isEmpty()) {
-                for (UUID uuid : PlayerManager.getPlayersMap().keySet()) {
-                    List<String> list = new ArrayList<>();
-                    for (UUID entity : armor.keySet()) {
-                        if ((armor.get(entity)).equals(uuid)) list.add(entity.toString());
-                    }
-                    locksConfig.set("armors." + uuid.toString(), list);
-                }
-            }
 
             for (Location location : locks.keySet()) {
                 UUID uuid = locks.get(location);
@@ -223,15 +189,7 @@ public class ConfigManager {
                 locksConfig.set("locks." + uuid + "." + i + ".x", location.getBlockX());
                 locksConfig.set("locks." + uuid + "." + i + ".y", location.getBlockY());
                 locksConfig.set("locks." + uuid + "." + i + ".z", location.getBlockZ());
-                if (two != null && two.containsKey(location)) {
-                    Location t = two.get(location);
-                    locksConfig.set("locks." + uuid + "." + i + ".a", t.getBlockX());
-                    locksConfig.set("locks." + uuid + "." + i + ".b", t.getBlockY());
-                    locksConfig.set("locks." + uuid + "." + i + ".c", t.getBlockZ());
-                }
-                if (two != null) {
-                    locksConfig.set("locks." + uuid + "." + i + ".d", two.containsKey(location));
-                }
+
                 i++;
             }
         }

@@ -196,10 +196,12 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
 
                 Set<String> homes = HomesManager.list(player.getUniqueId());
 
-                int i = 1;
-                for (String s : homes) {
-                    string.append(i + ") " + s + "\n");
-                    i++;
+                int i = 0;
+                if (homes.size() > 0) {
+                    for (String s : homes) {
+                        i++;
+                        string.append(i + ") " + s + "\n");
+                    }
                 }
 
                 sender.sendMessage(string.toString());

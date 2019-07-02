@@ -1,6 +1,5 @@
 package no.helponline.Managers;
 
-import no.helponline.Utils.DoubleChestUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -128,16 +127,7 @@ public class LockManager {
     }
 
     public static void lock(UUID uuid, Location location) {
-        if (location.getBlock().getType().equals(Material.CHEST)) {
-            Location bottom = DoubleChestUtil.getBottomLocation(location.getBlock());
-            Location top = DoubleChestUtil.getTopLocation(location.getBlock());
-            if (bottom != null) {
-                two.put(top, bottom);
-            }
-            locked.put(top, uuid);
-        } else {
-            locked.put(location, uuid);
-        }
+        locked.put(location, uuid);
     }
 
     public static void unlock(Entity entity) {
@@ -145,18 +135,7 @@ public class LockManager {
     }
 
     public static void unlock(Location location) {
-        if (two.containsValue(location)) {
-            for (Location top : two.keySet()) {
-                if (two.get(top).equals(location)) {
-                    two.remove(top);
-                    locked.remove(top);
-                    return;
-                }
-            }
-        } else {
-            two.remove(location);
-            locked.remove(location);
-        }
+        locked.remove(location);
     }
 
     public static UUID isLocked(Entity entity) {
@@ -169,29 +148,12 @@ public class LockManager {
     public static UUID isLocked(Location location) {
         if (locked.containsKey(location))
             return locked.get(location);
-        if (two.containsValue(location)) {
-            for (Location top : two.keySet()) {
-                if ((two.get(top)).equals(location)) {
-                    return locked.get(top);
-                }
-            }
-        }
         return null;
-    }
-
-    public static HashMap<UUID, UUID> getArmor() {
-        if (armor.isEmpty()) return null;
-        return armor;
     }
 
     public static HashMap<Location, UUID> getLocks() {
         if (locked.isEmpty()) return null;
         return locked;
-    }
-
-    public static HashMap<Location, Location> getTwo() {
-        if (two.isEmpty()) return null;
-        return two;
     }
 
     public static ItemStack makeSkeletonKey() {
@@ -218,9 +180,7 @@ public class LockManager {
         return newKey;
     }
 
-    public static void setLocks(HashMap<Location, UUID> locked, HashMap<Location, Location> two, HashMap<UUID, UUID> armor) {
-        LockManager.armor = armor;
-        LockManager.two = two;
+    public static void setLocks(HashMap<Location, UUID> locked) {
         LockManager.locked = locked;
     }
 
@@ -238,7 +198,15 @@ public class LockManager {
         return lockinfo;
     }
 
-    enum Type {
-        TRAPDOOR, DOOR, CHEST, GATE, FURNACE, WORKBENCH, JUKEBOX, ENCHANTING, ANVIL, SMOKER, GRINDSTONE, SMITHING, STONECUTTER
+    public static List<Material> getDoors() {
+        List<Material> doors = new ArrayList<>();
+        doors.add(Material.IRON_DOOR);
+        doors.add(Material.DARK_OAK_DOOR);
+        doors.add(Material.ACACIA_DOOR);
+        doors.add(Material.BIRCH_DOOR);
+        doors.add(Material.JUNGLE_DOOR);
+        doors.add(Material.OAK_DOOR);
+        doors.add(Material.SPRUCE_DOOR);
+        return doors;
     }
 }
