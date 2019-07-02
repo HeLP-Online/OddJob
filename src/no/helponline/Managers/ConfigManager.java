@@ -1,28 +1,21 @@
 package no.helponline.Managers;
 
+import no.helponline.Guilds.Role;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class ConfigManager {
     private static int generatedID = 100;
-    public static YamlConfiguration guildStatusConfig;
-    public static File guildStatus;
-    public static YamlConfiguration guildHomesConfig;
-    public static File guildHomes;
-    public static YamlConfiguration guildTiersConfig;
-    public static File guildTiers;
-    public static YamlConfiguration guildBanksConfig;
-    public static File guildBanks;
+    private static YamlConfiguration guildConfig;
+    private static File guildFile;
     private static YamlConfiguration balanceConfig;
     private static File balanceFile;
     private static YamlConfiguration playerConfig;
@@ -41,12 +34,20 @@ public class ConfigManager {
             generatedID = OddJob.getInstance().getConfig().getInt("generatedID");
         }
 
+        guildFile = new File(OddJob.getInstance().getDataFolder(), "guilds.yml");
         balanceFile = new File(OddJob.getInstance().getDataFolder(), "balances.yml");
         playerFile = new File(OddJob.getInstance().getDataFolder(), "players.yml");
         homesFile = new File(OddJob.getInstance().getDataFolder(), "homes.yml");
         locksFile = new File(OddJob.getInstance().getDataFolder(), "locks.yml");
 
-
+        if (!guildFile.exists()) {
+            try {
+                guildFile.createNewFile();
+                Bukkit.getConsoleSender().sendMessage("Guilds file created");
+            } catch (Exception e) {
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Could not create the guilds.yml");
+            }
+        }
         if (!balanceFile.exists()) {
             try {
                 balanceFile.createNewFile();
@@ -80,11 +81,13 @@ public class ConfigManager {
             }
         }
 
+        guildConfig = YamlConfiguration.loadConfiguration(guildFile);
         balanceConfig = YamlConfiguration.loadConfiguration(balanceFile);
         playerConfig = YamlConfiguration.loadConfiguration(playerFile);
         homesConfig = YamlConfiguration.loadConfiguration(homesFile);
         locksConfig = YamlConfiguration.loadConfiguration(locksFile);
 
+        loadGuilds();
         loadBalances();
         loadPlayers();
         loadHomes();
@@ -103,6 +106,29 @@ public class ConfigManager {
                 PlayerManager.updatePlayer(UUID.fromString(s), playerConfig.getString("players." + s));
             }
             Bukkit.getConsoleSender().sendMessage("Players loaded!");
+        }
+    }
+
+    private static void loadGuilds() {
+        if (guildConfig.contains("guild")) {
+            // TODO
+            for (String s : guildConfig.getConfigurationSection("guild").getKeys(false)) {
+                HashMap<UUID, Role> members = new HashMap<>();
+                List<Chunk> chunks = new ArrayList<>();
+                for (String c : guildConfig.getConfigurationSection("guild." + s + ".chunks").getKeys(false)) {
+                    UUID world = UUID.fromString(guildConfig.getString("guild." + s + ".chunks." + c + ".world"));
+                    Chunk chunk = Bukkit.getWorld(world).getChunkAt(guildConfig.getInt("guild." + s + ".chunks." + c + ".x"), guildConfig.getInt("guild." + s + ".chunks." + c + ".z"));
+                    chunks.add(chunk);
+                }
+                for (String i : guildConfig.getConfigurationSection("guild." + s + ".members").getKeys(false)) {
+                    members.put(UUID.fromString(i), Role.valueOf(guildConfig.getString("guild." + s + ".members." + i)));
+                }
+                OddJob.getInstance().getGuildManager().set(
+                        UUID.fromString(s),//id
+                        guildConfig.getString("guild." + s + ".name"),//name
+                        members,//members
+                        chunks);//claims
+            }
         }
     }
 

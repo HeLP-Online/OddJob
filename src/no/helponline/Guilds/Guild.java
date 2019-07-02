@@ -9,18 +9,21 @@ import java.util.UUID;
 public class Guild {
     private UUID id;
     private String name;
-    private UUID guildMaster;
     private Zone zone;
     private HashMap<UUID, Role> members = new HashMap<>();
 
     public Guild(UUID id, String name, UUID guildMaster) {
         this.id = id;
         this.name = name;
-        this.guildMaster = guildMaster;
         this.zone = Zone.GUILD;
         this.members.put(guildMaster, Role.guildMaster);
     }
 
+    public Guild(UUID id, String name, HashMap<UUID, Role> members) {
+        this.id = id;
+        this.name = name;
+        this.members = members;
+    }
 
     public String getName() {
         return this.name;
@@ -28,7 +31,10 @@ public class Guild {
 
 
     public UUID getGuildMaster() {
-        return this.guildMaster;
+        for (UUID uuid : members.keySet()) {
+            if (members.get(uuid).equals(Role.guildMaster)) return uuid;
+        }
+        return null;
     }
 
 

@@ -1,6 +1,7 @@
 package no.helponline.Managers;
 
 import no.helponline.Guilds.Guild;
+import no.helponline.Guilds.Role;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
@@ -74,5 +75,12 @@ public class GuildManager {
             }
         }
         return chunks;
+    }
+
+    public void set(UUID guild, String name, HashMap<UUID, Role> members, List<Chunk> chunks) {
+        guilds.put(guild, new Guild(guild, name, members));
+        for (Chunk chunk : chunks) {
+            this.chunks.put(chunk, guild);
+        }
     }
 }
