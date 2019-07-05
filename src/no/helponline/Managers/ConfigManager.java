@@ -1,6 +1,8 @@
 package no.helponline.Managers;
 
+import no.helponline.Guilds.Guild;
 import no.helponline.Guilds.Role;
+import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -87,11 +89,12 @@ public class ConfigManager {
         homesConfig = YamlConfiguration.loadConfiguration(homesFile);
         locksConfig = YamlConfiguration.loadConfiguration(locksFile);
 
-        //loadGuilds(); TODO
+        loadGuilds();
         loadBalances();
         loadPlayers();
         loadHomes();
         loadLocks();
+        OddJob.getInstance().log("All loaded");
     }
 
 
@@ -127,7 +130,8 @@ public class ConfigManager {
                         UUID.fromString(s),//id
                         guildConfig.getString("guild." + s + ".name"),//name
                         members,//members
-                        chunks);//claims
+                        chunks,//claims
+                        Zone.valueOf(guildConfig.getString("guild." + s + ".zone", "GUILD"))); //Zone
             }
         }
     }
@@ -187,7 +191,9 @@ public class ConfigManager {
         savePlayers();
         saveHomes();
         saveLocks();
+        saveGuilds();
         try {
+            guildConfig.save(guildFile);
             balanceConfig.save(balanceFile);
             playerConfig.save(playerFile);
             homesConfig.save(homesFile);
@@ -196,6 +202,29 @@ public class ConfigManager {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Error while saving!");
         }
         OddJob.getInstance().saveConfig();
+        OddJob.getInstance().log("All saved!");
+    }
+
+    public static void saveGuilds() {
+        int i = 0;
+        for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
+            Guild guild = OddJob.getInstance().getGuildManager().getGuild(uuid);
+            guildConfig.set("guild." + uuid.toString() + ".name", guild.getName()); //name
+            guildConfig.set("guild." + uuid.toString() + ".name", guild.getZone().toString());
+            HashMap<UUID, Role> members = guild.getMembers();
+            for (UUID player : members.keySet()) {
+                guildConfig.set("guild." + uuid.toString() + ".members." + player.toString(), members.get(player).toString()); //members
+            }
+            List<Chunk> chunks = OddJob.getInstance().getGuildManager().getChunks(uuid);
+            int c = 0;
+            for (Chunk chunk : chunks) {
+                c++;
+                guildConfig.set("guild." + uuid.toString() + ".chunks." + c + ".world", chunk.getWorld().getUID().toString());
+                guildConfig.set("guild." + uuid.toString() + ".chunks." + c + ".x", chunk.getX());
+                guildConfig.set("guild." + uuid.toString() + ".chunks." + c + ".z", chunk.getZ());
+            }
+            i++;
+        }
     }
 
     public static void saveLocks() {
@@ -270,6 +299,9 @@ public class ConfigManager {
         return OddJob.getInstance().getConfig().getDouble(name);
     }
 
+    public static boolean getBoolean(String name, UUID key, String string, boolean def) {
+        return guildConfig.getBoolean(name + "." + key + ".config." + string, def);
+    }
     public static boolean getBoolean(String name) {
         return OddJob.getInstance().getConfig().getBoolean(name);
     }

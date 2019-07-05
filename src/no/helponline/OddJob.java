@@ -6,19 +6,21 @@ import no.helponline.Commands.EconCommand;
 import no.helponline.Commands.GuildCommand;
 import no.helponline.Commands.HomesCommand;
 import no.helponline.Commands.LockCommand;
-import no.helponline.Events.ArmorstandEvent;
-import no.helponline.Events.LocksEvents;
-import no.helponline.Events.MoveEvent;
-import no.helponline.Events.PlayerJoin;
+import no.helponline.Events.*;
 import no.helponline.Managers.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
+    public static HashMap<UUID, Location> deathChest = new HashMap<>();
     private static OddJob instance;
 
     public static OddJob getInstance() {
@@ -30,6 +32,7 @@ public class OddJob extends JavaPlugin {
     private static Economy econ;
     private static Permission perms = null;
 
+    public static HashMap<UUID, UUID> inChunk = new HashMap<>(); //player - guild
     public static boolean vault;
 
 
@@ -63,6 +66,10 @@ public class OddJob extends JavaPlugin {
         //Bukkit.getPluginManager().registerEvents(new SofaEvent(), this);  //TODO Sleep?
         Bukkit.getPluginManager().registerEvents(new MoveEvent(), this);
         Bukkit.getPluginManager().registerEvents(new ArmorstandEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new onDeath(), this);
+
+        BukkitScheduler saver = getServer().getScheduler();
+        saver.scheduleSyncRepeatingTask(this, ConfigManager::save, 0L, 6000L);
     }
 
 

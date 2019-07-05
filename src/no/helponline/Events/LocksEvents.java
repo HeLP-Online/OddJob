@@ -34,15 +34,16 @@ public class LocksEvents implements Listener {
         boolean left = false;
         UUID uuid = null;
 
+        StringBuilder sb = new StringBuilder();
+
         if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null)) {
             return;
         }
 
-        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || event.getAction().equals(Action.PHYSICAL)) {
+        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (event.getAction().equals(Action.PHYSICAL))) {
             Block block = event.getClickedBlock();
-            Material t = block.getType();
 
-            OddJob.getInstance().log(block.getState().getBlockData().getAsString());
+            Material t = block.getType();
             if (LockManager.getLockable().contains(t)) {
                 try {
                     if (LockManager.getDoors().contains(t)) {
@@ -60,11 +61,12 @@ public class LocksEvents implements Listener {
                     } else {
                         uuid = LockManager.isLocked(block.getLocation());
                     }
-                    OddJob.getInstance().log("UUID: " + uuid + " : " + PlayerManager.getPlayer(uuid));
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 if (uuid != null) {
+                    sb.append(player.getName()).append(" trigger lock owned by: ").append(PlayerManager.getPlayer(uuid).getName()).append("; ");
                     if (player.getInventory().getItemInMainHand().equals(LockManager.makeSkeletonKey())) {
                         if (door) {
                             Utility.doorToggle(block);
@@ -72,6 +74,7 @@ public class LocksEvents implements Listener {
                             event.setCancelled(true);
                         }
                         player.sendMessage(ChatColor.RED + "! " + ChatColor.RESET + "Lock open by the awesome Skeletonkey!");
+                        sb.append("Opened by skeletonkey; ");
                         return;
                     }
                     if (player.getInventory().getItemInMainHand().getType().equals(Material.TRIPWIRE_HOOK)) {
@@ -88,6 +91,7 @@ public class LocksEvents implements Listener {
                                         return;
                                     }
                                     player.sendMessage(ChatColor.YELLOW + "Lock open by key!");
+                                    sb.append("Opened by the key; ");
                                     if (door) {
                                         Utility.doorToggle(block);
                                         player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
@@ -100,7 +104,8 @@ public class LocksEvents implements Listener {
                             e.printStackTrace();
                         }
                     }
-                    player.sendMessage(ChatColor.RED + "This lock is owned by someone else.");
+                    //TODO pressure check
+                    //player.sendMessage(ChatColor.RED + "This lock is owned by someone else.");
                     event.setCancelled(true);
                 }
 
@@ -108,7 +113,6 @@ public class LocksEvents implements Listener {
                     OddJob.getInstance().log("Info Wand");
                     if (LockManager.isLockInfo(player.getUniqueId())) {
                         MessageManager.sendMessage(player, ChatColor.YELLOW + "The lock is owned by " + PlayerManager.getName(uuid));
-                        OddJob.getInstance().log("clicked block info");
                         event.setCancelled(true);
                         return;
                     }
@@ -122,14 +126,12 @@ public class LocksEvents implements Listener {
                             return;
                         }
                         if (uuid != null) {
-                            OddJob.getInstance().log("clicked block others chest");
                             MessageManager.sendMessage(player, ChatColor.RED + "A lock is already set on this.");
                             return;
                         }
                         LockManager.lock(player.getUniqueId(), block.getLocation());
                         LockManager.remove(player.getUniqueId());
                         MessageManager.sendMessage(player, ChatColor.GREEN + "Secured!");
-                        OddJob.getInstance().log("clicked block locked");
                         event.setCancelled(true);
 
                         return;
@@ -140,14 +142,12 @@ public class LocksEvents implements Listener {
                     OddJob.getInstance().log("Unlock Wand");
                     if (LockManager.isUnlocking(player.getUniqueId())) {
                         if (uuid != null && !uuid.equals(player.getUniqueId())) {
-                            OddJob.getInstance().log("clicked block others chest");
                             MessageManager.sendMessage(player, ChatColor.RED + "A lock is set by someone else.");
                             return;
                         }
                         LockManager.unlock(block.getLocation());
                         LockManager.remove(player.getUniqueId());
                         MessageManager.sendMessage(player, ChatColor.YELLOW + "Unsecured!");
-                        OddJob.getInstance().log("clicked block unlocked");
                         event.setCancelled(true);
                         return;
                     }
@@ -158,6 +158,10 @@ public class LocksEvents implements Listener {
 
     @EventHandler
     public void onPlaceLock(BlockPlaceEvent event) {
+        if (event.getItemInHand().equals(LockManager.unlockWand) || event.getItemInHand().equals(LockManager.lockWand) || event.getItemInHand().equals(LockManager.infoWand)) {
+            event.setCancelled(true);
+            return;
+        }
         if (event.getItemInHand().getType().equals(Material.TRIPWIRE_HOOK)) {
             ItemMeta meta = event.getItemInHand().getItemMeta();
             if (ChatColor.stripColor(meta.getDisplayName()).startsWith("Key to")) {
@@ -181,7 +185,7 @@ public class LocksEvents implements Listener {
                 MessageManager.sendMessage(event.getPlayer(), ChatColor.YELLOW + "Lock broken!");
             } else {
                 event.setCancelled(true);
-                MessageManager.sendMessage(event.getPlayer(), ChatColor.RED + "This chest is owned by someone else!");
+                MessageManager.sendMessage(event.getPlayer(), ChatColor.RED + "This lock is owned by someone else!");
             }
     }
 }

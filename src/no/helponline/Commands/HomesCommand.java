@@ -23,26 +23,26 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 1 && args[0].equalsIgnoreCase("help")) {
             StringBuilder sb = new StringBuilder();
-            sb.append(ChatColor.DARK_RED + "__-- HELP menu for /" + cmd.getName() + " --__\n");
+            sb.append(ChatColor.DARK_RED + "__-- HELP menu for /").append(cmd.getName()).append(" --__\n");
             sb.append(ChatColor.AQUA + "-----------------------------------------\n");
             for (Args y : Args.values()) {
                 if (sender.hasPermission("homes." + y.name())) {
-                    sb.append(ChatColor.GOLD + "- Command:" + ChatColor.RESET + " /" + cmd.getName() + " " + y.name() + "\n");
-                    sb.append(ChatColor.GOLD + "Description:" + ChatColor.RESET + " " + y.get() + "\n");
+                    sb.append(ChatColor.GOLD + "- Command:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append("\n");
+                    sb.append(ChatColor.GOLD + "Description:" + ChatColor.RESET + " ").append(y.get()).append("\n");
 
                     if (sender instanceof Player) {
                         if (!args[0].equalsIgnoreCase("list")) {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /" + cmd.getName() + " " + y.name() + " [name_of_home]\n");
+                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append(" [name_of_home]\n");
                         } else {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /" + cmd.getName() + " " + y.name() + "\n");
+                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append("\n");
                         }
                     }
                     if (sender.hasPermission("homes." + y.name() + ".others") &&
                             !args[0].equalsIgnoreCase("set")) {
                         if (!args[0].equalsIgnoreCase("list")) {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /" + cmd.getName() + " " + y.name() + " <player> <name_of_home>\n");
+                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append(" <player> <name_of_home>\n");
                         } else {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /" + cmd.getName() + " " + y.name() + " <player>\n");
+                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append(" <player>\n");
                         }
                     }
                 }
@@ -200,7 +200,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 if (homes.size() > 0) {
                     for (String s : homes) {
                         i++;
-                        string.append(i + ") " + s + "\n");
+                        string.append(i).append(") ").append(s).append("\n");
                     }
                 }
 
@@ -222,7 +222,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
 
                 int i = 1;
                 for (String s : homes) {
-                    string.append(i + ") " + s + "\n");
+                    string.append(i).append(") ").append(s).append("\n");
                     i++;
                 }
 
@@ -235,7 +235,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] g) {
         List<String> list = new ArrayList<>();
         if (command.getName().equalsIgnoreCase("homes") && commandSender.hasPermission(command.getName())) {
-            if (g.length == 1) {
+            if (g.length == 1 || g.length == 0) {
                 for (Args a : Args.values()) {
                     if (a.name().startsWith(g[0].toLowerCase())) {
                         list.add(a.toString());

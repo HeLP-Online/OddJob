@@ -2,6 +2,7 @@ package no.helponline.Managers;
 
 import no.helponline.Guilds.Guild;
 import no.helponline.Guilds.Role;
+import no.helponline.Guilds.Zone;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
@@ -54,9 +55,11 @@ public class GuildManager {
     public boolean claim(Player player) {
         boolean b = false;
         Chunk c = player.getLocation().getChunk();
+        UUID guild = getGuildByMember(player.getUniqueId()).getId();
         if (!this.chunks.containsKey(c)) {
-            this.chunks.put(c, getGuildByMember(player.getUniqueId()).getId());
+            this.chunks.put(c, guild);
             b = true;
+            player.sendMessage("You have claimed " + c.toString() + " to " + getGuild(guild).getName());
         }
         return b;
     }
@@ -77,10 +80,19 @@ public class GuildManager {
         return chunks;
     }
 
-    public void set(UUID guild, String name, HashMap<UUID, Role> members, List<Chunk> chunks) {
-        guilds.put(guild, new Guild(guild, name, members));
+    public void set(UUID uuid, String name, HashMap<UUID, Role> members, List<Chunk> chunks, Zone zone) {
+        Guild guild = new Guild(uuid, name, members, zone);
+        guilds.put(uuid, guild);
         for (Chunk chunk : chunks) {
-            this.chunks.put(chunk, guild);
+            this.chunks.put(chunk, uuid);
         }
+    }
+
+    public List<Chunk> getChunks(UUID uuid) {
+        List<Chunk> chunks = new ArrayList<>();
+        for (Chunk chunk : this.chunks.keySet()) {
+            if (this.chunks.containsValue(uuid)) chunks.add(chunk);
+        }
+        return chunks;
     }
 }

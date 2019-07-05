@@ -4,7 +4,6 @@ import no.helponline.Managers.ConfigManager;
 import no.helponline.Managers.LockManager;
 import no.helponline.Managers.MessageManager;
 import no.helponline.Managers.PlayerManager;
-import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,11 +23,10 @@ public class LockCommand implements CommandExecutor, TabCompleter {
             } else if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("help")) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(ChatColor.DARK_RED + "__-- HELP menu for " + cmd.getName() + " --__\n");
-                    sb.append(ChatColor.AQUA + "-----------------------------------------\n");
+                    sb.append(ChatColor.DARK_RED + "__-- HELP menu for ").append(cmd.getName()).append(" --__\n").append(ChatColor.AQUA + "-----------------------------------------\n");
                     for (Args y : Args.values()) {
                         if (sender.hasPermission("locks." + y.name())) {
-                            sb.append(ChatColor.GOLD + "`" + cmd.getName() + " " + y.name() + ChatColor.RESET + "`: " + y.get() + "\n");
+                            sb.append(ChatColor.GOLD + "`").append(cmd.getName()).append(" ").append(y.name()).append(ChatColor.RESET).append("`: ").append(y.get()).append("\n");
                         }
                     }
                     sender.sendMessage(sb.toString());
@@ -75,10 +73,12 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
                     Player player = (Player) sender;
                     int i = 0;
-                    for (Location location : LockManager.getLocks().keySet()) {
-                        if (LockManager.getLocks().get(location) == player.getUniqueId()) {
-                            i++;
-                            sender.sendMessage(i + ") X=" + location.getBlockX() + "; Y=" + location.getBlockY() + "; Z=" + location.getBlockZ() + "; W=" + location.getWorld().getName() + ";");
+                    if (LockManager.getLocks() != null) {
+                        for (Location location : LockManager.getLocks().keySet()) {
+                            if (LockManager.getLocks().get(location) == player.getUniqueId()) {
+                                i++;
+                                sender.sendMessage(i + ") X=" + location.getBlockX() + "; Y=" + location.getBlockY() + "; Z=" + location.getBlockZ() + "; W=" + location.getWorld().getName() + ";");
+                            }
                         }
                     }
 
@@ -95,7 +95,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     } else {
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : locking) {
-                            sb.append(PlayerManager.getName(uuid) + ", ");
+                            sb.append(PlayerManager.getName(uuid)).append(", ");
                         }
                         sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
                     }
@@ -106,7 +106,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     } else {
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : unlocking) {
-                            sb.append(PlayerManager.getName(uuid) + ", ");
+                            sb.append(PlayerManager.getName(uuid)).append(", ");
                         }
                         sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
                     }
@@ -117,7 +117,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     } else {
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : lockinfo) {
-                            sb.append(PlayerManager.getName(uuid) + ", ");
+                            sb.append(PlayerManager.getName(uuid)).append(", ");
                         }
                         sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
                     }
@@ -152,7 +152,6 @@ public class LockCommand implements CommandExecutor, TabCompleter {
             }
         }
         Collections.sort(list);
-        OddJob.getInstance().log(list.toString());
         return list;
     }
 

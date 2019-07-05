@@ -225,6 +225,7 @@ public class LockManager {
         may.add(Material.SMITHING_TABLE);
         may.add(Material.STONECUTTER);
         may.add(Material.LEVER);
+        may.add(Material.CHEST);
         // Doors
         may.add(Material.IRON_DOOR);
         may.add(Material.DARK_OAK_DOOR);

@@ -1,5 +1,6 @@
 package no.helponline.Guilds;
 
+import no.helponline.Managers.ConfigManager;
 import no.helponline.OddJob;
 import org.bukkit.Chunk;
 
@@ -19,10 +20,11 @@ public class Guild {
         this.members.put(guildMaster, Role.guildMaster);
     }
 
-    public Guild(UUID id, String name, HashMap<UUID, Role> members) {
+    public Guild(UUID id, String name, HashMap<UUID, Role> members, Zone zone) {
         this.id = id;
         this.name = name;
         this.members = members;
+        this.zone = zone;
     }
 
     public String getName() {
@@ -90,5 +92,13 @@ public class Guild {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public HashMap<UUID, Role> getMembers() {
+        return members;
+    }
+
+    public boolean getConfig(String plugin, String string, UUID guildId, boolean def) {
+        return ConfigManager.getBoolean(plugin, guildId, string, def);
     }
 }
