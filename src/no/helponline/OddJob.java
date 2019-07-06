@@ -2,10 +2,7 @@ package no.helponline;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
-import no.helponline.Commands.EconCommand;
-import no.helponline.Commands.GuildCommand;
-import no.helponline.Commands.HomesCommand;
-import no.helponline.Commands.LockCommand;
+import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
 import org.bukkit.Bukkit;
@@ -66,9 +63,21 @@ public class OddJob extends JavaPlugin {
         teleportManager = new TeleportManager();
 
         getCommand("econ").setExecutor(new EconCommand());
-        getCommand("homes").setExecutor(new HomesCommand());
-        getCommand("locks").setExecutor(new LockCommand());
         getCommand("guild").setExecutor(new GuildCommand());
+        getCommand("homes").setExecutor(new HomesCommand());
+        getCommand("invsee").setExecutor(new InvseeCommand());
+        getCommand("locks").setExecutor(new LockCommand());
+        getCommand("suicide").setExecutor(new SuicideCommand());
+        getCommand("kill").setExecutor(new KillCommand());
+        getCommand("tp").setExecutor(new TpCommand());
+        getCommand("tpall").setExecutor(new TpAllCommand());
+        getCommand("kick").setExecutor(new KickCommand());
+        getCommand("tpa").setExecutor(new TpACommand());
+        getCommand("tpaccept").setExecutor(new TpAcceptCommand());
+        getCommand("tpdeny").setExecutor(new TpDenyCommand());
+        getCommand("ban").setExecutor(new BanCommand());
+        getCommand("unban").setExecutor(new UnbanCommand());
+
 
         configManager.load();
 
@@ -145,5 +154,9 @@ public class OddJob extends JavaPlugin {
 
     public TeleportManager getTeleportManager() {
         return teleportManager;
+    }
+
+    public BanManager getBanManager() {
+        return banManager;
     }
 }

@@ -7,7 +7,7 @@ import org.bukkit.command.TabCompleter;
 
 import java.util.List;
 
-public class TreasureHunter implements CommandExecutor, TabCompleter {
+public class TreasureHunterCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (command.getName().equalsIgnoreCase("treasure")) {

@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class BanManager {
-    private static HashMap<UUID, String> bans = new HashMap<>();
+    private HashMap<UUID, String> bans = new HashMap<>();
 
-    public static void ban(UUID uniqueId, String text) {
+    public void ban(UUID uniqueId, String text) {
         Player player = OddJob.getInstance().getPlayerManager().getPlayer(uniqueId);
         if (player.isOnline()) {
             player.kickPlayer(text);
@@ -17,7 +17,7 @@ public class BanManager {
         bans.put(uniqueId, text);
     }
 
-    public static void unban(UUID uniqueId) {
+    public void unban(UUID uniqueId) {
         bans.remove(uniqueId);
     }
 }

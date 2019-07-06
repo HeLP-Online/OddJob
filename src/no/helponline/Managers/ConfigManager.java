@@ -208,9 +208,11 @@ public class ConfigManager {
     public void saveGuilds() {
         int i = 0;
         for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
+
+            i++;
             Guild guild = OddJob.getInstance().getGuildManager().getGuild(uuid);
             guildConfig.set("guild." + uuid.toString() + ".name", guild.getName()); //name
-            guildConfig.set("guild." + uuid.toString() + ".name", guild.getZone().toString());
+            guildConfig.set("guild." + uuid.toString() + ".zone", guild.getZone().toString());
             HashMap<UUID, Role> members = guild.getMembers();
             for (UUID player : members.keySet()) {
                 guildConfig.set("guild." + uuid.toString() + ".members." + player.toString(), members.get(player).toString()); //members
@@ -223,7 +225,6 @@ public class ConfigManager {
                 guildConfig.set("guild." + uuid.toString() + ".chunks." + c + ".x", chunk.getX());
                 guildConfig.set("guild." + uuid.toString() + ".chunks." + c + ".z", chunk.getZ());
             }
-            i++;
         }
     }
 
