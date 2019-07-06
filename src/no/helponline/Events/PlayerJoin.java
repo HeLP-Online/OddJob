@@ -2,9 +2,7 @@ package no.helponline.Events;
 
 import net.minecraft.server.v1_14_R1.IChatBaseComponent;
 import net.minecraft.server.v1_14_R1.PacketPlayOutTitle;
-import no.helponline.Managers.EconManager;
 import no.helponline.Managers.LockManager;
-import no.helponline.Managers.PlayerManager;
 import no.helponline.OddJob;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -21,10 +19,10 @@ public class PlayerJoin implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        PlayerManager.updatePlayer(uuid, player.getName());
+        OddJob.getInstance().getPlayerManager().updatePlayer(uuid, player.getName());
 
-        if (EconManager.hasAccount(uuid)) {
-            EconManager.setBalance(player.getUniqueId(), 200.0D);
+        if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
+            OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D);
             player.sendMessage("Your first balance is initialized!");
             OddJob.getInstance().log("Initializing account for " + player.getName());
         }

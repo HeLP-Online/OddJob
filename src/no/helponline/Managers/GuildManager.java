@@ -16,8 +16,8 @@ public class GuildManager {
     private HashMap<Chunk, UUID> chunks;
 
     public GuildManager() {
-        this.guilds = new HashMap<>();
-        this.chunks = new HashMap<>();
+        guilds = new HashMap<>();
+        chunks = new HashMap<>();
     }
 
     public Guild create(UUID uniqueId, String string) {
@@ -27,18 +27,18 @@ public class GuildManager {
         }
         UUID uuid = UUID.randomUUID();
         guild = new Guild(uuid, string, uniqueId);
-        this.guilds.put(uuid, guild);
+        guilds.put(uuid, guild);
         return guild;
     }
 
 
     public HashMap<UUID, Guild> getGuilds() {
-        return this.guilds;
+        return guilds;
     }
 
 
     public Guild getGuildByMember(UUID uuid) {
-        for (Guild guild : this.guilds.values()) {
+        for (Guild guild : guilds.values()) {
             if (guild.isMember(uuid)) {
                 return guild;
             }
@@ -48,7 +48,7 @@ public class GuildManager {
 
 
     public Guild getGuild(UUID uuid) {
-        return this.guilds.get(uuid);
+        return guilds.get(uuid);
     }
 
 
@@ -56,8 +56,8 @@ public class GuildManager {
         boolean b = false;
         Chunk c = player.getLocation().getChunk();
         UUID guild = getGuildByMember(player.getUniqueId()).getId();
-        if (!this.chunks.containsKey(c)) {
-            this.chunks.put(c, guild);
+        if (!chunks.containsKey(c)) {
+            chunks.put(c, guild);
             b = true;
             player.sendMessage("You have claimed " + c.toString() + " to " + getGuild(guild).getName());
         }
@@ -66,7 +66,7 @@ public class GuildManager {
 
 
     public Guild getGuildByChunk(Chunk chunk) {
-        return getGuild(this.chunks.get(chunk));
+        return getGuild(chunks.get(chunk));
     }
 
 

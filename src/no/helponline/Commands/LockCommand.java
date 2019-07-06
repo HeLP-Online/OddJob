@@ -1,9 +1,7 @@
 package no.helponline.Commands;
 
-import no.helponline.Managers.ConfigManager;
 import no.helponline.Managers.LockManager;
-import no.helponline.Managers.MessageManager;
-import no.helponline.Managers.PlayerManager;
+import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -31,9 +29,9 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
                     sender.sendMessage(sb.toString());
                 } else if (args[0].equalsIgnoreCase("load") && sender.hasPermission(cmd.getName() + "." + args[0])) {
-                    ConfigManager.loadLocks();
+                    OddJob.getInstance().getConfigManager().loadLocks();
                 } else if (args[0].equalsIgnoreCase("save") && sender.hasPermission(cmd.getName() + "." + args[0])) {
-                    ConfigManager.saveLocks();
+                    OddJob.getInstance().getConfigManager().saveLocks();
                 } else if (args[0].equalsIgnoreCase("count") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
@@ -47,8 +45,8 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
                     Player player = (Player) sender;
                     player.getInventory().addItem(LockManager.makeKey(player.getUniqueId()));
-                    MessageManager.sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "This is a key to all your chests, keep in mind who you share it with.");
-                    MessageManager.sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "Stolen item or lost keys will not be refunded.");
+                    OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "This is a key to all your chests, keep in mind who you share it with.");
+                    OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "Stolen item or lost keys will not be refunded.");
                 } else if (args[0].equalsIgnoreCase("lock") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
@@ -95,7 +93,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     } else {
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : locking) {
-                            sb.append(PlayerManager.getName(uuid)).append(", ");
+                            sb.append(OddJob.getInstance().getPlayerManager().getName(uuid)).append(", ");
                         }
                         sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
                     }
@@ -106,7 +104,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     } else {
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : unlocking) {
-                            sb.append(PlayerManager.getName(uuid)).append(", ");
+                            sb.append(OddJob.getInstance().getPlayerManager().getName(uuid)).append(", ");
                         }
                         sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
                     }
@@ -117,7 +115,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     } else {
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : lockinfo) {
-                            sb.append(PlayerManager.getName(uuid)).append(", ");
+                            sb.append(OddJob.getInstance().getPlayerManager().getName(uuid)).append(", ");
                         }
                         sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
                     }

@@ -1,6 +1,5 @@
 package no.helponline.Guilds;
 
-import no.helponline.Managers.ConfigManager;
 import no.helponline.OddJob;
 import org.bukkit.Chunk;
 
@@ -99,6 +98,6 @@ public class Guild {
     }
 
     public boolean getConfig(String plugin, String string, UUID guildId, boolean def) {
-        return ConfigManager.getBoolean(plugin, guildId, string, def);
+        return OddJob.getInstance().getConfigManager().getBoolean(plugin, guildId, string, def);
     }
 }

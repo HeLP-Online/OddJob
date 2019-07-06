@@ -1,7 +1,6 @@
 package no.helponline.Commands;
 
 import no.helponline.Guilds.Guild;
-import no.helponline.Managers.MessageManager;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -26,13 +25,13 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     Player player = (Player) commandSender;
                     Guild guild = OddJob.getInstance().getGuildManager().create(player.getUniqueId(), strings[1]);
                     if (guild == null) {
-                        MessageManager.warning("A Guild with the name `" + strings[1] + "` already exists", commandSender);
+                        OddJob.getInstance().getMessageManager().warning("A Guild with the name `" + strings[1] + "` already exists", commandSender);
                     }
-                    MessageManager.success("Guild `" + guild.getName() + "` created", commandSender);
+                    OddJob.getInstance().getMessageManager().success("Guild `" + guild.getName() + "` created", commandSender);
                 }
 
             } else if (strings.length == 1 && strings[0].equalsIgnoreCase("get")) {
-                MessageManager.console(OddJob.getInstance().getGuildManager().getGuilds().toString());
+                OddJob.getInstance().getMessageManager().console(OddJob.getInstance().getGuildManager().getGuilds().toString());
             } else if (strings.length == 1 && strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;

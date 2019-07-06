@@ -7,25 +7,25 @@ import java.util.Set;
 import java.util.UUID;
 
 public class HomesManager {
-    private static HashMap<UUID, HashMap<String, Location>> homes = new HashMap<>();
+    private HashMap<UUID, HashMap<String, Location>> homes = new HashMap<>();
 
-    public static boolean add(UUID uuid, Location location) {
+    public boolean add(UUID uuid, Location location) {
         return add(uuid, "home", location);
     }
 
-    public static boolean del(UUID uuid) {
+    public boolean del(UUID uuid) {
         return del(uuid, "home");
     }
 
-    public static Location get(UUID uuid) {
+    public Location get(UUID uuid) {
         return get(uuid, "home");
     }
 
-    public static boolean has(UUID uuid) {
+    public boolean has(UUID uuid) {
         return has(uuid, "home");
     }
 
-    public static boolean add(UUID uuid, String name, Location location) {
+    public boolean add(UUID uuid, String name, Location location) {
         HashMap<String, Location> loc = new HashMap<>();
         if (homes.containsKey(uuid)) {
             loc = homes.get(uuid);
@@ -36,7 +36,7 @@ public class HomesManager {
         return true;
     }
 
-    public static boolean del(UUID uuid, String name) {
+    public boolean del(UUID uuid, String name) {
         HashMap<String, Location> loc = new HashMap<>();
         if (homes.containsKey(uuid)) {
             loc = homes.get(uuid);
@@ -49,7 +49,7 @@ public class HomesManager {
         return false;
     }
 
-    public static Location get(UUID uuid, String name) {
+    public Location get(UUID uuid, String name) {
         HashMap<String, Location> loc = new HashMap<>();
         if (homes.containsKey(uuid)) {
             loc = homes.get(uuid);
@@ -57,7 +57,7 @@ public class HomesManager {
         return loc.get(name);
     }
 
-    public static boolean has(UUID uuid, String name) {
+    public boolean has(UUID uuid, String name) {
         HashMap<String, Location> loc;
         if (homes.containsKey(uuid)) {
             loc = homes.get(uuid);
@@ -66,7 +66,7 @@ public class HomesManager {
         return false;
     }
 
-    public static Set<String> list(UUID uuid) {
+    public Set<String> list(UUID uuid) {
         Set<String> list = null;
         HashMap<String, Location> loc;
         if (homes.containsKey(uuid)) {

@@ -8,17 +8,17 @@ import java.util.Set;
 import java.util.UUID;
 
 public class PlayerManager {
-    private static HashMap<UUID, String> players = new HashMap<>();
+    private HashMap<UUID, String> players = new HashMap<>();
 
-    public static void updatePlayer(UUID uuid, String name) {
+    public void updatePlayer(UUID uuid, String name) {
         players.put(uuid, name);
     }
 
-    public static String getName(UUID uuid) {
+    public String getName(UUID uuid) {
         return players.get(uuid);
     }
 
-    public static UUID getUUID(String name) {
+    public UUID getUUID(String name) {
         for (UUID uuid : players.keySet()) {
             if ((players.get(uuid)).equalsIgnoreCase(name)) {
                 return uuid;
@@ -27,15 +27,15 @@ public class PlayerManager {
         return null;
     }
 
-    public static HashMap<UUID, String> getPlayersMap() {
+    public HashMap<UUID, String> getPlayersMap() {
         return players;
     }
 
-    public static Set<UUID> getUUIDs() {
+    public Set<UUID> getUUIDs() {
         return players.keySet();
     }
 
-    public static Player getPlayer(UUID uniqueId) {
+    public Player getPlayer(UUID uniqueId) {
         return Bukkit.getServer().getPlayer(uniqueId);
     }
 }

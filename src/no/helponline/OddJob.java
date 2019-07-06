@@ -15,21 +15,31 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
     public static HashMap<UUID, Location> deathChest = new HashMap<>();
+    public static List<Location> deathTrappedChest = new ArrayList<>();
     private static OddJob instance;
+    private EconManager econManager;
+    private GuildManager guildManager;
+    private PlayerManager playerManager;
+    private LockManager lockManager;
+    private MessageManager messageManager;
+    private HomesManager homesManager;
+    private ConfigManager configManager;
+    private BanManager banManager;
+    private TeleportManager teleportManager;
 
     public static OddJob getInstance() {
         return instance;
     }
 
-    private static GuildManager guildManager;
-    private static LockManager lockManager;
-    private static Economy econ;
+    private static Economy econ = null;
     private static Permission perms = null;
 
     public static HashMap<UUID, UUID> inChunk = new HashMap<>(); //player - guild
@@ -45,20 +55,22 @@ public class OddJob extends JavaPlugin {
         }
 
         instance = this;
-
-        new ConfigManager();
-        lockManager = new LockManager();
-        new PlayerManager();
-        new HomesManager();
-        new MessageManager(this);
+        banManager = new BanManager();
+        configManager = new ConfigManager();
+        econManager = new EconManager();
         guildManager = new GuildManager();
+        homesManager = new HomesManager();
+        lockManager = new LockManager();
+        messageManager = new MessageManager();
+        playerManager = new PlayerManager();
+        teleportManager = new TeleportManager();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("homes").setExecutor(new HomesCommand());
         getCommand("locks").setExecutor(new LockCommand());
         getCommand("guild").setExecutor(new GuildCommand());
 
-        ConfigManager.load();
+        configManager.load();
 
         setupEconomy();
         Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
@@ -69,12 +81,12 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new onDeath(), this);
 
         BukkitScheduler saver = getServer().getScheduler();
-        saver.scheduleSyncRepeatingTask(this, ConfigManager::save, 0L, 6000L);
+        saver.scheduleSyncRepeatingTask(this, configManager::save, 0L, 6000L);
     }
 
 
     public void onDisable() {
-        ConfigManager.save();
+        configManager.save();
     }
 
 
@@ -107,17 +119,31 @@ public class OddJob extends JavaPlugin {
         return (perms != null);
     }
 
-    public static Permission getPermissions() {
-        return perms;
-    }
-
-
     public GuildManager getGuildManager() {
         return guildManager;
     }
 
+    public HomesManager getHomesManager() {
+        return homesManager;
+    }
 
-    public LockManager getLockManager() {
-        return lockManager;
+    public MessageManager getMessageManager() {
+        return messageManager;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public PlayerManager getPlayerManager() {
+        return playerManager;
+    }
+
+    public EconManager getEconManager() {
+        return econManager;
+    }
+
+    public TeleportManager getTeleportManager() {
+        return teleportManager;
     }
 }

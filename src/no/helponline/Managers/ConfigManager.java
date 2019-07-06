@@ -15,19 +15,19 @@ import java.io.File;
 import java.util.*;
 
 public class ConfigManager {
-    private static int generatedID = 100;
-    private static YamlConfiguration guildConfig;
-    private static File guildFile;
-    private static YamlConfiguration balanceConfig;
-    private static File balanceFile;
-    private static YamlConfiguration playerConfig;
-    private static File playerFile;
-    private static YamlConfiguration homesConfig;
-    private static File homesFile;
-    private static YamlConfiguration locksConfig;
-    private static File locksFile;
+    private int generatedID = 100;
+    private YamlConfiguration guildConfig;
+    private File guildFile;
+    private YamlConfiguration balanceConfig;
+    private File balanceFile;
+    private YamlConfiguration playerConfig;
+    private File playerFile;
+    private YamlConfiguration homesConfig;
+    private File homesFile;
+    private YamlConfiguration locksConfig;
+    private File locksFile;
 
-    public static void load() {
+    public void load() {
         if (!OddJob.getInstance().getDataFolder().exists()) {
             OddJob.getInstance().getDataFolder().mkdirs();
         }
@@ -98,21 +98,21 @@ public class ConfigManager {
     }
 
 
-    public static UUID generateUniqueId() {
+    public UUID generateUniqueId() {
         return UUID.randomUUID();
     }
 
 
-    private static void loadPlayers() {
+    private void loadPlayers() {
         if (playerConfig.contains("players")) {
             for (String s : playerConfig.getConfigurationSection("players").getKeys(false)) {
-                PlayerManager.updatePlayer(UUID.fromString(s), playerConfig.getString("players." + s));
+                OddJob.getInstance().getPlayerManager().updatePlayer(UUID.fromString(s), playerConfig.getString("players." + s));
             }
             Bukkit.getConsoleSender().sendMessage("Players loaded!");
         }
     }
 
-    private static void loadGuilds() {
+    private void loadGuilds() {
         if (guildConfig.contains("guild")) {
             // TODO
             for (String s : guildConfig.getConfigurationSection("guild").getKeys(false)) {
@@ -136,16 +136,16 @@ public class ConfigManager {
         }
     }
 
-    private static void loadBalances() {
+    private void loadBalances() {
         if (balanceConfig.contains("balance")) {
             for (String s : balanceConfig.getConfigurationSection("balance").getKeys(false)) {
-                EconManager.setBalance(UUID.fromString(s), balanceConfig.getDouble("balance." + s));
+                OddJob.getInstance().getEconManager().setBalance(UUID.fromString(s), balanceConfig.getDouble("balance." + s));
             }
             Bukkit.getConsoleSender().sendMessage("Balances loaded!");
         }
     }
 
-    public static void loadLocks() {
+    public void loadLocks() {
         if (locksConfig.contains("locks")) {
             int iLocks = 0;
             HashMap<Location, UUID> chest = new HashMap<>();
@@ -163,7 +163,7 @@ public class ConfigManager {
         }
     }
 
-    private static void loadHomes() {
+    private void loadHomes() {
         if (homesConfig.contains("homes")) {
             for (String s : homesConfig.getConfigurationSection("homes").getKeys(false)) {
                 UUID uuid = UUID.fromString(s);
@@ -177,7 +177,7 @@ public class ConfigManager {
                         float yaw = homesConfig.getInt("homes." + uuid + "." + str + ".yaw");
                         float pitch = homesConfig.getInt("homes." + uuid + "." + str + ".pitch");
                         Location location = new Location(Bukkit.getWorld(UUID.fromString(worldUUID)), x, y, z, yaw, pitch);
-                        HomesManager.add(uuid, str, location);
+                        OddJob.getInstance().getHomesManager().add(uuid, str, location);
                     }
                 }
             }
@@ -185,7 +185,7 @@ public class ConfigManager {
         }
     }
 
-    public static void save() {
+    public void save() {
         OddJob.getInstance().getConfig().set("generatedID", generatedID);
         saveBalances();
         savePlayers();
@@ -205,7 +205,7 @@ public class ConfigManager {
         OddJob.getInstance().log("All saved!");
     }
 
-    public static void saveGuilds() {
+    public void saveGuilds() {
         int i = 0;
         for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
             Guild guild = OddJob.getInstance().getGuildManager().getGuild(uuid);
@@ -227,8 +227,8 @@ public class ConfigManager {
         }
     }
 
-    public static void saveLocks() {
-        for (UUID uuid : PlayerManager.getUUIDs()) {
+    public void saveLocks() {
+        for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
             locksConfig.set("locks." + uuid, null);
         }
         if (LockManager.getLocks() != null && LockManager.getLocks().size() > 0) {
@@ -247,26 +247,26 @@ public class ConfigManager {
 
     }
 
-    private static void saveBalances() {
-        for (UUID uuid : EconManager.getBalanceMap().keySet()) {
-            balanceConfig.set("balance." + uuid.toString(), EconManager.getBalanceMap().get(uuid));
+    private void saveBalances() {
+        for (UUID uuid : OddJob.getInstance().getEconManager().getBalanceMap().keySet()) {
+            balanceConfig.set("balance." + uuid.toString(), OddJob.getInstance().getEconManager().getBalanceMap().get(uuid));
         }
         Bukkit.getConsoleSender().sendMessage("Balances saved!");
     }
 
-    private static void savePlayers() {
-        for (UUID uuid : PlayerManager.getPlayersMap().keySet()) {
-            playerConfig.set("players." + uuid.toString(), PlayerManager.getPlayersMap().get(uuid));
+    private void savePlayers() {
+        for (UUID uuid : OddJob.getInstance().getPlayerManager().getPlayersMap().keySet()) {
+            playerConfig.set("players." + uuid.toString(), OddJob.getInstance().getPlayerManager().getPlayersMap().get(uuid));
         }
         Bukkit.getConsoleSender().sendMessage("Players saved!");
     }
 
-    private static void saveHomes() {
-        for (UUID uuid : PlayerManager.getPlayersMap().keySet()) {
-            Set<String> list = HomesManager.list(uuid);
+    private void saveHomes() {
+        for (UUID uuid : OddJob.getInstance().getPlayerManager().getPlayersMap().keySet()) {
+            Set<String> list = OddJob.getInstance().getHomesManager().list(uuid);
             if (list != null) {
                 for (String st : list) {
-                    Location location = HomesManager.get(uuid, st);
+                    Location location = OddJob.getInstance().getHomesManager().get(uuid, st);
                     homesConfig.set("homes." + uuid + "." + st + ".world", location.getWorld().getUID().toString());
                     homesConfig.set("homes." + uuid + "." + st + ".x", location.getBlockX());
                     homesConfig.set("homes." + uuid + "." + st + ".y", location.getBlockY());
@@ -279,30 +279,31 @@ public class ConfigManager {
         Bukkit.getConsoleSender().sendMessage("Homes saved!");
     }
 
-    public static int getInt(String string) {
+    public int getInt(String string) {
         return OddJob.getInstance().getConfig().getInt(string);
     }
 
-    public static String getString(String string) {
+    public String getString(String string) {
         return OddJob.getInstance().getConfig().getString(string);
     }
 
-    public static ConfigurationSection getConfigurationSection(String name) {
+    public ConfigurationSection getConfigurationSection(String name) {
         return OddJob.getInstance().getConfig().getConfigurationSection(name);
     }
 
-    public static List<String> getStringList(String name) {
+    public List<String> getStringList(String name) {
         return OddJob.getInstance().getConfig().getStringList(name);
     }
 
-    public static double getDouble(String name) {
+    public double getDouble(String name) {
         return OddJob.getInstance().getConfig().getDouble(name);
     }
 
-    public static boolean getBoolean(String name, UUID key, String string, boolean def) {
+    public boolean getBoolean(String name, UUID key, String string, boolean def) {
         return guildConfig.getBoolean(name + "." + key + ".config." + string, def);
     }
-    public static boolean getBoolean(String name) {
+
+    public boolean getBoolean(String name) {
         return OddJob.getInstance().getConfig().getBoolean(name);
     }
 }

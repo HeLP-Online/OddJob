@@ -1,5 +1,6 @@
 package no.helponline.Managers;
 
+import no.helponline.OddJob;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -62,29 +63,29 @@ public class LockManager {
     public static void infolock(UUID uniqueId) {
         if (lockinfo.contains(uniqueId)) {
             remove(uniqueId);
-            MessageManager.sendMessage(uniqueId, "No longer showing lock info.");
+            OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "No longer showing lock info.");
             return;
         }
         remove(uniqueId);
         lockinfo.add(uniqueId);
-        PlayerManager.getPlayer(uniqueId).getInventory().addItem(infoWand);
-        MessageManager.sendMessage(uniqueId, "Right click with the tool to show it's owner.");
+        OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(infoWand);
+        OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Right click with the tool to show it's owner.");
     }
 
     public static void locking(UUID uniqueId) {
         if (locking.contains(uniqueId)) {
             remove(uniqueId);
-            MessageManager.sendMessage(uniqueId, "Aborting");
+            OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Aborting");
             return;
         }
         remove(uniqueId);
         locking.add(uniqueId);
-        PlayerManager.getPlayer(uniqueId).getInventory().addItem(lockWand);
-        MessageManager.sendMessage(uniqueId, "Right click with the tool to lock it.");
+        OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(lockWand);
+        OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Right click with the tool to lock it.");
     }
 
     public static void remove(UUID uniqueId) {
-        Player player = PlayerManager.getPlayer(uniqueId);
+        Player player = OddJob.getInstance().getPlayerManager().getPlayer(uniqueId);
         PlayerInventory playerInventory = player.getInventory();
         playerInventory.remove(lockWand);
         playerInventory.remove(unlockWand);
@@ -97,13 +98,13 @@ public class LockManager {
     public static void unlocking(UUID uniqueId) {
         if (unlocking.contains(uniqueId)) {
             remove(uniqueId);
-            MessageManager.sendMessage(uniqueId, "Aborting");
+            OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Aborting");
             return;
         }
         remove(uniqueId);
         unlocking.add(uniqueId);
-        PlayerManager.getPlayer(uniqueId).getInventory().addItem(unlockWand);
-        MessageManager.sendMessage(uniqueId, "Right click with the tool unlock it.");
+        OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(unlockWand);
+        OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Right click with the tool unlock it.");
     }
 
     public static boolean isLocking(UUID uuid) {
@@ -171,9 +172,9 @@ public class LockManager {
     public static ItemStack makeKey(UUID target) {
         ItemStack newKey = key;
         ItemMeta meta = newKey.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "Key to " + PlayerManager.getName(target));
+        meta.setDisplayName(ChatColor.GOLD + "Key to " + OddJob.getInstance().getPlayerManager().getName(target));
         List<String> list = new ArrayList<>();
-        list.add(ChatColor.YELLOW + "This key will open a chest owned by " + PlayerManager.getName(target));
+        list.add(ChatColor.YELLOW + "This key will open a chest owned by " + OddJob.getInstance().getPlayerManager().getName(target));
         list.add(ChatColor.GRAY + target.toString());
         meta.setLore(list);
         newKey.setItemMeta(meta);

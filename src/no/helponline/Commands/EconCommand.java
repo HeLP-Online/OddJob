@@ -1,7 +1,5 @@
 package no.helponline.Commands;
 
-import no.helponline.Managers.EconManager;
-import no.helponline.Managers.PlayerManager;
 import no.helponline.OddJob;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -17,19 +15,19 @@ public class EconCommand implements CommandExecutor {
         Double amount;
 
         if (args.length == 0 && sender instanceof Player) {
-            sender.sendMessage(ChatColor.GREEN + "Hey! Your balance is " + EconManager.getBalance(((Player) sender).getUniqueId()));
+            sender.sendMessage(ChatColor.GREEN + "Hey! Your balance is " + OddJob.getInstance().getEconManager().getBalance(((Player) sender).getUniqueId()));
             return true;
         }
 
         if (args.length == 1 && sender.hasPermission("econ.other")) {
-            uuid = PlayerManager.getUUID(args[0]);
+            uuid = OddJob.getInstance().getPlayerManager().getUUID(args[0]);
 
             if (uuid == null) {
                 sender.sendMessage(ChatColor.RED + "We could not find any player with that name");
                 return true;
             }
 
-            sender.sendMessage(ChatColor.GREEN + "Balance of " + args[0] + " is " + EconManager.getBalance(uuid));
+            sender.sendMessage(ChatColor.GREEN + "Balance of " + args[0] + " is " + OddJob.getInstance().getEconManager().getBalance(uuid));
             return true;
         }
 
@@ -43,7 +41,7 @@ public class EconCommand implements CommandExecutor {
             return true;
         }
 
-        uuid = PlayerManager.getUUID(args[1]);
+        uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
 
         if (uuid == null) {
             sender.sendMessage(ChatColor.RED + "We could not find any player with that name");
@@ -57,20 +55,20 @@ public class EconCommand implements CommandExecutor {
             return true;
         }
 
-        if (EconManager.hasAccount(uuid)) {
+        if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
             sender.sendMessage(ChatColor.RED + args[1] + " does not own an account");
             return true;
         }
 
         if (args[0].equalsIgnoreCase("add")) {
-            EconManager.setBalance(uuid, EconManager.getBalance(uuid) + amount);
-            OddJob.getInstance().log("Added balance to " + args[1] + ", " + args[2] + ", sum: " + EconManager.getBalance(uuid));
+            OddJob.getInstance().getEconManager().setBalance(uuid, OddJob.getInstance().getEconManager().getBalance(uuid) + amount);
+            OddJob.getInstance().log("Added balance to " + args[1] + ", " + args[2] + ", sum: " + OddJob.getInstance().getEconManager().getBalance(uuid));
         } else if (args[0].equalsIgnoreCase("set")) {
-            EconManager.setBalance(uuid, amount);
+            OddJob.getInstance().getEconManager().setBalance(uuid, amount);
             OddJob.getInstance().log("Balance for " + args[1] + " set to " + args[2]);
         } else if (args[0].equalsIgnoreCase("remove")) {
-            EconManager.setBalance(uuid, EconManager.getBalance(uuid) - amount);
-            OddJob.getInstance().log("Subtracted balance for " + args[1] + ", " + args[2] + ", sum: " + EconManager.getBalance(uuid));
+            OddJob.getInstance().getEconManager().setBalance(uuid, OddJob.getInstance().getEconManager().getBalance(uuid) - amount);
+            OddJob.getInstance().log("Subtracted balance for " + args[1] + ", " + args[2] + ", sum: " + OddJob.getInstance().getEconManager().getBalance(uuid));
         } else {
             sender.sendMessage(ChatColor.RED + "Incorrect argument");
             OddJob.getInstance().log("Incorrect argument!");

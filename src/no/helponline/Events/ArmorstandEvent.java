@@ -1,8 +1,6 @@
 package no.helponline.Events;
 
 import no.helponline.Managers.LockManager;
-import no.helponline.Managers.MessageManager;
-import no.helponline.Managers.PlayerManager;
 import no.helponline.OddJob;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -26,26 +24,26 @@ public class ArmorstandEvent implements Listener {
                 OddJob.getInstance().log("2");
                 if (LockManager.isLockInfo(player.getUniqueId())) {
                     OddJob.getInstance().log("3");
-                    MessageManager.warning("Entity locked by " + PlayerManager.getName(locked), player.getUniqueId());
+                    OddJob.getInstance().getMessageManager().warning("Entity locked by " + OddJob.getInstance().getPlayerManager().getName(locked), player.getUniqueId());
                     event.setCancelled(true);
                     return;
                 }
                 if (LockManager.isUnlocking(player.getUniqueId()) && locked.equals(player.getUniqueId())) {
                     OddJob.getInstance().log("4");
                     LockManager.unlock(entity);
-                    MessageManager.warning("Entity unlocked.", player.getUniqueId());
+                    OddJob.getInstance().getMessageManager().warning("Entity unlocked.", player.getUniqueId());
                     event.setCancelled(true);
                     return;
                 }
                 OddJob.getInstance().log("5");
-                MessageManager.warning("Entity is locked", player.getUniqueId());
+                OddJob.getInstance().getMessageManager().warning("Entity is locked", player.getUniqueId());
                 event.setCancelled(true);
             } else {
                 OddJob.getInstance().log("6");
                 if (LockManager.isLocking(player.getUniqueId())) {
                     OddJob.getInstance().log("7");
                     LockManager.lock(player.getUniqueId(), entity);
-                    MessageManager.success("Entity secure!", player.getUniqueId());
+                    OddJob.getInstance().getMessageManager().success("Entity secure!", player.getUniqueId());
                     event.setCancelled(true);
                 }
                 OddJob.getInstance().log("8");
@@ -62,7 +60,7 @@ public class ArmorstandEvent implements Listener {
             if (LockManager.isLocked(entity) != null) {
                 event.setDamage(0.0D);
 
-                MessageManager.warning("Entity is locked", event.getDamager().getUniqueId());
+                OddJob.getInstance().getMessageManager().warning("Entity is locked", event.getDamager().getUniqueId());
             }
         }
     }
