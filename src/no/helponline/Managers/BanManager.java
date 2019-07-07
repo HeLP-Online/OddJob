@@ -20,4 +20,8 @@ public class BanManager {
     public void unban(UUID uniqueId) {
         bans.remove(uniqueId);
     }
+
+    public HashMap<UUID, String> getBans() {
+        return bans;
+    }
 }

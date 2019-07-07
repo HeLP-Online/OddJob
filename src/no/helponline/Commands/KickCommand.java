@@ -24,7 +24,7 @@ public class KickCommand implements CommandExecutor, TabCompleter {
                 message = sb.toString();
             }
             Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
-            if (target == null) {
+            if (target == null || !target.isOnline()) {
                 OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
                 return true;
             }

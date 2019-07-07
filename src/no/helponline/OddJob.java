@@ -77,6 +77,11 @@ public class OddJob extends JavaPlugin {
         getCommand("tpdeny").setExecutor(new TpDenyCommand());
         getCommand("ban").setExecutor(new BanCommand());
         getCommand("unban").setExecutor(new UnbanCommand());
+        getCommand("feed").setExecutor(new FeedCommand());
+        getCommand("heal").setExecutor(new HealCommand());
+        getCommand("give").setExecutor(new GiveCommand());
+        getCommand("gamemode").setExecutor(new GameModeCommand());
+        getCommand("gamemode").setTabCompleter(new GameModeCommand());
 
 
         configManager.load();

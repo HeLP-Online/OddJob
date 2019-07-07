@@ -11,6 +11,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TpCommand implements CommandExecutor, TabCompleter {
@@ -62,7 +63,18 @@ public class TpCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        //TODO
-        return null;
+        List<String> list = new ArrayList<>();
+        if (strings.length <= 1) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (strings.length == 1) {
+                    if (player.getName().startsWith(strings[0])) {
+                        list.add(player.getName());
+                    }
+                } else {
+                    list.add(player.getName());
+                }
+            }
+        }
+        return list;
     }
 }

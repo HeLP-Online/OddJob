@@ -7,7 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class UnbanCommand implements CommandExecutor, TabCompleter {
     @Override
@@ -27,6 +29,17 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        return null;
+        List<String> list = new ArrayList<>();
+        if (strings.length <= 1)
+            for (UUID uuid : OddJob.getInstance().getBanManager().getBans().keySet()) {
+                if (strings.length == 1) {
+                    if (OddJob.getInstance().getPlayerManager().getPlayer(uuid).getName().startsWith(strings[0])) {
+                        list.add(OddJob.getInstance().getPlayerManager().getPlayer(uuid).getName());
+                    }
+                } else {
+                    list.add(OddJob.getInstance().getPlayerManager().getPlayer(uuid).getName());
+                }
+            }
+        return list;
     }
 }

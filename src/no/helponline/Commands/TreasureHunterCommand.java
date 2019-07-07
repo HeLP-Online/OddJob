@@ -26,6 +26,7 @@ public class TreasureHunterCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        //todo
         return null;
     }
 }
