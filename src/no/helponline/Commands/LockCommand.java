@@ -1,6 +1,5 @@
 package no.helponline.Commands;
 
-import no.helponline.Managers.LockManager;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -37,14 +36,14 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                     Player player = (Player) sender;
-                    int i = LockManager.count(player.getUniqueId());
+                    int i = OddJob.getInstance().getLockManager().count(player.getUniqueId());
                     player.sendMessage("You have " + i + " lock" + ((i != 1) ? "s" : ""));
                 } else if (args[0].equalsIgnoreCase("make") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
                     }
                     Player player = (Player) sender;
-                    player.getInventory().addItem(LockManager.makeKey(player.getUniqueId()));
+                    player.getInventory().addItem(OddJob.getInstance().getLockManager().makeKey(player.getUniqueId()));
                     OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "This is a key to all your chests, keep in mind who you share it with.");
                     OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "Stolen item or lost keys will not be refunded.");
                 } else if (args[0].equalsIgnoreCase("lock") && sender.hasPermission(cmd.getName() + "." + args[0])) {
@@ -52,28 +51,28 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                     Player player = (Player) sender;
-                    LockManager.locking(player.getUniqueId());
+                    OddJob.getInstance().getLockManager().locking(player.getUniqueId());
                 } else if (args[0].equalsIgnoreCase("unlock") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
                     }
                     Player player = (Player) sender;
-                    LockManager.unlocking(player.getUniqueId());
+                    OddJob.getInstance().getLockManager().unlocking(player.getUniqueId());
                 } else if (args[0].equalsIgnoreCase("info") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
                     }
                     Player player = (Player) sender;
-                    LockManager.infolock(player.getUniqueId());
+                    OddJob.getInstance().getLockManager().infolock(player.getUniqueId());
                 } else if (args[0].equalsIgnoreCase("show") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
                     }
                     Player player = (Player) sender;
                     int i = 0;
-                    if (LockManager.getLocks() != null) {
-                        for (Location location : LockManager.getLocks().keySet()) {
-                            if (LockManager.getLocks().get(location) == player.getUniqueId()) {
+                    if (OddJob.getInstance().getLockManager().getLocks() != null) {
+                        for (Location location : OddJob.getInstance().getLockManager().getLocks().keySet()) {
+                            if (OddJob.getInstance().getLockManager().getLocks().get(location) == player.getUniqueId()) {
                                 i++;
                                 sender.sendMessage(i + ") X=" + location.getBlockX() + "; Y=" + location.getBlockY() + "; Z=" + location.getBlockZ() + "; W=" + location.getWorld().getName() + ";");
                             }
@@ -81,9 +80,9 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
 
                 } else if (args[0].equalsIgnoreCase("list") && sender.hasPermission(cmd.getName() + "." + args[0])) {
-                    Collection<UUID> locking = LockManager.getLocking();
-                    Collection<UUID> unlocking = LockManager.getUnlocking();
-                    Collection<UUID> lockinfo = LockManager.getLockinfo();
+                    Collection<UUID> locking = OddJob.getInstance().getLockManager().getLocking();
+                    Collection<UUID> unlocking = OddJob.getInstance().getLockManager().getUnlocking();
+                    Collection<UUID> lockinfo = OddJob.getInstance().getLockManager().getLockinfo();
                     if (sender instanceof Player) {
                         return true;
                     }
@@ -129,7 +128,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 Player player = (Player) sender;
-                player.getInventory().addItem(LockManager.makeSkeletonKey());
+                player.getInventory().addItem(OddJob.getInstance().getLockManager().makeSkeletonKey());
                 player.sendMessage(ChatColor.RED + " !!! Warning !!! " + ChatColor.RESET + "This is a dangerous key! Do not loose it!");
             }
         }

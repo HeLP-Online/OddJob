@@ -118,10 +118,12 @@ public class ConfigManager {
             for (String s : guildConfig.getConfigurationSection("guild").getKeys(false)) {
                 HashMap<UUID, Role> members = new HashMap<>();
                 List<Chunk> chunks = new ArrayList<>();
-                for (String c : guildConfig.getConfigurationSection("guild." + s + ".chunks").getKeys(false)) {
-                    UUID world = UUID.fromString(guildConfig.getString("guild." + s + ".chunks." + c + ".world"));
-                    Chunk chunk = Bukkit.getWorld(world).getChunkAt(guildConfig.getInt("guild." + s + ".chunks." + c + ".x"), guildConfig.getInt("guild." + s + ".chunks." + c + ".z"));
-                    chunks.add(chunk);
+                if (guildConfig.getConfigurationSection("guild." + s + ".chunks") != null) {
+                    for (String c : guildConfig.getConfigurationSection("guild." + s + ".chunks").getKeys(false)) {
+                        UUID world = UUID.fromString(guildConfig.getString("guild." + s + ".chunks." + c + ".world"));
+                        Chunk chunk = Bukkit.getWorld(world).getChunkAt(guildConfig.getInt("guild." + s + ".chunks." + c + ".x"), guildConfig.getInt("guild." + s + ".chunks." + c + ".z"));
+                        chunks.add(chunk);
+                    }
                 }
                 for (String i : guildConfig.getConfigurationSection("guild." + s + ".members").getKeys(false)) {
                     members.put(UUID.fromString(i), Role.valueOf(guildConfig.getString("guild." + s + ".members." + i)));
@@ -159,7 +161,7 @@ public class ConfigManager {
                 }
             }
             OddJob.getInstance().log("loaded " + iLocks + " locks.");
-            LockManager.setLocks(chest);
+            OddJob.getInstance().getLockManager().setLocks(chest);
         }
     }
 
@@ -232,9 +234,9 @@ public class ConfigManager {
         for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
             locksConfig.set("locks." + uuid, null);
         }
-        if (LockManager.getLocks() != null && LockManager.getLocks().size() > 0) {
+        if (OddJob.getInstance().getLockManager().getLocks() != null && OddJob.getInstance().getLockManager().getLocks().size() > 0) {
             int i = 0;
-            HashMap<Location, UUID> locks = LockManager.getLocks();
+            HashMap<Location, UUID> locks = OddJob.getInstance().getLockManager().getLocks();
             for (Location location : locks.keySet()) {
                 UUID uuid = locks.get(location);
                 locksConfig.set("locks." + uuid + "." + i + ".world", location.getWorld().getUID().toString());

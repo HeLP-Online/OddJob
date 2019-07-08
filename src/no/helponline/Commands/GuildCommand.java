@@ -3,6 +3,7 @@ package no.helponline.Commands;
 import no.helponline.Guilds.Guild;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,6 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GuildCommand implements CommandExecutor, TabCompleter {
@@ -31,7 +33,8 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 }
 
             } else if (strings.length == 1 && strings[0].equalsIgnoreCase("get")) {
-                OddJob.getInstance().getMessageManager().console(OddJob.getInstance().getGuildManager().getGuilds().toString());
+
+                OddJob.getInstance().getMessageManager().console("Guilds:\n" + Arrays.toString(OddJob.getInstance().getGuildManager().getGuilds().values().toArray()));
             } else if (strings.length == 1 && strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
@@ -46,6 +49,37 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     OddJob.getInstance().log("This chunk is owned by " + guild.getName());
                 }
                 OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).myClaims();
+            } else if (strings.length >= 3 && strings[0].equalsIgnoreCase("set")) {
+                if (strings[1].equalsIgnoreCase("name")) {
+                    if (commandSender instanceof Player) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 2; i < strings.length; i++) {
+                            sb.append(strings[i]);
+                        }
+                        Player player = (Player) commandSender;
+                        OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).setName(sb.toString());
+                    }
+                }
+            } else if (strings.length == 2) {
+                if (strings[0].equalsIgnoreCase("join")) {
+                    if (commandSender instanceof Player) {
+                        Player player = (Player) commandSender;
+                        Guild guild = null;
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 1; i < strings.length; i++) {
+                            sb.append(strings[i]);
+                        }
+                        for (Guild g : OddJob.getInstance().getGuildManager().getGuilds().values()) {
+                            if (ChatColor.stripColor(g.getName()).equalsIgnoreCase(sb.toString())) {
+                                guild = g;
+                            }
+                        }
+
+                        if (guild != null) {
+                            OddJob.getInstance().getGuildManager().join(guild.getId(), player.getUniqueId());
+                        }
+                    }
+                }
             }
         }
         return true;

@@ -1,6 +1,7 @@
 package no.helponline.Managers;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -37,5 +38,9 @@ public class PlayerManager {
 
     public Player getPlayer(UUID uniqueId) {
         return Bukkit.getServer().getPlayer(uniqueId);
+    }
+
+    public OfflinePlayer getOffPlayer(UUID uniqueId) {
+        return Bukkit.getServer().getOfflinePlayer(uniqueId);
     }
 }

@@ -9,6 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.*;
 
@@ -135,7 +136,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 1) {
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId())) {
                         loc = OddJob.getInstance().getHomesManager().get(player.getUniqueId());
-                        if (loc != null) player.teleport(loc);
+                        if (loc != null) player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                     } else {
                         OddJob.getInstance().getMessageManager().warning("No home found.", sender);
                     }
@@ -146,7 +147,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     String name = args[1];
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
                         loc = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
-                        if (loc != null) player.teleport(loc);
+                        if (loc != null) player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                     } else {
                         OddJob.getInstance().getMessageManager().warning("Can't find any home named " + name, sender);
                     }
@@ -163,7 +164,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
                         loc = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
                         if (loc != null) {
-                            player.teleport(loc);
+                            player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                             OddJob.getInstance().getMessageManager().success("Teleporting to home named `" + name + "` of " + args[1], sender);
                         } else {
                             OddJob.getInstance().getMessageManager().warning("Something went wrong!", sender);

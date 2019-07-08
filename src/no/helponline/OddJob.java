@@ -164,4 +164,8 @@ public class OddJob extends JavaPlugin {
     public BanManager getBanManager() {
         return banManager;
     }
+
+    public LockManager getLockManager() {
+        return lockManager;
+    }
 }

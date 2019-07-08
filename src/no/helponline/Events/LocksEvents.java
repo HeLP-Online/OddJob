@@ -1,6 +1,5 @@
 package no.helponline.Events;
 
-import no.helponline.Managers.LockManager;
 import no.helponline.OddJob;
 import no.helponline.Utils.Utility;
 import org.bukkit.ChatColor;
@@ -42,30 +41,30 @@ public class LocksEvents implements Listener {
             Block block = event.getClickedBlock();
 
             Material t = block.getType();
-            if (LockManager.getLockable().contains(t)) {
+            if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
                 try {
-                    if (LockManager.getDoors().contains(t)) {
+                    if (OddJob.getInstance().getLockManager().getDoors().contains(t)) {
                         door = true;
                         // changing <block>
                         block = Utility.getLowerLeftDoor(block).getBlock();
-                        uuid = LockManager.isLocked(block.getLocation());
+                        uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
 
                     } else if (t.equals(Material.CHEST)) {
                         // changing <block>
                         chest = true;
                         block = Utility.getChestPosition(block).getBlock();
-                        uuid = LockManager.isLocked(block.getLocation());
+                        uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
 
                     } else {
-                        uuid = LockManager.isLocked(block.getLocation());
+                        uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 if (uuid != null) {
-                    sb.append(player.getName()).append(" trigger lock owned by: ").append(OddJob.getInstance().getPlayerManager().getPlayer(uuid).getName()).append("; ");
-                    if (player.getInventory().getItemInMainHand().equals(LockManager.makeSkeletonKey())) {
+                    sb.append(player.getName()).append(" trigger lock owned by: ").append(OddJob.getInstance().getPlayerManager().getOffPlayer(uuid).getName()).append("; ");
+                    if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
                         if (door) {
                             Utility.doorToggle(block);
                             player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
@@ -107,18 +106,18 @@ public class LocksEvents implements Listener {
                     event.setCancelled(true);
                 }
 
-                if (player.getInventory().getItemInMainHand().equals(LockManager.infoWand)) {
+                if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
                     OddJob.getInstance().log("Info Wand");
-                    if (LockManager.isLockInfo(player.getUniqueId())) {
+                    if (OddJob.getInstance().getLockManager().isLockInfo(player.getUniqueId())) {
                         OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.YELLOW + "The lock is owned by " + OddJob.getInstance().getPlayerManager().getName(uuid));
                         event.setCancelled(true);
                         return;
                     }
                 }
 
-                if (player.getInventory().getItemInMainHand().equals(LockManager.lockWand)) {
+                if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
                     OddJob.getInstance().log("Lock wand");
-                    if (LockManager.isLocking(player.getUniqueId())) {
+                    if (OddJob.getInstance().getLockManager().isLocking(player.getUniqueId())) {
                         if (uuid == player.getUniqueId()) {
                             OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.YELLOW + "You have already locked this.");
                             return;
@@ -127,8 +126,8 @@ public class LocksEvents implements Listener {
                             OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "A lock is already set on this.");
                             return;
                         }
-                        LockManager.lock(player.getUniqueId(), block.getLocation());
-                        LockManager.remove(player.getUniqueId());
+                        OddJob.getInstance().getLockManager().lock(player.getUniqueId(), block.getLocation());
+                        OddJob.getInstance().getLockManager().remove(player.getUniqueId());
                         OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.GREEN + "Secured!");
                         event.setCancelled(true);
 
@@ -136,15 +135,15 @@ public class LocksEvents implements Listener {
                     }
                 }
 
-                if (player.getInventory().getItemInMainHand().equals(LockManager.unlockWand)) {
+                if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().unlockWand)) {
                     OddJob.getInstance().log("Unlock Wand");
-                    if (LockManager.isUnlocking(player.getUniqueId())) {
+                    if (OddJob.getInstance().getLockManager().isUnlocking(player.getUniqueId())) {
                         if (uuid != null && !uuid.equals(player.getUniqueId())) {
                             OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "A lock is set by someone else.");
                             return;
                         }
-                        LockManager.unlock(block.getLocation());
-                        LockManager.remove(player.getUniqueId());
+                        OddJob.getInstance().getLockManager().unlock(block.getLocation());
+                        OddJob.getInstance().getLockManager().remove(player.getUniqueId());
                         OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.YELLOW + "Unsecured!");
                         event.setCancelled(true);
                         return;
@@ -156,7 +155,7 @@ public class LocksEvents implements Listener {
 
     @EventHandler
     public void onPlaceLock(BlockPlaceEvent event) {
-        if (event.getItemInHand().equals(LockManager.unlockWand) || event.getItemInHand().equals(LockManager.lockWand) || event.getItemInHand().equals(LockManager.infoWand)) {
+        if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().unlockWand) || event.getItemInHand().equals(OddJob.getInstance().getLockManager().lockWand) || event.getItemInHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
             event.setCancelled(true);
             return;
         }
@@ -173,17 +172,23 @@ public class LocksEvents implements Listener {
         Block block = event.getBlock();
         if (block.getType().equals(Material.CHEST)) {
             block = Utility.getChestPosition(block).getBlock();
-        } else if (LockManager.getDoors().contains(block.getType())) {
+        } else if (OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {
             block = Utility.getLowerLeftDoor(block).getBlock();
         }
-        UUID uuid = LockManager.isLocked(block.getLocation());
-        if (uuid != null)
+        UUID uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
+        if (uuid != null) {
             if (uuid.equals(event.getPlayer().getUniqueId())) {
-                LockManager.unlock(block.getLocation());
+                OddJob.getInstance().getLockManager().unlock(block.getLocation());
                 OddJob.getInstance().getMessageManager().sendMessage(event.getPlayer(), ChatColor.YELLOW + "Lock broken!");
             } else {
                 event.setCancelled(true);
                 OddJob.getInstance().getMessageManager().sendMessage(event.getPlayer(), ChatColor.RED + "This lock is owned by someone else!");
             }
+        }
+    }
+
+    @EventHandler
+    public void targetDummyHit(PlayerInteractEvent event) {
+
     }
 }

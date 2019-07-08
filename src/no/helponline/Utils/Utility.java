@@ -1,6 +1,5 @@
 package no.helponline.Utils;
 
-import no.helponline.Managers.LockManager;
 import no.helponline.OddJob;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -78,13 +77,13 @@ public class Utility {
                 }
             }
         }
-        if (doorLowerLeft != null && LockManager.getDoors().contains(doorLowerLeft.getType()))
+        if (doorLowerLeft != null && OddJob.getInstance().getLockManager().getDoors().contains(doorLowerLeft.getType()))
             doors.add(doorLowerLeft);
-        if (doorLowerRight != null && LockManager.getDoors().contains(doorLowerRight.getType()))
+        if (doorLowerRight != null && OddJob.getInstance().getLockManager().getDoors().contains(doorLowerRight.getType()))
             doors.add(doorLowerRight);
-        if (doorUpperLeft != null && LockManager.getDoors().contains(doorUpperLeft.getType()))
+        if (doorUpperLeft != null && OddJob.getInstance().getLockManager().getDoors().contains(doorUpperLeft.getType()))
             doors.add(doorUpperLeft);
-        if (doorUpperRight != null && LockManager.getDoors().contains(doorUpperRight.getType()))
+        if (doorUpperRight != null && OddJob.getInstance().getLockManager().getDoors().contains(doorUpperRight.getType()))
             doors.add(doorUpperRight);
 
         for (Block bl : doors) {
@@ -128,7 +127,7 @@ public class Utility {
                     test = block.getRelative(BlockFace.SOUTH);
                     break;
             }
-            if (test != null && LockManager.getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.LEFT)) {
+            if (test != null && OddJob.getInstance().getLockManager().getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.LEFT)) {
                 OddJob.getInstance().log("has right");
                 block = test;
             }
@@ -172,7 +171,7 @@ public class Utility {
                     test = block.getRelative(BlockFace.NORTH);
                     break;
             }
-            if (test != null && LockManager.getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.RIGHT)) {
+            if (test != null && OddJob.getInstance().getLockManager().getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.RIGHT)) {
                 OddJob.getInstance().log("has left");
                 block = test;
             }

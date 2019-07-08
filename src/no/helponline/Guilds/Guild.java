@@ -100,4 +100,13 @@ public class Guild {
     public boolean getConfig(String plugin, String string, UUID guildId, boolean def) {
         return OddJob.getInstance().getConfigManager().getBoolean(plugin, guildId, string, def);
     }
+
+    public void setMember(UUID player) {
+        members.put(player, Role.members);
+        OddJob.getInstance().getMessageManager().success("You have successfully joined " + name, player);
+        for (UUID uuid : members.keySet()) {
+            if (uuid.equals(player)) return;
+            OddJob.getInstance().getMessageManager().success("Welcome " + OddJob.getInstance().getPlayerManager().getName(player) + " to the guild!", uuid);
+        }
+    }
 }

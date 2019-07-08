@@ -2,7 +2,6 @@ package no.helponline.Events;
 
 import net.minecraft.server.v1_14_R1.IChatBaseComponent;
 import net.minecraft.server.v1_14_R1.PacketPlayOutTitle;
-import no.helponline.Managers.LockManager;
 import no.helponline.OddJob;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -30,6 +29,6 @@ public class PlayerJoin implements Listener {
         PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
         (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
 
-        LockManager.remove(uuid);
+        OddJob.getInstance().getLockManager().remove(uuid);
     }
 }

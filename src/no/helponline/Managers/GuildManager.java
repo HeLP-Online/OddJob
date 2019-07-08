@@ -95,4 +95,10 @@ public class GuildManager {
         }
         return chunks;
     }
+
+    public void join(UUID guild, UUID player) {
+        Guild g = getGuild(guild);
+        g.setMember(player);
+    }
+
 }
