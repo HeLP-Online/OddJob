@@ -161,8 +161,8 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                     String name = args[2];
-                    if (OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
-                        loc = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
+                    if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
+                        loc = OddJob.getInstance().getHomesManager().get(uuid, name);
                         if (loc != null) {
                             player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                             OddJob.getInstance().getMessageManager().success("Teleporting to home named `" + name + "` of " + args[1], sender);
