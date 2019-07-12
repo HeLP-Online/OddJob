@@ -62,8 +62,6 @@ public class onDeath implements Listener {
             if (chest.getType().equals(Material.TNT)) {
                 chest = chest.getRelative(0, 2, 0);
                 if (chest.getType() == Material.TRAPPED_CHEST) {
-                    chest.getRelative(0, 1, 0).setType(Material.AIR);
-                    chest.setType(Material.AIR);
                     event.getClickedBlock().setType(Material.AIR);
                     OddJob.deathTrappedChest.remove(chest.getLocation());
                 }
