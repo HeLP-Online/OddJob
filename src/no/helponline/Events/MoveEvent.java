@@ -21,6 +21,7 @@ public class MoveEvent implements Listener {
         Player player = event.getPlayer();
         Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
         UUID guildId = (guild != null) ? guild.getId() : null;
+        /* WHEN CHANGING CHUNK */
         if (event.getFrom().getChunk().equals(chunk)) {
             // within same chunk
             return;
@@ -31,19 +32,16 @@ public class MoveEvent implements Listener {
         }
         OddJob.inChunk.put(player.getUniqueId(), guildId);
 
-        OddJob.getInstance().log("Chunk changed; new Chunk: X: " + chunk.getX() + "; Z: " + chunk.getZ() + "; World: " + chunk.getWorld().getName() + ";");
-
+        /* PRINT GUILD NAME */
         String s = "";
-
         if (guild != null) {
-
-            OddJob.getInstance().log("We know this place");
             switch (guild.getZone()) {
                 case GUILD:
                     s = s + ChatColor.DARK_BLUE;
                     break;
                 case ARENA:
                 case WAR:
+                case JAIL:
                     s = s + ChatColor.RED;
                     break;
                 case SAFE:
@@ -53,12 +51,10 @@ public class MoveEvent implements Listener {
                     s = s + ChatColor.YELLOW;
                     break;
             }
-
             s = s + guild.getName() + " hails you!";
         } else {
             s = s + ChatColor.YELLOW + "Welcome to the wild!";
         }
-
         PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
         (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
     }

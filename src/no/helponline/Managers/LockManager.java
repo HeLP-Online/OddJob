@@ -268,4 +268,12 @@ public class LockManager {
         may.add(Material.SPRUCE_FENCE_GATE);
         return may;
     }
+
+    public void setArmorstand(HashMap<UUID, UUID> a) {
+        armor = a;
+    }
+
+    public HashMap<UUID, UUID> getArmorstands() {
+        return armor;
+    }
 }

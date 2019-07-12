@@ -5,30 +5,67 @@ api-version: 1.14
 
 commands:
   locks:
-    description: Locks plugin
+    description: Locks Menu
+    usage: /locks ...
+    aliases: [ 'l' ]
   econ:
     description: EconomyCommand
     usage: /econ <set|add|remove> <player> <amount>
   arena:
+    description: Arena Menu
   guild:
+    description: Guild Menu
   homes:
     description: Homes Menu
     usage: /homes <set|del|list|tp>
+    aliases: [ 'h' ]
   invsee:
+    description: See another players inventory
+    usage: /<command> <Player>
   suicide:
+    description: Take suicide
+    usage: /<command>
   kill:
+    description: Kill a given player
+    usage: /<command> <Player>
   tp:
+    description: Teleports a player to another player
+    usage: /<command> <Player> [OtherPlayer]
   tpall:
+    description: Teleports all online players to your location
+    usage: /<command>
+  tppos:
+    description: Teleport you to a given coordinate
+    usage: /<command> <X> <Y> <Z> [World]
   kick:
+    description: Kicks a given player from the server
+    usage: /<command> <Player> [message]
   tpa:
+    description: Sends a teleport request to a given player
+    usage: /<command> <Player>
   tpaccept:
+    description: Accepts a teleport request
+    usage: /<command>
   tpdeny:
+    description: Denies a teleport request
+    usage: /<command>
   ban:
+    description: Ban a given player
+    usage: /<command> <Player> [message]
   unban:
+    description: Unban a given player
+    usage: /<command> [Player]
   feed:
+    description: Feeds a given player
+    usage: /<command> [Player]
   heal:
+    description: Heals a given player
+    usage: /<command> [Player]
   give:
   gamemode:
+    description: Changes gamemode of given player
+    usage: /<command> <GameMode> [Player]
+    aliases: [ 'gm' ]
 
 permissions:
   homes.*:

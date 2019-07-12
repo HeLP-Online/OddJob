@@ -38,8 +38,8 @@ public class TeleportManager {
                     // player (sends request) // target (teleport to)
                     Player player = OddJob.getInstance().getPlayerManager().getPlayer(teleportAccept.get(u));
                     Player target = OddJob.getInstance().getPlayerManager().getPlayer(u);
-                    OddJob.getInstance().getMessageManager().success("Your request has been denied by " + player.getName(), target.getUniqueId());
-                    OddJob.getInstance().getMessageManager().success("You have denied the request from " + target.getName(), player.getUniqueId());
+                    OddJob.getInstance().getMessageManager().danger("Your request has been denied by " + player.getName(), target.getUniqueId());
+                    OddJob.getInstance().getMessageManager().danger("You have denied the request from " + target.getName(), player.getUniqueId());
                     teleportAccept.remove(uuid);
                 }
             }
