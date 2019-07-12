@@ -230,7 +230,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
 
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] g) {
         List<String> list = new ArrayList<>();
-        if (command.getName().equalsIgnoreCase("homes") && commandSender.hasPermission(command.getName())) {
+        if (command.getName().equalsIgnoreCase("homes")) {
             if (g.length == 1 || g.length == 0) {
                 for (Args a : Args.values()) {
                     if (a.name().startsWith(g[0].toLowerCase())) {
