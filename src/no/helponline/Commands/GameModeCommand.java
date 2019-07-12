@@ -17,11 +17,7 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (command.getName().equalsIgnoreCase("gamemode")) {
             GameMode gm = GameMode.SURVIVAL;
-            Player target = (strings.length == 2) ?
-                    OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[1])) :
-                    ((commandSender instanceof Player) ?
-                            OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0])) :
-                            null);
+            Player target = null;
             if (strings.length >= 1) {
                 String str = strings[0];
 
@@ -36,10 +32,13 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
                 }
             }
             if (strings.length == 2) {
+                target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[1]));
                 if (target == null || !target.isOnline()) {
                     OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
                     return true;
                 }
+            } else if (strings.length == 1) {
+                target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
             }
 
             if (target != null) {
