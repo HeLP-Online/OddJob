@@ -68,6 +68,8 @@ commands:
     aliases: [ 'gm' ]
 
 permissions:
+  essentials.tpall:
+    default: op
   homes.*:
     children:
       homes.tp: true

@@ -12,7 +12,7 @@ import java.util.List;
 public class TpAllCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (command.getName().equalsIgnoreCase("tpall")) {
+        if (command.getName().equalsIgnoreCase("tpall") && commandSender.hasPermission("essentials.tpall")) {
             // COMMAND TPALL
             if (!(commandSender instanceof Player)) return true;
             Player sender = (Player) commandSender;
