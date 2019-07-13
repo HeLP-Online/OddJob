@@ -38,6 +38,31 @@ public class Guild {
         return null;
     }
 
+    public Role promote(UUID uuid) {
+        Role r = null;
+        int level = members.get(uuid).level();
+        level = (level >= Role.admins.level()) ? level + 11 : Role.admins.level();
+        for (Role role : Role.values()) {
+            if (role.level() == level) {
+                r = role;
+            }
+        }
+        members.put(uuid, r);
+        return r;
+    }
+
+    public Role demote(UUID uuid) {
+        Role r = null;
+        int level = members.get(uuid).level();
+        level = (level <= Role.all.level()) ? level - 11 : Role.all.level();
+        for (Role role : Role.values()) {
+            if (role.level() == level) {
+                r = role;
+            }
+        }
+        members.put(uuid, r);
+        return r;
+    }
 
     public UUID getId() {
         return this.id;
