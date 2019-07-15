@@ -24,7 +24,7 @@ public class Utility {
         Bisected.Half doorHalf = door.getHalf();
         Door.Hinge doorHinge = door.getHinge();
 
-        OddJob.getInstance().log("Open:" + (open ? "true" : "false") + "; Face:" + doorFace + "; Hinge:" + doorHinge + "; Half:" + doorHalf);
+        //OddJob.getInstance().log("Open:" + (open ? "true" : "false") + "; Face:" + doorFace + "; Hinge:" + doorHinge + "; Half:" + doorHalf);
 
         boolean left = (doorHinge == Door.Hinge.LEFT);
         boolean lower = (doorHalf == Bisected.Half.BOTTOM);
@@ -101,17 +101,17 @@ public class Utility {
         Bisected.Half doorHalf = door.getHalf();
         Door.Hinge doorHinge = door.getHinge();
 
-        OddJob.getInstance().log("Open:" + (open ? "true" : "false") + "; Face:" + doorFace + "; Hinge:" + doorHinge + "; Half:" + doorHalf);
+        //OddJob.getInstance().log("Open:" + (open ? "true" : "false") + "; Face:" + doorFace + "; Hinge:" + doorHinge + "; Half:" + doorHalf);
 
         boolean right = (doorHinge == Door.Hinge.RIGHT);
         boolean lower = (doorHalf == Bisected.Half.BOTTOM);
 
         if (!lower) {
             block = block.getRelative(BlockFace.DOWN);
-            OddJob.getInstance().log("is upper, moving down");
+            //OddJob.getInstance().log("is upper, moving down");
         }
         if (!right) {
-            OddJob.getInstance().log("is left");
+            //OddJob.getInstance().log("is left");
             Block test = null;
             switch (doorFace) {
                 case NORTH:
@@ -128,13 +128,13 @@ public class Utility {
                     break;
             }
             if (test != null && OddJob.getInstance().getLockManager().getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.LEFT)) {
-                OddJob.getInstance().log("has right");
+                //OddJob.getInstance().log("has right");
                 block = test;
             }
         } else {
             OddJob.getInstance().log("is right");
         }
-        OddJob.getInstance().log("Lower right : " + block.getLocation().serialize().toString());
+        //OddJob.getInstance().log("Lower right : " + block.getLocation().serialize().toString());
         return block.getLocation();
     }
 
@@ -145,17 +145,17 @@ public class Utility {
         Bisected.Half doorHalf = door.getHalf();
         Door.Hinge doorHinge = door.getHinge();
 
-        OddJob.getInstance().log("Open:" + (open ? "true" : "false") + "; Face:" + doorFace + "; Hinge:" + doorHinge + "; Half:" + doorHalf);
+        //OddJob.getInstance().log("Open:" + (open ? "true" : "false") + "; Face:" + doorFace + "; Hinge:" + doorHinge + "; Half:" + doorHalf);
 
         boolean left = (doorHinge == Door.Hinge.LEFT);
         boolean lower = (doorHalf == Bisected.Half.BOTTOM);
 
         if (!lower) {
             block = block.getRelative(BlockFace.DOWN);
-            OddJob.getInstance().log("is upper, moving down");
+            //OddJob.getInstance().log("is upper, moving down");
         }
         if (!left) {
-            OddJob.getInstance().log("is right");
+            //OddJob.getInstance().log("is right");
             Block test = null;
             switch (doorFace) {
                 case NORTH:
@@ -172,14 +172,14 @@ public class Utility {
                     break;
             }
             if (test != null && OddJob.getInstance().getLockManager().getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.RIGHT)) {
-                OddJob.getInstance().log("has left");
+                //OddJob.getInstance().log("has left");
                 block = test;
             }
         } else {
-            OddJob.getInstance().log("is left");
+            //OddJob.getInstance().log("is left");
         }
 
-        OddJob.getInstance().log("Lower left : " + block.getLocation().serialize().toString());
+        //OddJob.getInstance().log("Lower left : " + block.getLocation().serialize().toString());
         return block.getLocation();
     }
 

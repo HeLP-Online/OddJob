@@ -129,8 +129,10 @@ public class ConfigManager {
                     members.put(UUID.fromString(i), Role.valueOf(guildConfig.getString("guild." + s + ".members." + i)));
                 }
                 HashMap<String, Object> settings = new HashMap<>();
-                for (String i : guildConfig.getConfigurationSection("guild." + s + ".settings").getKeys(false)) {
-                    settings.put(i, guildConfig.get("guild." + s + ".settings." + i));
+                if (guildConfig.get("guild." + s + ".settings") != null) {
+                    for (String i : guildConfig.getConfigurationSection("guild." + s + ".settings").getKeys(false)) {
+                        settings.put(i, guildConfig.get("guild." + s + ".settings." + i));
+                    }
                 }
                 OddJob.getInstance().getGuildManager().set(
                         UUID.fromString(s),//id
