@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -21,6 +22,33 @@ import java.util.List;
 import java.util.UUID;
 
 public class LocksEvents implements Listener {
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityOpen(EntityInteractEvent event) {
+        if (!(event.getEntity() instanceof Player)) {
+            Block block = event.getBlock();
+            boolean locked = false;
+
+            Material t = block.getType();
+            if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
+                try {
+                    if (OddJob.getInstance().getLockManager().getDoors().contains(t)) {
+                        // changing <block>
+                        block = Utility.getLowerLeftDoor(block).getBlock();
+                        locked = OddJob.getInstance().getLockManager().isLocked(block.getLocation()) != null;
+
+                    } else {
+                        locked = OddJob.getInstance().getLockManager().isLocked(block.getLocation()) != null;
+                    }
+                } catch (Exception e) {
+                    return;
+                }
+            }
+
+            if (locked) event.setCancelled(true);
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteractEvent(PlayerInteractEvent event) {
         Player player = event.getPlayer();
@@ -76,30 +104,10 @@ public class LocksEvents implements Listener {
                     }
                     if (player.getInventory().getItemInMainHand().getType().equals(Material.TRIPWIRE_HOOK)) {
                         ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
-                        try {
-                            if (meta.hasLore()) {
-                                List<String> lore = meta.getLore();
-                                if (lore.size() > 1) {
-                                    String one = ChatColor.stripColor(lore.get(1));
-                                    if (!one.equalsIgnoreCase(uuid.toString())) {
-                                        OddJob.getInstance().log("compared: " + lore.get(1) + " vs " + uuid.toString());
-                                        player.sendMessage(ChatColor.YELLOW + "You don't have the correct key");
-                                        event.setCancelled(true);
-                                        return;
-                                    }
-                                    player.sendMessage(ChatColor.YELLOW + "Lock open by key!");
-                                    sb.append("Opened by the key; ");
-                                    if (door) {
-                                        Utility.doorToggle(block);
-                                        player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
-                                        event.setCancelled(true);
-                                    }
-                                    return;
-                                }
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        if (lore(event, player, door, uuid, block, meta)) return;
+                    } else if (player.getInventory().getItemInOffHand().getType().equals(Material.TRIPWIRE_HOOK)) {
+                        ItemMeta met = player.getInventory().getItemInOffHand().getItemMeta();
+                        if (lore(event, player, door, uuid, block, met)) return;
                     }
                     //TODO pressure check
                     //player.sendMessage(ChatColor.RED + "This lock is owned by someone else.");
@@ -151,6 +159,33 @@ public class LocksEvents implements Listener {
                 }
             }
         }
+    }
+
+    private boolean lore(PlayerInteractEvent event, Player player, boolean door, UUID uuid, Block block, ItemMeta meta) {
+        try {
+            if (meta.hasLore()) {
+                List<String> lore = meta.getLore();
+                if (lore.size() > 1) {
+                    String one = ChatColor.stripColor(lore.get(1));
+                    if (!one.equalsIgnoreCase(uuid.toString())) {
+                        OddJob.getInstance().log("compared: " + lore.get(1) + " vs " + uuid.toString());
+                        player.sendMessage(ChatColor.YELLOW + "You don't have the correct key");
+                        event.setCancelled(true);
+                        return true;
+                    }
+                    player.sendMessage(ChatColor.YELLOW + "Lock open by key!");
+                    if (door) {
+                        Utility.doorToggle(block);
+                        player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
+                        event.setCancelled(true);
+                    }
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @EventHandler

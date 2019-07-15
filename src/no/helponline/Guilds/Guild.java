@@ -11,50 +11,46 @@ public class Guild {
     private String name;
     private Zone zone;
     private HashMap<UUID, Role> members = new HashMap<>();
+    private HashMap<String, Object> settings = new HashMap<>();
 
     public Guild(UUID id, String name, UUID guildMaster) {
         this.id = id;
         this.name = name;
         this.zone = Zone.GUILD;
         this.members.put(guildMaster, Role.guildMaster);
+        this.settings.put("invitedOnly", false);
+        this.settings.put("firendlyFire", false);
     }
 
-    public Guild(UUID id, String name, HashMap<UUID, Role> members, Zone zone) {
+    public Guild(UUID id, String name, HashMap<UUID, Role> members, Zone zone, HashMap<String, Object> settings) {
         this.id = id;
         this.name = name;
         this.members = members;
         this.zone = zone;
+        this.settings = settings;
     }
 
     public String getName() {
         return this.name;
     }
 
-
-    public UUID getGuildMaster() {
-        for (UUID uuid : members.keySet()) {
-            if (members.get(uuid).equals(Role.guildMaster)) return uuid;
-        }
-        return null;
-    }
-
     public Role promote(UUID uuid) {
-        Role r = null;
+        Role role = null;
         int level = members.get(uuid).level();
-        level = (level >= Role.admins.level()) ? level + 11 : Role.admins.level();
-        for (Role role : Role.values()) {
-            if (role.level() == level) {
-                r = role;
+        level = (level < Role.admins.level()) ? level + 11 : Role.admins.level();
+        for (Role r : Role.values()) {
+            if (r.level() == level) {
+                role = r;
             }
         }
-        members.put(uuid, r);
-        return r;
+        members.put(uuid, role);
+        return role;
     }
 
     public Role demote(UUID uuid) {
         Role r = null;
         int level = members.get(uuid).level();
-        level = (level <= Role.all.level()) ? level - 11 : Role.all.level();
+        level = (level >= Role.all.level()) ? level - 11 : Role.all.level();
         for (Role role : Role.values()) {
             if (role.level() == level) {
                 r = role;
@@ -122,6 +118,10 @@ public class Guild {
         return members;
     }
 
+    public Role getRole(UUID uuid) {
+        return members.get(uuid);
+    }
+
     public boolean getConfig(String plugin, String string, UUID guildId, boolean def) {
         return OddJob.getInstance().getConfigManager().getBoolean(plugin, guildId, string, def);
     }
@@ -133,5 +133,29 @@ public class Guild {
             if (uuid.equals(player)) return;
             OddJob.getInstance().getMessageManager().success("Welcome " + OddJob.getInstance().getPlayerManager().getName(player) + " to the guild!", uuid);
         }
+    }
+
+    public void leave(UUID uniqueId) {
+        members.remove(uniqueId);
+    }
+
+    public void setInvitedOnly(boolean bol) {
+        settings.put("invitedOnly", bol);
+    }
+
+    public boolean getInvitedOnly() {
+        return (boolean) settings.get("invitedOnly");
+    }
+
+    public void setFriendlyFire(boolean bol) {
+        settings.put("Friendlyfire", bol);
+    }
+
+    public boolean getFriendlyFire() {
+        return (boolean) settings.get("friendlyFire");
+    }
+
+    public HashMap<String, Object> getSettings() {
+        return settings;
     }
 }

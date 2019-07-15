@@ -3,6 +3,7 @@ package no.helponline.Managers;
 import no.helponline.Guilds.Guild;
 import no.helponline.Guilds.Role;
 import no.helponline.Guilds.Zone;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
@@ -80,8 +81,8 @@ public class GuildManager {
         return chunks;
     }
 
-    public void set(UUID uuid, String name, HashMap<UUID, Role> members, List<Chunk> chunks, Zone zone) {
-        Guild guild = new Guild(uuid, name, members, zone);
+    public void set(UUID uuid, String name, HashMap<UUID, Role> members, List<Chunk> chunks, Zone zone, HashMap<String, Object> settings) {
+        Guild guild = new Guild(uuid, name, members, zone, settings);
         guilds.put(uuid, guild);
         for (Chunk chunk : chunks) {
             this.chunks.put(chunk, uuid);
@@ -101,4 +102,12 @@ public class GuildManager {
         g.setMember(player);
     }
 
+    public UUID getGuildByName(String string) {
+        for (UUID uuid : guilds.keySet()) {
+            if (ChatColor.stripColor(string).equalsIgnoreCase(guilds.get(uuid).getName())) {
+                return uuid;
+            }
+        }
+        return null;
+    }
 }

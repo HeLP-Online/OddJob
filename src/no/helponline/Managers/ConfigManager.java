@@ -128,12 +128,17 @@ public class ConfigManager {
                 for (String i : guildConfig.getConfigurationSection("guild." + s + ".members").getKeys(false)) {
                     members.put(UUID.fromString(i), Role.valueOf(guildConfig.getString("guild." + s + ".members." + i)));
                 }
+                HashMap<String, Object> settings = new HashMap<>();
+                for (String i : guildConfig.getConfigurationSection("guild." + s + ".settings").getKeys(false)) {
+                    settings.put(i, guildConfig.get("guild." + s + ".settings." + i));
+                }
                 OddJob.getInstance().getGuildManager().set(
                         UUID.fromString(s),//id
                         guildConfig.getString("guild." + s + ".name"),//name
                         members,//members
                         chunks,//claims
-                        Zone.valueOf(guildConfig.getString("guild." + s + ".zone", "GUILD"))); //Zone
+                        Zone.valueOf(guildConfig.getString("guild." + s + ".zone", "GUILD")),
+                        settings); //Zone
             }
         }
     }
@@ -225,6 +230,10 @@ public class ConfigManager {
             HashMap<UUID, Role> members = guild.getMembers();
             for (UUID player : members.keySet()) {
                 guildConfig.set("guild." + uuid.toString() + ".members." + player.toString(), members.get(player).toString()); //members
+            }
+            HashMap<String, Object> settings = guild.getSettings();
+            for (String s : settings.keySet()) {
+                guildConfig.set("guild." + uuid.toString() + ".settings." + s, settings.get(s));
             }
             List<Chunk> chunks = OddJob.getInstance().getGuildManager().getChunks(uuid);
             int c = 0;
