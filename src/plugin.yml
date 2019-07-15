@@ -22,24 +22,30 @@ commands:
   invsee:
     description: See another players inventory
     usage: /<command> <Player>
+    permission: essentials.invsee
   suicide:
     description: Take suicide
     usage: /<command>
   kill:
     description: Kill a given player
     usage: /<command> <Player>
+    permission: essentials.kill
   tp:
     description: Teleports a player to another player
     usage: /<command> <Player> [OtherPlayer]
+    permission: essentials.tp
   tpall:
     description: Teleports all online players to your location
     usage: /<command>
+    permission: essentials.tpall
   tppos:
     description: Teleport you to a given coordinate
     usage: /<command> <X> <Y> <Z> [World]
+    permission: essentials.tppos
   kick:
     description: Kicks a given player from the server
     usage: /<command> <Player> [message]
+    permission: essentials.kick
   tpa:
     description: Sends a teleport request to a given player
     usage: /<command> <Player>
@@ -52,20 +58,25 @@ commands:
   ban:
     description: Ban a given player
     usage: /<command> <Player> [message]
+    permission: essentials.ban
   unban:
     description: Unban a given player
     usage: /<command> [Player]
+    permission: essentials.unban
   feed:
     description: Feeds a given player
     usage: /<command> [Player]
+    permission: essentials.feed
   heal:
     description: Heals a given player
     usage: /<command> [Player]
+    permission: essentials.heal
   give:
   gamemode:
     description: Changes gamemode of given player
     usage: /<command> <GameMode> [Player]
     aliases: [ 'gm' ]
+    permission: essentials.gamemode
 
 permissions:
   essentials.tpall:
