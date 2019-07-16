@@ -1,5 +1,7 @@
 package no.helponline.Utils;
 
+import no.helponline.OddJob;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -51,7 +53,17 @@ public class OddPlayer {
     }
 
     public boolean request(UUID from) {
-
+        boolean request = false;
+        if (getWhiteList().contains(from.toString())) {
+            OddJob.getInstance().log("whitelist");
+            request = true;
+        } else if (getBlackList().contains(from.toString())) {
+            OddJob.getInstance().log("blacklist");
+        } else if (isDenyTPA()) {
+            OddJob.getInstance().log("tpa deny");
+            OddJob.getInstance().getMessageManager().warning(name + " is denying all request!", from);
+        }
+        return request;
     }
 
     public OddPlayer(UUID uuid, String name, boolean denyTPA, List<String> whiteList, List<String> blackList) {

@@ -1,14 +1,12 @@
 package no.helponline.Managers;
 
+import no.helponline.OddJob;
 import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerManager {
     private HashMap<UUID, OddPlayer> oddPlayers = new HashMap<>();
@@ -20,6 +18,7 @@ public class PlayerManager {
             oddPlayers.put(uuid, oddPlayer);
         } else {
             create(uuid, Bukkit.getPlayer(uuid).getName(), false, null, null);
+            OddJob.getInstance().log("created " + uuid.toString());
         }
     }
 
@@ -36,8 +35,8 @@ public class PlayerManager {
         return null;
     }
 
-    public HashMap<UUID, OddPlayer> getPlayersMap() {
-        return oddPlayers;
+    public Collection<OddPlayer> getPlayersMap() {
+        return oddPlayers.values();
     }
 
     public Set<UUID> getUUIDs() {
@@ -58,5 +57,14 @@ public class PlayerManager {
 
     public void create(UUID uuid, String name, boolean denyTPA, List<String> whiteList, List<String> blackList) {
         OddPlayer oddPlayer = new OddPlayer(uuid, name, denyTPA, whiteList, blackList);
+        oddPlayers.put(uuid, oddPlayer);
+    }
+
+    public List<String> listPlayers() {
+        List<String> list = new ArrayList<>();
+        for (UUID uuid : oddPlayers.keySet()) {
+            list.add(oddPlayers.get(uuid).getName() + ":" + uuid.toString());
+        }
+        return list;
     }
 }

@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class onDeath implements Listener {
@@ -22,24 +23,40 @@ public class onDeath implements Listener {
     public void onDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
 
-        Location location = player.getLocation();
-        location.getBlock().setType(Material.CHEST);
-        Block upper = location.getBlock().getRelative(0, 1, 0);
-        upper.setType(Material.CHEST);
-        Chest chest = (Chest) location.getBlock().getState();
-        chest.getBlockInventory().addItem(player.getInventory().getContents());
-        //AREMOR CHEST
-        Chest upperChest = (Chest) chest.getBlock().getState();
-        upperChest.getBlockInventory().addItem(player.getInventory().getArmorContents());
-        //SKULL
         ItemStack playerSkull = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta skull = (SkullMeta) playerSkull.getItemMeta();
         if (skull != null) {
             skull.setOwningPlayer(Bukkit.getOfflinePlayer(player.getUniqueId()));
             skull.setDisplayName(ChatColor.DARK_PURPLE + "Head of " + OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getName());
             playerSkull.setItemMeta(skull);
-            upperChest.getBlockInventory().addItem(playerSkull);
         }
+
+        Location location = player.getLocation();
+        location.getBlock().setType(Material.CHEST);
+        Block upper = location.getBlock().getRelative(0, 1, 0);
+        upper.setType(Material.CHEST);
+        Chest chest = (Chest) location.getBlock().getState();
+        ArrayList<ItemStack> list = new ArrayList<>();
+        for (ItemStack is : player.getInventory().getContents()) {
+            if (is != null && is.getType() != Material.AIR) {
+                list.add(is);
+            }
+        }
+        OddJob.getInstance().log("Content: " + list.toArray(new ItemStack[list.size()]).toString());
+        chest.getInventory().setContents(list.toArray(new ItemStack[list.size()]));
+        //AREMOR CHEST
+        Chest upperChest = (Chest) chest.getBlock().getState();
+        list.clear();
+        for (ItemStack is : player.getInventory().getArmorContents()) {
+            if (is != null && is.getType() != Material.AIR) {
+                list.add(is);
+            }
+        }
+        list.add(playerSkull);
+        OddJob.getInstance().log("ArmorContent: " + list.toArray(new ItemStack[list.size()]).toString());
+        upperChest.getInventory().setContents(list.toArray(new ItemStack[list.size()]));
+        //SKULL
+
 
         if (OddJob.deathChest.containsKey(player.getUniqueId())) {
             Location trap = OddJob.deathChest.get(player.getUniqueId());

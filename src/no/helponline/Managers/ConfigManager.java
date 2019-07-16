@@ -4,6 +4,7 @@ import no.helponline.Guilds.Guild;
 import no.helponline.Guilds.Role;
 import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
+import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -104,40 +105,48 @@ public class ConfigManager {
 
 
     private void loadPlayers() {
+        int i = 0;
         if (playerConfig.contains("players")) {
             for (String s : playerConfig.getConfigurationSection("players").getKeys(false)) {
+                i++;
                 OddJob.getInstance().getPlayerManager().create(
                         UUID.fromString(s),
-                        playerConfig.getString("players." + s + ".uuid"),
+                        playerConfig.getString("players." + s + ".name"),
                         playerConfig.getBoolean("players." + s + ".denyTPA", false),
                         playerConfig.getStringList("players." + s + ".blackList"),
                         playerConfig.getStringList("players." + s + ".whiteLits"));
 
             }
-            Bukkit.getConsoleSender().sendMessage("Players loaded!");
+            OddJob.getInstance().log("Loaded " + i + " players!");
         }
     }
 
     private void loadGuilds() {
+        int i = 0;
+        int a = 0;
+        int p = 0;
         if (guildConfig.contains("guild")) {
             // TODO
             for (String s : guildConfig.getConfigurationSection("guild").getKeys(false)) {
+                i++;
                 HashMap<UUID, Role> members = new HashMap<>();
                 List<Chunk> chunks = new ArrayList<>();
                 if (guildConfig.getConfigurationSection("guild." + s + ".chunks") != null) {
+                    a++;
                     for (String c : guildConfig.getConfigurationSection("guild." + s + ".chunks").getKeys(false)) {
                         UUID world = UUID.fromString(guildConfig.getString("guild." + s + ".chunks." + c + ".world"));
                         Chunk chunk = Bukkit.getWorld(world).getChunkAt(guildConfig.getInt("guild." + s + ".chunks." + c + ".x"), guildConfig.getInt("guild." + s + ".chunks." + c + ".z"));
                         chunks.add(chunk);
                     }
                 }
-                for (String i : guildConfig.getConfigurationSection("guild." + s + ".members").getKeys(false)) {
-                    members.put(UUID.fromString(i), Role.valueOf(guildConfig.getString("guild." + s + ".members." + i)));
+                for (String b : guildConfig.getConfigurationSection("guild." + s + ".members").getKeys(false)) {
+                    p++;
+                    members.put(UUID.fromString(b), Role.valueOf(guildConfig.getString("guild." + s + ".members." + b)));
                 }
                 HashMap<String, Object> settings = new HashMap<>();
                 if (guildConfig.get("guild." + s + ".settings") != null) {
-                    for (String i : guildConfig.getConfigurationSection("guild." + s + ".settings").getKeys(false)) {
-                        settings.put(i, guildConfig.get("guild." + s + ".settings." + i));
+                    for (String b : guildConfig.getConfigurationSection("guild." + s + ".settings").getKeys(false)) {
+                        settings.put(b, guildConfig.get("guild." + s + ".settings." + b));
                     }
                 }
                 OddJob.getInstance().getGuildManager().set(
@@ -148,15 +157,18 @@ public class ConfigManager {
                         Zone.valueOf(guildConfig.getString("guild." + s + ".zone", "GUILD")),
                         settings); //Zone
             }
+            OddJob.getInstance().log("Loaded " + i + " guilds; " + p + " members; " + a + " chunks!");
         }
     }
 
     private void loadBalances() {
+        int i = 0;
         if (balanceConfig.contains("balance")) {
             for (String s : balanceConfig.getConfigurationSection("balance").getKeys(false)) {
+                i++;
                 OddJob.getInstance().getEconManager().setBalance(UUID.fromString(s), balanceConfig.getDouble("balance." + s));
             }
-            Bukkit.getConsoleSender().sendMessage("Balances loaded!");
+            OddJob.getInstance().log("Loaded " + i + " balances!");
         }
     }
 
@@ -186,12 +198,14 @@ public class ConfigManager {
     }
 
     private void loadHomes() {
+        int i = 0;
         if (homesConfig.contains("homes")) {
             for (String s : homesConfig.getConfigurationSection("homes").getKeys(false)) {
                 UUID uuid = UUID.fromString(s);
                 Set<String> st = homesConfig.getConfigurationSection("homes." + uuid.toString()).getKeys(false);
                 if (!st.isEmpty()) {
                     for (String str : st) {
+                        i++;
                         String worldUUID = homesConfig.getString("homes." + uuid.toString() + "." + str + ".world");
                         int x = homesConfig.getInt("homes." + uuid.toString() + "." + str + ".x");
                         int y = homesConfig.getInt("homes." + uuid.toString() + "." + str + ".y");
@@ -203,7 +217,7 @@ public class ConfigManager {
                     }
                 }
             }
-            Bukkit.getConsoleSender().sendMessage("Homes loaded!");
+            OddJob.getInstance().log("Loaded " + i + " homes!");
         }
     }
 
@@ -291,24 +305,30 @@ public class ConfigManager {
     }
 
     private void savePlayers() {
-        for (UUID uuid : OddJob.getInstance().getPlayerManager().getPlayersMap().keySet()) {
-            playerConfig.set("players." + uuid.toString(), OddJob.getInstance().getPlayerManager().getPlayersMap().get(uuid));
+        for (OddPlayer op : OddJob.getInstance().getPlayerManager().getPlayersMap()) {
+            String s = op.getUuid().toString();
+            playerConfig.set("players." + s + ".name", op.getName());
+            playerConfig.set("players." + s + ".uuid", s);
+            playerConfig.set("players." + s + ".denyTPA", op.isDenyTPA());
+            playerConfig.set("players." + s + ".whiteList", op.getWhiteList());
+            playerConfig.set("players." + s + ".blackList", op.getBlackList());
         }
         Bukkit.getConsoleSender().sendMessage("Players saved!");
     }
 
     private void saveHomes() {
-        for (UUID uuid : OddJob.getInstance().getPlayerManager().getPlayersMap().keySet()) {
+        for (OddPlayer op : OddJob.getInstance().getPlayerManager().getPlayersMap()) {
+            UUID uuid = op.getUuid();
             Set<String> list = OddJob.getInstance().getHomesManager().list(uuid);
             if (list != null) {
                 for (String st : list) {
                     Location location = OddJob.getInstance().getHomesManager().get(uuid, st);
-                    homesConfig.set("homes." + uuid + "." + st + ".world", location.getWorld().getUID().toString());
-                    homesConfig.set("homes." + uuid + "." + st + ".x", location.getBlockX());
-                    homesConfig.set("homes." + uuid + "." + st + ".y", location.getBlockY());
-                    homesConfig.set("homes." + uuid + "." + st + ".z", location.getBlockZ());
-                    homesConfig.set("homes." + uuid + "." + st + ".yaw", location.getYaw());
-                    homesConfig.set("homes." + uuid + "." + st + ".pitch", location.getPitch());
+                    homesConfig.set("homes." + uuid.toString() + "." + st + ".world", location.getWorld().getUID().toString());
+                    homesConfig.set("homes." + uuid.toString() + "." + st + ".x", location.getBlockX());
+                    homesConfig.set("homes." + uuid.toString() + "." + st + ".y", location.getBlockY());
+                    homesConfig.set("homes." + uuid.toString() + "." + st + ".z", location.getBlockZ());
+                    homesConfig.set("homes." + uuid.toString() + "." + st + ".yaw", location.getYaw());
+                    homesConfig.set("homes." + uuid.toString() + "." + st + ".pitch", location.getPitch());
                 }
             }
         }

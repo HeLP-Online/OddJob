@@ -38,14 +38,15 @@ public class TpACommand implements CommandExecutor, TabCompleter {
                 OddJob.getInstance().getMessageManager().danger("You have already sent an request to " + strings[0], player.getUniqueId());
                 return true;
             }
-            OddJob.getInstance().getTeleportManager().tpa(player.getUniqueId(), target.getUniqueId()); // player (sends request) // target (teleport to)
-            OddJob.getInstance().getMessageManager().warning("You have requested to be teleported to " + target.getName(), player.getUniqueId());
-            OddJob.getInstance().getMessageManager().warning(player.getName() + " want to be teleported to you. To accept this, you can click on 'ACCEPT'", target.getUniqueId());
-            PlayerConnection connection = ((CraftPlayer) target).getHandle().playerConnection;
-            PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"ACCPET\",\"color\":\"dark_green\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpaccept " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Accepting the teleport request\",\"color\":\"gold\"}]}}}"));
-            connection.sendPacket(packet);
-            packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"DENY\",\"color\":\"dark_red\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpdeny " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Declines the teleport request\",\"color\":\"gold\"}]}}}"));
-            connection.sendPacket(packet);
+            if (OddJob.getInstance().getTeleportManager().tpa(player.getUniqueId(), target.getUniqueId())) { // player (sends request) // target (teleport to)
+                OddJob.getInstance().getMessageManager().warning("You have requested to be teleported to " + target.getName(), player.getUniqueId());
+                OddJob.getInstance().getMessageManager().warning(player.getName() + " want to be teleported to you. To accept this, you can click on 'ACCEPT'", target.getUniqueId());
+                PlayerConnection connection = ((CraftPlayer) target).getHandle().playerConnection;
+                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"ACCPET\",\"color\":\"dark_green\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpaccept " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Accepting the teleport request\",\"color\":\"gold\"}]}}}"));
+                connection.sendPacket(packet);
+                packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"DENY\",\"color\":\"dark_red\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpdeny " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Declines the teleport request\",\"color\":\"gold\"}]}}}"));
+                connection.sendPacket(packet);
+            }
         }
         return true;
     }

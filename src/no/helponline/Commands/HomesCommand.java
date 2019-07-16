@@ -1,6 +1,7 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -240,9 +241,9 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
             }
             if (g.length == 2 &&
                     commandSender.hasPermission(command.getName() + "." + g[0] + ".others")) {
-                for (String player : OddJob.getInstance().getPlayerManager().getPlayersMap().values()) {
-                    if (player.startsWith(g[1].toLowerCase())) {
-                        list.add(player);
+                for (OddPlayer player : OddJob.getInstance().getPlayerManager().getPlayersMap()) {
+                    if (player.getName().startsWith(g[1].toLowerCase())) {
+                        list.add(player.getName());
                     }
                 }
             }

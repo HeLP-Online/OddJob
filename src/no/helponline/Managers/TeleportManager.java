@@ -12,15 +12,20 @@ public class TeleportManager {
     private HashMap<UUID, UUID> teleportAccept = new HashMap<>();
     private HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
 
-    public void tpa(UUID from, UUID to) {
+    public boolean tpa(UUID from, UUID to) {
         if (!OddJob.getInstance().getPlayerManager().getOddPlayer(to).request(from)) {
-            return;
+            OddJob.getInstance().log("is no oddplayer");
+            return false;
         }
+        OddJob.getInstance().log("is oddplayer");
         if (hasRequest(from)) {
+            OddJob.getInstance().log("exists");
             OddJob.getInstance().getMessageManager().warning("Rewriting existing TPA request to " + OddJob.getInstance().getPlayerManager().getName(teleportAccept.get(from)), from);
         }
+        OddJob.getInstance().log("Making teleport request & task later");
         teleportAccept.put(from, to);
         startTimer(from);
+        return true;
     }
     // player (sends request) // target (teleport to)
 
@@ -38,7 +43,7 @@ public class TeleportManager {
                     OddJob.getInstance().getMessageManager().success("Your request has been accepted by " + player.getName(), target.getUniqueId());
                     OddJob.getInstance().getMessageManager().success("You have accepted the request from " + target.getName(), player.getUniqueId());
                     target.teleport(player, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                    teleportAccept.remove(from, to);
+                    remove(from);
                     if (reset.containsKey(from)) reset.get(from).cancel();
                 }
             }
@@ -54,7 +59,7 @@ public class TeleportManager {
                     Player target = OddJob.getInstance().getPlayerManager().getPlayer(from);
                     OddJob.getInstance().getMessageManager().danger("Your request has been denied by " + player.getName(), target.getUniqueId());
                     OddJob.getInstance().getMessageManager().danger("You have denied the request from " + target.getName(), player.getUniqueId());
-                    teleportAccept.remove(from, to);
+                    remove(from);
                     if (reset.containsKey(from)) reset.get(from).cancel();
                 }
             }
@@ -65,15 +70,19 @@ public class TeleportManager {
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (OddJob.getInstance().getTeleportManager().hasRequest(from))
-                    OddJob.getInstance().getTeleportManager().cancel(from);
+                OddJob.getInstance().log("Running task later");
+                if (hasRequest(from)) {
+                    remove(from);
+                    reset.remove(from);
+                }
             }
         };
         task.runTaskLater(OddJob.getInstance(), 300000L);
         reset.put(from, task);
     }
 
-    private void cancel(UUID from) {
+    private void remove(UUID from) {
+        OddJob.getInstance().log("Removing teleport request");
         teleportAccept.remove(from);
     }
 }

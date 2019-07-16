@@ -77,6 +77,8 @@ commands:
     usage: /<command> <GameMode> [Player]
     aliases: [ 'gm' ]
     permission: essentials.gamemode
+  player:
+    description: Access Player settings
 
 permissions:
   essentials.tpall:

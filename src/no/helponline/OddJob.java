@@ -83,6 +83,7 @@ public class OddJob extends JavaPlugin {
         getCommand("gamemode").setExecutor(new GameModeCommand());
         getCommand("gamemode").setTabCompleter(new GameModeCommand());
         getCommand("tppos").setExecutor(new TpPosCommand());
+        getCommand("player").setExecutor(new PlayerCommand());
 
         configManager.load();
 
