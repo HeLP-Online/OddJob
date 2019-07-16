@@ -13,12 +13,19 @@ public class TeleportManager {
     private HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
 
     public void tpa(UUID from, UUID to) {
+        if (!OddJob.getInstance().getPlayerManager().getOddPlayer(to).request(from)) {
+            return;
+        }
+        if (hasRequest(from)) {
+            OddJob.getInstance().getMessageManager().warning("Rewriting existing TPA request to " + OddJob.getInstance().getPlayerManager().getName(teleportAccept.get(from)), from);
+        }
         teleportAccept.put(from, to);
+        startTimer(from);
     }
     // player (sends request) // target (teleport to)
 
-    public boolean hasRequest(UUID uuid) {
-        return teleportAccept.containsKey(uuid);
+    public boolean hasRequest(UUID from) {
+        return teleportAccept.containsKey(from);
     }
 
     public void accept(UUID to) {
@@ -54,19 +61,19 @@ public class TeleportManager {
         }
     }
 
-    public void startTimer(UUID uniqueId) {
+    public void startTimer(UUID from) {
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (OddJob.getInstance().getTeleportManager().hasRequest(uniqueId))
-                    OddJob.getInstance().getTeleportManager().cancel(uniqueId);
+                if (OddJob.getInstance().getTeleportManager().hasRequest(from))
+                    OddJob.getInstance().getTeleportManager().cancel(from);
             }
         };
         task.runTaskLater(OddJob.getInstance(), 300000L);
-        reset.put(uniqueId, task);
+        reset.put(from, task);
     }
 
-    private void cancel(UUID uniqueId) {
-        teleportAccept.remove(uniqueId);
+    private void cancel(UUID from) {
+        teleportAccept.remove(from);
     }
 }

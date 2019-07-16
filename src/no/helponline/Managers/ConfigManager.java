@@ -106,7 +106,13 @@ public class ConfigManager {
     private void loadPlayers() {
         if (playerConfig.contains("players")) {
             for (String s : playerConfig.getConfigurationSection("players").getKeys(false)) {
-                OddJob.getInstance().getPlayerManager().updatePlayer(UUID.fromString(s), playerConfig.getString("players." + s));
+                OddJob.getInstance().getPlayerManager().create(
+                        UUID.fromString(s),
+                        playerConfig.getString("players." + s + ".uuid"),
+                        playerConfig.getBoolean("players." + s + ".denyTPA", false),
+                        playerConfig.getStringList("players." + s + ".blackList"),
+                        playerConfig.getStringList("players." + s + ".whiteLits"));
+
             }
             Bukkit.getConsoleSender().sendMessage("Players loaded!");
         }
