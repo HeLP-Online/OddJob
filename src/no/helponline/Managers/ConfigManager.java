@@ -109,12 +109,20 @@ public class ConfigManager {
         if (playerConfig.contains("players")) {
             for (String s : playerConfig.getConfigurationSection("players").getKeys(false)) {
                 i++;
+                List<UUID> blacklist = new ArrayList<>();
+                for (String a : playerConfig.getStringList("players." + s + ".blackList")) {
+                    blacklist.add(UUID.fromString(a));
+                }
+                List<UUID> whitelist = new ArrayList<>();
+                for (String a : playerConfig.getStringList("players." + s + ".whiteList")) {
+                    whitelist.add(UUID.fromString(a));
+                }
                 OddJob.getInstance().getPlayerManager().create(
                         UUID.fromString(s),
                         playerConfig.getString("players." + s + ".name"),
                         playerConfig.getBoolean("players." + s + ".denyTPA", false),
-                        playerConfig.getStringList("players." + s + ".blackList"),
-                        playerConfig.getStringList("players." + s + ".whiteLits"));
+                        blacklist,
+                        whitelist);
 
             }
             OddJob.getInstance().log("Loaded " + i + " players!");
@@ -310,8 +318,8 @@ public class ConfigManager {
             playerConfig.set("players." + s + ".name", op.getName());
             playerConfig.set("players." + s + ".uuid", s);
             playerConfig.set("players." + s + ".denyTPA", op.isDenyTPA());
-            playerConfig.set("players." + s + ".whiteList", op.getWhiteList());
-            playerConfig.set("players." + s + ".blackList", op.getBlackList());
+            playerConfig.set("players." + s + ".whiteList", op.getWhiteList().toString());
+            playerConfig.set("players." + s + ".blackList", op.getBlackList().toString());
         }
         Bukkit.getConsoleSender().sendMessage("Players saved!");
     }

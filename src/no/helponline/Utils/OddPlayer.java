@@ -9,8 +9,8 @@ public class OddPlayer {
     private UUID uuid;
     private String name;
     private boolean denyTPA;
-    private List<String> whiteList;
-    private List<String> blackList;
+    private List<UUID> whiteList;
+    private List<UUID> blackList;
 
     public UUID getUuid() {
         return uuid;
@@ -36,41 +36,60 @@ public class OddPlayer {
         this.denyTPA = denyTPA;
     }
 
-    public List<String> getWhiteList() {
+    public List<UUID> getWhiteList() {
         return whiteList;
     }
 
-    public void setWhiteList(List<String> whiteList) {
+    public void setWhiteList(List<UUID> whiteList) {
         this.whiteList = whiteList;
     }
 
-    public List<String> getBlackList() {
+    public List<UUID> getBlackList() {
         return blackList;
     }
 
-    public void setBlackList(List<String> blackList) {
+    public void setBlackList(List<UUID> blackList) {
         this.blackList = blackList;
     }
 
     public boolean request(UUID from) {
+        OddJob.getInstance().log("request: " + !isDenyTPA());
         boolean request = !isDenyTPA();
-        if (getWhiteList().contains(from.toString())) {
+        if (getWhiteList().contains(from)) {
             OddJob.getInstance().log("whitelist");
             request = true;
-        } else if (getBlackList().contains(from.toString())) {
+        } else if (getBlackList().contains(from)) {
             OddJob.getInstance().log("blacklist");
+            request = false;
         } else if (isDenyTPA()) {
             OddJob.getInstance().log("tpa deny");
             OddJob.getInstance().getMessageManager().warning(name + " is denying all request!", from);
+            request = false;
         }
         return request;
     }
 
-    public OddPlayer(UUID uuid, String name, boolean denyTPA, List<String> whiteList, List<String> blackList) {
+    public OddPlayer(UUID uuid, String name, boolean denyTPA, List<UUID> whiteList, List<UUID> blackList) {
         this.uuid = uuid;
         this.name = name;
         this.denyTPA = denyTPA;
         this.whiteList = whiteList;
         this.blackList = blackList;
+    }
+
+    public void addWhiteList(UUID uniqueId) {
+        whiteList.add(uniqueId);
+    }
+
+    public void addBlackList(UUID uniqueId) {
+        blackList.add(uniqueId);
+    }
+
+    public void delWhiteList(UUID uniqueId) {
+        whiteList.remove(uniqueId);
+    }
+
+    public void delBlackList(UUID uniqueId) {
+        blackList.remove(uniqueId);
     }
 }

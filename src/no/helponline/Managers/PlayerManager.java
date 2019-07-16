@@ -17,7 +17,7 @@ public class PlayerManager {
             oddPlayer.setName(name);
             oddPlayers.put(uuid, oddPlayer);
         } else {
-            create(uuid, Bukkit.getPlayer(uuid).getName(), false, null, null);
+            create(uuid, Bukkit.getPlayer(uuid).getName(), false, new ArrayList<>(), new ArrayList<>());
             OddJob.getInstance().log("created " + uuid.toString());
         }
     }
@@ -55,7 +55,7 @@ public class PlayerManager {
         return oddPlayers.get(to);
     }
 
-    public void create(UUID uuid, String name, boolean denyTPA, List<String> whiteList, List<String> blackList) {
+    public void create(UUID uuid, String name, boolean denyTPA, List<UUID> whiteList, List<UUID> blackList) {
         OddPlayer oddPlayer = new OddPlayer(uuid, name, denyTPA, whiteList, blackList);
         oddPlayers.put(uuid, oddPlayer);
     }

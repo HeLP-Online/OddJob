@@ -1,6 +1,7 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -23,7 +24,7 @@ public class TeleportManager {
         }
         OddJob.getInstance().log("Making teleport request & task later");
         teleportAccept.put(from, to);
-        startTimer(from);
+        startTimer(from, to);
         return true;
     }
     // player (sends request) // target (teleport to)
@@ -65,7 +66,7 @@ public class TeleportManager {
         }
     }
 
-    public void startTimer(UUID from) {
+    public void startTimer(UUID from, UUID to) {
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
@@ -73,10 +74,18 @@ public class TeleportManager {
                 if (hasRequest(from)) {
                     remove(from);
                     reset.remove(from);
+                    Player player = Bukkit.getPlayer(from);
+                    if (player.isOnline()) {
+                        OddJob.getInstance().getMessageManager().sendMessage(player, "The teleport request has timed out");
+                    }
+                    player = Bukkit.getPlayer(to);
+                    if (player.isOnline()) {
+                        OddJob.getInstance().getMessageManager().sendMessage(player, "The teleport request has timed out");
+                    }
                 }
             }
         };
-        task.runTaskLater(OddJob.getInstance(), 300000L);
+        task.runTaskLater(OddJob.getInstance(), 1200L);
         reset.put(from, task);
     }
 
