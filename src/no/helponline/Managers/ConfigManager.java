@@ -90,9 +90,9 @@ public class ConfigManager {
         homesConfig = YamlConfiguration.loadConfiguration(homesFile);
         locksConfig = YamlConfiguration.loadConfiguration(locksFile);
 
+        loadPlayers();
         loadGuilds();
         loadBalances();
-        loadPlayers();
         loadHomes();
         loadLocks();
         OddJob.getInstance().log("All loaded");

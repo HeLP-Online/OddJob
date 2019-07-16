@@ -89,6 +89,8 @@ public class OddJob extends JavaPlugin {
         configManager.load();
 
         setupEconomy();
+
+        Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
         Bukkit.getPluginManager().registerEvents(new LocksEvents(), this);
         //Bukkit.getPluginManager().registerEvents(new SofaEvent(), this);  //TODO Sleep?

@@ -32,6 +32,11 @@ public class PlayerManager {
                 return uuid;
             }
         }
+        for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+            if (op.getName().equalsIgnoreCase(name)) {
+                return op.getUniqueId();
+            }
+        }
         return null;
     }
 
