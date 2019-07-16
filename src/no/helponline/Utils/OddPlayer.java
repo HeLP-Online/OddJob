@@ -53,7 +53,7 @@ public class OddPlayer {
     }
 
     public boolean request(UUID from) {
-        boolean request = false;
+        boolean request = !isDenyTPA();
         if (getWhiteList().contains(from.toString())) {
             OddJob.getInstance().log("whitelist");
             request = true;

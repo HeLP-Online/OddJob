@@ -14,7 +14,6 @@ public class TeleportManager {
 
     public boolean tpa(UUID from, UUID to) {
         if (!OddJob.getInstance().getPlayerManager().getOddPlayer(to).request(from)) {
-            OddJob.getInstance().log("is no oddplayer");
             return false;
         }
         OddJob.getInstance().log("is oddplayer");
