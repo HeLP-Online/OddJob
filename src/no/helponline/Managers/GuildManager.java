@@ -3,6 +3,7 @@ package no.helponline.Managers;
 import no.helponline.Guilds.Guild;
 import no.helponline.Guilds.Role;
 import no.helponline.Guilds.Zone;
+import no.helponline.OddJob;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
@@ -13,12 +14,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class GuildManager {
-    private HashMap<UUID, Guild> guilds;
-    private HashMap<Chunk, UUID> chunks;
+    private HashMap<UUID, Guild> guilds;// Guild | Guild<>
+    private HashMap<Chunk, UUID> chunks;// Chunk | Guild
+    private HashMap<UUID, UUID> autoClaim;// Player | Guild
 
     public GuildManager() {
         guilds = new HashMap<>();
         chunks = new HashMap<>();
+        autoClaim = new HashMap<>();
     }
 
     public Guild create(UUID uniqueId, String string) {
@@ -52,6 +55,15 @@ public class GuildManager {
         return guilds.get(uuid);
     }
 
+    public void autoClaim(UUID uuid, Chunk chunk) {
+        if (!chunks.containsKey(chunk)) {
+            // NOT CLAIMED
+            Guild g = getGuild(autoClaim.get(uuid));
+
+            chunks.put(chunk, g.getId());
+            OddJob.getInstance().getMessageManager().sendMessage(uuid, "Claiming chunk X: " + chunk.getX() + "; Z: " + chunk.getZ() + "; to " + g.getZone().name());
+        }
+    }
 
     public boolean claim(Player player) {
         boolean b = false;
@@ -109,5 +121,41 @@ public class GuildManager {
             }
         }
         return null;
+    }
+
+    public void toggleAutoClaim(UUID uuid, Zone zone) {
+        Guild guild = null;
+        if (zone != Zone.GUILD) {
+            for (UUID uid : guilds.keySet()) {
+                Guild g = guilds.get(uid);
+                if (g.getZone() == zone) {
+                    guild = g;
+                }
+            }
+        } else {
+            guild = OddJob.getInstance().getGuildManager().getGuildByMember(uuid);
+        }
+        if (guild != null) {
+            if (autoClaim.containsKey(uuid)) {
+                if (autoClaim.get(uuid) != guild.getId()) {
+                    autoClaim.put(uuid, guild.getId());
+                    OddJob.getInstance().getMessageManager().sendMessage(uuid, "Changing Zone auto claim to " + guild.getName());
+                } else {
+                    autoClaim.remove(uuid);
+                    OddJob.getInstance().getMessageManager().sendMessage(uuid, "Turning off Zone auto claim to " + guild.getName());
+                }
+            } else {
+                autoClaim.put(uuid, guild.getId());
+                OddJob.getInstance().getMessageManager().sendMessage(uuid, "You are now claiming zones for " + guild.getName());
+            }
+        }
+    }
+
+    public boolean hasAutoClaim(UUID uniqueId) {
+        return autoClaim.containsKey(uniqueId);
+    }
+
+    public Guild getAutoCLaim(UUID uniqueId) {
+        return OddJob.getInstance().getGuildManager().getGuild(autoClaim.get(uniqueId));
     }
 }

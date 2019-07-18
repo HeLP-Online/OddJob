@@ -103,12 +103,25 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         List<String> list = new ArrayList<>();
         if (command.getName().equalsIgnoreCase("player")) {
-            if (strings.length >= 1) {
-                list.add("help");
-                list.add("set");
-                list.add("whitelist");
-                list.add("blacklist");
-                list.add("info");
+            if (strings.length == 1) {
+                String[] st = new String[]{"set", "info", "blacklist", "whitelist", "help"};
+                for (String t : st) {
+                    if (t.startsWith(strings[0])) list.add(t);
+                }
+            } else if (strings.length == 2 && (strings[0].equalsIgnoreCase("blacklist") || strings[0].equalsIgnoreCase("whitelist"))) {
+                String[] st = new String[]{"add", "del", "show"};
+                for (String t : st) {
+                    if (t.startsWith(strings[1])) list.add(t);
+                }
+            } else if (strings.length == 3 && (strings[0].equalsIgnoreCase("blacklist") || strings[0].equalsIgnoreCase("whitelist")) && (strings[1].equalsIgnoreCase("add") || strings[1].equalsIgnoreCase("del"))) {
+                for (OddPlayer op : OddJob.getInstance().getPlayerManager().getPlayersMap()) {
+                    if (op.getName().startsWith(strings[2])) list.add(op.getName());
+                }
+            } else if (strings.length == 2 && strings[0].equalsIgnoreCase("set")) {
+                list.add("denytpa");
+            } else if (strings.length == 3 && strings[0].equalsIgnoreCase("set") && strings[1].equalsIgnoreCase("denytpa")) {
+                list.add("true");
+                list.add("false");
             }
         }
         return list;

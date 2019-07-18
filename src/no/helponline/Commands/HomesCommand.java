@@ -275,7 +275,6 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
         }
 
         Collections.sort(list);
-        OddJob.getInstance().log(list.toString());
         return list;
     }
 

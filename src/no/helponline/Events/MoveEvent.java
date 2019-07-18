@@ -21,12 +21,17 @@ public class MoveEvent implements Listener {
         Player player = event.getPlayer();
         Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
         UUID guildId = (guild != null) ? guild.getId() : null;
+
+
         /* WHEN CHANGING CHUNK */
         if (event.getFrom().getChunk().equals(chunk)) {
             // within same chunk
             return;
         } else if (OddJob.inChunk.containsKey(player.getUniqueId())) {
             if (OddJob.inChunk.get(player.getUniqueId()) == guildId) {
+                if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
+                    OddJob.getInstance().getGuildManager().autoClaim(player.getUniqueId(), chunk);
+                }
                 return;
             }
         }
@@ -37,21 +42,19 @@ public class MoveEvent implements Listener {
         if (guild != null) {
             switch (guild.getZone()) {
                 case GUILD:
-                    s = s + ChatColor.DARK_BLUE;
+                    s = s + ChatColor.DARK_BLUE + guild.getName() + " hails you!";
                     break;
                 case ARENA:
                 case WAR:
+                    s = s + ChatColor.RED + "Draw your weapon!";
+                    break;
                 case JAIL:
-                    s = s + ChatColor.RED;
+                    s = s + ChatColor.GOLD + "Nap time!";
                     break;
                 case SAFE:
-                    s = s + ChatColor.GREEN;
-                    break;
-                default:
-                    s = s + ChatColor.YELLOW;
+                    s = s + ChatColor.GREEN + "Take a break and prepare!";
                     break;
             }
-            s = s + guild.getName() + " hails you!";
         } else {
             s = s + ChatColor.YELLOW + "Welcome to the wild!";
         }

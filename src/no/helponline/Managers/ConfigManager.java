@@ -129,7 +129,7 @@ public class ConfigManager {
         }
     }
 
-    private void loadGuilds() {
+    public void loadGuilds() {
         int i = 0;
         int a = 0;
         int p = 0;

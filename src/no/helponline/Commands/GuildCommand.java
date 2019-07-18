@@ -2,6 +2,7 @@ package no.helponline.Commands;
 
 import no.helponline.Guilds.Guild;
 import no.helponline.Guilds.Role;
+import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -93,10 +94,32 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         OddJob.getInstance().getMessageManager().success("You have been demoted to " + roleT.toString() + " by " + commandSender.getName(), targetUUID);
                     }
                 }
-            } else if (strings.length == 1 && strings[0].equalsIgnoreCase("claim")) {
+            } else if (strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    OddJob.getInstance().getGuildManager().claim(player);
+                    if (strings[1].equalsIgnoreCase("safe")) {
+                        if (strings[2].equalsIgnoreCase("auto")) {
+                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.SAFE);
+                        }
+                    } else if (strings[1].equalsIgnoreCase("war")) {
+                        if (strings[2].equalsIgnoreCase("auto")) {
+                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.WAR);
+                        }
+                    } else if (strings[1].equalsIgnoreCase("jail")) {
+                        if (strings[2].equalsIgnoreCase("auto")) {
+                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.JAIL);
+                        }
+                    } else if (strings[1].equalsIgnoreCase("arena")) {
+                        if (strings[2].equalsIgnoreCase("auto")) {
+                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.ARENA);
+                        }
+                    } else {
+                        if (strings[1].equalsIgnoreCase("auto")) {
+                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.GUILD);
+                        }
+                        OddJob.getInstance().getGuildManager().claim(player);
+                    }
+
                 }
             } else if (strings.length == 1 && strings[0].equalsIgnoreCase("claims") &&
                     commandSender instanceof Player) {
@@ -170,16 +193,48 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
     }
 
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (strings.length == 1) {
-            List<String> list = new ArrayList<>();
-            for (Args a : Args.values()) {
-                if (a.name().startsWith(strings[0])) {
-                    list.add(a.name());
+        List<String> list = new ArrayList<>();
+        String[] st;
+        if (strings.length == 1 || strings.length == 0) {
+            st = new String[]{"create", "join", "claim", "claims", "set", "demote", "promote", "list"};
+            for (String t : st) {
+                if (t.startsWith(strings[0])) {
+                    list.add(t);
                 }
             }
-            return list;
         }
-        return null;
+
+        if (strings[0].equalsIgnoreCase("join")) {
+            // TODO List all open guilds
+        } else if (strings[0].equalsIgnoreCase("claim") && strings.length >= 2) {
+            // TODO permission autoclaim
+            if (strings.length == 2) {
+                for (Zone z : Zone.values()) {
+                    if (commandSender.hasPermission("guild.claim." + z.name()) && z.name().startsWith(strings[1])) {
+                        list.add(z.name());
+                    }
+                }
+            }
+            if (strings.length == 3 && commandSender.hasPermission("guild.claim." + strings[1] + ".auto")) {
+                list.add("auto");
+            }
+        } else if (strings[0].equalsIgnoreCase("set") && strings.length == 2) {
+            st = new String[]{"friendlyFire", "invitedOnly", "name"};
+            for (String t : st) {
+                if (t.startsWith(strings[1])) {
+                    list.add(t);
+                }
+            }
+        } else if (strings[0].equalsIgnoreCase("set") && strings.length == 3 && (strings[1].equalsIgnoreCase("friendlyFire") || strings[1].equalsIgnoreCase("invitedOnly"))) {
+            st = new String[]{"TRUE", "FALSE"};
+            for (String t : st) {
+                if (t.startsWith(strings[2])) {
+                    list.add(t);
+                }
+            }
+        }
+
+        return list;
     }
 
     enum Args {

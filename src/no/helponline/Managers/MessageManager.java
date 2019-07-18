@@ -69,4 +69,8 @@ public class MessageManager {
     public void console(String s) {
         Bukkit.getConsoleSender().sendMessage(s);
     }
+
+    public void sendMessage(CommandSender commandSender, String message) {
+        commandSender.sendMessage(message);
+    }
 }
