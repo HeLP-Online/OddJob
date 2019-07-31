@@ -2,7 +2,6 @@ package no.helponline.Events;
 
 import net.minecraft.server.v1_14_R1.IChatBaseComponent;
 import net.minecraft.server.v1_14_R1.PacketPlayOutTitle;
-import no.helponline.Guilds.Guild;
 import no.helponline.OddJob;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -19,8 +18,7 @@ public class MoveEvent implements Listener {
     public void onGuildMove(PlayerMoveEvent event) {
         Chunk chunk = event.getTo().getChunk();
         Player player = event.getPlayer();
-        Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
-        UUID guildId = (guild != null) ? guild.getId() : null;
+        UUID guildId = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
 
 
         /* WHEN CHANGING CHUNK */
@@ -39,10 +37,10 @@ public class MoveEvent implements Listener {
 
         /* PRINT GUILD NAME */
         String s = "";
-        if (guild != null) {
-            switch (guild.getZone()) {
+        if (guildId != null) {
+            switch (OddJob.getInstance().getMySQLManager().getZoneByGuild(guildId)) {
                 case GUILD:
-                    s = s + ChatColor.DARK_BLUE + guild.getName() + " hails you!";
+                    s = s + ChatColor.DARK_BLUE + OddJob.getInstance().getMySQLManager().getGuildNameByUUID(guildId) + " hails you!";
                     break;
                 case ARENA:
                 case WAR:

@@ -95,8 +95,8 @@ public class GuildManager {
     }
 
 
-    public Guild getGuildByChunk(Chunk chunk) {
-        return getGuild(chunks.get(chunk));
+    public UUID getGuildByChunk(Chunk chunk) {
+        return OddJob.getInstance().getMySQLManager().getGuildByChunk(chunk);
     }
 
 

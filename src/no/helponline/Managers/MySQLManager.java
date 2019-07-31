@@ -641,4 +641,40 @@ public class MySQLManager {
         }
         return uuid;
     }
+
+    public Zone getZoneByGuild(UUID guild) {
+        Zone zone = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `zone` FROM `mine_guilds` WHERE `uuid` = ? ");
+            preparedStatement.setString(1, guild.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                zone = Zone.valueOf(resultSet.getString("zone"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return zone;
+    }
+
+    public String getGuildNameByUUID(UUID guild) {
+        String name = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_guilds` WHERE `uuid` = ? ");
+            preparedStatement.setString(1, guild.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                name = resultSet.getString("zone");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return name;
+    }
 }
