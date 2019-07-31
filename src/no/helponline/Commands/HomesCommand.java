@@ -1,7 +1,6 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -12,7 +11,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public class HomesCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -130,14 +132,14 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("tp")) {
-            Location loc;
+            Location location;
             if (sender instanceof Player) {
                 Player player = (Player) sender;
 
                 if (args.length == 1) {
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId())) {
-                        loc = OddJob.getInstance().getHomesManager().get(player.getUniqueId());
-                        if (loc != null) player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                        location = OddJob.getInstance().getHomesManager().get(player.getUniqueId());
+                        if (location != null) player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
                     } else {
                         OddJob.getInstance().getMessageManager().warning("No home found.", sender);
                     }
@@ -147,8 +149,8 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 2) {
                     String name = args[1];
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
-                        loc = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
-                        if (loc != null) player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                        location = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
+                        if (location != null) player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
                     } else {
                         OddJob.getInstance().getMessageManager().warning("Can't find any home named " + name, sender);
                     }
@@ -163,9 +165,9 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     }
                     String name = args[2];
                     if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
-                        loc = OddJob.getInstance().getHomesManager().get(uuid, name);
-                        if (loc != null) {
-                            player.teleport(loc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                        location = OddJob.getInstance().getHomesManager().get(uuid, name);
+                        if (location != null) {
+                            player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
                             OddJob.getInstance().getMessageManager().success("Teleporting to home named `" + name + "` of " + args[1], sender);
                         } else {
                             OddJob.getInstance().getMessageManager().warning("Something went wrong!", sender);
@@ -191,7 +193,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 string.append("List of your homes:\n");
                 string.append("-------------------\n");
 
-                Set<String> homes = OddJob.getInstance().getHomesManager().list(player.getUniqueId());
+                List<String> homes = OddJob.getInstance().getHomesManager().list(player.getUniqueId());
 
                 int i = 0;
                 if (homes.size() > 0) {
@@ -215,7 +217,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 string.append("List of your homes:\n");
                 string.append("-------------------\n");
 
-                Set<String> homes = OddJob.getInstance().getHomesManager().list(uuid);
+                List<String> homes = OddJob.getInstance().getHomesManager().list(uuid);
 
                 int i = 1;
                 for (String s : homes) {
@@ -241,9 +243,9 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
             }
             if (g.length == 2 &&
                     commandSender.hasPermission(command.getName() + "." + g[0] + ".others")) {
-                for (OddPlayer player : OddJob.getInstance().getPlayerManager().getPlayersMap()) {
-                    if (player.getName().startsWith(g[1].toLowerCase())) {
-                        list.add(player.getName());
+                for (String playerName : OddJob.getInstance().getPlayerManager().getNames()) {
+                    if (playerName.startsWith(g[1].toLowerCase())) {
+                        list.add(playerName);
                     }
                 }
             }

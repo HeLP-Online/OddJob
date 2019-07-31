@@ -18,6 +18,7 @@ public class PlayerJoin implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
+        // Making an OddPlayer
         OddJob.getInstance().getPlayerManager().updatePlayer(uuid, player.getName());
 
         if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {

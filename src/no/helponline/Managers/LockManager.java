@@ -123,33 +123,36 @@ public class LockManager {
     }
 
     public void lock(UUID uuid, Entity entity) {
-        if (entity.getType().equals(EntityType.ARMOR_STAND))
+        if (entity.getType().equals(EntityType.ARMOR_STAND)) {
             armor.put(entity.getUniqueId(), uuid);
+            OddJob.getInstance().getMySQLManager().createLock(uuid, entity);
+        }
     }
 
     public void lock(UUID uuid, Location location) {
         locked.put(location, uuid);
+        OddJob.getInstance().getMySQLManager().createLock(uuid, location);
     }
 
     public void unlock(Entity entity) {
         armor.remove(entity.getUniqueId());
+        OddJob.getInstance().getMySQLManager().deleteLock(entity);
     }
 
     public void unlock(Location location) {
         locked.remove(location);
+        OddJob.getInstance().getMySQLManager().deleteLock(location);
     }
 
     public UUID isLocked(Entity entity) {
-        if (armor.containsKey(entity.getUniqueId())) {
+        /*if (armor.containsKey(entity.getUniqueId())) {
             return armor.get(entity.getUniqueId());
-        }
-        return null;
+        }*/
+        return OddJob.getInstance().getMySQLManager().hasLock(entity);
     }
 
     public UUID isLocked(Location location) {
-        if (locked.containsKey(location))
-            return locked.get(location);
-        return null;
+        return OddJob.getInstance().getMySQLManager().hasLock(location);
     }
 
     public HashMap<Location, UUID> getLocks() {

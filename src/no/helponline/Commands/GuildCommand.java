@@ -6,6 +6,7 @@ import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,16 +27,53 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             if (strings.length == 2 && strings[0].equalsIgnoreCase("create")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    if (OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()) == null) {
-                        Guild guild = OddJob.getInstance().getGuildManager().create(player.getUniqueId(), strings[1]);
-                        if (guild != null) {
-                            OddJob.getInstance().getMessageManager().success("Guild `" + guild.getName() + "` created", commandSender);
-                        }
-
-                        OddJob.getInstance().getMessageManager().warning("A Guild with the name `" + strings[1] + "` already exists", commandSender);
-                    } else {
-                        OddJob.getInstance().getMessageManager().danger("You are already connected to a guild, to create a new use '/guild leave'", commandSender);
+                    if (OddJob.getInstance().getGuildManager().create(player.getUniqueId(), strings[1])) {
+                        OddJob.getInstance().getMessageManager().success("Guild `" + strings[1] + "` created", commandSender);
                     }
+                } else {
+                    OddJob.getInstance().getMessageManager().danger("You are already connected to a guild, to create a new use '/guild leave'", commandSender);
+                }
+            } else if (strings[0].equalsIgnoreCase("invite")) {
+                Player player = (Player) commandSender;
+                UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                if (strings.length == 2) {
+                    OfflinePlayer target = null;
+                    for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+                        if (op.getName().equalsIgnoreCase(strings[1])) target = op;
+                    }
+                    if (target == null) {
+                        OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                        return true;
+                    }
+                    OddJob.getInstance().getGuildManager().inviteToGuild(guild, strings[1]);
+                }
+            } else if (strings[0].equalsIgnoreCase("uninvite")) {
+                Player player = (Player) commandSender;
+                UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                if (strings.length == 2) {
+                    OfflinePlayer target = null;
+                    for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+                        if (op.getName().equalsIgnoreCase(strings[1])) target = op;
+                    }
+                    if (target == null) {
+                        OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                        return true;
+                    }
+                    OddJob.getInstance().getGuildManager().uninviteToGuild(guild, strings[1]);
+                }
+            } else if (strings[0].equalsIgnoreCase("kick")) {
+                Player player = (Player) commandSender;
+                UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                if (strings.length == 2) {
+                    OfflinePlayer target = null;
+                    for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+                        if (op.getName().equalsIgnoreCase(strings[1])) target = op;
+                    }
+                    if (target == null) {
+                        OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                        return true;
+                    }
+                    OddJob.getInstance().getGuildManager().kickFromGuild(guild, OddJob.getInstance().getPlayerManager().getUUID(strings[1]));
                 }
             } else if (strings[0].equalsIgnoreCase("list")) {
                 if (strings.length == 2 && strings[1].equalsIgnoreCase("guilds")) {
@@ -67,11 +105,12 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
                     return true;
                 }
-                if (OddJob.getInstance().getGuildManager().getGuildByMember(targetUUID) == OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId())) {
-                    Role roleT = OddJob.getInstance().getGuildManager().getGuildByMember(targetUUID).getRole(targetUUID);
-                    Role roleC = OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).getRole(player.getUniqueId());
+                UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(targetUUID) == guildUUID) {
+                    Role roleT = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
+                    Role roleC = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
                     if (roleC.level() > roleT.level()) {
-                        roleT = OddJob.getInstance().getGuildManager().getGuildByMember(targetUUID).promote(targetUUID);
+                        roleT = OddJob.getInstance().getGuildManager().promoteMember(guildUUID, targetUUID);
                         OddJob.getInstance().getMessageManager().success("Promoted " + target.getName() + " to " + roleT.toString(), commandSender);
                         OddJob.getInstance().getMessageManager().success("You have been promoted to " + roleT.toString() + " by " + commandSender.getName(), targetUUID);
                     }
@@ -85,11 +124,12 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
                     return true;
                 }
-                if (OddJob.getInstance().getGuildManager().getGuildByMember(targetUUID) == OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId())) {
-                    Role roleT = OddJob.getInstance().getGuildManager().getGuildByMember(targetUUID).getMembers().get(targetUUID);
-                    Role roleC = OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).getMembers().get(player.getUniqueId());
+                UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(targetUUID) == guildUUID) {
+                    Role roleT = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
+                    Role roleC = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
                     if (roleC.level() > roleT.level()) {
-                        roleT = OddJob.getInstance().getGuildManager().getGuildByMember(targetUUID).demote(targetUUID);
+                        roleT = OddJob.getInstance().getGuildManager().demoteMember(guildUUID, targetUUID);
                         OddJob.getInstance().getMessageManager().success("Demoted " + target.getName() + " to " + roleT.toString(), commandSender);
                         OddJob.getInstance().getMessageManager().success("You have been demoted to " + roleT.toString() + " by " + commandSender.getName(), targetUUID);
                     }
@@ -134,23 +174,18 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 if (strings.length >= 3) {
                     Player player = (Player) commandSender;
                     if (strings[1].equalsIgnoreCase("name")) {
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 2; i < strings.length; i++) {
-                            sb.append(strings[i]);
-                        }
-                        OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).setName(sb.toString());
-
-                    } else if (strings[1].equalsIgnoreCase("invitedOnly")) {
+                        OddJob.getInstance().getGuildManager().changeName(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()), strings[2]);
+                    } else if (strings[1].equalsIgnoreCase("invited_only")) {
                         try {
                             boolean bol = Boolean.parseBoolean(strings[2]);
-                            OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).setInvitedOnly(bol);
+                            OddJob.getInstance().getGuildManager().changeInvitedOnly(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()), bol);
                         } catch (Exception e) {
                         }
 
-                    } else if (strings[1].equalsIgnoreCase("friendlyFire")) {
+                    } else if (strings[1].equalsIgnoreCase("friendly_fire")) {
                         try {
                             boolean bol = Boolean.parseBoolean(strings[2]);
-                            OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).setFriendlyFire(bol);
+                            OddJob.getInstance().getGuildManager().changeFriendlyFire(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()), bol);
                         } catch (Exception e) {
                         }
 
@@ -160,30 +195,18 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 if (strings[0].equalsIgnoreCase("join")) {
                     if (commandSender instanceof Player) {
                         Player player = (Player) commandSender;
+                        UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildByName(strings[1]);
 
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 1; i < strings.length; i++) {
-                            sb.append(strings[i]);
-                        }
-                        UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildByName(sb.toString());
-                        Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
-
-                        if (guild != null) {
-                            OddJob.getInstance().getGuildManager().join(guild.getId(), player.getUniqueId());
+                        if (guildUUID != null) {
+                            OddJob.getInstance().getGuildManager().join(guildUUID, player.getUniqueId());
                         }
                     }
                 } else if (strings[0].equalsIgnoreCase("leave")) {
                     if (commandSender instanceof Player) {
                         Player player = (Player) commandSender;
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 1; i < strings.length; i++) {
-                            sb.append(strings[i]);
-                        }
-                        UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildByName(sb.toString());
-                        Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
-                        guild.leave(player.getUniqueId());
-                        if (OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()) == null) {
-                            OddJob.getInstance().getMessageManager().success("You have successfully left the guild " + guild.getName(), player.getUniqueId());
+                        OddJob.getInstance().getGuildManager().leave(player.getUniqueId());
+                        if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) == null) {
+                            OddJob.getInstance().getMessageManager().success("You have successfully left the guild", player.getUniqueId());
                         }
                     }
                 }
@@ -196,7 +219,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         List<String> list = new ArrayList<>();
         String[] st;
         if (strings.length == 1 || strings.length == 0) {
-            st = new String[]{"create", "join", "claim", "claims", "set", "demote", "promote", "list"};
+            st = new String[]{"create", "join", "claim", "claims", "set", "demote", "promote", "list", "invite", "uninvite", "kick"};
             for (String t : st) {
                 if (t.startsWith(strings[0])) {
                     list.add(t);
@@ -219,13 +242,13 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 list.add("auto");
             }
         } else if (strings[0].equalsIgnoreCase("set") && strings.length == 2) {
-            st = new String[]{"friendlyFire", "invitedOnly", "name"};
+            st = new String[]{"friendly_fire", "invited_only", "name"};
             for (String t : st) {
                 if (t.startsWith(strings[1])) {
                     list.add(t);
                 }
             }
-        } else if (strings[0].equalsIgnoreCase("set") && strings.length == 3 && (strings[1].equalsIgnoreCase("friendlyFire") || strings[1].equalsIgnoreCase("invitedOnly"))) {
+        } else if (strings[0].equalsIgnoreCase("set") && strings.length == 3 && (strings[1].equalsIgnoreCase("friendly_fire") || strings[1].equalsIgnoreCase("invited_only"))) {
             st = new String[]{"TRUE", "FALSE"};
             for (String t : st) {
                 if (t.startsWith(strings[2])) {

@@ -31,6 +31,7 @@ public class OddJob extends JavaPlugin {
     private ConfigManager configManager;
     private BanManager banManager;
     private TeleportManager teleportManager;
+    private MySQLManager mySQLManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -61,6 +62,7 @@ public class OddJob extends JavaPlugin {
         messageManager = new MessageManager();
         playerManager = new PlayerManager();
         teleportManager = new TeleportManager();
+        mySQLManager = new MySQLManager();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());
@@ -98,7 +100,8 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new onDeath(), this);
 
         BukkitScheduler saver = getServer().getScheduler();
-        saver.scheduleSyncRepeatingTask(this, configManager::save, 0L, 6000L);
+        log("Setting up scheduler for saving!");
+        saver.scheduleSyncRepeatingTask(this, configManager::save, 0L, 1200L); // 5 min = 6000
     }
 
 
@@ -170,5 +173,9 @@ public class OddJob extends JavaPlugin {
 
     public LockManager getLockManager() {
         return lockManager;
+    }
+
+    public MySQLManager getMySQLManager() {
+        return mySQLManager;
     }
 }

@@ -1,9 +1,10 @@
 package no.helponline.Managers;
 
+import no.helponline.OddJob;
 import org.bukkit.Location;
 
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 public class HomesManager {
@@ -26,55 +27,36 @@ public class HomesManager {
     }
 
     public boolean add(UUID uuid, String name, Location location) {
-        HashMap<String, Location> loc = new HashMap<>();
+        /*HashMap<String, Location> loc = new HashMap<>();
         if (homes.containsKey(uuid)) {
             loc = homes.get(uuid);
         }
         loc.put(name, location);
-        homes.put(uuid, loc);
+        homes.put(uuid, loc);*/
 
+        Location loc = OddJob.getInstance().getMySQLManager().getHome(uuid, name);
+        if (loc == null) {
+            OddJob.getInstance().getMySQLManager().createHome(uuid, name, location);
+        } else {
+            OddJob.getInstance().getMySQLManager().updateHome(uuid, name, location);
+        }
         return true;
     }
 
     public boolean del(UUID uuid, String name) {
-        HashMap<String, Location> loc = new HashMap<>();
-        if (homes.containsKey(uuid)) {
-            loc = homes.get(uuid);
-        }
-        if (loc.containsKey(name)) {
-            loc.remove(name);
-            homes.put(uuid, loc);
-            return true;
-        }
+        OddJob.getInstance().getMySQLManager().deleteHome(uuid, name);
         return false;
     }
 
     public Location get(UUID uuid, String name) {
-        HashMap<String, Location> loc = new HashMap<>();
-        if (homes.containsKey(uuid)) {
-            loc = homes.get(uuid);
-        }
-        return loc.get(name);
+        return OddJob.getInstance().getMySQLManager().getHome(uuid, name);
     }
 
     public boolean has(UUID uuid, String name) {
-        HashMap<String, Location> loc;
-        if (homes.containsKey(uuid)) {
-            loc = homes.get(uuid);
-            return loc.containsKey(name);
-        }
-        return false;
+        return (OddJob.getInstance().getMySQLManager().getHome(uuid, name) != null);
     }
 
-    public Set<String> list(UUID uuid) {
-        Set<String> list = null;
-        HashMap<String, Location> loc;
-        if (homes.containsKey(uuid)) {
-            loc = homes.get(uuid);
-            if (loc.size() >= 1) {
-                list = loc.keySet();
-            }
-        }
-        return list;
+    public List<String> list(UUID uuid) {
+        return OddJob.getInstance().getMySQLManager().listHomes(uuid);
     }
 }

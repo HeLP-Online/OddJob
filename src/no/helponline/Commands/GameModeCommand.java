@@ -16,21 +16,23 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (command.getName().equalsIgnoreCase("gamemode")) {
+            if (strings.length == 0) {
+                commandSender.sendMessage("Usage: /gamemode <GameMode> [Player]");
+                return true;
+            }
             GameMode gm = GameMode.SURVIVAL;
             Player target = null;
-            if (strings.length >= 1) {
-                String str = strings[0];
 
-                if (str.startsWith("sp")) {
-                    gm = GameMode.SPECTATOR;
-                } else if (str.startsWith("c")) {
-                    gm = GameMode.CREATIVE;
-                } else if (str.startsWith("a")) {
-                    gm = GameMode.ADVENTURE;
-                } else {
-                    gm = GameMode.SURVIVAL;
-                }
+            String str = strings[0];
+
+            if (str.startsWith("sp")) {
+                gm = GameMode.SPECTATOR;
+            } else if (str.startsWith("c")) {
+                gm = GameMode.CREATIVE;
+            } else if (str.startsWith("a")) {
+                gm = GameMode.ADVENTURE;
             }
+
             if (strings.length == 2) {
                 target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[1]));
                 if (target == null || !target.isOnline()) {
