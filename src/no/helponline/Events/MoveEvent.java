@@ -18,7 +18,7 @@ public class MoveEvent implements Listener {
     public void onGuildMove(PlayerMoveEvent event) {
         Chunk chunk = event.getTo().getChunk();
         Player player = event.getPlayer();
-        UUID guildId = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
+        UUID guildId = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
 
 
         /* WHEN CHANGING CHUNK */

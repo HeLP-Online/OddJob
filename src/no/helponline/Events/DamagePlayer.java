@@ -1,10 +1,6 @@
 package no.helponline.Events;
 
-import no.helponline.Guilds.Guild;
-import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
-import org.bukkit.Chunk;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,16 +17,16 @@ public class DamagePlayer implements Listener {
                WAR FREE FOR ALL
                ARENA FREE FOR ALL
                JAIL FREE FOR ALL
-             */
+
             // ATTACKED IS A PLAYER
             Player target = (Player) event.getEntity();
             Chunk chunk = target.getLocation().getChunk();
             Zone zone = Zone.WILD;
-            Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
             if (guild != null) {
-                OddJob.getInstance().log("Is inside any chunk assigned to " + guild.getName());
+                OddJob.getInstance().log("Is inside any chunk assigned to " + OddJob.getInstance().getMySQLManager().getGuildNameByUUID(guild));
                 // IS THE CHUNK ATTACKED TO ASSIGNED TO A GUILD
-                zone = guild.getZone();
+                zone = OddJob.getInstance().getGuildManager().getZoneByGuild(guild)
                 if (event.getDamager() instanceof Player) {
                     OddJob.getInstance().log("player attacking player");
                     if (zone.equals(Zone.SAFE) ||
@@ -66,7 +62,7 @@ public class DamagePlayer implements Listener {
             Player damager = (Player) event.getDamager();
             if (event.getEntity() instanceof Monster) {
                 OddJob.getInstance().log("Damage monster by player");
-            }
+            }*/
         }
     }
 }
