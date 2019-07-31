@@ -668,7 +668,7 @@ public class MySQLManager {
             preparedStatement.setString(1, guild.toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                name = resultSet.getString("zone");
+                name = resultSet.getString("name");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
