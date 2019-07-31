@@ -95,7 +95,7 @@ public class GuildManager {
     }
 
 
-    public UUID getGuildByChunk(Chunk chunk) {
+    public UUID getGuildUUIDByChunk(Chunk chunk) {
         return OddJob.getInstance().getMySQLManager().getGuildByChunk(chunk);
     }
 
@@ -227,5 +227,9 @@ public class GuildManager {
         if (OddJob.getInstance().getMySQLManager().getGuildInvite(uuid) == guild) {
             OddJob.getInstance().getMySQLManager().deleteGuildInvite(guild, uuid);
         }
+    }
+
+    public Zone getZoneByGuild(UUID guild) {
+        return OddJob.getInstance().getMySQLManager().getZoneByGuild(guild);
     }
 }

@@ -1,6 +1,5 @@
 package no.helponline.Events;
 
-import no.helponline.Guilds.Guild;
 import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
 import org.bukkit.Chunk;
@@ -22,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class BlockBreak implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -30,9 +30,9 @@ public class BlockBreak implements Listener {
         Player player = event.getPlayer();
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
-        Guild memberOfGuild = OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId());
-        Guild chunkInGuild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
-        if (chunkInGuild == null || chunkInGuild.getZone().equals(Zone.WILD)) {
+        UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+        if (chunkInGuild == null) {
             return;
         }
 
@@ -49,9 +49,9 @@ public class BlockBreak implements Listener {
         Player player = event.getPlayer();
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
-        Guild memberOfGuild = OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId());
-        Guild chunkInGuild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
-        if (chunkInGuild == null || chunkInGuild.getZone().equals(Zone.WILD)) {
+        UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+        if (chunkInGuild == null) {
             return;
         }
 
@@ -68,8 +68,8 @@ public class BlockBreak implements Listener {
         HashMap<Location, BlockData> keep = new HashMap<>();
         for (Block block : blocks) {
             Chunk chunk = block.getChunk();
-            Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
-            if (guild != null && guild.getZone() != Zone.WILD) {
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+            if (guild != null) {
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
             }
@@ -91,8 +91,8 @@ public class BlockBreak implements Listener {
         HashMap<Location, BlockData> keep = new HashMap<>();
         for (Block block : blocks) {
             Chunk chunk = block.getChunk();
-            Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
-            if (guild != null && guild.getZone() != Zone.WILD) {
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+            if (guild != null) {
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
             }
@@ -112,9 +112,9 @@ public class BlockBreak implements Listener {
     @EventHandler
     public void entitySpawn(EntitySpawnEvent event) {
         Chunk chunk = event.getLocation().getChunk();
-        Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
         if (guild != null) {
-            Zone zone = guild.getZone();
+            Zone zone = OddJob.getInstance().getGuildManager().getZoneByGuild(guild);
             if (zone == Zone.GUILD || zone == Zone.SAFE || zone == Zone.JAIL || zone == Zone.ARENA) {
                 if (event.getEntity() instanceof Monster) {
                     event.setCancelled(true);
@@ -125,10 +125,10 @@ public class BlockBreak implements Listener {
 
     @EventHandler
     public void entityInteract(EntityInteractEvent event) {
-        Guild chunkInGuild = OddJob.getInstance().getGuildManager().getGuildByChunk(event.getBlock().getChunk());
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getChunk());
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
-            Guild playerInGuild = OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId());
+            UUID playerInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
 
         }
     }

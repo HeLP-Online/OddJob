@@ -165,9 +165,9 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     commandSender instanceof Player) {
                 Player player = (Player) commandSender;
                 Chunk chunk = player.getLocation().getChunk();
-                Guild guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
+                UUID guild = OddJob.getInstance().getGuildManager().getGuildByChunk(chunk);
                 if (guild != null) {
-                    OddJob.getInstance().log("This chunk is owned by " + guild.getName());
+                    OddJob.getInstance().log("This chunk is owned by " + OddJob.getInstance().getMySQLManager().getGuildNameByUUID(guild));
                 }
                 OddJob.getInstance().getGuildManager().getGuildByMember(player.getUniqueId()).myClaims();
             } else if (strings[0].equalsIgnoreCase("set")) {
