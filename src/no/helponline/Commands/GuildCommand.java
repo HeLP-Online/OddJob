@@ -134,6 +134,11 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         OddJob.getInstance().getMessageManager().success("You have been demoted to " + roleT.toString() + " by " + commandSender.getName(), targetUUID);
                     }
                 }
+            } else if (strings[0].equalsIgnoreCase("unclaim")) {
+                if (commandSender instanceof Player) {
+                    Player player = (Player) commandSender;
+                    OddJob.getInstance().getGuildManager().unclaim(player);
+                }
             } else if (strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;

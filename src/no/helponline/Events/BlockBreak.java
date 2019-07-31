@@ -103,7 +103,6 @@ public class BlockBreak implements Listener {
                 for (Location location : keep.keySet()) {
                     location.getBlock().setBlockData(keep.get(location));
                 }
-
             }
         };
         runnable.runTaskLater(OddJob.getInstance(), 20L);
@@ -129,7 +128,7 @@ public class BlockBreak implements Listener {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             UUID playerInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-
+//TODO
         }
     }
 

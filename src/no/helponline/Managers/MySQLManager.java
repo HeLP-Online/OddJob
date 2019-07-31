@@ -169,7 +169,7 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_players`");
             resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 names.add(resultSet.getString("name"));
             }
         } catch (SQLException ex) {
@@ -435,13 +435,14 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("SELECT b.* FROM `mine_guilds_members` a LEFT JOIN `mine_guilds` b ON a.`uuid` = b.`uuid` WHERE `player` = ? ");
             preparedStatement.setString(1, uniqueId.toString());
-            preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
                 guild.put("uuid", resultSet.getString("uuid"));
                 guild.put("name", resultSet.getString("name"));
                 guild.put("zone", Zone.valueOf(resultSet.getString("zone")));
                 guild.put("invited_only", resultSet.getBoolean("invited_only"));
+                guild.put("friendly_fire", resultSet.getBoolean("friendly_fire"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -676,5 +677,22 @@ public class MySQLManager {
             close();
         }
         return name;
+    }
+
+    public void deleteGuildChunks(String toString, Chunk c) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `uuid` = ? AND `world` = ? AND `x` = ? AND `z` = ?");
+            preparedStatement.setString(1, toString);
+            preparedStatement.setString(2, c.getWorld().getUID().toString());
+            preparedStatement.setInt(3, c.getX());
+            preparedStatement.setInt(4, c.getZ());
+            preparedStatement.executeQuery();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
     }
 }

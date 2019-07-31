@@ -85,13 +85,22 @@ public class GuildManager {
     public boolean claim(Player player) {
         boolean b = false;
         Chunk c = player.getLocation().getChunk();
-        UUID guild = getGuildByMember(player.getUniqueId()).getId();
-        if (OddJob.getInstance().getMySQLManager().getGuildByChunk(c) == null) {
+        UUID guild = getGuildUUIDByMember(player.getUniqueId());
+        if (getGuildUUIDByChunk(c) == null) {
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild.toString(), c);
             b = true;
             player.sendMessage("You have claimed " + c.toString() + " to " + getGuild(guild).getName());
         }
         return b;
+    }
+
+    public void unclaim(Player player) {
+        Chunk c = player.getLocation().getChunk();
+        UUID guild = getGuildUUIDByMember(player.getUniqueId());
+        if (getGuildUUIDByChunk(c) == guild) {
+            OddJob.getInstance().getMySQLManager().deleteGuildChunks(guild.toString(), c);
+            player.sendMessage("You have unclaimed " + c.toString() + " to " + getGuild(guild).getName());
+        }
     }
 
 
