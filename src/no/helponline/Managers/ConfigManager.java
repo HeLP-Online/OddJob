@@ -266,7 +266,7 @@ public class ConfigManager {
                         // Creating the location of the home
                         Location location = new Location(Bukkit.getWorld(UUID.fromString(worldUUID)), x, y, z, yaw, pitch);
                         // Setting the value
-                        OddJob.getInstance().getHomesManager().add(uuid, homeName, location);
+                        //OddJob.getInstance().getHomesManager().add(uuid, homeName, location);
                     }
                 }
             }

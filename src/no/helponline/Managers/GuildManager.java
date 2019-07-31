@@ -86,8 +86,8 @@ public class GuildManager {
         boolean b = false;
         Chunk c = player.getLocation().getChunk();
         UUID guild = getGuildByMember(player.getUniqueId()).getId();
-        if (!chunks.containsKey(c)) {
-            chunks.put(c, guild);
+        if (OddJob.getInstance().getMySQLManager().getGuildByChunk(c) == null) {
+            OddJob.getInstance().getMySQLManager().addGuildChunks(guild.toString(), c);
             b = true;
             player.sendMessage("You have claimed " + c.toString() + " to " + getGuild(guild).getName());
         }

@@ -621,4 +621,24 @@ public class MySQLManager {
         }
         return change;
     }
+
+    public UUID getGuildByChunk(Chunk chunk) {
+        UUID uuid = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? ");
+            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
+            preparedStatement.setInt(2, chunk.getX());
+            preparedStatement.setInt(3, chunk.getZ());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                uuid = UUID.fromString(resultSet.getString("uuid"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuid;
+    }
 }
