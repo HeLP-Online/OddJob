@@ -919,4 +919,18 @@ public class MySQLManager {
             close();
         }
     }
+
+    public void addGuildPending(UUID guild, UUID player) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_pendings` (`uuid`,`player`) VALUES (?,?)");
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.setString(2, player.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
 }

@@ -55,18 +55,15 @@ public class GuildManager {
         }
     }
 
-    public boolean claim(Player player) {
-        boolean b = false;
+    public void claim(Player player) {
         Chunk chunk = player.getLocation().getChunk();
         UUID guild = getGuildUUIDByMember(player.getUniqueId());
         if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
             player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
         } else {
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk);
-            b = true;
             player.sendMessage("You have claimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
         }
-        return b;
     }
 
     public void unclaim(Player player) {
@@ -225,5 +222,9 @@ public class GuildManager {
 
     public List<UUID> getGuildInvitations(UUID guild) {
         return OddJob.getInstance().getMySQLManager().getGuildInvitations(guild);
+    }
+
+    public void addGuildPending(UUID guild, UUID player) {
+        OddJob.getInstance().getMySQLManager().addGuildPending(guild, player);
     }
 }

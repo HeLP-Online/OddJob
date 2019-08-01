@@ -221,6 +221,23 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             } else if (strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
+                    if (strings.length == 1) {
+                        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                        if (guild == null) {
+                            commandSender.sendMessage("Sorry, you are not associated with any guild yet.");
+                            return true;
+                        }
+                        OddJob.getInstance().getGuildManager().claim(player);
+                    } else if (strings.length == 2 && strings[1].equalsIgnoreCase("auto")) {
+                        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                        if (guild == null) {
+                            commandSender.sendMessage("Sorry, you are not associated with any guild yet.");
+                            return true;
+                        }
+                        OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.GUILD);
+                        OddJob.getInstance().getGuildManager().claim(player);
+                    }
+
                     if (strings.length > 1) {
                         if (strings[1].equalsIgnoreCase("safe")) {
                             if (strings[2].equalsIgnoreCase("auto")) {
@@ -239,11 +256,6 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.ARENA);
                             }
                         }
-                    } else {
-                        if (strings[1].equalsIgnoreCase("auto")) {
-                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.GUILD);
-                        }
-                        OddJob.getInstance().getGuildManager().claim(player);
                     }
 
                 } else {
@@ -282,6 +294,23 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     UUID invite = OddJob.getInstance().getGuildManager().getGuildInvitation(player.getUniqueId());
                     if (invite != null) {
                         OddJob.getInstance().getGuildManager().join(invite, player.getUniqueId());
+                        player.sendMessage("You have successfully joined " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(invite));
+                        //TODO announce to the rest of the guild
+                    }
+                    if (strings.length == 2) {
+                        UUID join = OddJob.getInstance().getGuildManager().getGuildUUIDByName(strings[1]);
+                        if (join == null) {
+                            player.sendMessage("Sorry, we don't know about " + strings[1]);
+                            return true;
+                        }
+                        UUID pend = OddJob.getInstance().getGuildManager().getGuildPending(player.getUniqueId());
+                        if (pend.equals(join)) {
+                            player.sendMessage("We have already annonuced the guild about your pending request to join " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(pend));
+                            return true;
+                        }
+                        OddJob.getInstance().getGuildManager().addGuildPending(join, player.getUniqueId());
+                        player.sendMessage("We have now announced your pending interest to join the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(join));
+                        return true;
                     }
                 } else {
                     // TODO when console creating guild
