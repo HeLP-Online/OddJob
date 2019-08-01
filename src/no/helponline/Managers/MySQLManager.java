@@ -849,7 +849,6 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 bol = resultSet.getInt(settings) == 1;
-                OddJob.getInstance().log("uuid: " + guild.toString() + "; settings: " + settings + "; bol: " + resultSet.getInt(settings));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -857,5 +856,67 @@ public class MySQLManager {
             close();
         }
         return bol;
+    }
+
+    public List<UUID> getGuildInvitations(UUID guild) {
+        List<UUID> uuids = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_invites` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                uuids.add(UUID.fromString(resultSet.getString("player")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuids;
+    }
+
+    public List<UUID> getGuildPendings(UUID guild) {
+        List<UUID> uuids = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_pendings` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                uuids.add(UUID.fromString(resultSet.getString("player")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuids;
+    }
+
+    public void deletePending(UUID player) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_pendings` WHERE `player` = ?");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void deleteInvitation(UUID player) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_invites` WHERE `player` = ?");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
     }
 }

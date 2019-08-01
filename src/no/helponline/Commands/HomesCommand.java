@@ -234,15 +234,16 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] g) {
         List<String> list = new ArrayList<>();
         if (command.getName().equalsIgnoreCase("homes")) {
+            String[] st;
             if (g.length == 1 || g.length == 0) {
-                for (Args a : Args.values()) {
-                    if (a.name().startsWith(g[0].toLowerCase())) {
-                        list.add(a.toString());
+                st = new String[]{"tp", "set", "del", "list"};
+                for (String t : st) {
+                    if (t.startsWith(g[0])) {
+                        list.add(t);
                     }
                 }
             }
-            if (g.length == 2 &&
-                    commandSender.hasPermission(command.getName() + "." + g[0] + ".others")) {
+            if (g.length == 2 && commandSender.hasPermission(command.getName() + "." + g[0] + ".others")) {
                 for (String playerName : OddJob.getInstance().getPlayerManager().getNames()) {
                     if (playerName.startsWith(g[1].toLowerCase())) {
                         list.add(playerName);
@@ -254,7 +255,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 Player player = (Player) commandSender;
                 try {
                     for (String home : OddJob.getInstance().getHomesManager().list(player.getUniqueId())) {
-                        if (home.startsWith(g[1].toLowerCase())) {
+                        if (home.toLowerCase().startsWith(g[1].toLowerCase())) {
                             list.add(home);
                         }
                     }

@@ -279,10 +279,9 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             } else if (strings[0].equalsIgnoreCase("join")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByName(strings[1]);
-
-                    if (guildUUID != null) {
-                        OddJob.getInstance().getGuildManager().join(guildUUID, player.getUniqueId());
+                    UUID invite = OddJob.getInstance().getGuildManager().getGuildInvitation(player.getUniqueId());
+                    if (invite != null) {
+                        OddJob.getInstance().getGuildManager().join(invite, player.getUniqueId());
                     }
                 } else {
                     // TODO when console creating guild
@@ -322,6 +321,14 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 }
             }
         }
+        if (strings[0].equalsIgnoreCase("uninvite")) {
+            if (commandSender instanceof Player) {
+                Player player = (Player) commandSender;
+                for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildInvitations(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()))) {
+                    list.add(OddJob.getInstance().getPlayerManager().getName(uuid));
+                }
+            }
+        }
         if (strings[0].equalsIgnoreCase("invite")) {
             for (UUID player : OddJob.getInstance().getPlayerManager().getUUIDs()) {
                 if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player) == null
@@ -330,8 +337,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     list.add(OddJob.getInstance().getPlayerManager().getName(player));
                 }
             }
-        }
-        if (strings[0].equalsIgnoreCase("join")) {
+        } else if (strings[0].equalsIgnoreCase("join")) {
             OddJob.getInstance().log("join");
             if (strings.length == 2) {
                 if (commandSender instanceof Player) {

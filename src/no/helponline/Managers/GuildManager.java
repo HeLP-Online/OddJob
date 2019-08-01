@@ -73,8 +73,7 @@ public class GuildManager {
         Chunk chunk = player.getLocation().getChunk();
         UUID guild = getGuildUUIDByMember(player.getUniqueId());
         UUID comp = getGuildUUIDByMember(player.getUniqueId());
-        OddJob.getInstance().log(guild.toString().length() + " vs " + comp.toString().length());
-        if (comp != guild) {
+        if (!comp.equals(guild)) {
             player.sendMessage("Sorry, you are not associated with the guild who claimed this chunk");
         } else {
             OddJob.getInstance().getMySQLManager().deleteGuildChunks(guild, chunk);
@@ -93,6 +92,8 @@ public class GuildManager {
     }
 
     public void join(UUID guild, UUID player) {
+        OddJob.getInstance().getMySQLManager().deleteInvitation(player);
+        OddJob.getInstance().getMySQLManager().deletePending(player);
         OddJob.getInstance().getMySQLManager().addGuildMember(guild, player, Role.members);
     }
 
@@ -105,7 +106,7 @@ public class GuildManager {
         if (zone != Zone.GUILD) {
             guild = getGuildUUIDByZone(zone);
         } else {
-            guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player);
+            guild = getGuildUUIDByMember(player);
         }
         if (guild != null) {
             if (autoClaim.containsKey(player)) {
@@ -220,5 +221,9 @@ public class GuildManager {
 
     private boolean isGuildOpen(UUID guild) {
         return !OddJob.getInstance().getMySQLManager().getGuildSettings("invited_only", guild);
+    }
+
+    public List<UUID> getGuildInvitations(UUID guild) {
+        return OddJob.getInstance().getMySQLManager().getGuildInvitations(guild);
     }
 }
