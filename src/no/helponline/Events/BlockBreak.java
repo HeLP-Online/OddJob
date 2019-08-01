@@ -1,7 +1,7 @@
 package no.helponline.Events;
 
-import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
+import no.helponline.Utils.Zone;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -31,7 +31,7 @@ public class BlockBreak implements Listener {
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
         if (chunkInGuild == null) {
             return;
         }
@@ -50,7 +50,7 @@ public class BlockBreak implements Listener {
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
         if (chunkInGuild == null) {
             return;
         }
@@ -68,7 +68,7 @@ public class BlockBreak implements Listener {
         HashMap<Location, BlockData> keep = new HashMap<>();
         for (Block block : blocks) {
             Chunk chunk = block.getChunk();
-            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, block.getWorld());
             if (guild != null) {
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
@@ -91,7 +91,7 @@ public class BlockBreak implements Listener {
         HashMap<Location, BlockData> keep = new HashMap<>();
         for (Block block : blocks) {
             Chunk chunk = block.getChunk();
-            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, block.getWorld());
             if (guild != null) {
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
@@ -111,7 +111,7 @@ public class BlockBreak implements Listener {
     @EventHandler
     public void entitySpawn(EntitySpawnEvent event) {
         Chunk chunk = event.getLocation().getChunk();
-        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, event.getLocation().getWorld());
         if (guild != null) {
             Zone zone = OddJob.getInstance().getGuildManager().getZoneByGuild(guild);
             if (zone == Zone.GUILD || zone == Zone.SAFE || zone == Zone.JAIL || zone == Zone.ARENA) {
@@ -124,7 +124,7 @@ public class BlockBreak implements Listener {
 
     @EventHandler
     public void entityInteract(EntityInteractEvent event) {
-        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getChunk());
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getChunk(), event.getBlock().getWorld());
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             UUID playerInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());

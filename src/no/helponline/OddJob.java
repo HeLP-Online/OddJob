@@ -101,12 +101,12 @@ public class OddJob extends JavaPlugin {
 
         BukkitScheduler saver = getServer().getScheduler();
         log("Setting up scheduler for saving!");
-        saver.scheduleSyncRepeatingTask(this, configManager::save, 0L, 1200L); // 5 min = 6000
+        //saver.scheduleSyncRepeatingTask(this, configManager::save, 0L, 1200L); // 5 min = 6000
     }
 
 
     public void onDisable() {
-        configManager.save();
+        //configManager.save();
     }
 
 

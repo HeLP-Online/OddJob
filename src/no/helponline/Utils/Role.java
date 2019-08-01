@@ -1,4 +1,4 @@
-package no.helponline.Guilds;
+package no.helponline.Utils;
 
 public enum Role {
     guildMaster(99),

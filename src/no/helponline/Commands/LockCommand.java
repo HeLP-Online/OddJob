@@ -27,10 +27,6 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     sender.sendMessage(sb.toString());
-                } else if (args[0].equalsIgnoreCase("load") && sender.hasPermission(cmd.getName() + "." + args[0])) {
-                    OddJob.getInstance().getConfigManager().loadLocks();
-                } else if (args[0].equalsIgnoreCase("save") && sender.hasPermission(cmd.getName() + "." + args[0])) {
-                    OddJob.getInstance().getConfigManager().saveLocks();
                 } else if (args[0].equalsIgnoreCase("count") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;

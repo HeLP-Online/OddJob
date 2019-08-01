@@ -18,7 +18,7 @@ public class MoveEvent implements Listener {
     public void onGuildMove(PlayerMoveEvent event) {
         Chunk chunk = event.getTo().getChunk();
         Player player = event.getPlayer();
-        UUID guildId = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
 
 
         /* WHEN CHANGING CHUNK */
@@ -26,21 +26,21 @@ public class MoveEvent implements Listener {
             // within same chunk
             return;
         } else if (OddJob.inChunk.containsKey(player.getUniqueId())) {
-            if (OddJob.inChunk.get(player.getUniqueId()) == guildId) {
+            if (OddJob.inChunk.get(player.getUniqueId()) == guild) {
                 if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
-                    OddJob.getInstance().getGuildManager().autoClaim(player.getUniqueId(), chunk);
+                    OddJob.getInstance().getGuildManager().autoClaim(player, chunk);
                 }
                 return;
             }
         }
-        OddJob.inChunk.put(player.getUniqueId(), guildId);
+        OddJob.inChunk.put(player.getUniqueId(), guild);
 
         /* PRINT GUILD NAME */
         String s = "";
-        if (guildId != null) {
-            switch (OddJob.getInstance().getGuildManager().getZoneByGuild(guildId)) {
+        if (guild != null) {
+            switch (OddJob.getInstance().getGuildManager().getZoneByGuild(guild)) {
                 case GUILD:
-                    s = s + ChatColor.DARK_BLUE + OddJob.getInstance().getMySQLManager().getGuildNameByUUID(guildId) + " hails you!";
+                    s = s + ChatColor.DARK_BLUE + OddJob.getInstance().getMySQLManager().getGuildNameByUUID(guild) + " hails you!";
                     break;
                 case ARENA:
                 case WAR:

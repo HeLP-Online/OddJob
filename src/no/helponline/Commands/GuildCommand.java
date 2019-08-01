@@ -1,7 +1,7 @@
 package no.helponline.Commands;
 
-import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
+import no.helponline.Utils.Zone;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -22,8 +22,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             if (strings.length == 0) {
                 Bukkit.dispatchCommand(commandSender, command.getName() + " help");
                 return true;
-            }
-            if (strings[0].equalsIgnoreCase("create")) {
+            } else if (strings[0].equalsIgnoreCase("create")) {
                 // guild create <Name>
                 if (commandSender instanceof Player) {
                     if (strings.length == 1) {
@@ -65,6 +64,22 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
                         if (target == null) {
                             OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                            return true;
+                        }
+                        UUID invite = OddJob.getInstance().getGuildManager().getGuildInvitation(target);
+                        if (invite == guild) {
+                            player.sendMessage(strings[1] + " has already been invited to this guild.");
+                            return true;
+                        } else if (invite != null) {
+                            player.sendMessage(strings[1] + " has already been invited to another guild.");
+                            return true;
+                        }
+                        UUID accepted = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(target);
+                        if (accepted == guild) {
+                            player.sendMessage(strings[1] + " has already joined this guild.");
+                            return true;
+                        } else if (accepted != null) {
+                            player.sendMessage(strings[1] + " has already joined a guild.");
                             return true;
                         }
                         if (OddJob.getInstance().getGuildManager().getGuildPermissionInvite(guild).level() <= OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()).level()) {
@@ -206,21 +221,23 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             } else if (strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    if (strings[1].equalsIgnoreCase("safe")) {
-                        if (strings[2].equalsIgnoreCase("auto")) {
-                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.SAFE);
-                        }
-                    } else if (strings[1].equalsIgnoreCase("war")) {
-                        if (strings[2].equalsIgnoreCase("auto")) {
-                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.WAR);
-                        }
-                    } else if (strings[1].equalsIgnoreCase("jail")) {
-                        if (strings[2].equalsIgnoreCase("auto")) {
-                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.JAIL);
-                        }
-                    } else if (strings[1].equalsIgnoreCase("arena")) {
-                        if (strings[2].equalsIgnoreCase("auto")) {
-                            OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.ARENA);
+                    if (strings.length > 1) {
+                        if (strings[1].equalsIgnoreCase("safe")) {
+                            if (strings[2].equalsIgnoreCase("auto")) {
+                                OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.SAFE);
+                            }
+                        } else if (strings[1].equalsIgnoreCase("war")) {
+                            if (strings[2].equalsIgnoreCase("auto")) {
+                                OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.WAR);
+                            }
+                        } else if (strings[1].equalsIgnoreCase("jail")) {
+                            if (strings[2].equalsIgnoreCase("auto")) {
+                                OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.JAIL);
+                            }
+                        } else if (strings[1].equalsIgnoreCase("arena")) {
+                            if (strings[2].equalsIgnoreCase("auto")) {
+                                OddJob.getInstance().getGuildManager().toggleAutoClaim(player.getUniqueId(), Zone.ARENA);
+                            }
                         }
                     } else {
                         if (strings[1].equalsIgnoreCase("auto")) {
@@ -289,42 +306,66 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
 
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         List<String> list = new ArrayList<>();
-        String[] st;
         if (strings.length == 1 || strings.length == 0) {
-            st = new String[]{"create", "join", "claim", "unclaim", "set", "list", "invite", "uninvite", "kick"};
+            String[] st;
+            if ((commandSender instanceof Player) && OddJob.getInstance().getGuildManager().getGuildUUIDByMember(((Player) commandSender).getUniqueId()) != null) {
+                st = new String[]{"claim", "unclaim", "set", "list", "invite", "uninvite", "kick"};
+            } else if (commandSender instanceof Player) {
+                st = new String[]{"create", "join"};
+            } else {
+                st = new String[]{"create", "set", "list", "invite", "uninvite", "kick"};
+            }
+
             for (String t : st) {
                 if (t.startsWith(strings[0])) {
                     list.add(t);
                 }
             }
         }
-
+        if (strings[0].equalsIgnoreCase("invite")) {
+            for (UUID player : OddJob.getInstance().getPlayerManager().getUUIDs()) {
+                if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player) == null
+                        && OddJob.getInstance().getGuildManager().getGuildInvitation(player) == null
+                        && OddJob.getInstance().getGuildManager().getGuildPending(player) == null) {
+                    list.add(OddJob.getInstance().getPlayerManager().getName(player));
+                }
+            }
+        }
         if (strings[0].equalsIgnoreCase("join")) {
-            // TODO List all open guilds
-        } else if (strings[0].equalsIgnoreCase("claim") && strings.length >= 2) {
-            // TODO permission autoclaim
+            OddJob.getInstance().log("join");
+            if (strings.length == 2) {
+                if (commandSender instanceof Player) {
+                    list.addAll(OddJob.getInstance().getGuildManager().listGuildsToJoin(((Player) commandSender).getUniqueId()));
+                }
+            }
+        } else if (strings[0].equalsIgnoreCase("claim")) {
             if (strings.length == 2) {
                 for (Zone z : Zone.values()) {
                     if (commandSender.hasPermission("guild.claim." + z.name()) && z.name().startsWith(strings[1])) {
                         list.add(z.name());
                     }
                 }
-            }
-            if (strings.length == 3 && commandSender.hasPermission("guild.claim." + strings[1] + ".auto")) {
-                list.add("auto");
-            }
-        } else if (strings[0].equalsIgnoreCase("set") && strings.length == 2) {
-            st = new String[]{"friendly_fire", "invited_only", "name"};
-            for (String t : st) {
-                if (t.startsWith(strings[1])) {
-                    list.add(t);
+            } else if (strings.length == 3) {
+                if (commandSender.hasPermission("guild.claim." + strings[1] + ".auto")) {
+                    list.add("auto");
                 }
             }
-        } else if (strings[0].equalsIgnoreCase("set") && strings.length == 3 && (strings[1].equalsIgnoreCase("friendly_fire") || strings[1].equalsIgnoreCase("invited_only"))) {
-            st = new String[]{"TRUE", "FALSE"};
-            for (String t : st) {
-                if (t.startsWith(strings[2])) {
-                    list.add(t);
+        } else if (strings[0].equalsIgnoreCase("set")) {
+            if (strings.length == 2) {
+                String[] st = new String[]{"friendly_fire", "invited_only", "name"};
+                for (String t : st) {
+                    if (t.startsWith(strings[1])) {
+                        list.add(t);
+                    }
+                }
+            } else if (strings.length == 3) {
+                if (strings[1].equalsIgnoreCase("friendly_fire") || strings[1].equalsIgnoreCase("invited_only")) {
+                    String[] st = new String[]{"TRUE", "FALSE"};
+                    for (String t : st) {
+                        if (t.startsWith(strings[2])) {
+                            list.add(t);
+                        }
+                    }
                 }
             }
         }
@@ -333,7 +374,9 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
     }
 
     enum Args {
-        create("Creates a new guild"), join("Join an existing guild"), claim("Claim the chunk to your guild");
+        create("Creates a new guild"),
+        join("Join an existing guild"),
+        claim("Claim the chunk to your guild");
 
         private String help;
 

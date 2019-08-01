@@ -1,11 +1,13 @@
 package no.helponline.Managers;
 
-import no.helponline.Guilds.Role;
-import no.helponline.Guilds.Zone;
 import no.helponline.OddJob;
+import no.helponline.Utils.Role;
+import no.helponline.Utils.Zone;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -43,10 +45,10 @@ public class GuildManager {
         return OddJob.getInstance().getMySQLManager().getGuildUUIDs();
     }
 
-    public void autoClaim(UUID player, Chunk chunk) {
-        if (getGuildUUIDByChunk(chunk) == null) {
+    public void autoClaim(Player player, Chunk chunk) {
+        if (getGuildUUIDByChunk(chunk, player.getWorld()) == null) {
             // NOT CLAIMED
-            UUID guild = autoClaim.get(player);
+            UUID guild = autoClaim.get(player.getUniqueId());
 
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk);
             OddJob.getInstance().getMessageManager().sendMessage(player, "Claiming chunk X: " + chunk.getX() + "; Z: " + chunk.getZ() + "; to " + getZoneByGuild(guild).name());
@@ -57,8 +59,8 @@ public class GuildManager {
         boolean b = false;
         Chunk chunk = player.getLocation().getChunk();
         UUID guild = getGuildUUIDByMember(player.getUniqueId());
-        if (getGuildUUIDByChunk(chunk) != null) {
-            player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk)));
+        if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
+            player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
         } else {
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk);
             b = true;
@@ -70,7 +72,9 @@ public class GuildManager {
     public void unclaim(Player player) {
         Chunk chunk = player.getLocation().getChunk();
         UUID guild = getGuildUUIDByMember(player.getUniqueId());
-        if (getGuildUUIDByChunk(chunk) != guild) {
+        UUID comp = getGuildUUIDByMember(player.getUniqueId());
+        OddJob.getInstance().log(guild.toString().length() + " vs " + comp.toString().length());
+        if (comp != guild) {
             player.sendMessage("Sorry, you are not associated with the guild who claimed this chunk");
         } else {
             OddJob.getInstance().getMySQLManager().deleteGuildChunks(guild, chunk);
@@ -79,8 +83,8 @@ public class GuildManager {
     }
 
 
-    public UUID getGuildUUIDByChunk(Chunk chunk) {
-        return UUID.fromString(OddJob.getInstance().getMySQLManager().getGuildUUIDByChunk(chunk));
+    public UUID getGuildUUIDByChunk(Chunk chunk, World world) {
+        return OddJob.getInstance().getMySQLManager().getGuildUUIDByChunk(chunk, world);
     }
 
 
@@ -132,11 +136,12 @@ public class GuildManager {
     }
 
     public UUID getGuildUUIDByMember(UUID player) {
-        return UUID.fromString(OddJob.getInstance().getMySQLManager().getGuildUUIDByMemeber(player));
+        return OddJob.getInstance().getMySQLManager().getGuildUUIDByMemeber(player);
     }
 
     public Role getGuildMemberRole(UUID player) {
-        return Role.valueOf(OddJob.getInstance().getMySQLManager().getGuildMemberRole(player));
+        OddJob.getInstance().log("role");
+        return OddJob.getInstance().getMySQLManager().getGuildMemberRole(player);
     }
 
     public Role promoteMember(UUID guildUUID, UUID targetUUID) {
@@ -190,5 +195,30 @@ public class GuildManager {
 
     public UUID getGuildInvitation(UUID player) {
         return OddJob.getInstance().getMySQLManager().getGuildInvite(player);
+    }
+
+    public UUID getGuildPending(UUID player) {
+        return OddJob.getInstance().getMySQLManager().getGuildPending(player);
+    }
+
+    public List<String> listGuildsToJoin(UUID player) {
+        List<UUID> guilds = OddJob.getInstance().getMySQLManager().getGuildUUIDs();
+        UUID invited = getGuildInvitation(player);
+        List<String> ret = new ArrayList<>();
+        for (UUID guild : guilds) {
+            if (isGuildOpen(guild)) {
+                OddJob.getInstance().log("open");
+                ret.add(getGuildNameByUUID(guild));
+            } else if (invited.equals(guild)) {
+                OddJob.getInstance().log("invited");
+                ret.add(getGuildNameByUUID(guild));
+            }
+        }
+        OddJob.getInstance().log("ret: " + ret.size());
+        return ret;
+    }
+
+    private boolean isGuildOpen(UUID guild) {
+        return !OddJob.getInstance().getMySQLManager().getGuildSettings("invited_only", guild);
     }
 }
