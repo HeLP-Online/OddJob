@@ -6,6 +6,7 @@ import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 
 import java.sql.*;
@@ -468,12 +469,12 @@ public class MySQLManager {
         }
     }
 
-    public synchronized void addGuildMember(String guildUUIDString, UUID uniqueId, Role role) {
+    public synchronized void addGuildMember(UUID guild, UUID player, Role role) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
-            preparedStatement.setString(1, guildUUIDString);
-            preparedStatement.setString(2, uniqueId.toString());
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.setString(2, player.toString());
             preparedStatement.setString(3, role.name());
             preparedStatement.execute();
         } catch (SQLException ex) {
@@ -483,11 +484,11 @@ public class MySQLManager {
         }
     }
 
-    public synchronized void addGuildChunks(String guildUUIDString, Chunk chunk) {
+    public synchronized void addGuildChunks(UUID guild, Chunk chunk) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
-            preparedStatement.setString(1, guildUUIDString);
+            preparedStatement.setString(1, guild.toString());
             preparedStatement.setString(2, chunk.getWorld().getUID().toString());
             preparedStatement.setInt(3, chunk.getX());
             preparedStatement.setInt(4, chunk.getZ());
@@ -499,8 +500,8 @@ public class MySQLManager {
         }
     }
 
-    public synchronized Role getGuildMemberRole(UUID targetUUID) {
-        Role role = null;
+    public synchronized String getGuildMemberRole(UUID targetUUID) {
+        String role = "";
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `role` FROM `mine_guilds_members` WHERE `uuid` = ?");
@@ -508,7 +509,7 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                role = Role.valueOf(resultSet.getString("role"));
+                role = resultSet.getString("role");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -623,8 +624,8 @@ public class MySQLManager {
         return change;
     }
 
-    public UUID getGuildByChunk(Chunk chunk) {
-        UUID uuid = null;
+    public String getGuildUUIDByChunk(Chunk chunk) {
+        String uuid = null;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? ");
@@ -633,7 +634,7 @@ public class MySQLManager {
             preparedStatement.setInt(3, chunk.getZ());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                uuid = UUID.fromString(resultSet.getString("uuid"));
+                uuid = resultSet.getString("uuid");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -643,15 +644,15 @@ public class MySQLManager {
         return uuid;
     }
 
-    public Zone getZoneByGuild(UUID guild) {
-        Zone zone = null;
+    public String getZoneByGuild(UUID guild) {
+        String zone = "";
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `zone` FROM `mine_guilds` WHERE `uuid` = ? ");
             preparedStatement.setString(1, guild.toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                zone = Zone.valueOf(resultSet.getString("zone"));
+                zone = resultSet.getString("zone");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -679,14 +680,14 @@ public class MySQLManager {
         return name;
     }
 
-    public void deleteGuildChunks(String toString, Chunk c) {
+    public void deleteGuildChunks(UUID guild, Chunk chunk) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `uuid` = ? AND `world` = ? AND `x` = ? AND `z` = ?");
-            preparedStatement.setString(1, toString);
-            preparedStatement.setString(2, c.getWorld().getUID().toString());
-            preparedStatement.setInt(3, c.getX());
-            preparedStatement.setInt(4, c.getZ());
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.setString(2, chunk.getWorld().getUID().toString());
+            preparedStatement.setInt(3, chunk.getX());
+            preparedStatement.setInt(4, chunk.getZ());
             preparedStatement.executeQuery();
 
         } catch (SQLException ex) {
@@ -694,5 +695,130 @@ public class MySQLManager {
         } finally {
             close();
         }
+    }
+
+    public List<Material> getLockableMaterials() {
+        List<Material> materials = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `*` FROM `mine_lockable_materials` WHERE `value` = ?");
+            preparedStatement.setBoolean(1, true);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                materials.add(Material.valueOf(resultSet.getString("name")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return materials;
+    }
+
+    public String getGuildPermission(String permission, String uuid) {
+        String ret = "";
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `" + permission + "_permission` FROM `mine_guilds` WHERE `uuid` = ?");
+            preparedStatement.setString(1, uuid);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                ret = resultSet.getString(permission + "_permission");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return ret;
+    }
+
+    public String getGuildUUIDByMemeber(UUID player) {
+        String uuid = "";
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT b.`uuid` FROM `mine_guilds_members` a LEFT JOIN `mine_guilds` b ON a.`uuid` = b.`uuid` WHERE `player` = ? ");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                uuid = resultSet.getString("b.uuid");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuid;
+    }
+
+    public String getGuildUUIDByZone(Zone zone) {
+        String uuid = "";
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `zone` = ? ");
+            preparedStatement.setString(1, zone.name());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                uuid = resultSet.getString("uuid");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuid;
+    }
+
+    public String getGuildUUIDByName(String name) {
+        String uuid = "";
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `name` = ? ");
+            preparedStatement.setString(1, name);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                uuid = resultSet.getString("uuid");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuid;
+    }
+
+    public List<Chunk> getGuildChunksByUUID(UUID guild) {
+        List<Chunk> chunks = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `*` FROM `mine_guilds_chunks` WHERE `uuid` = ? ");
+            preparedStatement.setString(1, guild.toString());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                chunks.add(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))).getChunkAt(resultSet.getInt("x"), resultSet.getInt("y")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return chunks;
+    }
+
+    public List<UUID> getGuildUUIDs() {
+        List<UUID> uuids = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` ");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                uuids.add(UUID.fromString(resultSet.getString("uuid")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuids;
     }
 }

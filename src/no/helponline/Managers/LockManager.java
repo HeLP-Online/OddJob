@@ -215,61 +215,7 @@ public class LockManager {
     }
 
     public List<Material> getLockable() {
-        List<Material> may = new ArrayList<>();
-        may.add(Material.FURNACE);
-        may.add(Material.JUKEBOX);
-        may.add(Material.ENCHANTING_TABLE);
-        may.add(Material.CRAFTING_TABLE);
-        may.add(Material.ANVIL);
-        may.add(Material.SMOKER);
-        may.add(Material.BLAST_FURNACE);
-        may.add(Material.CARTOGRAPHY_TABLE);
-        may.add(Material.FLETCHING_TABLE);
-        may.add(Material.GRINDSTONE);
-        may.add(Material.SMITHING_TABLE);
-        may.add(Material.STONECUTTER);
-        may.add(Material.LEVER);
-        may.add(Material.CHEST);
-        // Doors
-        may.add(Material.IRON_DOOR);
-        may.add(Material.DARK_OAK_DOOR);
-        may.add(Material.ACACIA_DOOR);
-        may.add(Material.BIRCH_DOOR);
-        may.add(Material.JUNGLE_DOOR);
-        may.add(Material.OAK_DOOR);
-        may.add(Material.SPRUCE_DOOR);
-        // Pressure
-        may.add(Material.STONE_PRESSURE_PLATE);
-        may.add(Material.DARK_OAK_PRESSURE_PLATE);
-        may.add(Material.ACACIA_PRESSURE_PLATE);
-        may.add(Material.BIRCH_PRESSURE_PLATE);
-        may.add(Material.JUNGLE_PRESSURE_PLATE);
-        may.add(Material.OAK_PRESSURE_PLATE);
-        may.add(Material.SPRUCE_PRESSURE_PLATE);
-        // Buttons
-        may.add(Material.STONE_BUTTON);
-        may.add(Material.DARK_OAK_BUTTON);
-        may.add(Material.ACACIA_BUTTON);
-        may.add(Material.BIRCH_BUTTON);
-        may.add(Material.JUNGLE_BUTTON);
-        may.add(Material.OAK_BUTTON);
-        may.add(Material.SPRUCE_BUTTON);
-        // Trapdoor
-        may.add(Material.IRON_TRAPDOOR);
-        may.add(Material.DARK_OAK_TRAPDOOR);
-        may.add(Material.ACACIA_TRAPDOOR);
-        may.add(Material.BIRCH_TRAPDOOR);
-        may.add(Material.JUNGLE_TRAPDOOR);
-        may.add(Material.OAK_TRAPDOOR);
-        may.add(Material.SPRUCE_TRAPDOOR);
-        // Fencegate
-        may.add(Material.DARK_OAK_FENCE_GATE);
-        may.add(Material.ACACIA_FENCE_GATE);
-        may.add(Material.BIRCH_FENCE_GATE);
-        may.add(Material.JUNGLE_FENCE_GATE);
-        may.add(Material.OAK_FENCE_GATE);
-        may.add(Material.SPRUCE_FENCE_GATE);
-        return may;
+        return OddJob.getInstance().getMySQLManager().getLockableMaterials();
     }
 
     public void setArmorstand(HashMap<UUID, UUID> a) {

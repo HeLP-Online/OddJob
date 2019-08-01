@@ -38,7 +38,7 @@ public class MoveEvent implements Listener {
         /* PRINT GUILD NAME */
         String s = "";
         if (guildId != null) {
-            switch (OddJob.getInstance().getMySQLManager().getZoneByGuild(guildId)) {
+            switch (OddJob.getInstance().getGuildManager().getZoneByGuild(guildId)) {
                 case GUILD:
                     s = s + ChatColor.DARK_BLUE + OddJob.getInstance().getMySQLManager().getGuildNameByUUID(guildId) + " hails you!";
                     break;
