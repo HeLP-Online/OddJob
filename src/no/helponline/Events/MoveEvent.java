@@ -41,7 +41,6 @@ public class MoveEvent implements Listener {
         Player player = event.getPlayer();
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
 
-
         /* WHEN CHANGING CHUNK */
         if (event.getFrom().getChunk().equals(chunk)) {
             // within same chunk
