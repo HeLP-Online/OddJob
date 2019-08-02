@@ -6,6 +6,7 @@ import no.helponline.Utils.Role;
 import no.helponline.Utils.Zone;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -950,5 +951,60 @@ public class MySQLManager {
             close();
         }
         return uuids;
+    }
+
+    public GameMode getPlayerMode(Player player, World world) {
+        GameMode gameMode = GameMode.SURVIVAL;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `gamemode` FROM `mine_players_gamemodes` WHERE `uuid` = ? AND `world` = ?");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.setString(2, world.getUID().toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                GameMode.valueOf(resultSet.getString("gamemode"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return gameMode;
+    }
+
+    public GameMode getWorldMode(World world) {
+        GameMode gameMode = GameMode.SURVIVAL;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `gamemode` FROM `mine_worlds` WHERE `uuid` = ?");
+            preparedStatement.setString(1, world.getUID().toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                GameMode.valueOf(resultSet.getString("gamemode"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return gameMode;
+    }
+
+    public boolean getForceMode(World world) {
+        boolean force = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `gamemode` FROM `mine_worlds` WHERE `uuid` = ?");
+            preparedStatement.setString(1, world.getUID().toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                force = (resultSet.getInt("gforce") == 1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return force;
     }
 }

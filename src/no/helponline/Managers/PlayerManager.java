@@ -3,7 +3,9 @@ package no.helponline.Managers;
 import no.helponline.OddJob;
 import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -80,4 +82,9 @@ public class PlayerManager {
     public List<String> getNames() {
         return OddJob.getInstance().getMySQLManager().getPlayerMapNames();
     }
+
+    public GameMode getGamemode(Player player, World world) {
+        return OddJob.getInstance().getMySQLManager().getPlayerMode(player, world);
+    }
+
 }

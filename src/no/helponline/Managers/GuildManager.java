@@ -98,25 +98,26 @@ public class GuildManager {
         return UUID.fromString(OddJob.getInstance().getMySQLManager().getGuildUUIDByName(name));
     }
 
-    public void toggleAutoClaim(UUID player, Zone zone) {
+    public void toggleAutoClaim(Player player, Zone zone) {
         UUID guild;
         if (zone != Zone.GUILD) {
             guild = getGuildUUIDByZone(zone);
         } else {
-            guild = getGuildUUIDByMember(player);
+            guild = getGuildUUIDByMember(player.getUniqueId());
         }
         if (guild != null) {
-            if (autoClaim.containsKey(player)) {
-                if (autoClaim.get(player) != guild) {
-                    autoClaim.put(player, guild);
+            if (autoClaim.containsKey(player.getUniqueId())) {
+                if (autoClaim.get(player.getUniqueId()) != guild) {
+                    autoClaim.put(player.getUniqueId(), guild);
                     OddJob.getInstance().getMessageManager().sendMessage(player, "Changing Zone auto claim to " + getGuildNameByUUID(guild));
                 } else {
-                    autoClaim.remove(player);
+                    autoClaim.remove(player.getUniqueId());
                     OddJob.getInstance().getMessageManager().sendMessage(player, "Turning off Zone auto claim to " + getGuildNameByUUID(guild));
                 }
             } else {
-                autoClaim.put(player, guild);
+                autoClaim.put(player.getUniqueId(), guild);
                 OddJob.getInstance().getMessageManager().sendMessage(player, "You are now claiming zones for " + getGuildNameByUUID(guild));
+                OddJob.getInstance().getGuildManager().claim(player);
             }
         }
     }
@@ -152,8 +153,8 @@ public class GuildManager {
         return null;
     }
 
-    public boolean changeName(UUID guild, String name) {
-        return OddJob.getInstance().getMySQLManager().setGuildName(guild, name);
+    public void changeName(UUID guild, String name) {
+        OddJob.getInstance().getMySQLManager().setGuildName(guild, name);
     }
 
     public void leave(UUID player) {

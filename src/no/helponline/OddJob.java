@@ -10,7 +10,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ public class OddJob extends JavaPlugin {
     private BanManager banManager;
     private TeleportManager teleportManager;
     private MySQLManager mySQLManager;
+    private WorldManger worldManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -45,8 +45,6 @@ public class OddJob extends JavaPlugin {
 
 
     public void onEnable() {
-        long startingTime = System.currentTimeMillis();
-
         if (!Bukkit.getPluginManager().isPluginEnabled("Vault")) {
             log("Needing vault");
             Bukkit.getPluginManager().disablePlugin(this);
@@ -98,15 +96,10 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new MoveEvent(), this);
         Bukkit.getPluginManager().registerEvents(new ArmorstandEvent(), this);
         Bukkit.getPluginManager().registerEvents(new onDeath(), this);
-
-        BukkitScheduler saver = getServer().getScheduler();
-        log("Setting up scheduler for saving!");
-        //saver.scheduleSyncRepeatingTask(this, configManager::save, 0L, 1200L); // 5 min = 6000
     }
 
-
     public void onDisable() {
-        //configManager.save();
+
     }
 
 
@@ -177,5 +170,9 @@ public class OddJob extends JavaPlugin {
 
     public MySQLManager getMySQLManager() {
         return mySQLManager;
+    }
+
+    public WorldManger getWorldManager() {
+        return worldManager;
     }
 }

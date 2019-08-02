@@ -5,15 +5,36 @@ import net.minecraft.server.v1_14_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.GameMode;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.UUID;
 
 public class MoveEvent implements Listener {
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        World world = event.getPlayer().getWorld();
+        Player player = event.getPlayer();
+
+        GameMode playerMode = OddJob.getInstance().getPlayerManager().getGamemode(player, world);
+        GameMode worldMode = OddJob.getInstance().getWorldManager().getGamemode(world);
+        boolean forceMode = OddJob.getInstance().getWorldManager().getForceMode(world);
+
+        if (forceMode) {
+            player.setGameMode(worldMode);
+        } else {
+            if (player.getGameMode() != playerMode) {
+                player.setGameMode(playerMode);
+            }
+        }
+    }
+
     @EventHandler
     public void onGuildMove(PlayerMoveEvent event) {
         Chunk chunk = event.getTo().getChunk();
