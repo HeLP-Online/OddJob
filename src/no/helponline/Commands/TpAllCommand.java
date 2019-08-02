@@ -1,5 +1,6 @@
 package no.helponline.Commands;
 
+import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,7 +18,10 @@ public class TpAllCommand implements CommandExecutor, TabCompleter {
             if (!(commandSender instanceof Player)) return true;
             Player sender = (Player) commandSender;
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (!player.equals(sender)) player.teleport(sender);
+                if (!player.equals(sender)) {
+                    OddJob.getInstance().getTeleportManager().teleport(player, sender);
+                    //player.teleport(sender);
+                }
                 player.sendMessage("Everyone was teleported!");
             }
             //todo permission

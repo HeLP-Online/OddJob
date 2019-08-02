@@ -1081,4 +1081,56 @@ public class MySQLManager {
         }
         return whiteList;
     }
+
+    public void updateTeleport(Player player) {
+        boolean exist = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players_teleport` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.getUniqueId().toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                exist = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        if (exist) {
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("UPDATE `mine_players_teleport` SET `world` = ?, `x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ? WHERE `uuid` = ?");
+                preparedStatement.setString(1, player.getWorld().getUID().toString());
+                preparedStatement.setDouble(2, player.getLocation().getX());
+                preparedStatement.setDouble(3, player.getLocation().getY());
+                preparedStatement.setDouble(4, player.getLocation().getZ());
+                preparedStatement.setFloat(5, player.getLocation().getYaw());
+                preparedStatement.setFloat(6, player.getLocation().getPitch());
+                preparedStatement.setString(7, player.getUniqueId().toString());
+                preparedStatement.executeUpdate();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
+            }
+        } else {
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_teleport` (`world`,`x`,`y`,`z`,`yaw`,`pitch`,`uuid`) VALUES (?,?,?,?,?,?,?)");
+                preparedStatement.setString(1, player.getWorld().getUID().toString());
+                preparedStatement.setDouble(2, player.getLocation().getX());
+                preparedStatement.setDouble(3, player.getLocation().getY());
+                preparedStatement.setDouble(4, player.getLocation().getZ());
+                preparedStatement.setFloat(5, player.getLocation().getYaw());
+                preparedStatement.setFloat(6, player.getLocation().getPitch());
+                preparedStatement.setString(7, player.getUniqueId().toString());
+                preparedStatement.execute();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
+            }
+        }
+    }
 }

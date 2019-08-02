@@ -1,5 +1,6 @@
 package no.helponline.Commands;
 
+import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -8,7 +9,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class TpPosCommand implements CommandExecutor, TabCompleter {
                 int y = Integer.parseInt(strings[1]);
                 int z = Integer.parseInt(strings[2]);
 
-                player.teleport(new Location(world, x, y, z), PlayerTeleportEvent.TeleportCause.COMMAND);
+                OddJob.getInstance().getTeleportManager().teleport(player, new Location(world, x, y, z));
             } catch (Exception e) {
             }
         }

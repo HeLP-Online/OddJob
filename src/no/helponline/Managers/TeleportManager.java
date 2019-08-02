@@ -2,6 +2,7 @@ package no.helponline.Managers;
 
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -42,12 +43,22 @@ public class TeleportManager {
                     Player target = OddJob.getInstance().getPlayerManager().getPlayer(from);
                     OddJob.getInstance().getMessageManager().success("Your request has been accepted by " + player.getName(), target.getUniqueId());
                     OddJob.getInstance().getMessageManager().success("You have accepted the request from " + target.getName(), player.getUniqueId());
-                    target.teleport(player, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                    teleport(target, player);
                     remove(from);
                     if (reset.containsKey(from)) reset.get(from).cancel();
                 }
             }
         }
+    }
+
+    public void teleport(Player target, Player player) {
+        OddJob.getInstance().getMySQLManager().updateTeleport(target);
+        target.teleport(player, PlayerTeleportEvent.TeleportCause.PLUGIN);
+    }
+
+    public void teleport(Player player, Location location) {
+        OddJob.getInstance().getMySQLManager().updateTeleport(player);
+        player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 
     public void deny(UUID to) {
