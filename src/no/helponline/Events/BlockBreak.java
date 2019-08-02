@@ -31,6 +31,7 @@ public class BlockBreak implements Listener {
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+        if (memberOfGuild == null) memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
         if (chunkInGuild == null) {
             return;
@@ -39,7 +40,7 @@ public class BlockBreak implements Listener {
         if (memberOfGuild.equals(chunkInGuild)) {
             return;
         }
-
+        if (player.isOp()) return;
         event.setCancelled(true);
     }
 
@@ -50,6 +51,7 @@ public class BlockBreak implements Listener {
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+        if (memberOfGuild == null) memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
         if (chunkInGuild == null) {
             return;

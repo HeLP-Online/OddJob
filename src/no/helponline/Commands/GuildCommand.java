@@ -73,6 +73,13 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     } else {
                         commandSender.sendMessage("ArenaZone exists");
                     }
+                    UUID wild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+                    if (wild == null) {
+                        OddJob.getInstance().getGuildManager().create("WildZone", Zone.WILD, true, false);
+                        commandSender.sendMessage("WildZone created!");
+                    } else {
+                        commandSender.sendMessage("WildZone exists");
+                    }
                 }
             } else if (strings[0].equalsIgnoreCase("accept")) {
                 if (commandSender instanceof Player) {
@@ -276,7 +283,6 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             } else if (strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-
                     if (strings.length == 1) {
                         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
                         if (guild == null) {
@@ -291,7 +297,6 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                             return true;
                         }
                         OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.GUILD);
-
                     }
 
                     if (strings.length > 1) {
@@ -299,22 +304,18 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.SAFE);
                             }
-                            OddJob.getInstance().getGuildManager().claim(player, Zone.SAFE);
                         } else if (strings[1].equalsIgnoreCase("war")) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.WAR);
                             }
-                            OddJob.getInstance().getGuildManager().claim(player, Zone.WAR);
                         } else if (strings[1].equalsIgnoreCase("jail")) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.JAIL);
                             }
-                            OddJob.getInstance().getGuildManager().claim(player, Zone.JAIL);
                         } else if (strings[1].equalsIgnoreCase("arena")) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.ARENA);
                             }
-                            OddJob.getInstance().getGuildManager().claim(player, Zone.ARENA);
                         }
                     }
                 } else {

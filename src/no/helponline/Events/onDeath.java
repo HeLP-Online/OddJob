@@ -25,6 +25,7 @@ public class onDeath implements Listener {
             playerSkull.setItemMeta(skull);
         }
         player.getWorld().dropItem(player.getLocation(), playerSkull);
+
     }
 
     @EventHandler

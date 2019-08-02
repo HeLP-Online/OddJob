@@ -8,6 +8,7 @@ import no.helponline.Managers.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -42,7 +43,6 @@ public class OddJob extends JavaPlugin {
 
     public static HashMap<UUID, UUID> inChunk = new HashMap<>(); //player - guild
     public static boolean vault;
-
 
     public void onEnable() {
         if (!Bukkit.getPluginManager().isPluginEnabled("Vault")) {
@@ -98,6 +98,12 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ArmorstandEvent(), this);
         Bukkit.getPluginManager().registerEvents(new onDeath(), this);
 
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            OddJob.getInstance().log(playerManager.getGamemode(player, player.getWorld()).name());
+            if (!player.getGameMode().equals(playerManager.getGamemode(player, player.getWorld()))) {
+                playerManager.setGameMode(player, playerManager.getGamemode(player, player.getWorld()));
+            }
+        }
     }
 
     public void onDisable() {

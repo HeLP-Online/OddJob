@@ -52,7 +52,7 @@ public class GuildManager {
             // NOT CLAIMED
             UUID guild = autoClaim.get(player.getUniqueId());
 
-            OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk);
+            OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
             OddJob.getInstance().getMessageManager().sendMessage(player, "Claiming chunk X: " + chunk.getX() + "; Z: " + chunk.getZ() + "; to " + getZoneByGuild(guild).name());
         }
     }
@@ -63,7 +63,7 @@ public class GuildManager {
         if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
             player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
         } else {
-            OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk);
+            OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
             player.sendMessage("You have claimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
         }
     }
@@ -75,7 +75,7 @@ public class GuildManager {
         if (!comp.equals(guild)) {
             player.sendMessage("Sorry, you are not associated with the guild who claimed this chunk");
         } else {
-            OddJob.getInstance().getMySQLManager().deleteGuildChunks(guild, chunk);
+            OddJob.getInstance().getMySQLManager().deleteGuildChunks(guild, chunk, player);
             player.sendMessage("You have unclaimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
         }
     }
@@ -109,7 +109,7 @@ public class GuildManager {
         }
         if (guild != null) {
             if (autoClaim.containsKey(player.getUniqueId())) {
-                if (autoClaim.get(player.getUniqueId()) != guild) {
+                if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
                     autoClaim.put(player.getUniqueId(), guild);
                     OddJob.getInstance().getMessageManager().sendMessage(player, "Changing Zone auto claim to " + getGuildNameByUUID(guild));
                 } else {
@@ -132,8 +132,8 @@ public class GuildManager {
         return OddJob.getInstance().getMySQLManager().getGuildUUIDByZone(zone);
     }
 
-    public boolean hasAutoClaim(UUID uniqueId) {
-        return autoClaim.containsKey(uniqueId);
+    public boolean hasAutoClaim(UUID player) {
+        return autoClaim.containsKey(player);
     }
 
     public UUID getGuildUUIDByMember(UUID player) {
@@ -244,7 +244,7 @@ public class GuildManager {
         if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
             player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
         } else {
-            OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk);
+            OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
             player.sendMessage("You have claimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
         }
     }

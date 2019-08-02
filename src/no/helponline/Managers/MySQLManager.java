@@ -44,7 +44,6 @@ public class MySQLManager {
     }
 
 
-
     public synchronized void updatePlayer(UUID uuid, String name) {
         try {
             connect();
@@ -475,12 +474,12 @@ public class MySQLManager {
         }
     }
 
-    public synchronized void addGuildChunks(UUID guild, Chunk chunk) {
+    public synchronized void addGuildChunks(UUID guild, Chunk chunk, Player player) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
             preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, chunk.getWorld().getUID().toString());
+            preparedStatement.setString(2, player.getWorld().getUID().toString());
             preparedStatement.setInt(3, chunk.getX());
             preparedStatement.setInt(4, chunk.getZ());
             preparedStatement.execute();
@@ -691,12 +690,12 @@ public class MySQLManager {
         return name;
     }
 
-    public void deleteGuildChunks(UUID guild, Chunk chunk) {
+    public void deleteGuildChunks(UUID guild, Chunk chunk, Player player) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `uuid` = ? AND `world` = ? AND `x` = ? AND `z` = ?");
             preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, chunk.getWorld().getUID().toString());
+            preparedStatement.setString(2, player.getWorld().getUID().toString());
             preparedStatement.setInt(3, chunk.getX());
             preparedStatement.setInt(4, chunk.getZ());
             preparedStatement.execute();
@@ -954,7 +953,7 @@ public class MySQLManager {
             preparedStatement.setString(2, world.getUID().toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                GameMode.valueOf(resultSet.getString("gamemode"));
+                gameMode = GameMode.valueOf(resultSet.getString("gamemode"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
