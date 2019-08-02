@@ -36,10 +36,12 @@ public class BanCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        List<UUID> bans = OddJob.getInstance().getBanManager().getBans();
         List<String> list = new ArrayList<>();
-        for (UUID player : OddJob.getInstance().getPlayerManager().getUUIDs()) {
-            if (!bans.contains(player)) list.add(OddJob.getInstance().getPlayerManager().getName(player));
+        if (strings.length == 1) {
+            List<UUID> bans = OddJob.getInstance().getBanManager().getBans();
+            for (UUID player : OddJob.getInstance().getPlayerManager().getUUIDs()) {
+                if (!bans.contains(player)) list.add(OddJob.getInstance().getPlayerManager().getName(player));
+            }
         }
         return list;
     }
