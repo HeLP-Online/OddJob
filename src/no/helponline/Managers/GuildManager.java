@@ -126,7 +126,7 @@ public class GuildManager {
     }
 
     public UUID getGuildUUIDByZone(Zone zone) {
-        return UUID.fromString(OddJob.getInstance().getMySQLManager().getGuildUUIDByZone(zone));
+        return OddJob.getInstance().getMySQLManager().getGuildUUIDByZone(zone);
     }
 
     public boolean hasAutoClaim(UUID uniqueId) {
@@ -207,9 +207,11 @@ public class GuildManager {
             if (isGuildOpen(guild)) {
                 OddJob.getInstance().log("open");
                 ret.add(getGuildNameByUUID(guild));
-            } else if (invited.equals(guild)) {
-                OddJob.getInstance().log("invited");
-                ret.add(getGuildNameByUUID(guild));
+            } else if (invited != null) {
+                if (guild.equals(invited)) {
+                    OddJob.getInstance().log("invited");
+                    ret.add(getGuildNameByUUID(guild));
+                }
             }
         }
         OddJob.getInstance().log("ret: " + ret.size());
@@ -230,5 +232,28 @@ public class GuildManager {
 
     public List<UUID> getGuildMembers(UUID guild) {
         return OddJob.getInstance().getMySQLManager().getGuildMembers(guild);
+    }
+
+    public void claim(Player player, Zone zone) {
+        Chunk chunk = player.getLocation().getChunk();
+        UUID guild = getGuildUUIDByZone(zone);
+        if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
+            player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
+        } else {
+            OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk);
+            player.sendMessage("You have claimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
+        }
+    }
+
+    public void create(String name, Zone zone, boolean invited_only, boolean friendly_fire) {
+        HashMap<String, Object> memberOfGuild = new HashMap<>();
+
+        UUID guild = UUID.randomUUID();
+        memberOfGuild.put("name", name);
+        memberOfGuild.put("zone", zone.name());
+        memberOfGuild.put("uuid", guild.toString());
+        memberOfGuild.put("invited_only", invited_only);
+        memberOfGuild.put("friendly_fire", friendly_fire);
+        OddJob.getInstance().getMySQLManager().createGuild(memberOfGuild);
     }
 }

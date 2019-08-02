@@ -457,7 +457,7 @@ public class MySQLManager {
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`) VALUES (?,?,?,?)");
             preparedStatement.setString(1, (String) memberOfGuild.get("uuid"));
             preparedStatement.setString(2, (String) memberOfGuild.get("name"));
-            preparedStatement.setString(3, ((Zone) memberOfGuild.get("zone")).name());
+            preparedStatement.setString(3, (String) memberOfGuild.get("zone"));
             preparedStatement.setBoolean(4, false);
             preparedStatement.execute();
         } catch (SQLException ex) {
@@ -769,15 +769,15 @@ public class MySQLManager {
         return uuid;
     }
 
-    public String getGuildUUIDByZone(Zone zone) {
-        String uuid = "";
+    public UUID getGuildUUIDByZone(Zone zone) {
+        UUID uuid = null;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `zone` = ? ");
             preparedStatement.setString(1, zone.name());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                uuid = resultSet.getString("uuid");
+                uuid = UUID.fromString(resultSet.getString("uuid"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

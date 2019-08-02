@@ -55,7 +55,7 @@ public class BlockBreak implements Listener {
             return;
         }
 
-        if (memberOfGuild == chunkInGuild) {
+        if (memberOfGuild.equals(chunkInGuild)) {
             return;
         }
 

@@ -62,7 +62,10 @@ public class MessageManager {
 
 
     public void sendMessage(UUID player, String message) {
-        Bukkit.getPlayer(player).sendMessage(message);
+        Player send = Bukkit.getPlayer(player);
+        if (send != null) {
+            send.sendMessage(message);
+        }
     }
 
 
