@@ -3,7 +3,9 @@ package no.helponline.Managers;
 import no.helponline.OddJob;
 import no.helponline.Utils.Role;
 import no.helponline.Utils.Zone;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -170,8 +172,9 @@ public class GuildManager {
     }
 
     public void kickFromGuild(UUID guild, UUID player, String reason) {
-        if (getGuildUUIDByMember(player) == guild) {
+        if (guild.equals(getGuildUUIDByMember(player))) {
             leave(player);
+            OddJob.getInstance().log("left");
             //TODO print reason
         }
     }
@@ -256,5 +259,28 @@ public class GuildManager {
         memberOfGuild.put("invited_only", invited_only);
         memberOfGuild.put("friendly_fire", friendly_fire);
         OddJob.getInstance().getMySQLManager().createGuild(memberOfGuild);
+    }
+
+    public void accept(UUID guild, UUID target) {
+        join(guild, target);
+        OddJob.getInstance().getMySQLManager().deletePending(target);
+        OddJob.getInstance().getMessageManager().sendMessage(target, "Welcome to " + getGuildNameByUUID(guild) + "!");
+        for (UUID member : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
+            OfflinePlayer op = Bukkit.getOfflinePlayer(member);
+            if (op.isOnline()) {
+                op.getPlayer().sendMessage("Please welcome " + OddJob.getInstance().getPlayerManager().getName(target) + " to the guild");
+            }
+        }
+    }
+
+    public void deny(UUID guild, UUID target) {
+        OddJob.getInstance().getMySQLManager().deletePending(target);
+        OddJob.getInstance().getMessageManager().sendMessage(target, "You have declined " + OddJob.getInstance().getPlayerManager().getName(target) + " entrance to " + getGuildNameByUUID(guild) + "!");
+        for (UUID member : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
+            OfflinePlayer op = Bukkit.getOfflinePlayer(member);
+            if (op.isOnline()) {
+                op.getPlayer().sendMessage("Request from " + OddJob.getInstance().getPlayerManager().getName(target) + " to join " + getGuildNameByUUID(guild) + " has been declined");
+            }
+        }
     }
 }

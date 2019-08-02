@@ -145,13 +145,17 @@ public class MySQLManager {
                 player.put("name", resultSet.getString("name"));
                 player.put("denytpa", resultSet.getBoolean("denytpa"));
                 List<UUID> whitelist = new ArrayList<>();
-                for (String uid : resultSet.getString("whitelist").split(",")) {
-                    whitelist.add(UUID.fromString(uid));
+                if (resultSet.getString("whitelist") != null) {
+                    for (String uid : resultSet.getString("whitelist").split(",")) {
+                        whitelist.add(UUID.fromString(uid));
+                    }
                 }
                 player.put("whitelist", whitelist);
                 List<UUID> blacklist = new ArrayList<>();
-                for (String uid : resultSet.getString("blacklist").split(",")) {
-                    blacklist.add(UUID.fromString(uid));
+                if (resultSet.getString("blacklist") != null) {
+                    for (String uid : resultSet.getString("blacklist").split(",")) {
+                        blacklist.add(UUID.fromString(uid));
+                    }
                 }
                 player.put("blacklist", blacklist);
             }
@@ -199,10 +203,14 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ? WHERE `uuid` = ?");
             StringBuilder list = new StringBuilder();
-            for (UUID uuid : blacklist) {
-                list.append(uuid.toString()).append(",");
+            if (blacklist.isEmpty()) {
+                for (UUID uuid : blacklist) {
+                    list.append(uuid.toString()).append(";");
+                }
+                preparedStatement.setString(1, list.substring(0, list.length() - 1));
+            } else {
+                preparedStatement.setString(1, null);
             }
-            preparedStatement.setString(1, list.substring(0, list.length() - 1));
             preparedStatement.setString(2, uniqueId.toString());
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -217,10 +225,14 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `whitelist` = ? WHERE `uuid` = ?");
             StringBuilder list = new StringBuilder();
-            for (UUID uuid : whitelist) {
-                list.append(uuid.toString()).append(",");
+            if (whitelist.isEmpty()) {
+                for (UUID uuid : whitelist) {
+                    list.append(uuid.toString()).append(";");
+                }
+                preparedStatement.setString(1, list.substring(0, list.length() - 1));
+            } else {
+                preparedStatement.setString(1, null);
             }
-            preparedStatement.setString(1, list.substring(0, list.length() - 1));
             preparedStatement.setString(2, uniqueId.toString());
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -519,11 +531,11 @@ public class MySQLManager {
         return role;
     }
 
-    public void deleteMemberFromGuild(UUID uniqueId) {
+    public void deleteMemberFromGuild(UUID player) {
         try {
             connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `uuid` = ?");
-            preparedStatement.setString(1, uniqueId.toString());
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `player` = ?");
+            preparedStatement.setString(1, player.toString());
             preparedStatement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -1006,5 +1018,67 @@ public class MySQLManager {
             close();
         }
         return force;
+    }
+
+    public boolean getPlayerDenyTpa(UUID to) {
+        boolean accept = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `denytpa` FROM `mine_players` WHERE `uuid` = ?");
+            preparedStatement.setString(1, to.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                accept = (resultSet.getInt("denytpa") == 1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return accept;
+    }
+
+    public List<UUID> getPlayerBlackList(UUID to) {
+        List<UUID> blackList = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `blacklist` FROM `mine_players` WHERE `uuid` = ?");
+            preparedStatement.setString(1, to.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                if (resultSet.getString("blacklist") != null) {
+                    for (String string : resultSet.getString("blacklist").split(";")) {
+                        blackList.add(UUID.fromString(string));
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return blackList;
+    }
+
+    public List<UUID> getPlayerWhiteList(UUID to) {
+        List<UUID> whiteList = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `whitelist` FROM `mine_players` WHERE `uuid` = ?");
+            preparedStatement.setString(1, to.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                if (resultSet.getString("whitelist") != null) {
+                    for (String string : resultSet.getString("whitelist").split(";")) {
+                        whiteList.add(UUID.fromString(string));
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return whiteList;
     }
 }

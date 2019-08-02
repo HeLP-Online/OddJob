@@ -74,6 +74,27 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         commandSender.sendMessage("ArenaZone exists");
                     }
                 }
+            } else if (strings[0].equalsIgnoreCase("accept")) {
+                if (commandSender instanceof Player) {
+                    Player player = (Player) commandSender;
+                    UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                    if (guild == null) {
+                        commandSender.sendMessage("Sorry, you are not associated with any guild yet.");
+                        return true;
+                    }
+                    if (strings.length == 1) {
+                        commandSender.sendMessage("Missing a player to invite to your guild.");
+                        return true;
+                    }
+                    if (strings.length == 2) {
+                        UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
+                        if (target == null) {
+                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                            return true;
+                        }
+                        OddJob.getInstance().getGuildManager().accept(guild, target);
+                    }
+                }
             } else if (strings[0].equalsIgnoreCase("invite")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
@@ -176,6 +197,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     OddJob.getInstance().getGuildManager().kickFromGuild(guild, target, reason.toString());
+                    player.sendMessage(strings[1] + " has left the guild.");
                 } else {
                     // TODO when console creating guild
                     // create guilds like SAFE,WAR,JAIL,ARENA ?

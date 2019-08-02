@@ -62,18 +62,16 @@ public class PlayerManager {
     }
 
     public boolean request(UUID to, UUID from) {
-        HashMap<String, Object> teleportTo = getOddPlayer(to);
-        OddJob.getInstance().log("request: " + (teleportTo.get("denytpa")));
-        boolean request = (boolean) teleportTo.get("denytpa");
-        if (((List) teleportTo.get("whitelist")).contains(from)) {
+        boolean request = OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to);
+        if (OddJob.getInstance().getMySQLManager().getPlayerWhiteList(to).contains(from)) {
             OddJob.getInstance().log("whitelist");
             request = true;
-        } else if (((List) teleportTo.get("blacklist")).contains(from)) {
+        } else if (OddJob.getInstance().getMySQLManager().getPlayerBlackList(to).contains(from)) {
             OddJob.getInstance().log("blacklist");
             request = false;
-        } else if ((boolean) teleportTo.get("denytpa")) {
+        } else if (OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to)) {
             OddJob.getInstance().log("tpa deny");
-            OddJob.getInstance().getMessageManager().warning(teleportTo.get("name") + " is denying all request!", from);
+            OddJob.getInstance().getMessageManager().warning(getName(to) + " is denying all request!", from);
             request = false;
         }
         return request;
