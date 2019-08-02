@@ -102,7 +102,7 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players`");
             resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 uuids.add(UUID.fromString(resultSet.getString("uuid")));
             }
         } catch (SQLException ex) {
@@ -1191,7 +1191,7 @@ public class MySQLManager {
         List<UUID> bans = new ArrayList<>();
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players` WHERE `banned` != NULL ");
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players` WHERE `banned` IS NOT NULL ");
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 bans.add(UUID.fromString(resultSet.getString("uuid")));
@@ -1208,7 +1208,7 @@ public class MySQLManager {
         String string = "";
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players` WHERE `uuid` = ? ");
+            preparedStatement = connection.prepareStatement("SELECT `banned` FROM `mine_players` WHERE `uuid` = ? ");
             preparedStatement.setString(1, uuid.toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {

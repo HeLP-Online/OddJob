@@ -22,17 +22,18 @@ public class PlayerJoin implements Listener {
         OddJob.getInstance().getPlayerManager().updatePlayer(uuid, player.getName());
         if (OddJob.getInstance().getBanManager().getBan(uuid) != null) {
             OddJob.getInstance().getBanManager().kick(player);
+        } else {
+
+            if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
+                OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D);
+                //player.sendMessage("Your first balance is initialized!");
+                OddJob.getInstance().log("Initializing account for " + player.getName());
+            }
+
+            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
+            (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
+
+            OddJob.getInstance().getLockManager().remove(uuid);
         }
-
-        if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
-            OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D);
-            //player.sendMessage("Your first balance is initialized!");
-            OddJob.getInstance().log("Initializing account for " + player.getName());
-        }
-
-        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
-        (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
-
-        OddJob.getInstance().getLockManager().remove(uuid);
     }
 }

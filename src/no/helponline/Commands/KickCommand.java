@@ -18,7 +18,7 @@ public class KickCommand implements CommandExecutor, TabCompleter {
             if (strings.length >= 2) {
                 int length = strings.length;
                 StringBuilder sb = new StringBuilder();
-                for (int i = 1; i <= length; i++) {
+                for (int i = 1; i <= length - 1; i++) {
                     sb.append(strings[i]);
                 }
                 message = sb.toString();
@@ -28,7 +28,7 @@ public class KickCommand implements CommandExecutor, TabCompleter {
                 OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
                 return true;
             }
-            target.kickPlayer(message);
+            OddJob.getInstance().getBanManager().kick(target, message);
             commandSender.sendMessage("Player " + target.getName() + " kicked, reason: " + message);
             // todo permission
         }

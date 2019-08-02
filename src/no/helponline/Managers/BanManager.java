@@ -1,6 +1,8 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -8,10 +10,11 @@ import java.util.UUID;
 
 public class BanManager {
 
-    public void ban(Player player, String text) {
-        if (player.isOnline()) {
-            player.kickPlayer(text);
-            OddJob.getInstance().getMySQLManager().addPlayerBan(player.getUniqueId(), text);
+    public void ban(UUID player, String text) {
+        OfflinePlayer op = Bukkit.getOfflinePlayer(player);
+        OddJob.getInstance().getMySQLManager().addPlayerBan(player, text);
+        if (op.isOnline()) {
+            kick(op.getPlayer());
         }
     }
 
@@ -29,5 +32,9 @@ public class BanManager {
 
     public void kick(Player player) {
         player.kickPlayer(getBan(player.getUniqueId()));
+    }
+
+    public void kick(Player player, String text) {
+        player.kickPlayer(text);
     }
 }
