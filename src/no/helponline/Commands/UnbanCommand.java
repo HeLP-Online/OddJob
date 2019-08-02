@@ -31,7 +31,7 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         List<String> list = new ArrayList<>();
         if (strings.length <= 1)
-            for (UUID uuid : OddJob.getInstance().getBanManager().getBans().keySet()) {
+            for (UUID uuid : OddJob.getInstance().getBanManager().getBans()) {
                 if (strings.length == 1) {
                     if (OddJob.getInstance().getPlayerManager().getPlayer(uuid).getName().startsWith(strings[0])) {
                         list.add(OddJob.getInstance().getPlayerManager().getPlayer(uuid).getName());

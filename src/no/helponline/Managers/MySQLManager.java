@@ -1,7 +1,6 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.OddPlayer;
 import no.helponline.Utils.Role;
 import no.helponline.Utils.Zone;
 import org.bukkit.*;
@@ -44,26 +43,7 @@ public class MySQLManager {
         }
     }
 
-    public synchronized void saveHomes(Location location, String homeName, OddPlayer oddPlayer) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_homes` (`name`,`uuid`,`x`,`y`,`z`,`world`,`yaw`,`pitch`) VALUES (?,?,?,?,?,?,?,?)");
-            preparedStatement.setString(1, homeName);
-            preparedStatement.setString(2, oddPlayer.getUuid().toString());
-            preparedStatement.setInt(3, location.getBlockX());
-            preparedStatement.setInt(4, location.getBlockY());
-            preparedStatement.setInt(5, location.getBlockZ());
-            preparedStatement.setString(6, location.getWorld().getUID().toString());
-            preparedStatement.setDouble(7, location.getYaw());
-            preparedStatement.setDouble(8, location.getPitch());
-            preparedStatement.execute();
-            close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
+
 
     public synchronized void updatePlayer(UUID uuid, String name) {
         try {
@@ -1132,5 +1112,113 @@ public class MySQLManager {
                 close();
             }
         }
+    }
+
+    public void setGameMode(Player player, GameMode gameMode) {
+        boolean exist = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players_gamemodes` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.getUniqueId().toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                exist = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
+        if (exist) {
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("UPDATE `mine_players_gamemodes` SET `world` = ?, `gamemode` = ? WHERE `uuid` = ?");
+                preparedStatement.setString(1, player.getWorld().getUID().toString());
+                preparedStatement.setString(2, gameMode.name());
+                preparedStatement.setString(3, player.getUniqueId().toString());
+                preparedStatement.executeUpdate();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
+            }
+        } else {
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_gamemodes` (`world`,`gamemode`,`uuid`) VALUES (?,?,?)");
+                preparedStatement.setString(1, player.getWorld().getUID().toString());
+                preparedStatement.setString(2, gameMode.name());
+                preparedStatement.setString(3, player.getUniqueId().toString());
+                preparedStatement.execute();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
+            }
+        }
+    }
+
+    public void deletePlayerBan(UUID player) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `banned` = ? WHERE `uuid` = ?");
+            preparedStatement.setString(1, null);
+            preparedStatement.setString(2, player.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void addPlayerBan(UUID player, String text) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `banned` = ? WHERE `uuid` = ?");
+            preparedStatement.setString(1, text);
+            preparedStatement.setString(2, player.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public List<UUID> getBans() {
+        List<UUID> bans = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players` WHERE `banned` != NULL ");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                bans.add(UUID.fromString(resultSet.getString("uuid")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return bans;
+    }
+
+    public String getBan(UUID uuid) {
+        String string = "";
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players` WHERE `uuid` = ? ");
+            preparedStatement.setString(1, uuid.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                string = resultSet.getString("banned");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return string;
     }
 }

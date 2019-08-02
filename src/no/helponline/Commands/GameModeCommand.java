@@ -39,12 +39,12 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
                     OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
                     return true;
                 }
-            } else if (strings.length == 1) {
-                target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
+            } else if (strings.length == 1 && commandSender instanceof Player) {
+                target = (Player) commandSender;
             }
 
             if (target != null) {
-                target.setGameMode(gm);
+                OddJob.getInstance().getPlayerManager().setGameMode(target, gm);
                 OddJob.getInstance().getMessageManager().success("Gamemode changed to " + gm.name(), target.getUniqueId());
             }
         }

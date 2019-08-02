@@ -20,10 +20,13 @@ public class PlayerJoin implements Listener {
 
         // Making an OddPlayer
         OddJob.getInstance().getPlayerManager().updatePlayer(uuid, player.getName());
+        if (OddJob.getInstance().getBanManager().getBan(uuid) != null) {
+            OddJob.getInstance().getBanManager().kick(player);
+        }
 
         if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
             OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D);
-            player.sendMessage("Your first balance is initialized!");
+            //player.sendMessage("Your first balance is initialized!");
             OddJob.getInstance().log("Initializing account for " + player.getName());
         }
 

@@ -27,7 +27,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 }
                 text = sb.toString();
             }
-            OddJob.getInstance().getBanManager().ban(target.getUniqueId(), text);
+            OddJob.getInstance().getBanManager().ban(target, text);
         }
         return true;
     }

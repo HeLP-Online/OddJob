@@ -1,7 +1,6 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class PlayerManager {
-    private HashMap<UUID, OddPlayer> oddPlayers = new HashMap<>();
 
     public void updatePlayer(UUID uuid, String name) {
         OddJob.getInstance().getMySQLManager().updatePlayer(uuid, name);
@@ -85,4 +83,9 @@ public class PlayerManager {
         return OddJob.getInstance().getMySQLManager().getPlayerMode(player, world);
     }
 
+    public void setGameMode(Player player, GameMode gameMode) {
+        OddJob.getInstance().getMySQLManager().setGameMode(player, gameMode);
+        player.setGameMode(gameMode);
+        player.sendMessage("Your GameMode is set to " + gameMode.name() + " in " + player.getWorld().getName());
+    }
 }

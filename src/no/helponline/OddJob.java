@@ -97,6 +97,7 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new MoveEvent(), this);
         Bukkit.getPluginManager().registerEvents(new ArmorstandEvent(), this);
         Bukkit.getPluginManager().registerEvents(new onDeath(), this);
+
     }
 
     public void onDisable() {
