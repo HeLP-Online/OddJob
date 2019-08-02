@@ -933,4 +933,22 @@ public class MySQLManager {
             close();
         }
     }
+
+    public List<UUID> getGuildMembers(UUID guild) {
+        List<UUID> uuids = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_members` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                uuids.add(UUID.fromString(resultSet.getString("player")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return uuids;
+    }
 }

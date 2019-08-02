@@ -179,8 +179,8 @@ public class GuildManager {
         OddJob.getInstance().getMySQLManager().addGuildInvite(guild, player);
     }
 
-    public void uninviteToGuild(UUID guild, UUID player) {
-        OddJob.getInstance().getMySQLManager().deleteGuildInvite(guild, player);
+    public void uninviteToGuild(UUID player) {
+        OddJob.getInstance().getMySQLManager().deleteInvitation(player);
     }
 
     public Zone getZoneByGuild(UUID guild) {
@@ -226,5 +226,9 @@ public class GuildManager {
 
     public void addGuildPending(UUID guild, UUID player) {
         OddJob.getInstance().getMySQLManager().addGuildPending(guild, player);
+    }
+
+    public List<UUID> getGuildMembers(UUID guild) {
+        return OddJob.getInstance().getMySQLManager().getGuildMembers(guild);
     }
 }
