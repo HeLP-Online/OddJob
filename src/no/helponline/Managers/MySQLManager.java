@@ -1227,4 +1227,120 @@ public class MySQLManager {
         }
         return string;
     }
+
+    public int getGuildCountClaims(UUID guild) {
+        int c = 0;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT COUNT(DISTINCT `id`) FROM `mine_guilds_chunks` WHERE `uuid` = ? ");
+            preparedStatement.setString(1, guild.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                c = resultSet.getInt(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return c;
+    }
+
+    public HashMap<UUID, Double> getBalanceMapPlayer() {
+        HashMap<UUID, Double> map = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances` WHERE `guild` = 0");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                map.put(UUID.fromString(resultSet.getString("uuid")), resultSet.getDouble("balance"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return map;
+    }
+
+    public HashMap<UUID, Double> getBalanceMapGuild() {
+        HashMap<UUID, Double> map = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances` WHERE `guild` = 1");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                map.put(UUID.fromString(resultSet.getString("uuid")), resultSet.getDouble("balance"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return map;
+    }
+
+    public boolean hasBalance(UUID player) {
+        boolean has = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_balances` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                has = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return has;
+    }
+
+    public Double getBalance(UUID player) {
+        double has = 0D;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `balance` FROM `mine_balances` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                has = resultSet.getDouble("balance");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return has;
+    }
+
+    public void setBalance(UUID player, double amount) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `balance` = ? WHERE `uuid` = ?");
+            preparedStatement.setDouble(1, amount);
+            preparedStatement.setString(2, player.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void createBalance(UUID player, boolean guild) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_balances` (`balance`,`uuid`) VALUES (?,?)");
+            preparedStatement.setDouble(1, 200D);
+            preparedStatement.setString(2, player.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
 }

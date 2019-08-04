@@ -1,24 +1,33 @@
 package no.helponline.Managers;
 
+import no.helponline.OddJob;
+
 import java.util.HashMap;
 import java.util.UUID;
 
 public class EconManager {
-    private HashMap<UUID, Double> bal = new HashMap<>();
+
+    public void createBalance(UUID player, boolean guild) {
+        OddJob.getInstance().getMySQLManager().createBalance(player, guild);
+    }
 
     public void setBalance(UUID player, double amount) {
-        bal.put(player, amount);
+        OddJob.getInstance().getMySQLManager().setBalance(player, amount);
     }
 
     public Double getBalance(UUID player) {
-        return (Double) bal.get(player);
+        return OddJob.getInstance().getMySQLManager().getBalance(player);
     }
 
     public boolean hasAccount(UUID player) {
-        return !bal.containsKey(player);
+        return OddJob.getInstance().getMySQLManager().hasBalance(player);
     }
 
-    public HashMap<UUID, Double> getBalanceMap() {
-        return bal;
+    public HashMap<UUID, Double> getBalanceMapPlayer() {
+        return OddJob.getInstance().getMySQLManager().getBalanceMapPlayer();
+    }
+
+    public HashMap<UUID, Double> getBalanceMapGuild() {
+        return OddJob.getInstance().getMySQLManager().getBalanceMapGuild();
     }
 }

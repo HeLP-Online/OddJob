@@ -47,6 +47,7 @@ public class TpACommand implements CommandExecutor, TabCompleter {
                 packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"DENY\",\"color\":\"dark_red\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpdeny " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Declines the teleport request\",\"color\":\"gold\"}]}}}"));
                 connection.sendPacket(packet);
             }
+            OddJob.getInstance().log("tpa complete");
         }
         return true;
     }

@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ public class OddJob extends JavaPlugin {
     private TeleportManager teleportManager;
     private MySQLManager mySQLManager;
     private WorldManger worldManager;
+    private ScoreManager scoreManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -61,6 +61,8 @@ public class OddJob extends JavaPlugin {
         playerManager = new PlayerManager();
         teleportManager = new TeleportManager();
         mySQLManager = new MySQLManager();
+        worldManager = new WorldManger();
+        scoreManager = new ScoreManager();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());
@@ -88,8 +90,6 @@ public class OddJob extends JavaPlugin {
 
         configManager.load();
 
-        setupEconomy();
-
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
         Bukkit.getPluginManager().registerEvents(new LocksEvents(), this);
@@ -113,31 +113,6 @@ public class OddJob extends JavaPlugin {
 
     public void log(String message) {
         getLogger().log(Level.INFO, ChatColor.YELLOW + message);
-    }
-
-
-    public static Economy getEconomy() {
-        return econ;
-    }
-
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-
-        if (rsp == null) {
-            return false;
-        }
-        econ = (Economy) rsp.getProvider();
-        return (econ != null);
-    }
-
-    private boolean setupPermissions() {
-        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = (Permission) rsp.getProvider();
-        return (perms != null);
     }
 
     public GuildManager getGuildManager() {
@@ -182,5 +157,9 @@ public class OddJob extends JavaPlugin {
 
     public WorldManger getWorldManager() {
         return worldManager;
+    }
+
+    public ScoreManager getScoreManager() {
+        return scoreManager;
     }
 }

@@ -15,7 +15,8 @@ public class TeleportManager {
     private HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
 
     public boolean tpa(UUID from, UUID to) {
-        if (!OddJob.getInstance().getPlayerManager().request(to, from)) {
+        if (!OddJob.getInstance().getPlayerManager().request(to, from)) { // false
+            OddJob.getInstance().log("deny request");
             return false;
         }
         OddJob.getInstance().log("is oddplayer");
@@ -31,6 +32,7 @@ public class TeleportManager {
     // player (sends request) // target (teleport to)
 
     public boolean hasRequest(UUID from) {
+        OddJob.getInstance().log("contains: " + teleportAccept.containsKey(from));
         return teleportAccept.containsKey(from);
     }
 

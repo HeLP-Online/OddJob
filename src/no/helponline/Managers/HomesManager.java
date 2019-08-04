@@ -27,14 +27,12 @@ public class HomesManager {
     }
 
     public boolean add(UUID uuid, String name, Location location) {
-        /*HashMap<String, Location> loc = new HashMap<>();
-        if (homes.containsKey(uuid)) {
-            loc = homes.get(uuid);
-        }
-        loc.put(name, location);
-        homes.put(uuid, loc);*/
-
         Location loc = OddJob.getInstance().getMySQLManager().getHome(uuid, name);
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(location.getChunk(), location.getWorld());
+        if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid))) {
+            OddJob.getInstance().getMessageManager().danger("You can't set home inside someone elses guild", uuid);
+            return true;
+        }
         if (loc == null) {
             OddJob.getInstance().getMySQLManager().createHome(uuid, name, location);
         } else {

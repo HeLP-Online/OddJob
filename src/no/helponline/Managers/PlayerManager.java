@@ -60,19 +60,20 @@ public class PlayerManager {
     }
 
     public boolean request(UUID to, UUID from) {
-        boolean request = OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to);
-        if (OddJob.getInstance().getMySQLManager().getPlayerWhiteList(to).contains(from)) {
+        boolean request = OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to); // false
+        if (OddJob.getInstance().getMySQLManager().getPlayerWhiteList(to).contains(from)) { //false
             OddJob.getInstance().log("whitelist");
             request = true;
-        } else if (OddJob.getInstance().getMySQLManager().getPlayerBlackList(to).contains(from)) {
+        } else if (OddJob.getInstance().getMySQLManager().getPlayerBlackList(to).contains(from)) { // false
             OddJob.getInstance().log("blacklist");
             request = false;
-        } else if (OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to)) {
+        } else if (OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to)) { // false
             OddJob.getInstance().log("tpa deny");
             OddJob.getInstance().getMessageManager().warning(getName(to) + " is denying all request!", from);
             request = false;
         }
-        return request;
+        OddJob.getInstance().log("request : deny");
+        return !request;
     }
 
     public List<String> getNames() {

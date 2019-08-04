@@ -4,6 +4,7 @@ import no.helponline.OddJob;
 import no.helponline.Utils.Zone;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Monster;
@@ -13,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
@@ -59,7 +61,7 @@ public class BlockBreak implements Listener {
         if (memberOfGuild.equals(chunkInGuild)) {
             return;
         }
-
+        if (player.isOp()) return;
         event.setCancelled(true);
     }
 
@@ -84,6 +86,16 @@ public class BlockBreak implements Listener {
             }
         };
         runnable.runTaskLater(OddJob.getInstance(), 20L);
+    }
+
+    @EventHandler
+    public void blockIgnite(BlockIgniteEvent event) {
+        if (event.getBlock().getType() == Material.TNT) {
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getLocation().getChunk(), event.getBlock().getWorld());
+            if (guild != null) {
+                event.setCancelled(true);
+            }
+        }
     }
 
     @EventHandler
