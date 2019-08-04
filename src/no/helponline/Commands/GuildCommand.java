@@ -303,18 +303,26 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         if (strings[1].equalsIgnoreCase("safe")) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.SAFE);
+                            } else {
+                                OddJob.getInstance().getGuildManager().claim(player, Zone.SAFE);
                             }
                         } else if (strings[1].equalsIgnoreCase("war")) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.WAR);
+                            } else {
+                                OddJob.getInstance().getGuildManager().claim(player, Zone.WAR);
                             }
                         } else if (strings[1].equalsIgnoreCase("jail")) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.JAIL);
+                            } else {
+                                OddJob.getInstance().getGuildManager().claim(player, Zone.JAIL);
                             }
                         } else if (strings[1].equalsIgnoreCase("arena")) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
                                 OddJob.getInstance().getGuildManager().toggleAutoClaim(player, Zone.ARENA);
+                            } else {
+                                OddJob.getInstance().getGuildManager().claim(player, Zone.ARENA);
                             }
                         }
                     }

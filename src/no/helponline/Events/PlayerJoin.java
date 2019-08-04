@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scoreboard.Team;
 
 import java.util.UUID;
 
@@ -34,6 +35,18 @@ public class PlayerJoin implements Listener {
             (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
 
             OddJob.getInstance().getLockManager().remove(uuid);
+
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+            if (guild != null) {
+                Team team = OddJob.getInstance().getGuildManager().getTeam(guild);
+                if (team == null) {
+                    team = OddJob.getInstance().getGuildManager().addTeam(guild, player.getUniqueId());
+                } else {
+                    team = OddJob.getInstance().getGuildManager().addTeamMember(guild, player.getUniqueId());
+                }
+                player.setScoreboard(OddJob.getInstance().getGuildManager().getScoreboard());
+                //OddJob.getInstance().log("Teams: " + OddJob.getInstance().getGuildManager().getScoreboard().getTeams().size());
+            }
         }
     }
 }

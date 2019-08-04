@@ -779,15 +779,15 @@ public class MySQLManager {
         return uuid;
     }
 
-    public String getGuildUUIDByName(String name) {
-        String uuid = "";
+    public UUID getGuildUUIDByName(String name) {
+        UUID uuid = null;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `name` = ? ");
             preparedStatement.setString(1, name);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                uuid = resultSet.getString("uuid");
+                uuid = UUID.fromString(resultSet.getString("uuid"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -953,7 +953,14 @@ public class MySQLManager {
             preparedStatement.setString(2, world.getUID().toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                gameMode = GameMode.valueOf(resultSet.getString("gamemode"));
+                String str = resultSet.getString("gamemode");
+                if (str.startsWith("SP")) {
+                    gameMode = GameMode.SPECTATOR;
+                } else if (str.startsWith("C")) {
+                    gameMode = GameMode.CREATIVE;
+                } else if (str.startsWith("A")) {
+                    gameMode = GameMode.ADVENTURE;
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

@@ -8,6 +8,7 @@ import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,9 +17,16 @@ import java.util.UUID;
 
 public class GuildManager {
     private HashMap<UUID, UUID> autoClaim;// Player | Guild
+    private HashMap<UUID, Team> teams;
+    private Scoreboard scoreboard;
 
     public GuildManager() {
         autoClaim = new HashMap<>();
+        teams = new HashMap<>();
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        if (manager != null) {
+            scoreboard = manager.getNewScoreboard();
+        }
     }
 
     public boolean create(UUID player, String name) {
@@ -36,8 +44,8 @@ public class GuildManager {
         OddJob.getInstance().getMySQLManager().createGuild(memberOfGuild);
         addGuildMember(guild, player, Role.guildMaster);
         return true;
-
     }
+
 
     public void addGuildMember(UUID guild, UUID player, Role role) {
         OddJob.getInstance().getMySQLManager().addGuildMember(guild, player, role);
@@ -97,7 +105,7 @@ public class GuildManager {
     }
 
     public UUID getGuildUUIDByName(String name) {
-        return UUID.fromString(OddJob.getInstance().getMySQLManager().getGuildUUIDByName(name));
+        return OddJob.getInstance().getMySQLManager().getGuildUUIDByName(name);
     }
 
     public void toggleAutoClaim(Player player, Zone zone) {
@@ -282,5 +290,34 @@ public class GuildManager {
                 op.getPlayer().sendMessage("Request from " + OddJob.getInstance().getPlayerManager().getName(target) + " to join " + getGuildNameByUUID(guild) + " has been declined");
             }
         }
+    }
+
+
+    public Team getTeam(UUID guild) {
+        if (teams.containsKey(guild)) return teams.get(guild);
+        return null;
+    }
+
+    public Team addTeam(UUID guild, UUID player) {
+        Team team = scoreboard.registerNewTeam(getGuildNameByUUID(guild));
+        team.addEntry(player.toString());
+        team.setAllowFriendlyFire(false);
+        teams.put(guild, team);
+        return team;
+    }
+
+    public Scoreboard getScoreboard() {
+        Objective objective = scoreboard.registerNewObjective("test", "dummy", "yeah");
+        objective.setDisplayName("yummy");
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        return scoreboard;
+    }
+
+    public Team addTeamMember(UUID guild, UUID player) {
+        Team t = teams.get(guild);
+        t.addEntry(player.toString());
+        teams.put(guild, t);
+        return t;
     }
 }
