@@ -37,7 +37,7 @@ public class PlayerJoin implements Listener {
 
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
             if (guild != null) {
-                player.setScoreboard(OddJob.getInstance().getScoreManager().getScoreboard(player.getUniqueId()));
+                //player.setScoreboard(OddJob.getInstance().getScoreManager().getScoreboard(player.getUniqueId()));
             }
         }
     }

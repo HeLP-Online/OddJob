@@ -2,6 +2,7 @@ package no.helponline.Events;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Utility;
+import no.helponline.Utils.Zone;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
@@ -67,7 +68,6 @@ public class LocksEvents implements Listener {
 
         if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (event.getAction().equals(Action.PHYSICAL))) {
             Block block = event.getClickedBlock();
-
             Material t = block.getType();
             if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
                 try {
@@ -109,7 +109,11 @@ public class LocksEvents implements Listener {
                         ItemMeta met = player.getInventory().getItemInOffHand().getItemMeta();
                         if (lore(event, player, door, uuid, block, met)) return;
                     }
-                    //TODO pressure check
+                    if (uuid.equals(player.getUniqueId())) {
+                        OddJob.getInstance().log("opened your own");
+                        return;
+                    }
+
                     //player.sendMessage(ChatColor.RED + "This lock is owned by someone else.");
                     event.setCancelled(true);
                 }
@@ -156,6 +160,17 @@ public class LocksEvents implements Listener {
                         event.setCancelled(true);
                         return;
                     }
+                }
+            }
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(block.getChunk(), block.getWorld());
+            UUID g2 = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+            if (guild != null && g2 != null) {
+                if (guild.equals(g2)) {
+                    OddJob.getInstance().log("same guild");
+                } else if (!OddJob.getInstance().getGuildManager().getZoneByGuild(guild).equals(Zone.GUILD)) {
+                    OddJob.getInstance().log("in wild");
+                } else {
+                    event.setCancelled(true);
                 }
             }
         }

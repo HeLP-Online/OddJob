@@ -19,14 +19,14 @@ public class TpCommand implements CommandExecutor, TabCompleter {
         if (strings.length > 0 && command.getName().equalsIgnoreCase("tp")) {
             // COMMAND TP
             if (strings.length == 2) {
-                Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[1]));
+                Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
                     return true;
                 }
-                Player destination = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
+                Player destination = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[1]));
                 if (destination == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
                     return true;
                 }
 

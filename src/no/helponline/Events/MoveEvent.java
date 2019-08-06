@@ -18,6 +18,14 @@ import java.util.UUID;
 
 public class MoveEvent implements Listener {
     @EventHandler
+    public void freeze(PlayerMoveEvent event) {
+        //TODO block teleport
+        Player player = event.getPlayer();
+        if (OddJob.getInstance().getFreezeManager().get(player.getUniqueId()) != null) {
+            event.setCancelled(true);
+        }
+    }
+    @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
         World world = event.getPlayer().getWorld();
         Player player = event.getPlayer();

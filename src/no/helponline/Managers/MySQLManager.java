@@ -339,7 +339,7 @@ public class MySQLManager {
         UUID uid = null;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_secured_armorstands` WHERE `entity` = ?");
+            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_secured_armorstands` WHERE `entity` = ?");
             preparedStatement.setString(1, entity.toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {

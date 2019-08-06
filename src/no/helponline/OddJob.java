@@ -11,15 +11,12 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
     public static HashMap<UUID, Location> deathChest = new HashMap<>();
-    public static List<Location> deathTrappedChest = new ArrayList<>();
     private static OddJob instance;
     private EconManager econManager;
     private GuildManager guildManager;
@@ -32,7 +29,8 @@ public class OddJob extends JavaPlugin {
     private TeleportManager teleportManager;
     private MySQLManager mySQLManager;
     private WorldManger worldManager;
-    private ScoreManager scoreManager;
+    private FreezeManager freezeManager;
+    private DeathManager deathManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -62,7 +60,8 @@ public class OddJob extends JavaPlugin {
         teleportManager = new TeleportManager();
         mySQLManager = new MySQLManager();
         worldManager = new WorldManger();
-        scoreManager = new ScoreManager();
+        freezeManager = new FreezeManager();
+        deathManager = new DeathManager();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());
@@ -159,7 +158,11 @@ public class OddJob extends JavaPlugin {
         return worldManager;
     }
 
-    public ScoreManager getScoreManager() {
-        return scoreManager;
+    public FreezeManager getFreezeManager() {
+        return freezeManager;
+    }
+
+    public DeathManager getDeathManager() {
+        return deathManager;
     }
 }

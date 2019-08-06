@@ -19,6 +19,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
@@ -26,6 +28,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class BlockBreak implements Listener {
+    @EventHandler
+    public void interactEvent(PlayerInteractEvent event) {
+
+    }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
@@ -143,6 +149,22 @@ public class BlockBreak implements Listener {
             UUID playerInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
 //TODO
         }
+    }
+
+    @EventHandler
+    public void bucketEmpty(PlayerBucketEmptyEvent event) {
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlockClicked().getChunk(), event.getBlockClicked().getWorld());
+        UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(event.getPlayer().getUniqueId());
+        if (memberOfGuild == null) memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+
+        if (chunkInGuild == null) {
+            return;
+        }
+        if (memberOfGuild.equals(chunkInGuild)) {
+            return;
+        }
+        if (event.getPlayer().isOp()) return;
+        event.setCancelled(true);
     }
 
     /*

@@ -29,10 +29,11 @@ public class onDeath implements Listener {
             skull.setDisplayName(ChatColor.DARK_PURPLE + "Head of " + OddJob.getInstance().getPlayerManager().getName(player.getUniqueId()));
             playerSkull.setItemMeta(skull);
         }
-        //player.getWorld().dropItem(player.getLocation(), playerSkull);
 
         Block leftSide = player.getLocation().getBlock();
         Block rightSide = leftSide.getRelative(0, 0, -1);
+
+        OddJob.getInstance().getDeathManager().add(leftSide, rightSide);
 
         leftSide.setType(Material.CHEST);
         rightSide.setType(Material.CHEST);

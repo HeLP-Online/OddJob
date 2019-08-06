@@ -53,9 +53,9 @@ public class TeleportManager {
         }
     }
 
-    public void teleport(Player target, Player player) {
+    public void teleport(Player target, Player destination) {
         OddJob.getInstance().getMySQLManager().updateTeleport(target);
-        target.teleport(player, PlayerTeleportEvent.TeleportCause.PLUGIN);
+        target.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 
     public void teleport(Player player, Location location) {
