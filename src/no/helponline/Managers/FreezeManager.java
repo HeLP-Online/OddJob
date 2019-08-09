@@ -2,19 +2,20 @@ package no.helponline.Managers;
 
 import org.bukkit.Location;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class FreezeManager {
+    private HashMap<UUID, Location> frozen = new HashMap<>();
     public void add(UUID player, Location location) {
-        //OddJob.getInstance().getMySQLManager().addFrozen(player,location);
+        frozen.put(player, location);
     }
 
     public Location get(UUID player) {
-        // return OddJob.getInstance().getMySQLManager().getFrozen(player);
-        return null;
+        return frozen.get(player);
     }
 
     public void del(UUID player) {
-        //OddJob.getInstance().getMySQLManager().deleteFrozen(player);
+        frozen.remove(player);
     }
 }

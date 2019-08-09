@@ -62,7 +62,7 @@ public class LocksEvents implements Listener {
 
         StringBuilder sb = new StringBuilder();
 
-        if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null)) {
+        if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null) || player.isOp()) {
             return;
         }
 
@@ -166,12 +166,18 @@ public class LocksEvents implements Listener {
             UUID g2 = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
             if (guild != null && g2 != null) {
                 if (guild.equals(g2)) {
-                    OddJob.getInstance().log("same guild");
+                    if (OddJob.getInstance().getLockManager().getDoors().contains(t)) {
+                        door = true;
+                        block = Utility.getLowerLeftDoor(block).getBlock();
+                    }
                 } else if (!OddJob.getInstance().getGuildManager().getZoneByGuild(guild).equals(Zone.GUILD)) {
                     OddJob.getInstance().log("in wild");
                 } else {
                     event.setCancelled(true);
                 }
+            }
+            if (door) {
+                Utility.doorToggle(block);
             }
         }
     }

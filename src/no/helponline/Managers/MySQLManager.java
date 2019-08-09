@@ -1343,4 +1343,69 @@ public class MySQLManager {
             close();
         }
     }
+
+    public void addFrozen(UUID player, Location location) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_frozen` (`uuid`,`world`,`x`,`y`,`z`) VALUES (?,?,?,?,?)");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.setString(2, location.getWorld().getUID().toString());
+            preparedStatement.setInt(3, location.getBlockX());
+            preparedStatement.setInt(4, location.getBlockY());
+            preparedStatement.setInt(5, location.getBlockZ());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void updateFrozen(UUID player, Location location) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_frozen` SET `world` = ?, `x` = ?, `y` = ?, `z` = ? WHERE `uuid` = ?");
+            preparedStatement.setString(5, player.toString());
+            preparedStatement.setString(1, location.getWorld().getUID().toString());
+            preparedStatement.setInt(2, location.getBlockX());
+            preparedStatement.setInt(3, location.getBlockY());
+            preparedStatement.setInt(4, location.getBlockZ());
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void deleteFrozen(UUID player) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_frozen` WHERE `uuid`?");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public Location getFrozen(UUID player) {
+        Location location = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_frozen` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                location = new Location(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))), resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return location;
+    }
 }

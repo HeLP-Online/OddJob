@@ -26,8 +26,7 @@ public class FreezeCommand implements CommandExecutor, TabCompleter {
                 }
                 OddJob.getInstance().getFreezeManager().add(target.getUniqueId(), target.getLocation());
             }
-        }
-        if (command.getName().equalsIgnoreCase("unfreeze")) {
+        } else if (command.getName().equalsIgnoreCase("unfreeze")) {
             if (strings.length == 1) {
                 Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
                 if (target == null) {
@@ -38,7 +37,7 @@ public class FreezeCommand implements CommandExecutor, TabCompleter {
                     commandSender.sendMessage(strings[0] + " was not frozen");
                     return true;
                 }
-                OddJob.getInstance().getFreezeManager().add(target.getUniqueId(), target.getLocation());
+                OddJob.getInstance().getFreezeManager().del(target.getUniqueId());
             }
         }
         return true;
