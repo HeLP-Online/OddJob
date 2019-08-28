@@ -20,8 +20,8 @@ public class WarpManager {
         OddJob.getInstance().getMySQLManager().addWarp(name, player, password);
     }
 
-    public void delWarp(String name, String passw) {
-        OddJob.getInstance().getMySQLManager().deleteWarp(name, passw);
+    public void delWarp(String name, String password) {
+        OddJob.getInstance().getMySQLManager().deleteWarp(name, password);
     }
 
     public boolean exists(String name) {
