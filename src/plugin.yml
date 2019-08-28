@@ -80,11 +80,14 @@ commands:
   player:
     description: Access Player settings
   warp:
+    usage: /<command> <name> [password]
     description: Warp you to a specified location
   addwarp:
+    usage: /<command> <name> [password]
     description: Sets a specified warppoint
     permission: essentials.warp.set
   delwarp:
+    usage: /<command> <name> [password]
     description: Deletes a specified warppoint
     permission: essentials.warp.del
 
@@ -152,3 +155,10 @@ permissions:
     default: op
   locks.show:
     default: true
+  essentials.warp:
+    default: true
+    children:
+      essentials.warp.set:
+        default: op
+      essentials.warp.del:
+        default: op

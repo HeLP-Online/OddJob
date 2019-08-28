@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WorldCommand implements CommandExecutor, TabCompleter {
@@ -34,19 +33,6 @@ public class WorldCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        List<String> list = new ArrayList<>();
-        if (command.getName().equalsIgnoreCase("warp") || command.getName().equalsIgnoreCase("delwarp")) {
-            if (strings.length == 0 || strings.length == 1) {
-                List<String> l = OddJob.getInstance().getWarpManager().listWarps();
-                if (strings.length == 1) {
-                    for (String st : l) {
-                        if (st.startsWith(strings[0])) {
-                            list.add(st);
-                        }
-                    }
-                }
-            }
-        }
-        return list;
+        return null;
     }
 }

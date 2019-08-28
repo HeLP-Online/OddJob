@@ -1415,10 +1415,10 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_warps` WHERE `name` = ? AND `passw` = ?");
             preparedStatement.setString(1, world);
-            preparedStatement.setString(1, password);
+            preparedStatement.setString(2, password);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                location = new Location(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))), resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"));
+                location = new Location(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))), resultSet.getDouble("x"), resultSet.getDouble("y"), resultSet.getDouble("z"), resultSet.getFloat("yaw"), resultSet.getFloat("pitch"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -1434,10 +1434,10 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_warps` (`name`,`world`,`x`,`y`,`z`,`yaw`,`pitch`,`passw`) VALUES (?,?,?,?,?,?,?,?)");
             preparedStatement.setString(1, name);
-            preparedStatement.setString(2, player.getWorld().getUID().toString());
-            preparedStatement.setInt(3, location.getBlockX());
-            preparedStatement.setInt(4, location.getBlockY());
-            preparedStatement.setInt(5, location.getBlockZ());
+            preparedStatement.setString(2, player.getLocation().getWorld().getUID().toString());
+            preparedStatement.setDouble(3, location.getX());
+            preparedStatement.setDouble(4, location.getY());
+            preparedStatement.setDouble(5, location.getZ());
             preparedStatement.setFloat(6, location.getYaw());
             preparedStatement.setFloat(7, location.getPitch());
             preparedStatement.setString(8, password);

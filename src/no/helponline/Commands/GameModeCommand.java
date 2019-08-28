@@ -56,11 +56,11 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
         List<String> list = new ArrayList<>();
         if (strings.length == 0) {
             for (GameMode gm : GameMode.values()) {
-                list.add(gm.name());
+                list.add(gm.name().toLowerCase());
             }
         } else if (strings.length == 1) {
             for (GameMode gm : GameMode.values()) {
-                if (gm.name().startsWith(strings[0])) {
+                if (gm.name().toLowerCase().startsWith(strings[0])) {
                     list.add(gm.name());
                 }
             }
