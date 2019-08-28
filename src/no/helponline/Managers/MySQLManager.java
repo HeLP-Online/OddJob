@@ -1408,4 +1408,76 @@ public class MySQLManager {
         }
         return location;
     }
+
+    public Location getWarp(String world, String password) {
+        Location location = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_warps` WHERE `name` = ? AND `passw` = ?");
+            preparedStatement.setString(1, world);
+            preparedStatement.setString(1, password);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                location = new Location(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))), resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return location;
+    }
+
+    public void addWarp(String name, Player player, String password) {
+        try {
+            Location location = player.getLocation();
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_warps` (`name`,`world`,`x`,`y`,`z`,`yaw`,`pitch`,`passw`) VALUES (?,?,?,?,?,?,?,?)");
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, player.getWorld().getUID().toString());
+            preparedStatement.setInt(3, location.getBlockX());
+            preparedStatement.setInt(4, location.getBlockY());
+            preparedStatement.setInt(5, location.getBlockZ());
+            preparedStatement.setFloat(6, location.getYaw());
+            preparedStatement.setFloat(7, location.getPitch());
+            preparedStatement.setString(8, password);
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void deleteWarp(String name, String password) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_warps` WHERE `name` = ? AND `passw` = ?");
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, password);
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public boolean getWarp(String name) {
+        boolean bol = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_warps` WHERE `name` = ?");
+            preparedStatement.setString(1, name);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                bol = true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return bol;
+    }
 }

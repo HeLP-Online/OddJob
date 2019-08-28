@@ -31,6 +31,7 @@ public class OddJob extends JavaPlugin {
     private WorldManger worldManager;
     private FreezeManager freezeManager;
     private DeathManager deathManager;
+    private WarpManager warpManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -62,6 +63,7 @@ public class OddJob extends JavaPlugin {
         worldManager = new WorldManger();
         freezeManager = new FreezeManager();
         deathManager = new DeathManager();
+        warpManager = new WarpManager();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());
@@ -164,5 +166,9 @@ public class OddJob extends JavaPlugin {
 
     public DeathManager getDeathManager() {
         return deathManager;
+    }
+
+    public WarpManager getWarpManager() {
+        return warpManager;
     }
 }
