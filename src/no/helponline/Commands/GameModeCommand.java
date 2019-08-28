@@ -25,11 +25,11 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
 
             String str = strings[0];
 
-            if (str.startsWith("sp")) {
+            if (str.startsWith("sp") || str.startsWith("SP")) {
                 gm = GameMode.SPECTATOR;
-            } else if (str.startsWith("c")) {
+            } else if (str.startsWith("c") || str.startsWith("C")) {
                 gm = GameMode.CREATIVE;
-            } else if (str.startsWith("a")) {
+            } else if (str.startsWith("a") || str.startsWith("A")) {
                 gm = GameMode.ADVENTURE;
             }
 

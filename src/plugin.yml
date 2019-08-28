@@ -79,6 +79,14 @@ commands:
     permission: essentials.gamemode
   player:
     description: Access Player settings
+  warp:
+    description: Warp you to a specified location
+  addwarp:
+    description: Sets a specified warppoint
+    permission: essentials.warp.set
+  delwarp:
+    description: Deletes a specified warppoint
+    permission: essentials.warp.del
 
 permissions:
   essentials.tpall:

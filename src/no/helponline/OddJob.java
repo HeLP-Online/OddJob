@@ -87,6 +87,9 @@ public class OddJob extends JavaPlugin {
         getCommand("gamemode").setTabCompleter(new GameModeCommand());
         getCommand("tppos").setExecutor(new TpPosCommand());
         getCommand("player").setExecutor(new PlayerCommand());
+        getCommand("addwarp").setExecutor(new WarpCommand());
+        getCommand("delwarp").setExecutor(new WarpCommand());
+        getCommand("warp").setExecutor(new WarpCommand());
         //getCommand("world").setExecutor(new WorldCommand());
 
         configManager.load();

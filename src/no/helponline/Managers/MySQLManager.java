@@ -1480,4 +1480,21 @@ public class MySQLManager {
         }
         return bol;
     }
+
+    public List<String> listWarps() {
+        List<String> list = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_warps`");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                list.add(resultSet.getString("name"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return list;
+    }
 }

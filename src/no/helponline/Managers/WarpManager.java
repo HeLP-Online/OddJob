@@ -4,6 +4,8 @@ import no.helponline.OddJob;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class WarpManager {
     public void warp(Player player, String name) {
         warp(player, name, "");
@@ -26,5 +28,9 @@ public class WarpManager {
 
     public boolean exists(String name) {
         return OddJob.getInstance().getMySQLManager().getWarp(name);
+    }
+
+    public List<String> listWarps() {
+        return OddJob.getInstance().getMySQLManager().listWarps();
     }
 }
