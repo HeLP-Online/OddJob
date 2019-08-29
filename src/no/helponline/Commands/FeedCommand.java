@@ -29,7 +29,7 @@ public class FeedCommand implements CommandExecutor, TabCompleter {
 
         if (target != null) {
             target.setFoodLevel(20);
-            if (commandSender instanceof Player) {
+            if (commandSender instanceof Player && !commandSender.equals(target)) {
                 OddJob.getInstance().getMessageManager().success(target.getName() + " has been feed.", commandSender);
             }
             OddJob.getInstance().getMessageManager().success("You have been feed", target.getUniqueId());

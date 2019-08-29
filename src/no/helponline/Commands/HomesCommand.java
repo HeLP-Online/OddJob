@@ -24,7 +24,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 1 && args[0].equalsIgnoreCase("help")) {
             StringBuilder sb = new StringBuilder();
-            sb.append(ChatColor.DARK_RED + "__-- HELP menu for /").append(cmd.getName()).append(" --__\n").append(ChatColor.AQUA + "-----------------------------------------\n");
+            sb.append(ChatColor.AQUA + "__-- HELP menu for /").append(cmd.getName()).append(" --__\n").append(ChatColor.AQUA + "-----------------------------------------\n");
             for (Args y : Args.values()) {
                 if (sender.hasPermission("homes." + y.name())) {
                     sb.append(ChatColor.GOLD + "- Command:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append("\n").append(ChatColor.GOLD + "Description:" + ChatColor.RESET + " ").append(y.get()).append("\n");
@@ -199,7 +199,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 if (homes.size() > 0) {
                     for (String s : homes) {
                         i++;
-                        string.append(i).append(") ").append(s).append("\n");
+                        string.append(i).append(".) ").append(s).append("\n");
                     }
                 }
 
@@ -221,7 +221,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
 
                 int i = 1;
                 for (String s : homes) {
-                    string.append(i).append(") ").append(s).append("\n");
+                    string.append(i).append(".) ").append(s).append("\n");
                     i++;
                 }
 

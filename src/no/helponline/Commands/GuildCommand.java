@@ -22,29 +22,42 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             if (strings.length == 0) {
                 Bukkit.dispatchCommand(commandSender, command.getName() + " help");
                 return true;
-            } else if (strings[0].equalsIgnoreCase("create")) {
-                // guild create <Name>
+            }
+            // guild create <Name>
+            else if (strings[0].equalsIgnoreCase("create")) {
+                // sender is a player
                 if (commandSender instanceof Player) {
+                    // args length
                     if (strings.length == 1) {
-                        commandSender.sendMessage("Missing a guild name");
+                        OddJob.getInstance().getMessageManager().danger("Missing a guild name", commandSender);
                         return true;
                     }
+
                     Player player = (Player) commandSender;
+
+                    // checking name
                     if (OddJob.getInstance().getGuildManager().getGuildUUIDByName(ChatColor.stripColor(strings[1])) != null) {
                         OddJob.getInstance().getMessageManager().warning("We already know a guild by that name", commandSender);
                         return true;
                     }
+
+                    // check if player is already in a guild
                     if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) != null) {
-                        OddJob.getInstance().getMessageManager().danger("You are already connected to a guild, to create a new use '/guild leave'", commandSender);
+                        OddJob.getInstance().getMessageManager().warning("You are already connected to a guild, to create a new use '/guild leave'", commandSender);
                         return true;
                     }
+
+                    // trying to create guild
                     if (OddJob.getInstance().getGuildManager().create(player.getUniqueId(), strings[1])) {
                         OddJob.getInstance().getMessageManager().success("Guild `" + strings[1] + "` created", commandSender);
                         return true;
                     }
+
                     OddJob.getInstance().getMessageManager().danger("Something went wrong when creating guild!", commandSender);
                     return true;
-                } else {
+                }
+                // guild create executed by console, creating default zones
+                else {
                     UUID safe = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.SAFE);
                     if (safe == null) {
                         OddJob.getInstance().getGuildManager().create("SafeZone", Zone.SAFE, true, false);
@@ -81,25 +94,48 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         commandSender.sendMessage("WildZone exists");
                     }
                 }
-            } else if (strings[0].equalsIgnoreCase("accept")) {
+            }
+            // guild accept
+            else if (strings[0].equalsIgnoreCase("accept")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
                     UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                    // player is not accossiated with any guild
                     if (guild == null) {
-                        commandSender.sendMessage("Sorry, you are not associated with any guild yet.");
-                        return true;
-                    }
-                    if (strings.length == 1) {
-                        commandSender.sendMessage("Missing a player to invite to your guild.");
-                        return true;
-                    }
-                    if (strings.length == 2) {
-                        UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
-                        if (target == null) {
-                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
-                            return true;
+                        guild = OddJob.getInstance().getGuildManager().getGuildInvitation(player.getUniqueId());
+                        // has an invitation to a guild
+                        if (guild != null) {
+                            OddJob.getInstance().getGuildManager().accept(guild, player.getUniqueId());
+                        } else {
+                            OddJob.getInstance().getMessageManager().warning("Nothing to accept.", player);
                         }
-                        OddJob.getInstance().getGuildManager().accept(guild, target);
+                        return true;
+                    }
+                    // player is in a guild
+                    else {
+                        if (strings.length == 1) {
+                            List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendings(guild);
+                            int c = 0;
+                            StringBuilder sb = new StringBuilder();
+                            player.sendMessage("List of pending membership to the guild:");
+                            if (pending.size() > 0) {
+                                for (UUID uuid : pending) {
+                                    c++;
+                                    sb.append(c + ".) " + OddJob.getInstance().getPlayerManager().getName(uuid));
+                                }
+                            } else {
+                                sb.append("No pending memberships.");
+                            }
+                            player.sendMessage(sb.toString());
+                        } else {
+                            UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
+                            if (target == null) {
+                                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], player);
+                                return true;
+                            }
+
+                            OddJob.getInstance().getGuildManager().accept(guild, target);
+                        }
                     }
                 }
             } else if (strings[0].equalsIgnoreCase("invite")) {

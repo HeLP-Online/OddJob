@@ -32,23 +32,35 @@ public class BlockBreak implements Listener {
     public void interactEvent(PlayerInteractEvent event) {
 
     }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
+
+        // PLAYER
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-        if (memberOfGuild == null) memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        if (memberOfGuild == null) {
+            memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        }
+        // CHUNK
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
         if (chunkInGuild == null) {
             return;
         }
 
+        // IN GUILD
+        //TODO CHECK ACCESS
         if (memberOfGuild.equals(chunkInGuild)) {
             return;
         }
-        if (player.isOp()) return;
+
+        if (player.isOp()) {
+            return;
+        }
+
         event.setCancelled(true);
     }
 
@@ -58,19 +70,36 @@ public class BlockBreak implements Listener {
         Player player = event.getPlayer();
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
+
+        // PLAYER
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-        if (memberOfGuild == null) memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        if (memberOfGuild == null) {
+            memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        }
+        // CHUNK
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
         if (chunkInGuild == null) {
             return;
         }
+
+        // IN GUILD
+        // TODO CHECK ACCESS
         if (memberOfGuild.equals(chunkInGuild)) {
             return;
         }
-        if (player.isOp()) return;
+
+        if (player.isOp()) {
+            return;
+        }
+
         event.setCancelled(true);
     }
 
+    /**
+     * Cancel Explode
+     *
+     * @param event
+     */
     @EventHandler
     public void blockExplode(BlockExplodeEvent event) {
         List<Block> blocks = event.blockList();
@@ -94,6 +123,11 @@ public class BlockBreak implements Listener {
         runnable.runTaskLater(OddJob.getInstance(), 20L);
     }
 
+    /**
+     * Cancel Ignition
+     *
+     * @param event
+     */
     @EventHandler
     public void blockIgnite(BlockIgniteEvent event) {
         if (event.getBlock().getType() == Material.TNT) {
@@ -104,6 +138,11 @@ public class BlockBreak implements Listener {
         }
     }
 
+    /**
+     * Cancel Creeper AND TNT
+     *
+     * @param event
+     */
     @EventHandler
     public void entityExplode(EntityExplodeEvent event) {
         List<Block> blocks = event.blockList();
@@ -127,6 +166,11 @@ public class BlockBreak implements Listener {
         runnable.runTaskLater(OddJob.getInstance(), 20L);
     }
 
+    /**
+     * Prevent monster spawn in guilds
+     *
+     * @param event
+     */
     @EventHandler
     public void entitySpawn(EntitySpawnEvent event) {
         Chunk chunk = event.getLocation().getChunk();
@@ -151,11 +195,18 @@ public class BlockBreak implements Listener {
         }
     }
 
+    /**
+     * Prevent use of buckets by non/other guild members (Water & Lava)
+     *
+     * @param event
+     */
     @EventHandler
     public void bucketEmpty(PlayerBucketEmptyEvent event) {
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlockClicked().getChunk(), event.getBlockClicked().getWorld());
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(event.getPlayer().getUniqueId());
-        if (memberOfGuild == null) memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        if (memberOfGuild == null) {
+            memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        }
 
         if (chunkInGuild == null) {
             return;
@@ -163,7 +214,11 @@ public class BlockBreak implements Listener {
         if (memberOfGuild.equals(chunkInGuild)) {
             return;
         }
-        if (event.getPlayer().isOp()) return;
+
+        if (event.getPlayer().isOp()) {
+            return;
+        }
+
         event.setCancelled(true);
     }
 

@@ -264,17 +264,18 @@ public class GuildManager {
     public void accept(UUID guild, UUID target) {
         join(guild, target);
         OddJob.getInstance().getMySQLManager().deletePending(target);
-        OddJob.getInstance().getMessageManager().sendMessage(target, "Welcome to " + getGuildNameByUUID(guild) + "!");
-        for (UUID member : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
-            OfflinePlayer op = Bukkit.getOfflinePlayer(member);
-            if (op.isOnline()) {
-                op.getPlayer().sendMessage("Please welcome " + OddJob.getInstance().getPlayerManager().getName(target) + " to the guild");
+        OddJob.getInstance().getMySQLManager().deleteInvitation(target);
+        OddJob.getInstance().getMessageManager().success("Welcome to " + getGuildNameByUUID(guild) + " guild!", target);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (OddJob.getInstance().getGuildManager().getGuildMembers(guild).contains(p.getUniqueId()) && p.getUniqueId() != target) {
+                p.sendMessage("Please welcome " + OddJob.getInstance().getPlayerManager().getName(target) + " to the guild");
             }
         }
     }
 
     public void deny(UUID guild, UUID target) {
         OddJob.getInstance().getMySQLManager().deletePending(target);
+        OddJob.getInstance().getMySQLManager().deleteInvitation(target);
         OddJob.getInstance().getMessageManager().sendMessage(target, "You have declined " + OddJob.getInstance().getPlayerManager().getName(target) + " entrance to " + getGuildNameByUUID(guild) + "!");
         for (UUID member : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
             OfflinePlayer op = Bukkit.getOfflinePlayer(member);
@@ -286,5 +287,9 @@ public class GuildManager {
 
     public int getGuildCountClaims(UUID guild) {
         return OddJob.getInstance().getMySQLManager().getGuildCountClaims(guild);
+    }
+
+    public List<UUID> getGuildPendings(UUID guild) {
+        return OddJob.getInstance().getMySQLManager().getGuildPendings(guild);
     }
 }

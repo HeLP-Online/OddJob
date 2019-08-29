@@ -58,7 +58,7 @@ public class TpACommand implements CommandExecutor, TabCompleter {
         if (strings.length <= 1) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (strings.length == 1) {
-                    if (player.getName().startsWith(strings[0])) {
+                    if (player.getName().startsWith(strings[0]) && !player.isOp()) {
                         list.add(player.getName());
                     }
                 } else {

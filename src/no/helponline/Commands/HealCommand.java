@@ -25,7 +25,7 @@ public class HealCommand implements CommandExecutor, TabCompleter {
 
         if (target != null) {
             target.setHealth(20);
-            if (commandSender instanceof Player) {
+            if (commandSender instanceof Player && !commandSender.equals(target)) {
                 OddJob.getInstance().getMessageManager().success(target.getName() + " has been healed.", commandSender);
             }
             OddJob.getInstance().getMessageManager().success("You have been healed", target.getUniqueId());
