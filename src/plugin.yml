@@ -95,6 +95,10 @@ commands:
     usage:  /<command>
     description: Teleports back to origin
     permission: essentials.back
+  freeze:
+    usage: /<command>
+    description: Toogle freeze a player
+    permission: essentials.freeze
 
 permissions:
   essentials.tpall:

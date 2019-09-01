@@ -59,6 +59,9 @@ public class MoveEvent implements Listener {
 
         // Who owns the chunk?
         guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
+        if (guild == null) {
+            guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        }
         if (OddJob.inChunk.containsKey(player.getUniqueId())) {
             // If nobody, it's the wild
             if (guild == null) {

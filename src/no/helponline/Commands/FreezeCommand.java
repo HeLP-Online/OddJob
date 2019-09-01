@@ -1,12 +1,14 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FreezeCommand implements CommandExecutor, TabCompleter {
@@ -21,23 +23,14 @@ public class FreezeCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 if (OddJob.getInstance().getFreezeManager().get(target.getUniqueId()) != null) {
-                    commandSender.sendMessage(strings[0] + " has already been frozen");
+                    OddJob.getInstance().getFreezeManager().del(target.getUniqueId());
+                    OddJob.getInstance().getMessageManager().sendMessage(commandSender, target.getName() + " is no longer frozen.");
+                    target.sendMessage("The bonechill has left your body.");
                     return true;
                 }
                 OddJob.getInstance().getFreezeManager().add(target.getUniqueId(), target.getLocation());
-            }
-        } else if (command.getName().equalsIgnoreCase("unfreeze")) {
-            if (strings.length == 1) {
-                Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
-                if (target == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
-                    return true;
-                }
-                if (OddJob.getInstance().getFreezeManager().get(target.getUniqueId()) == null) {
-                    commandSender.sendMessage(strings[0] + " was not frozen");
-                    return true;
-                }
-                OddJob.getInstance().getFreezeManager().del(target.getUniqueId());
+                OddJob.getInstance().getMessageManager().sendMessage(commandSender, target.getName() + " is now frozen to the spot.");
+                target.sendMessage("You feel a bonefreezing cold, that freezes your body, stuck at this location");
             }
         }
         return true;
@@ -45,6 +38,18 @@ public class FreezeCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        return null;
+        List<String> list = new ArrayList<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!player.getName().equals(commandSender.getName()) && !player.isOp()) {
+                if (strings.length == 1) {
+                    if (player.getName().toLowerCase().startsWith(strings[0].toLowerCase())) {
+                        list.add(player.getName());
+                    }
+                } else {
+                    list.add(player.getName());
+                }
+            }
+        }
+        return list;
     }
 }
