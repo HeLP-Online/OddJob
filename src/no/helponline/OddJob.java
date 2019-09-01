@@ -5,6 +5,7 @@ import net.milkbowl.vault.permission.Permission;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
+import no.helponline.Utils.ArenaPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -17,6 +18,7 @@ import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
     public static HashMap<UUID, Location> deathChest = new HashMap<>();
+    public HashMap<UUID, ArenaPlayer> arenaPlayer = new HashMap<>();
     private static OddJob instance;
     private EconManager econManager;
     private GuildManager guildManager;
@@ -32,6 +34,7 @@ public class OddJob extends JavaPlugin {
     private FreezeManager freezeManager;
     private DeathManager deathManager;
     private WarpManager warpManager;
+    private ArenaManager arenaManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -64,6 +67,7 @@ public class OddJob extends JavaPlugin {
         freezeManager = new FreezeManager();
         deathManager = new DeathManager();
         warpManager = new WarpManager();
+        arenaManager = new ArenaManager();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());
@@ -84,13 +88,13 @@ public class OddJob extends JavaPlugin {
         getCommand("heal").setExecutor(new HealCommand());
         getCommand("give").setExecutor(new GiveCommand());
         getCommand("gamemode").setExecutor(new GameModeCommand());
-        getCommand("gamemode").setTabCompleter(new GameModeCommand());
         getCommand("tppos").setExecutor(new TpPosCommand());
         getCommand("player").setExecutor(new PlayerCommand());
         getCommand("addwarp").setExecutor(new WarpCommand());
         getCommand("delwarp").setExecutor(new WarpCommand());
         getCommand("warp").setExecutor(new WarpCommand());
-        //getCommand("world").setExecutor(new WorldCommand());
+        getCommand("arena").setExecutor(new ArenaCommand());
+        getCommand("back").setExecutor(new BackCommand());
 
         configManager.load();
 
@@ -101,6 +105,7 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new MoveEvent(), this);
         Bukkit.getPluginManager().registerEvents(new ArmorstandEvent(), this);
         Bukkit.getPluginManager().registerEvents(new onDeath(), this);
+        Bukkit.getPluginManager().registerEvents(new ArenaMechanics(), this);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             OddJob.getInstance().log(playerManager.getGamemode(player, player.getWorld()).name());
@@ -108,6 +113,8 @@ public class OddJob extends JavaPlugin {
                 playerManager.setGameMode(player, playerManager.getGamemode(player, player.getWorld()));
             }
         }
+
+        OddJob.getInstance().getArenaManager().loadArenas();
     }
 
     public void onDisable() {
@@ -173,5 +180,9 @@ public class OddJob extends JavaPlugin {
 
     public WarpManager getWarpManager() {
         return warpManager;
+    }
+
+    public ArenaManager getArenaManager() {
+        return arenaManager;
     }
 }

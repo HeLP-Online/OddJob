@@ -645,6 +645,7 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 uuid = UUID.fromString(resultSet.getString("uuid"));
+                OddJob.getInstance().log("chunk - guild - " + resultSet.getString("uuid"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -1496,5 +1497,25 @@ public class MySQLManager {
             close();
         }
         return list;
+    }
+
+    public Location getBack(UUID player) {
+        Location location = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_teleport` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                location = new Location(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))),
+                        resultSet.getDouble("x"), resultSet.getDouble("y"), resultSet.getDouble("z"),
+                        resultSet.getFloat("yaw"), resultSet.getFloat("pitch"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return location;
     }
 }

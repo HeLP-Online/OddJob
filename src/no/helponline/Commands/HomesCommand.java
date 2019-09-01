@@ -150,7 +150,8 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     String name = args[1];
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
                         location = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
-                        if (location != null) player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                        if (location != null)
+                            OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
                     } else {
                         OddJob.getInstance().getMessageManager().warning("Can't find any home named " + name, sender);
                     }

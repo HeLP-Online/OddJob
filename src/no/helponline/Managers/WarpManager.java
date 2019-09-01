@@ -3,6 +3,7 @@ package no.helponline.Managers;
 import no.helponline.OddJob;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.List;
 
@@ -11,10 +12,11 @@ public class WarpManager {
         return warp(player, name, "");
     }
 
+    // TODO Warp cost?
     public boolean warp(Player player, String name, String password) {
         Location location = OddJob.getInstance().getMySQLManager().getWarp(name, password);
         if (location != null) {
-            OddJob.getInstance().getTeleportManager().teleport(player, location);
+            OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         } else {
             OddJob.getInstance().getMessageManager().danger("Sorry, can't find " + name + ", or the password is wrong.", player);

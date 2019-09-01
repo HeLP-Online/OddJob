@@ -60,7 +60,7 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
             }
         } else if (strings.length == 1) {
             for (GameMode gm : GameMode.values()) {
-                if (gm.name().toLowerCase().startsWith(strings[0])) {
+                if (gm.name().toLowerCase().startsWith(strings[0]) || gm.name().startsWith(strings[0])) {
                     list.add(gm.name());
                 }
             }

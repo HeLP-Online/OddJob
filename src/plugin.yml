@@ -1,6 +1,6 @@
 main: no.helponline.OddJob
 name: OddJob
-version: 0.4
+version: 0.5
 api-version: 1.14
 
 commands:
@@ -90,6 +90,10 @@ commands:
     usage: /<command> <name> [password]
     description: Deletes a specified warppoint
     permission: essentials.warp.del
+  back:
+    usage:  /<command>
+    description: Teleports back to origin
+    permission: essentials.back
 
 permissions:
   essentials.tpall:

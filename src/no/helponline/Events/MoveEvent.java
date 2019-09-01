@@ -3,6 +3,7 @@ package no.helponline.Events;
 import net.minecraft.server.v1_14_R1.IChatBaseComponent;
 import net.minecraft.server.v1_14_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
+import no.helponline.Utils.Zone;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
@@ -25,6 +26,7 @@ public class MoveEvent implements Listener {
             event.setCancelled(true);
         }
     }
+
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent event) {
         World world = event.getPlayer().getWorld();
@@ -47,22 +49,32 @@ public class MoveEvent implements Listener {
     public void onGuildMove(PlayerMoveEvent event) {
         Chunk chunk = event.getTo().getChunk();
         Player player = event.getPlayer();
-        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
+        UUID guild = null;
 
-        /* WHEN CHANGING CHUNK */
+        // Have the player changed chunk?
         if (event.getFrom().getChunk().equals(chunk)) {
             // within same chunk
             return;
-        } else if (OddJob.inChunk.containsKey(player.getUniqueId())) {
+        }
+
+        // Who owns the chunk?
+        guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
+        if (OddJob.inChunk.containsKey(player.getUniqueId())) {
+            // If nobody, it's the wild
+            if (guild == null) {
+                guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+            }
+
             if (OddJob.inChunk.get(player.getUniqueId()) == guild) {
                 if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
                     OddJob.getInstance().getGuildManager().autoClaim(player, chunk);
                 }
                 return;
             }
-        }
-        OddJob.inChunk.put(player.getUniqueId(), guild);
 
+        }
+
+        OddJob.inChunk.put(player.getUniqueId(), guild);
         /* PRINT GUILD NAME */
         String s = "";
         if (guild != null) {

@@ -30,4 +30,8 @@ public class EconManager {
     public HashMap<UUID, Double> getBalanceMapGuild() {
         return OddJob.getInstance().getMySQLManager().getBalanceMapGuild();
     }
+
+    public void subtract(UUID player, double cost) {
+        setBalance(player, getBalance(player) - cost);
+    }
 }
