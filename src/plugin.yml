@@ -72,6 +72,7 @@ commands:
     usage: /<command> [Player]
     permission: essentials.heal
   give:
+    description: Gives an item to a player
   gamemode:
     description: Changes gamemode of given player
     usage: /<command> <GameMode> [Player]
