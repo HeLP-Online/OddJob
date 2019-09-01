@@ -95,6 +95,7 @@ public class OddJob extends JavaPlugin {
         getCommand("warp").setExecutor(new WarpCommand());
         getCommand("arena").setExecutor(new ArenaCommand());
         getCommand("back").setExecutor(new BackCommand());
+        getCommand("freeze").setExecutor(new FreezeCommand());
 
         configManager.load();
 
