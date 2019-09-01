@@ -53,6 +53,7 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        String name = commandSender.getName();
         List<String> list = new ArrayList<>();
         if (strings.length == 0) {
             for (GameMode gm : GameMode.values()) {
@@ -66,7 +67,7 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
             }
         } else if (strings.length == 2) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getName().startsWith(strings[1])) {
+                if (player.getName().toLowerCase().startsWith(strings[1].toLowerCase()) && !player.getName().equals(name)) {
                     list.add(player.getName());
                 }
             }

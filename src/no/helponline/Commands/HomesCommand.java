@@ -139,7 +139,8 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 1) {
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId())) {
                         location = OddJob.getInstance().getHomesManager().get(player.getUniqueId());
-                        if (location != null) player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                        if (location != null)
+                            OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.PLUGIN);
                     } else {
                         OddJob.getInstance().getMessageManager().warning("No home found.", sender);
                     }
@@ -245,8 +246,9 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 }
             }
             if (g.length == 2 && commandSender.hasPermission(command.getName() + "." + g[0] + ".others")) {
+                String name = commandSender.getName();
                 for (String playerName : OddJob.getInstance().getPlayerManager().getNames()) {
-                    if (playerName.startsWith(g[1].toLowerCase())) {
+                    if (playerName.toLowerCase().startsWith(g[1].toLowerCase()) && !playerName.equals(name)) {
                         list.add(playerName);
                     }
                 }

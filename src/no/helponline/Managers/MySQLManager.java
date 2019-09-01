@@ -645,7 +645,6 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 uuid = UUID.fromString(resultSet.getString("uuid"));
-                OddJob.getInstance().log("chunk - guild - " + resultSet.getString("uuid"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

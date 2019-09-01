@@ -45,10 +45,10 @@ public class TeleportManager {
             for (UUID from : teleportAccept.keySet()) {
                 if (teleportAccept.get(from).equals(to)) {
                     // player (sends request) // target (teleport to)
-                    Player target = OddJob.getInstance().getPlayerManager().getPlayer(teleportAccept.get(from));
-                    Player destination = OddJob.getInstance().getPlayerManager().getPlayer(from);
-                    OddJob.getInstance().getMessageManager().success("Your request has been accepted by " + target.getName(), destination.getUniqueId());
-                    OddJob.getInstance().getMessageManager().success("You have accepted the request from " + destination.getName(), target.getUniqueId());
+                    Player target = OddJob.getInstance().getPlayerManager().getPlayer(from);
+                    Player destination = OddJob.getInstance().getPlayerManager().getPlayer(teleportAccept.get(from));
+                    OddJob.getInstance().getMessageManager().success("Your request has been accepted by " + destination.getName(), target.getUniqueId());
+                    OddJob.getInstance().getMessageManager().success("You have accepted the request from " + target.getName(), destination.getUniqueId());
                     remove(from);
                     teleport(target, destination, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
                     if (reset.containsKey(from)) reset.get(from).cancel();
@@ -146,7 +146,7 @@ public class TeleportManager {
         }
     }
 
-    public void startTimer(UUID from, UUID to) {
+    private void startTimer(UUID from, UUID to) {
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
