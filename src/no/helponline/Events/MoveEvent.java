@@ -4,10 +4,7 @@ import net.minecraft.server.v1_14_R1.IChatBaseComponent;
 import net.minecraft.server.v1_14_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
 import no.helponline.Utils.Zone;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.GameMode;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,7 +20,9 @@ public class MoveEvent implements Listener {
         //TODO block teleport
         Player player = event.getPlayer();
         if (OddJob.getInstance().getFreezeManager().get(player.getUniqueId()) != null) {
-            event.setCancelled(true);
+            if (event.getTo().getBlock() != null && !event.getFrom().getBlock().equals(event.getTo().getBlock())) {
+                player.teleport(new Location(player.getWorld(), event.getFrom().getBlockX(), event.getFrom().getBlockY(), event.getFrom().getBlockZ()));
+            }
         }
     }
 
