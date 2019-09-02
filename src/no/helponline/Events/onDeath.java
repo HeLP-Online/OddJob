@@ -13,13 +13,32 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 public class onDeath implements Listener {
     @EventHandler
-    public void onDeath(PlayerDeathEvent event) {
+    public void onChestOpen(PlayerInteractEvent event) {
+        Block left = null;
+        Block right = null;
+        Block block = event.getClickedBlock();
+        if (block != null && block.getType().equals(Material.CHEST)) {
+            Block relative = block.getRelative(0, 0, -1);
+            if (relative.getType().equals(Material.CHEST)) {
+                left = block;
+                right = relative;
+            } else {
+                right = block;
+                left = block.getRelative(0, 0, 1);
+            }
+        }
+
+
+    }
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
 
         ItemStack playerSkull = new ItemStack(Material.PLAYER_HEAD, 1);
@@ -33,7 +52,7 @@ public class onDeath implements Listener {
         Block leftSide = player.getLocation().getBlock();
         Block rightSide = leftSide.getRelative(0, 0, -1);
 
-        OddJob.getInstance().getDeathManager().add(leftSide, rightSide);
+        OddJob.getInstance().getDeathManager().add(leftSide, rightSide, player.getUniqueId());
 
         leftSide.setType(Material.CHEST);
         rightSide.setType(Material.CHEST);
@@ -60,7 +79,6 @@ public class onDeath implements Listener {
         leftChest.getInventory().addItem(playerSkull);
         event.getDrops().clear();
         player.getInventory().clear();
-
     }
 
     @EventHandler
