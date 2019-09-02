@@ -55,19 +55,19 @@ public class EconCommand implements CommandExecutor {
             return true;
         }
 
-        if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
+        if (!OddJob.getInstance().getEconManager().hasAccount(uuid)) {
             sender.sendMessage(ChatColor.RED + args[1] + " does not own an account");
             return true;
         }
 
         if (args[0].equalsIgnoreCase("add")) {
-            OddJob.getInstance().getEconManager().setBalance(uuid, OddJob.getInstance().getEconManager().getBalance(uuid) + amount);
-            OddJob.getInstance().log("Added balance to " + args[1] + ", " + args[2] + ", sum: " + OddJob.getInstance().getEconManager().getBalance(uuid));
+            OddJob.getInstance().getEconManager().setBalance(uuid, OddJob.getInstance().getEconManager().getBalance(uuid) + amount, false);
+            OddJob.getInstance().log("Added balance to " + OddJob.getInstance().getPlayerManager().getName(uuid) + ", " + args[2] + ", sum: " + OddJob.getInstance().getEconManager().getBalance(uuid));
         } else if (args[0].equalsIgnoreCase("set")) {
-            OddJob.getInstance().getEconManager().setBalance(uuid, amount);
+            OddJob.getInstance().getEconManager().setBalance(uuid, amount, false);
             OddJob.getInstance().log("Balance for " + args[1] + " set to " + args[2]);
         } else if (args[0].equalsIgnoreCase("remove")) {
-            OddJob.getInstance().getEconManager().setBalance(uuid, OddJob.getInstance().getEconManager().getBalance(uuid) - amount);
+            OddJob.getInstance().getEconManager().setBalance(uuid, OddJob.getInstance().getEconManager().getBalance(uuid) - amount, false);
             OddJob.getInstance().log("Subtracted balance for " + args[1] + ", " + args[2] + ", sum: " + OddJob.getInstance().getEconManager().getBalance(uuid));
         } else {
             sender.sendMessage(ChatColor.RED + "Incorrect argument");

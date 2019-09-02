@@ -26,7 +26,7 @@ public class PlayerJoin implements Listener {
         } else {
 
             if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
-                OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D);
+                OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D, false);
                 //player.sendMessage("Your first balance is initialized!");
                 OddJob.getInstance().log("Initializing account for " + player.getName());
             }

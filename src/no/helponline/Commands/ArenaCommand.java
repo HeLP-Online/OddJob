@@ -61,7 +61,6 @@ public class ArenaCommand implements CommandExecutor, TabCompleter {
                 }
                 player.sendMessage(sb.toString());
             } else if (strings[0].equalsIgnoreCase("load")) {
-
                 commandSender.sendMessage("Loaded " + OddJob.getInstance().getArenaManager().loadArenas() + " arenas");
             } else if (strings[0].equalsIgnoreCase("join")) {
                 OddJob.getInstance().getArenaManager().queue(strings[1], player.getUniqueId());

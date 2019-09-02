@@ -63,7 +63,7 @@ public class TeleportManager {
         else if (OddJob.getInstance().getArenaManager().isInArena(target.getUniqueId())) test = false;
         else if (cost > 0) {
             if (cost > OddJob.getInstance().getEconManager().getBalance(target.getUniqueId())) {
-                OddJob.getInstance().getEconManager().subtract(target.getUniqueId(), cost);
+                OddJob.getInstance().getEconManager().subtract(target.getUniqueId(), cost, false);
             } else {
                 test = false;
                 target.sendMessage("Sorry, but you can't afford the request");
@@ -99,7 +99,7 @@ public class TeleportManager {
         else if (OddJob.getInstance().getArenaManager().isInArena(target.getUniqueId())) test = false;
         else if (cost > 0) {
             if (cost > OddJob.getInstance().getEconManager().getBalance(target.getUniqueId())) {
-                OddJob.getInstance().getEconManager().subtract(target.getUniqueId(), cost);
+                OddJob.getInstance().getEconManager().subtract(target.getUniqueId(), cost, false);
             } else {
                 test = false;
                 target.sendMessage("Sorry, but you can't afford the request");

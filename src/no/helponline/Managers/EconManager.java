@@ -7,12 +7,8 @@ import java.util.UUID;
 
 public class EconManager {
 
-    public void createBalance(UUID player, boolean guild) {
-        OddJob.getInstance().getMySQLManager().createBalance(player, guild);
-    }
-
-    public void setBalance(UUID player, double amount) {
-        OddJob.getInstance().getMySQLManager().setBalance(player, amount);
+    public void setBalance(UUID uuid, double amount, boolean guild) {
+        OddJob.getInstance().getMySQLManager().setBalance(uuid, amount, guild);
     }
 
     public Double getBalance(UUID player) {
@@ -31,7 +27,7 @@ public class EconManager {
         return OddJob.getInstance().getMySQLManager().getBalanceMapGuild();
     }
 
-    public void subtract(UUID player, double cost) {
-        setBalance(player, getBalance(player) - cost);
+    public void subtract(UUID player, double cost, boolean guild) {
+        setBalance(player, getBalance(player) - cost, guild);
     }
 }

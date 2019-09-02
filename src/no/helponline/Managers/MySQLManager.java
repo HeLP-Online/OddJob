@@ -1316,12 +1316,13 @@ public class MySQLManager {
         return has;
     }
 
-    public void setBalance(UUID player, double amount) {
+    public void setBalance(UUID uuid, double amount, boolean guild) {
         try {
+            createBalance(uuid, amount, guild);
             connect();
             preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `balance` = ? WHERE `uuid` = ?");
             preparedStatement.setDouble(1, amount);
-            preparedStatement.setString(2, player.toString());
+            preparedStatement.setString(2, uuid.toString());
             preparedStatement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -1330,13 +1331,19 @@ public class MySQLManager {
         }
     }
 
-    public void createBalance(UUID player, boolean guild) {
+    public void createBalance(UUID uuid, double amount, boolean guild) {
         try {
             connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_balances` (`balance`,`uuid`) VALUES (?,?)");
-            preparedStatement.setDouble(1, 200D);
-            preparedStatement.setString(2, player.toString());
-            preparedStatement.execute();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances` WHERE `uuid` =? ");
+            preparedStatement.setString(1, uuid.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_balances` (`balance`,`uuid`,`guild`) VALUES (?,?,?)");
+                preparedStatement.setDouble(1, amount);
+                preparedStatement.setString(2, uuid.toString());
+                preparedStatement.setInt(3, (guild ? 1 : 0));
+                preparedStatement.execute();
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
