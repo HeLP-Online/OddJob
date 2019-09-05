@@ -25,13 +25,18 @@ public class onDeath implements Listener {
         Block right = null;
         Block block = event.getClickedBlock();
         if (block != null && block.getType().equals(Material.CHEST)) {
-            Block relative = block.getRelative(0, 0, -1);
-            if (relative.getType().equals(Material.CHEST)) {
+            BlockData blockData = block.getBlockData();
+            if (((Directional) blockData).getFacing().equals(BlockFace.EAST)) {
                 left = block;
-                right = relative;
+                right = block.getRelative(0, 0, -1);
             } else {
                 right = block;
                 left = block.getRelative(0, 0, 1);
+            }
+
+            Chest chest = (Chest) left.getState();
+            if (chest.getInventory().getContents().length == 0) {
+                OddJob.getInstance().getDeathManager().replace(left.getLocation());
             }
         }
 
