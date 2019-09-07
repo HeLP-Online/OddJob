@@ -99,8 +99,12 @@ commands:
     usage: /<command>
     description: Toogle freeze a player
     permission: essentials.freeze
-
+  death:
+    usage: /<command>
+    description: Cleans up chests
 permissions:
+  essentials.death:
+    default: op
   essentials.tpall:
     default: op
   homes.*:
@@ -171,3 +175,5 @@ permissions:
         default: op
       essentials.warp.del:
         default: op
+      essentials.warp.tp:
+        default: true
