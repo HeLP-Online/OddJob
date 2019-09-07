@@ -1,0 +1,179 @@
+main: no.helponline.OddJob
+name: OddJob
+version: 0.5
+api-version: 1.14
+
+commands:
+  locks:
+    description: Locks Menu
+    usage: /locks ...
+    aliases: [ 'l' ]
+  econ:
+    description: EconomyCommand
+    usage: /econ <set|add|remove> <player> <amount>
+  arena:
+    description: Arena Menu
+  guild:
+    description: Guild Menu
+  homes:
+    description: Homes Menu
+    usage: /homes <set|del|list|tp>
+    aliases: [ 'h' ]
+  invsee:
+    description: See another players inventory
+    usage: /<command> <Player>
+    permission: essentials.invsee
+  suicide:
+    description: Take suicide
+    usage: /<command>
+  kill:
+    description: Kill a given player
+    usage: /<command> <Player>
+    permission: essentials.kill
+  tp:
+    description: Teleports a player to another player
+    usage: /<command> <Player> [OtherPlayer]
+    permission: essentials.tp
+  tpall:
+    description: Teleports all online players to your location
+    usage: /<command>
+    permission: essentials.tpall
+  tppos:
+    description: Teleport you to a given coordinate
+    usage: /<command> <X> <Y> <Z> [World]
+    permission: essentials.tppos
+  kick:
+    description: Kicks a given player from the server
+    usage: /<command> <Player> [message]
+    permission: essentials.kick
+  tpa:
+    description: Sends a teleport request to a given player
+    usage: /<command> <Player>
+  tpaccept:
+    description: Accepts a teleport request
+    usage: /<command>
+  tpdeny:
+    description: Denies a teleport request
+    usage: /<command>
+  ban:
+    description: Ban a given player
+    usage: /<command> <Player> [message]
+    permission: essentials.ban
+  unban:
+    description: Unban a given player
+    usage: /<command> [Player]
+    permission: essentials.unban
+  feed:
+    description: Feeds a given player
+    usage: /<command> [Player]
+    permission: essentials.feed
+  heal:
+    description: Heals a given player
+    usage: /<command> [Player]
+    permission: essentials.heal
+  give:
+    description: Gives an item to a player
+  gamemode:
+    description: Changes gamemode of given player
+    usage: /<command> <GameMode> [Player]
+    aliases: [ 'gm' ]
+    permission: essentials.gamemode
+  player:
+    description: Access Player settings
+  warp:
+    usage: /<command> <name> [password]
+    description: Warp you to a specified location
+  addwarp:
+    usage: /<command> <name> [password]
+    description: Sets a specified warppoint
+    permission: essentials.warp.set
+  delwarp:
+    usage: /<command> <name> [password]
+    description: Deletes a specified warppoint
+    permission: essentials.warp.del
+  back:
+    usage:  /<command>
+    description: Teleports back to origin
+    permission: essentials.back
+  freeze:
+    usage: /<command>
+    description: Toogle freeze a player
+    permission: essentials.freeze
+  death:
+    usage: /<command>
+    description: Cleans up chests
+permissions:
+  essentials.death:
+    default: op
+  essentials.tpall:
+    default: op
+  homes.*:
+    children:
+      homes.tp: true
+      homes.tp.others: true
+      homes.set: true
+      homes.set.others: true
+      homes.del: true
+      homes.del.others: true
+      homes.list: true
+      homes.list.others: true
+  homes.tp:
+    default: true
+  homes.tp.others:
+    default: op
+  homes.set:
+    default: true
+  homes.set.others:
+    default: op
+  homes.del:
+    default: true
+  homes.del.others:
+    default: op
+  homes.list:
+    default: true
+  homes.list.others:
+    default: op
+  locks.*:
+    children:
+      locks.lock: true
+      locks.unlock: true
+      locks.info: true
+      locks.count: true
+      locks.list: true
+      locks.help: true
+      locks.save: false
+      locks.load: false
+      locks.make: true
+      locks.show: true
+      locks.make.skeleton: false
+  locks.lock:
+    default: true
+  locks.unlock:
+    default: true
+  locks.info:
+    default: true
+  locks.count:
+    default: true
+  locks.help:
+    default: true
+  locks.list:
+    default: op
+  locks.save:
+    default: op
+  locks.load:
+    default: op
+  locks.make:
+    default: true
+  locks.make.skeleton:
+    default: op
+  locks.show:
+    default: true
+  essentials.warp:
+    default: true
+    children:
+      essentials.warp.set:
+        default: op
+      essentials.warp.del:
+        default: op
+      essentials.warp.tp:
+        default: true
