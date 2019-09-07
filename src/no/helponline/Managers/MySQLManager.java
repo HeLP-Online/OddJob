@@ -15,6 +15,7 @@ import java.util.UUID;
 
 public class MySQLManager {
     private PreparedStatement preparedStatement = null;
+    private PreparedStatement preparedStatementsec = null;
     private Connection connection = null;
     private ResultSet resultSet = null;
 
@@ -29,7 +30,10 @@ public class MySQLManager {
                 resultSet.close();
                 resultSet = null;
             }
-
+            if (preparedStatementsec != null) {
+                preparedStatementsec.close();
+                preparedStatementsec = null;
+            }
             if (preparedStatement != null) {
                 preparedStatement.close();
                 preparedStatement = null;
@@ -1523,5 +1527,118 @@ public class MySQLManager {
             close();
         }
         return location;
+    }
+
+    public void addDeathChest(Location location, Material left, Material right, UUID player) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_death_chests` (`uuid`,`world`,`x`,`y`,`z`,`leftBlock`,`rightBlock`,`time`) VALUES (?,?,?,?,?,?,?,?)");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.setString(2, location.getWorld().getUID().toString());
+            preparedStatement.setDouble(3, location.getBlockX());
+            preparedStatement.setDouble(4, location.getBlockY());
+            preparedStatement.setDouble(5, location.getBlockZ());
+            preparedStatement.setString(6, left.toString());
+            preparedStatement.setString(7, right.toString());
+            preparedStatement.setLong(8, System.currentTimeMillis() / 1000L);
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public HashMap<String, Object> getDeathChest(Location location) {
+        HashMap<String, Object> ret = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
+            preparedStatement.setString(1, location.getWorld().getUID().toString());
+            preparedStatement.setDouble(2, location.getBlockX());
+            preparedStatement.setDouble(3, location.getBlockY());
+            preparedStatement.setDouble(4, location.getBlockZ());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                ret.put("uuid", UUID.fromString(resultSet.getString("uuid")));
+                ret.put("left", Material.valueOf(resultSet.getString("leftBlock")));
+                ret.put("right", Material.valueOf(resultSet.getString("rightBlock")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
+        return ret;
+    }
+
+    public void deleteDeathChest(Location location) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_players_death_chests` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
+            preparedStatement.setString(1, location.getWorld().getUID().toString());
+            preparedStatement.setDouble(2, location.getBlockX());
+            preparedStatement.setDouble(3, location.getBlockY());
+            preparedStatement.setDouble(4, location.getBlockZ());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public int timeCheck(int t) {
+        int i = 0;
+        OddJob.getInstance().log(t + "s");
+        OddJob.getInstance().log(((System.currentTimeMillis() / 1000L) - t) + "");
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `time` < ?");
+            preparedStatement.setLong(1, (System.currentTimeMillis() / 1000L) - t);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                OddJob.getInstance().log(resultSet.getLong("time") + "");
+                OddJob.getInstance().getDeathManager().replace(
+                        UUID.fromString(resultSet.getString("world")),
+                        resultSet.getDouble("x"),
+                        resultSet.getDouble("y"),
+                        resultSet.getDouble("z"),
+                        Material.valueOf(resultSet.getString("leftBlock")),
+                        Material.valueOf(resultSet.getString("rightBlock")));
+                i++;
+            }
+            OddJob.getInstance().log("chests " + i);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return i;
+    }
+
+    public boolean isDeathChest(Location location) {
+        boolean is = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
+            preparedStatement.setString(1, location.getWorld().getUID().toString());
+            preparedStatement.setDouble(2, location.getBlockX());
+            preparedStatement.setDouble(3, location.getBlockY());
+            preparedStatement.setDouble(4, location.getBlockZ());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                is = true;
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return is;
     }
 }

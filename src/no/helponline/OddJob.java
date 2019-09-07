@@ -96,6 +96,7 @@ public class OddJob extends JavaPlugin {
         getCommand("arena").setExecutor(new ArenaCommand());
         getCommand("back").setExecutor(new BackCommand());
         getCommand("freeze").setExecutor(new FreezeCommand());
+        getCommand("death").setExecutor(new DeathCommand());
 
         configManager.load();
 
@@ -107,6 +108,7 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ArmorstandEvent(), this);
         Bukkit.getPluginManager().registerEvents(new onDeath(), this);
         Bukkit.getPluginManager().registerEvents(new ArenaMechanics(), this);
+        Bukkit.getPluginManager().registerEvents(new PortalEvents(), this);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             OddJob.getInstance().log(playerManager.getGamemode(player, player.getWorld()).name());
