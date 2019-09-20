@@ -102,6 +102,8 @@ commands:
   death:
     usage: /<command>
     description: Cleans up chests
+  backup:
+  rollback:
 permissions:
   essentials.death:
     default: op

@@ -97,6 +97,8 @@ public class OddJob extends JavaPlugin {
         getCommand("back").setExecutor(new BackCommand());
         getCommand("freeze").setExecutor(new FreezeCommand());
         getCommand("death").setExecutor(new DeathCommand());
+        getCommand("backup").setExecutor(new RollbackCommand());
+        getCommand("rollback").setExecutor(new RollbackCommand());
 
         configManager.load();
 
@@ -187,5 +189,9 @@ public class OddJob extends JavaPlugin {
 
     public ArenaManager getArenaManager() {
         return arenaManager;
+    }
+
+    public Location getSpawn() {
+        return getServer().getWorld("world").getSpawnLocation();
     }
 }

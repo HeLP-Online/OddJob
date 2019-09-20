@@ -41,9 +41,7 @@ public class onDeath implements Listener {
         //OddJob.getInstance().log(i+"");
 
         if (i < 1) {
-            OddJob.getInstance().log("less");
             if (inventory.getHolder() instanceof DoubleChest) {
-                OddJob.getInstance().log("double");
                 DoubleChest doubleChest = (DoubleChest) inventory.getHolder();
                 Chest left = (Chest) doubleChest.getLeftSide();
                 if (left != null) {
@@ -101,23 +99,17 @@ public class onDeath implements Listener {
     public void breakBlock(BlockBreakEvent event) {
         Location location = null;
         // is a chest
-        OddJob.getInstance().log("is a chest");
         if (event.getBlock().getType().equals(Material.CHEST)) {
             Chest chest = (Chest) event.getBlock().getState();
             // is double chest
-            OddJob.getInstance().log("is double chest");
             if (chest.getInventory().getHolder() instanceof DoubleChest) {
                 DoubleChest doubleChest = (DoubleChest) ((Chest) event.getBlock().getState()).getInventory().getHolder();
                 // exists
-                OddJob.getInstance().log("exists");
                 if (doubleChest != null) {
                     location = ((Chest) doubleChest.getLeftSide()).getLocation();
                     // left side
-                    OddJob.getInstance().log("left side");
-                    OddJob.getInstance().log(location.toString());
                     if (OddJob.getInstance().getDeathManager().isDeathChest(location)) {
                         // exists
-                        OddJob.getInstance().log("exists");
                         if (location != null) {
                             OddJob.getInstance().getDeathManager().replace(location, event.getPlayer().getUniqueId());
                         }
