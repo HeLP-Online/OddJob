@@ -16,7 +16,7 @@ import java.util.UUID;
 public class PlayerManager {
 
     private HashMap<UUID, Long> inCombat = new HashMap<>();
-    private HashMap<UUID, BukkitTask> timerCombat = new HashMap<UUID, org.bukkit.scheduler.BukkitTask>();
+    private HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
 
     public void updatePlayer(UUID uuid, String name) {
         OddJob.getInstance().getMySQLManager().updatePlayer(uuid, name);
