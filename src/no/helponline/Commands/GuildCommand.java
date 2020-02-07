@@ -95,6 +95,19 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     }
                 }
             }
+            // guild leave
+            else if (strings[0].equalsIgnoreCase("leave")) {
+                if (commandSender instanceof Player) {
+                    Player player = (Player) commandSender;
+                    UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                    if (guild != null) {
+                        OddJob.getInstance().getGuildManager().leave(player.getUniqueId());
+                        OddJob.getInstance().getMessageManager().sendMessage(player, "You have now left " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild) + "!");
+                    } else {
+                        OddJob.getInstance().getMessageManager().sendMessage(player, "You are not connected to any guild.");
+                    }
+                }
+            }
             // guild accept
             else if (strings[0].equalsIgnoreCase("accept")) {
                 if (commandSender instanceof Player) {
@@ -529,7 +542,8 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
     enum Args {
         create("Creates a new guild"),
         join("Join an existing guild"),
-        claim("Claim the chunk to your guild");
+        claim("Claim the chunk to your guild"),
+        leave("Leave your guild");
 
         private String help;
 
