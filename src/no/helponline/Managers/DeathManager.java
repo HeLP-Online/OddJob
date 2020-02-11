@@ -51,34 +51,36 @@ public class DeathManager {
 
     public void replace(Location location, UUID player) {
         // LEFT OR RIGHT?
-        Chest chest = (Chest) location.getBlock().getState();
-        if (chest.getInventory().getHolder() instanceof DoubleChest) {
+        if (location.getBlock().getType().equals(Material.CHEST)) {
+            Chest chest = (Chest) location.getBlock().getState();
+            if (chest.getInventory().getHolder() instanceof DoubleChest) {
 
-        }
-
-        OddJob.getInstance().log(location.toString());
-        HashMap<String, Object> ret = OddJob.getInstance().getMySQLManager().getDeathChest(location);
-        if (!ret.isEmpty()) {
-
-            chest.getInventory().clear();
-            //location.getBlock().setType(posLeft.get(location));
-            location.getBlock().setType((Material) ret.get("left"));
-            Block right = location.getBlock().getRelative(0, 0, -1);
-            //right.setType(posRight.get(location));
-            right.setType((Material) ret.get("right"));
-            //if (posPlayer.get(location) == player) {
-            UUID owner = (UUID) ret.get("uuid");
-            if (owner == player) {
-                OddJob.getInstance().log("got your own stuff");
-            } else if (player != null) {
-                if (Bukkit.getPlayer(owner).isOnline()) {
-                    OddJob.getInstance().getMessageManager().sendMessage(player, "Somebody found your stuff.");
-                }
-                OddJob.getInstance().log(OddJob.getInstance().getPlayerManager().getName(player) + " found the stuff to " + OddJob.getInstance().getPlayerManager().getName((UUID) ret.get("uuid")));
-            } else {
-                OddJob.getInstance().log("clean up");
             }
-            remove(location);
+
+            OddJob.getInstance().log(location.toString());
+            HashMap<String, Object> ret = OddJob.getInstance().getMySQLManager().getDeathChest(location);
+            if (!ret.isEmpty()) {
+
+                chest.getInventory().clear();
+                //location.getBlock().setType(posLeft.get(location));
+                location.getBlock().setType((Material) ret.get("left"));
+                Block right = location.getBlock().getRelative(0, 0, -1);
+                //right.setType(posRight.get(location));
+                right.setType((Material) ret.get("right"));
+                //if (posPlayer.get(location) == player) {
+                UUID owner = (UUID) ret.get("uuid");
+                if (owner == player) {
+                    OddJob.getInstance().log("got your own stuff");
+                } else if (player != null) {
+                    if (Bukkit.getPlayer(owner).isOnline()) {
+                        OddJob.getInstance().getMessageManager().sendMessage(player, "Somebody found your stuff.");
+                    }
+                    OddJob.getInstance().log(OddJob.getInstance().getPlayerManager().getName(player) + " found the stuff to " + OddJob.getInstance().getPlayerManager().getName((UUID) ret.get("uuid")));
+                } else {
+                    OddJob.getInstance().log("clean up");
+                }
+                remove(location);
+            }
         }
     }
 
