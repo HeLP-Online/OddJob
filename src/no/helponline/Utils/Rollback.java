@@ -73,7 +73,7 @@ public class Rollback {
             if (destination.exists()) {
                 destination.mkdir();
             }
-            String files[] = source.list();
+            String[] files = source.list();
 
             if (files != null) {
                 for (String file : files) {
