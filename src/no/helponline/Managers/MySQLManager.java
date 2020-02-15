@@ -447,13 +447,13 @@ public class MySQLManager {
         return guild;
     }
 
-    public synchronized void createGuild(HashMap<String, Object> memberOfGuild) {
+    public synchronized void createGuild(HashMap<String, String> memberOfGuild) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`) VALUES (?,?,?,?)");
-            preparedStatement.setString(1, (String) memberOfGuild.get("uuid"));
-            preparedStatement.setString(2, (String) memberOfGuild.get("name"));
-            preparedStatement.setString(3, (String) memberOfGuild.get("zone"));
+            preparedStatement.setString(1, memberOfGuild.get("uuid"));
+            preparedStatement.setString(2, memberOfGuild.get("name"));
+            preparedStatement.setString(3, memberOfGuild.get("zone"));
             preparedStatement.setBoolean(4, false);
             preparedStatement.execute();
         } catch (SQLException ex) {
@@ -1549,8 +1549,8 @@ public class MySQLManager {
         }
     }
 
-    public HashMap<String, Object> getDeathChest(Location location) {
-        HashMap<String, Object> ret = new HashMap<>();
+    public HashMap<String, String> getDeathChest(Location location) {
+        HashMap<String, String> ret = new HashMap<>();
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
@@ -1561,9 +1561,9 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                ret.put("uuid", UUID.fromString(resultSet.getString("uuid")));
-                ret.put("left", Material.valueOf(resultSet.getString("leftBlock")));
-                ret.put("right", Material.valueOf(resultSet.getString("rightBlock")));
+                ret.put("uuid", resultSet.getString("uuid"));
+                ret.put("left", resultSet.getString("leftBlock"));
+                ret.put("right", resultSet.getString("rightBlock"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

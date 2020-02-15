@@ -1,7 +1,7 @@
 main: no.helponline.OddJob
 name: OddJob
-version: 0.5
-api-version: 1.14
+version: 0.6
+api-version: 1.15
 
 commands:
   locks:

@@ -13,21 +13,17 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class TeleportManager {
-    private HashMap<UUID, UUID> teleportAccept = new HashMap<>();
-    private HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
-    private HashMap<UUID, BukkitTask> teleportTimer = new HashMap<>();
+    private final HashMap<UUID, UUID> teleportAccept = new HashMap<>();
+    private final HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
+    private final HashMap<UUID, BukkitTask> teleportTimer = new HashMap<>();
 
     public boolean tpa(UUID from, UUID to) {
-        if (!OddJob.getInstance().getPlayerManager().request(to, from)) { // false
-            OddJob.getInstance().log("deny request");
+        if (!OddJob.getInstance().getPlayerManager().request(to, from)) {
             return false;
         }
-        OddJob.getInstance().log("is oddplayer");
         if (hasRequest(from)) {
-            OddJob.getInstance().log("exists");
             OddJob.getInstance().getMessageManager().warning("Rewriting existing TPA request to " + OddJob.getInstance().getPlayerManager().getName(teleportAccept.get(from)), from);
         }
-        OddJob.getInstance().log("Making teleport request & task later");
         teleportAccept.put(from, to);
         startTimer(from, to);
         return true;
@@ -35,7 +31,6 @@ public class TeleportManager {
     // player (sends request) // target (teleport to)
 
     public boolean hasRequest(UUID from) {
-        OddJob.getInstance().log("contains: " + teleportAccept.containsKey(from));
         return teleportAccept.containsKey(from);
     }
 

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class GuildManager {
-    private HashMap<UUID, UUID> autoClaim;// Player | Guild
+    private final HashMap<UUID, UUID> autoClaim;// Player | Guild
 
     public GuildManager() {
         autoClaim = new HashMap<>();
@@ -23,21 +23,24 @@ public class GuildManager {
 
     public boolean create(UUID player, String name) {
         if (getGuildUUIDByMember(player) != null) {
+            // PLAYER HAS GUILD ALREADY
             return false;
         }
-        HashMap<String, Object> memberOfGuild = new HashMap<>();
 
+        HashMap<String, String> memberOfGuild = new HashMap<>();
+
+        // NEW RANDOM UUID
         UUID guild = UUID.randomUUID();
+
         memberOfGuild.put("name", name);
         memberOfGuild.put("zone", Zone.GUILD.name());
         memberOfGuild.put("uuid", guild.toString());
-        memberOfGuild.put("invited_only", false);
-        memberOfGuild.put("friendly_fire", false);
+        memberOfGuild.put("invited_only", Boolean.toString(false));
+        memberOfGuild.put("friendly_fire", Boolean.toString(false));
         OddJob.getInstance().getMySQLManager().createGuild(memberOfGuild);
         addGuildMember(guild, player, Role.guildMaster);
         return true;
     }
-
 
     public void addGuildMember(UUID guild, UUID player, Role role) {
         OddJob.getInstance().getMySQLManager().addGuildMember(guild, player, role);
@@ -52,34 +55,42 @@ public class GuildManager {
             // NOT CLAIMED
             UUID guild = autoClaim.get(player.getUniqueId());
 
+            // CLAIM CHUNK
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
             OddJob.getInstance().getMessageManager().sendMessage(player, "Claiming chunk X: " + chunk.getX() + "; Z: " + chunk.getZ() + "; to " + getZoneByGuild(guild).name());
         }
     }
 
     public void claim(Player player) {
+        // WHAT CHUNK ARE WE IN
         Chunk chunk = player.getLocation().getChunk();
+        // DO YOU HAVE A GUILD
         UUID guild = getGuildUUIDByMember(player.getUniqueId());
         if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
+            // ALREADY CLAIMED
             player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
         } else {
+            // CLAIM CHUNK
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
             player.sendMessage("You have claimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
         }
     }
 
     public void unclaim(Player player) {
+        // WHAT CHUNK ARE WE IN
         Chunk chunk = player.getLocation().getChunk();
+        // DO YOU HAVE A GUILD
         UUID guild = getGuildUUIDByMember(player.getUniqueId());
-        UUID comp = getGuildUUIDByMember(player.getUniqueId());
+        // DO CHUNK HAVE A GUILD
+        UUID comp = getGuildUUIDByChunk(chunk, player.getWorld());
         if (!comp.equals(guild)) {
             player.sendMessage("Sorry, you are not associated with the guild who claimed this chunk");
         } else {
+            // UNCLAIM CHUNK
             OddJob.getInstance().getMySQLManager().deleteGuildChunks(guild, chunk, player);
             player.sendMessage("You have unclaimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
         }
     }
-
 
     public UUID getGuildUUIDByChunk(Chunk chunk, World world) {
         return OddJob.getInstance().getMySQLManager().getGuildUUIDByChunk(chunk, world);
@@ -91,8 +102,11 @@ public class GuildManager {
     }
 
     public void join(UUID guild, UUID player) {
+        // DELETE INVITATION IF THERE ARE ANY
         OddJob.getInstance().getMySQLManager().deleteInvitation(player);
+        // DELETE PENDINGS IF THERE ARE ANY
         OddJob.getInstance().getMySQLManager().deletePending(player);
+        // ADD GUILDMEMBER
         OddJob.getInstance().getMySQLManager().addGuildMember(guild, player, Role.members);
     }
 
@@ -250,14 +264,14 @@ public class GuildManager {
     }
 
     public void create(String name, Zone zone, boolean invited_only, boolean friendly_fire) {
-        HashMap<String, Object> memberOfGuild = new HashMap<>();
+        HashMap<String, String> memberOfGuild = new HashMap<>();
 
         UUID guild = UUID.randomUUID();
         memberOfGuild.put("name", name);
         memberOfGuild.put("zone", zone.name());
         memberOfGuild.put("uuid", guild.toString());
-        memberOfGuild.put("invited_only", invited_only);
-        memberOfGuild.put("friendly_fire", friendly_fire);
+        memberOfGuild.put("invited_only", Boolean.toString(invited_only));
+        memberOfGuild.put("friendly_fire", Boolean.toString(friendly_fire));
         OddJob.getInstance().getMySQLManager().createGuild(memberOfGuild);
     }
 

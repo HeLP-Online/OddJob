@@ -6,7 +6,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -14,38 +13,35 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class DeathManager {
-    //private HashMap<Location, Material> posLeft = new HashMap<>();
-    //private HashMap<Location, Material> posRight = new HashMap<>();
-    //private HashMap<Location, UUID> posPlayer = new HashMap<>();
-    private HashMap<Location, BukkitTask> task = new HashMap<>();
+    private final HashMap<Location, BukkitTask> task = new HashMap<>();
 
     public void add(Block chest, UUID player) {
-        //posLeft.put(chest.getLocation(),chest.getType());
+
+        // FIND BLOCK TO THE RIGHT
         Block right = chest.getRelative(0, 0, -1);
-        //posRight.put(chest.getLocation(),right.getType());
-        //posPlayer.put(chest.getLocation(),player);
-        OddJob.getInstance().log(chest.getLocation().toString());
+
         // SAVING AS LEFT SIDE
         task.put(chest.getLocation(), new BukkitRunnable() {
-            int i = 300;
+                    int i = 300;
 
-            @Override
-            public void run() {
-                if (i == 300) {
-                    OddJob.getInstance().getMessageManager().sendMessage(player, "Sorry to hear about your death. Your deathchest despawning in 5 min, if you don't get it!");
-                } else if (i == 60) {
-                    OddJob.getInstance().getMessageManager().sendMessage(player, "Deathchest despawning in 1 min.");
-                } else if (i < 20 && i > 0) {
-                    OddJob.getInstance().getMessageManager().sendMessage(player, "Deathchest despawning in " + i + " sec.");
-                } else if (i == 0) {
-                    OddJob.getInstance().getDeathManager().replace(chest.getLocation(), null);
-                    OddJob.getInstance().getMessageManager().sendMessage(player, "All your item from your deathchest is gone, sorry.");
-                    cancel();
-                }
-                i--;
-            }
+                    @Override
+                    public void run() {
+                        if (i == 300) {
+                            OddJob.getInstance().getMessageManager().sendMessage(player, "Sorry to hear about your death. Your deathchest despawning in 5 min, if you don't get it!");
+                        } else if (i == 60) {
+                            OddJob.getInstance().getMessageManager().sendMessage(player, "Deathchest despawning in 1 min.");
+                        } else if (i < 20 && i > 0) {
+                            OddJob.getInstance().getMessageManager().sendMessage(player, "Deathchest despawning in " + i + " sec.");
+                        } else if (i < 1) {
+                            OddJob.getInstance().getDeathManager().replace(chest.getLocation(), player);
+                            OddJob.getInstance().getMessageManager().sendMessage(player, "All your item from your deathchest is gone, sorry.");
+                            cancel();
+                        }
+                        i--;
+                    }
 
-        }.runTaskTimer(OddJob.getInstance(), 20L, 20L));
+                }.runTaskTimer(OddJob.getInstance(), 20L, 20L)
+        );
         OddJob.getInstance().getMySQLManager().addDeathChest(chest.getLocation(), chest.getType(), right.getType(), player);
     }
 
@@ -53,29 +49,24 @@ public class DeathManager {
         // LEFT OR RIGHT?
         if (location.getBlock().getType().equals(Material.CHEST)) {
             Chest chest = (Chest) location.getBlock().getState();
-            if (chest.getInventory().getHolder() instanceof DoubleChest) {
 
-            }
-
-            OddJob.getInstance().log(location.toString());
-            HashMap<String, Object> ret = OddJob.getInstance().getMySQLManager().getDeathChest(location);
+            HashMap<String, String> ret = OddJob.getInstance().getMySQLManager().getDeathChest(location);
             if (!ret.isEmpty()) {
-
+                // EMPTY IT
                 chest.getInventory().clear();
-                //location.getBlock().setType(posLeft.get(location));
-                location.getBlock().setType((Material) ret.get("left"));
+                location.getBlock().setType(Material.valueOf(ret.get("right")));
                 Block right = location.getBlock().getRelative(0, 0, -1);
                 //right.setType(posRight.get(location));
-                right.setType((Material) ret.get("right"));
+                right.setType(Material.valueOf(ret.get("right")));
                 //if (posPlayer.get(location) == player) {
-                UUID owner = (UUID) ret.get("uuid");
+                UUID owner = UUID.fromString(ret.get("uuid"));
                 if (owner == player) {
                     OddJob.getInstance().log("got your own stuff");
                 } else if (player != null) {
                     if (Bukkit.getPlayer(owner).isOnline()) {
                         OddJob.getInstance().getMessageManager().sendMessage(player, "Somebody found your stuff.");
                     }
-                    OddJob.getInstance().log(OddJob.getInstance().getPlayerManager().getName(player) + " found the stuff to " + OddJob.getInstance().getPlayerManager().getName((UUID) ret.get("uuid")));
+                    OddJob.getInstance().log(OddJob.getInstance().getPlayerManager().getName(player) + " found the stuff to " + OddJob.getInstance().getPlayerManager().getName(UUID.fromString(ret.get("uuid"))));
                 } else {
                     OddJob.getInstance().log("clean up");
                 }

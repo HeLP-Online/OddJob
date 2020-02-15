@@ -40,8 +40,8 @@ public class OddJob extends JavaPlugin {
         return instance;
     }
 
-    private static Economy econ = null;
-    private static Permission perms = null;
+    private static final Economy econ = null;
+    private static final Permission perms = null;
 
     public static HashMap<UUID, UUID> inChunk = new HashMap<>(); //player - guild
     public static boolean vault;
