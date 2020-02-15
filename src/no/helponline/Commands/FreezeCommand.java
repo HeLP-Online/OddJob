@@ -19,18 +19,18 @@ public class FreezeCommand implements CommandExecutor, TabCompleter {
             if (strings.length == 1) {
                 Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                    OddJob.getInstance().getMessageManager().danger("Sorry, we can't find " + strings[0], commandSender);
                     return true;
                 }
                 if (OddJob.getInstance().getFreezeManager().get(target.getUniqueId()) != null) {
                     OddJob.getInstance().getFreezeManager().del(target.getUniqueId());
-                    OddJob.getInstance().getMessageManager().sendMessage(commandSender, target.getName() + " is no longer frozen.");
-                    target.sendMessage("The bonechill has left your body.");
+                    OddJob.getInstance().getMessageManager().warning(target.getName() + " is no longer frozen.", commandSender);
+                    OddJob.getInstance().getMessageManager().success("The bonechill has left your body.", target);
                     return true;
                 }
                 OddJob.getInstance().getFreezeManager().add(target.getUniqueId(), target.getLocation());
-                OddJob.getInstance().getMessageManager().sendMessage(commandSender, target.getName() + " is now frozen to the spot.");
-                target.sendMessage("You feel a bonefreezing cold, that freezes your body, stuck at this location");
+                OddJob.getInstance().getMessageManager().success(target.getName() + " is now frozen to the spot.", commandSender);
+                OddJob.getInstance().getMessageManager().warning("You feel a bonefreezing cold, that freezes your body, stuck at this location.", target);
             }
         }
         return true;

@@ -21,6 +21,7 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
             }
             if (strings[0].equalsIgnoreCase("help")) {
                 OddJob.getInstance().log("HELP");
+                //TODO
             } else if (strings[0].equalsIgnoreCase("list")) {
                 List<String> list = OddJob.getInstance().getPlayerManager().getNames();
                 OddJob.getInstance().getMessageManager().console(Arrays.toString(list.toArray()));

@@ -80,16 +80,16 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     String name = args[2];
 
                     if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + args[0], sender);
+                        OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + args[1], sender);
                         return true;
                     }
 
                     if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
                         OddJob.getInstance().getHomesManager().del(uuid, name);
-                        OddJob.getInstance().getMessageManager().success("Home " + name + " deleted from " + args[0], sender);
+                        OddJob.getInstance().getMessageManager().success("Home " + name + " deleted from " + args[1], sender);
                         return true;
                     }
-                    OddJob.getInstance().getMessageManager().warning("No home named " + name + " found at " + args[0], sender);
+                    OddJob.getInstance().getMessageManager().warning("No home named " + name + " found at " + args[1], sender);
                     return true;
                 }
             }
@@ -116,11 +116,11 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     String name = args[2];
                     UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                     if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + args[0], sender);
+                        OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + args[1], sender);
                         return true;
                     }
                     OddJob.getInstance().getHomesManager().add(uuid, name, player.getLocation());
-                    OddJob.getInstance().getMessageManager().success("Home " + name + " set for " + args[0], sender);
+                    OddJob.getInstance().getMessageManager().success("Home " + name + " set for " + args[1], sender);
                     return true;
                 }
                 OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender);
@@ -162,7 +162,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 3) {
                     UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                     if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + args[0], sender);
+                        OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + args[1], sender);
                         return true;
                     }
                     String name = args[2];

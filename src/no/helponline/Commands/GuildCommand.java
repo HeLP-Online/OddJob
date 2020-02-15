@@ -113,7 +113,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
                     UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-                    // player is not accossiated with any guild
+                    // player is not associated with any guild
                     if (guild == null) {
                         guild = OddJob.getInstance().getGuildManager().getGuildInvitation(player.getUniqueId());
                         // has an invitation to a guild
@@ -433,17 +433,6 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                             OddJob.getInstance().getMessageManager().sendMessage(member, "Your guild has got a new member request from " + player.getName());
                         }
                         return true;
-                    }
-                } else {
-                    // TODO when console creating guild
-                    // create guilds like SAFE,WAR,JAIL,ARENA ?
-                }
-            } else if (strings[0].equalsIgnoreCase("leave")) {
-                if (commandSender instanceof Player) {
-                    Player player = (Player) commandSender;
-                    OddJob.getInstance().getGuildManager().leave(player.getUniqueId());
-                    if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) == null) {
-                        OddJob.getInstance().getMessageManager().success("You have successfully left the guild", player.getUniqueId());
                     }
                 } else {
                     // TODO when console creating guild

@@ -33,7 +33,7 @@ public class DeathManager {
                         } else if (i < 20 && i > 0) {
                             OddJob.getInstance().getMessageManager().sendMessage(player, "Deathchest despawning in " + i + " sec.");
                         } else if (i < 1) {
-                            OddJob.getInstance().getDeathManager().replace(chest.getLocation(), player);
+                            OddJob.getInstance().getDeathManager().replace(chest.getLocation(), null);
                             OddJob.getInstance().getMessageManager().sendMessage(player, "All your item from your deathchest is gone, sorry.");
                             cancel();
                         }
@@ -54,13 +54,15 @@ public class DeathManager {
             if (!ret.isEmpty()) {
                 // EMPTY IT
                 chest.getInventory().clear();
-                location.getBlock().setType(Material.valueOf(ret.get("right")));
+                // LEFT BLOCK
+                location.getBlock().setType(Material.valueOf(ret.get("left")));
+                // BLOCK TO THE RIGHT
                 Block right = location.getBlock().getRelative(0, 0, -1);
-                //right.setType(posRight.get(location));
                 right.setType(Material.valueOf(ret.get("right")));
-                //if (posPlayer.get(location) == player) {
+
+                // WHO OWNS IT?
                 UUID owner = UUID.fromString(ret.get("uuid"));
-                if (owner == player) {
+                if (owner.equals(player)) {
                     OddJob.getInstance().log("got your own stuff");
                 } else if (player != null) {
                     if (Bukkit.getPlayer(owner).isOnline()) {
@@ -93,7 +95,15 @@ public class DeathManager {
     }
 
     public void replace(UUID world, double x, double y, double z, Material leftBlock, Material rightBlock) {
-        Block left = new Location(Bukkit.getWorld(world), x, y, z).getBlock();
+        if (Bukkit.getWorld(world) == null) {
+            return;
+        }
+        Location location = new Location(Bukkit.getWorld(world), x, y, z);
+        OddJob.getInstance().log(location.toString());
+        Block left = location.getBlock();
+        if (!left.getType().equals(Material.CHEST)) {
+            return;
+        }
         Chest chest = (Chest) left.getState();
         chest.getInventory().clear();
         left.setType(leftBlock);
