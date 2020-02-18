@@ -3,6 +3,7 @@ package no.helponline.Managers;
 import no.helponline.OddJob;
 import no.helponline.Utils.Arena;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,22 +19,24 @@ import java.util.UUID;
 public class ArenaManager {
     public HashMap<UUID, Arena> editArena = new HashMap<>();
     public ItemStack spawnTool;
-    private HashMap<String, Arena> arenas = new HashMap<>();
-    private HashMap<UUID, Double> health = new HashMap<UUID, Double>();
-    private HashMap<UUID, Integer> food = new HashMap<>();
-    private HashMap<UUID, ItemStack[]> inventory = new HashMap<>();
-    private HashMap<UUID, ItemStack[]> armor = new HashMap<>();
+    private final HashMap<String, Arena> arenas = new HashMap<>();
+    private final HashMap<UUID, Double> health = new HashMap<UUID, Double>();
+    private final HashMap<UUID, Integer> food = new HashMap<>();
+    private final HashMap<UUID, ItemStack[]> inventory = new HashMap<>();
+    private final HashMap<UUID, ItemStack[]> armor = new HashMap<>();
     private Location lobbySpawn;
-    private FileConfiguration config = OddJob.getInstance().getConfig();
+    private final FileConfiguration config = OddJob.getInstance().getConfig();
 
     public ArenaManager() {
         // MAKE SPAWN TOOL
         spawnTool = new ItemStack(Material.STICK);
         ItemMeta im = spawnTool.getItemMeta();
-        im.setDisplayName("Arena Spawn Tool");
-        List<String> lore = new ArrayList<>();
-        lore.add("Right click a block to select as a spawnpoint to the arena");
-        im.setLore(lore);
+        if (im != null) {
+            im.setDisplayName("Arena Spawn Tool");
+            List<String> lore = new ArrayList<>();
+            lore.add("Right click a block to select as a spawnpoint to the arena");
+            im.setLore(lore);
+        }
         spawnTool.setItemMeta(im);
     }
 
@@ -49,13 +52,13 @@ public class ArenaManager {
     public void setLobbySpawn(Player player) {
         config.set("lobby.spawn", serializeLoc(player.getLocation()));
         OddJob.getInstance().saveConfig();
-        OddJob.getInstance().getMessageManager().success("Arena Lobby Spawn set!", player);
+        OddJob.getInstance().getMessageManager().success("Arena Lobby Spawn set!", player, false);
     }
 
     public void addPlayer(Player player, String arenaName) {
         Arena arena = getArena(arenaName);
         if (arena == null) {
-            OddJob.getInstance().getMessageManager().warning("Invalid arena", player);
+            OddJob.getInstance().getMessageManager().warning("Invalid arena", player, false);
             return;
         }
 
@@ -188,7 +191,10 @@ public class ArenaManager {
     }
 
     public String serializeLoc(Location l) {
-        return l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getYaw() + "," + l.getPitch();
+        String ret = "";
+        if (l.getWorld() != null)
+            ret = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getYaw() + "," + l.getPitch();
+        return ret;
     }
 
     public Location deserializeLoc(String string) {
@@ -204,17 +210,17 @@ public class ArenaManager {
         Arena arena = getArena(name);
         if (arena != null) {
             if (arena.getQueue().contains(player)) {
-                OddJob.getInstance().getMessageManager().warning("You are already in queue for " + arena.getName(), player);
+                OddJob.getInstance().getMessageManager().warning("You are already in queue for " + ChatColor.GOLD + arena.getName(), player, false);
                 return;
             }
             if (arena.getPlayers().contains(player)) {
-                OddJob.getInstance().getMessageManager().danger("! You are already in the arena " + arena.getName(), player);
+                OddJob.getInstance().getMessageManager().danger("! You are already in the arena " + ChatColor.GOLD + arena.getName(), player, false);
                 return;
             }
             arena.getQueue().add(player);
-            OddJob.getInstance().getMessageManager().success("You are now queued up for " + arena.getName(), player);
+            OddJob.getInstance().getMessageManager().success("You are now queued up for " + ChatColor.GOLD + arena.getName(), player, true);
         } else {
-            OddJob.getInstance().getMessageManager().warning("Sorry, we cant find arena named " + name, player);
+            OddJob.getInstance().getMessageManager().warning("Sorry, we cant find arena named " + ChatColor.GOLD + name, player, false);
         }
 
     }
@@ -226,7 +232,7 @@ public class ArenaManager {
                 editArena.put(player.getUniqueId(), arena);
                 player.getInventory().addItem(spawnTool);
             } else {
-                OddJob.getInstance().getMessageManager().warning("Sorry, we cant find arena named " + name, player);
+                OddJob.getInstance().getMessageManager().warning("Sorry, we cant find arena named " + ChatColor.GOLD + name, player, false);
             }
         }
     }

@@ -18,7 +18,7 @@ public class FeedCommand implements CommandExecutor, TabCompleter {
         if (strings.length == 1) {
             target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
             if (target == null || !target.isOnline()) {
-                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender,false);
                 return true;
             }
         }
@@ -30,9 +30,9 @@ public class FeedCommand implements CommandExecutor, TabCompleter {
         if (target != null) {
             target.setFoodLevel(20);
             if (commandSender instanceof Player && !commandSender.equals(target)) {
-                OddJob.getInstance().getMessageManager().success(target.getName() + " has been feed.", commandSender);
+                OddJob.getInstance().getMessageManager().success(target.getName() + " has been feed.", commandSender,true);
             }
-            OddJob.getInstance().getMessageManager().success("You have been feed", target.getUniqueId());
+            OddJob.getInstance().getMessageManager().success("You have been feed", target.getUniqueId(),false);
         }
         return true;
     }

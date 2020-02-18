@@ -17,7 +17,7 @@ public class InvseeCommand implements CommandExecutor, TabCompleter {
             if (!(commandSender instanceof Player)) return true;
             Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
             if (target == null) {
-                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender,false);
                 return true;
             }
             Player player = (Player) commandSender;

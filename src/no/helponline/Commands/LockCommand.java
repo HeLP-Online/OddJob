@@ -40,8 +40,8 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
                     Player player = (Player) sender;
                     player.getInventory().addItem(OddJob.getInstance().getLockManager().makeKey(player.getUniqueId()));
-                    OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "This is a key to all your chests, keep in mind who you share it with.");
-                    OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "! " + ChatColor.RESET + "Stolen item or lost keys will not be refunded.");
+                    OddJob.getInstance().getMessageManager().info(ChatColor.RED + "! " + ChatColor.RESET + "This is a key to all your chests, keep in mind who you share it with.",player,false);
+                    OddJob.getInstance().getMessageManager().info(ChatColor.RED + "! " + ChatColor.RESET + "Stolen item or lost keys will not be refunded.",player,false);
                 } else if (args[0].equalsIgnoreCase("lock") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;

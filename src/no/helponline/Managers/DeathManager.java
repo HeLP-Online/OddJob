@@ -2,6 +2,7 @@ package no.helponline.Managers;
 
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,14 +28,14 @@ public class DeathManager {
                     @Override
                     public void run() {
                         if (i == 300) {
-                            OddJob.getInstance().getMessageManager().sendMessage(player, "Sorry to hear about your death. Your deathchest despawning in 5 min, if you don't get it!");
+                            OddJob.getInstance().getMessageManager().info("Sorry to hear about your death. Your deathchest despawning in " + ChatColor.WHITE + "5" + ChatColor.RESET + " min, if you don't get it!", player,true);
                         } else if (i == 60) {
-                            OddJob.getInstance().getMessageManager().sendMessage(player, "Deathchest despawning in 1 min.");
-                        } else if (i < 20 && i > 0) {
-                            OddJob.getInstance().getMessageManager().sendMessage(player, "Deathchest despawning in " + i + " sec.");
+                            OddJob.getInstance().getMessageManager().info("Deathchest despawning in " + ChatColor.WHITE + "1" + ChatColor.RESET + " min.", player,false);
+                        } else if (i < 10 && i > 0) {
+                            OddJob.getInstance().getMessageManager().danger("Deathchest despawning in " + ChatColor.WHITE + i + ChatColor.RESET + " sec.", player, false);
                         } else if (i < 1) {
                             OddJob.getInstance().getDeathManager().replace(chest.getLocation(), null);
-                            OddJob.getInstance().getMessageManager().sendMessage(player, "All your item from your deathchest is gone, sorry.");
+                            OddJob.getInstance().getMessageManager().danger("All your item from your deathchest is gone, sorry.", player,true);
                             cancel();
                         }
                         i--;
@@ -62,15 +63,13 @@ public class DeathManager {
 
                 // WHO OWNS IT?
                 UUID owner = UUID.fromString(ret.get("uuid"));
-                if (owner.equals(player)) {
-                    OddJob.getInstance().log("got your own stuff");
-                } else if (player != null) {
-                    if (Bukkit.getPlayer(owner).isOnline()) {
-                        OddJob.getInstance().getMessageManager().sendMessage(player, "Somebody found your stuff.");
+                if (!owner.equals(player)) {
+                    if (player != null) {
+                        if (Bukkit.getPlayer(owner).isOnline()) {
+                            OddJob.getInstance().getMessageManager().danger("Somebody found your stuff.", player,false);
+                        }
+                        OddJob.getInstance().getMessageManager().console(ChatColor.AQUA+OddJob.getInstance().getPlayerManager().getName(player) +ChatColor.RESET+ " found the stuff from "+ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(UUID.fromString(ret.get("uuid"))));
                     }
-                    OddJob.getInstance().log(OddJob.getInstance().getPlayerManager().getName(player) + " found the stuff to " + OddJob.getInstance().getPlayerManager().getName(UUID.fromString(ret.get("uuid"))));
-                } else {
-                    OddJob.getInstance().log("clean up");
                 }
                 remove(location);
             }

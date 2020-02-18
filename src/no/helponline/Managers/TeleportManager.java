@@ -2,6 +2,7 @@ package no.helponline.Managers;
 
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -22,7 +23,7 @@ public class TeleportManager {
             return false;
         }
         if (hasRequest(from)) {
-            OddJob.getInstance().getMessageManager().warning("Rewriting existing TPA request to " + OddJob.getInstance().getPlayerManager().getName(teleportAccept.get(from)), from);
+            OddJob.getInstance().getMessageManager().warning("Rewriting existing TPA request to " + ChatColor.DARK_AQUA + OddJob.getInstance().getPlayerManager().getName(teleportAccept.get(from)), from, false);
         }
         teleportAccept.put(from, to);
         startTimer(from, to);
@@ -42,8 +43,8 @@ public class TeleportManager {
                     // player (sends request) // target (teleport to)
                     Player target = OddJob.getInstance().getPlayerManager().getPlayer(from);
                     Player destination = OddJob.getInstance().getPlayerManager().getPlayer(teleportAccept.get(from));
-                    OddJob.getInstance().getMessageManager().success("Your request has been accepted by " + destination.getName(), target.getUniqueId());
-                    OddJob.getInstance().getMessageManager().success("You have accepted the request from " + target.getName(), destination.getUniqueId());
+                    OddJob.getInstance().getMessageManager().success("Your request has been accepted by " + ChatColor.DARK_AQUA + destination.getName(), target.getUniqueId(), false);
+                    OddJob.getInstance().getMessageManager().success("You have accepted the request from " + ChatColor.DARK_AQUA + target.getName(), destination.getUniqueId(), true);
                     remove(from);
                     teleport(target, destination, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
                     if (reset.containsKey(from)) reset.get(from).cancel();
@@ -66,20 +67,26 @@ public class TeleportManager {
         }
         if (test) {
             OddJob.getInstance().getMySQLManager().updateTeleport(target);
+            UUID t = target.getUniqueId();
             teleportTimer.put(target.getUniqueId(), new BukkitRunnable() {
                 int i = 10;
 
                 @Override
                 public void run() {
                     if (OddJob.getInstance().getPlayerManager().isInCombat(target.getUniqueId())) {
-                        target.sendMessage("Interrupted, in combat");
+                        if (target.isOnline())
+                            OddJob.getInstance().getMessageManager().danger("Interrupted, in combat!", t, true);
                         cancel();
                     }
                     if (i > 0) {
-                        target.sendMessage("Teleporting in " + i);
+                        if (target.isOnline())
+                            OddJob.getInstance().getMessageManager().info("Teleporting in " + ChatColor.WHITE + i, t, false);
                     } else {
                         teleportTimer.remove(target.getUniqueId());
-                        target.teleport(destination, cause);
+                        if (target.isOnline()) {
+                            OddJob.getInstance().getMessageManager().success("Teleporting!", t, true);
+                            target.teleport(destination, cause);
+                        }
                         cancel();
                     }
                     i--;
@@ -102,20 +109,28 @@ public class TeleportManager {
         }
         if (test) {
             OddJob.getInstance().getMySQLManager().updateTeleport(target);
+            UUID t = target.getUniqueId();
             teleportTimer.put(target.getUniqueId(), new BukkitRunnable() {
                 int i = 10;
 
                 @Override
                 public void run() {
                     if (OddJob.getInstance().getPlayerManager().isInCombat(target.getUniqueId())) {
-                        target.sendMessage("Interrupted, in combat");
+                        if (target.isOnline())
+                            OddJob.getInstance().getMessageManager().danger("Interrupted, in combat!", t, true);
                         cancel();
+                        return;
                     }
                     if (i > 0) {
-                        target.sendMessage("Teleporting in " + i);
+                        if (target.isOnline())
+                            OddJob.getInstance().getMessageManager().info("Teleporting in " + ChatColor.WHITE + i, t, false);
                     } else {
-                        teleportTimer.remove(target.getUniqueId());
-                        target.teleport(destination, cause);
+                        teleportTimer.remove(t);
+
+                        if (target.isOnline()) {
+                            OddJob.getInstance().getMessageManager().success("Teleporting now!", t, true);
+                            target.teleport(destination, cause);
+                        }
                         cancel();
                     }
                     i--;
@@ -132,8 +147,8 @@ public class TeleportManager {
                     // player (sends request) // target (teleport to)
                     Player player = OddJob.getInstance().getPlayerManager().getPlayer(teleportAccept.get(from));
                     Player target = OddJob.getInstance().getPlayerManager().getPlayer(from);
-                    OddJob.getInstance().getMessageManager().danger("Your request has been denied by " + player.getName(), target.getUniqueId());
-                    OddJob.getInstance().getMessageManager().danger("You have denied the request from " + target.getName(), player.getUniqueId());
+                    OddJob.getInstance().getMessageManager().danger("Your request has been denied by " + ChatColor.DARK_AQUA + player.getName(), target.getUniqueId(), false);
+                    OddJob.getInstance().getMessageManager().danger("You have denied the request from " + ChatColor.DARK_AQUA + target.getName(), player.getUniqueId(), true);
                     remove(from);
                     if (reset.containsKey(from)) reset.get(from).cancel();
                 }
@@ -150,11 +165,11 @@ public class TeleportManager {
                     reset.remove(from);
                     OfflinePlayer player = Bukkit.getOfflinePlayer(from);
                     if (player.isOnline()) {
-                        OddJob.getInstance().getMessageManager().sendMessage(player.getUniqueId(), "The teleport request has timed out");
+                        OddJob.getInstance().getMessageManager().danger("The teleport request has timed out", player.getUniqueId(), false);
                     }
                     player = Bukkit.getOfflinePlayer(to);
                     if (player.isOnline()) {
-                        OddJob.getInstance().getMessageManager().sendMessage(player.getUniqueId(), "The teleport request has timed out");
+                        OddJob.getInstance().getMessageManager().danger("The teleport request has timed out", player.getUniqueId(), false);
                     }
                 }
             }
@@ -164,7 +179,6 @@ public class TeleportManager {
     }
 
     private void remove(UUID from) {
-        OddJob.getInstance().log("Removing teleport request");
         teleportAccept.remove(from);
     }
 

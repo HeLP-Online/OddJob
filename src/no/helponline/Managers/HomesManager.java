@@ -30,7 +30,7 @@ public class HomesManager {
         Location loc = OddJob.getInstance().getMySQLManager().getHome(uuid, name);
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(location.getChunk(), location.getWorld());
         if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid))) {
-            OddJob.getInstance().getMessageManager().danger("You can't set home inside someone elses guild", uuid);
+            OddJob.getInstance().getMessageManager().danger("You can't set home inside someone else guild", uuid,false);
             return true;
         }
         if (loc == null) {

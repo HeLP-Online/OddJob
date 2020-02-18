@@ -74,7 +74,7 @@ public class PlayerManager {
             request = false;
         } else if (OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to)) { // false
             OddJob.getInstance().log("tpa deny");
-            OddJob.getInstance().getMessageManager().warning(getName(to) + " is denying all request!", from);
+            OddJob.getInstance().getMessageManager().warning(getName(to) + " is denying all request!", from, false);
             request = false;
         }
         OddJob.getInstance().log("request : deny");
@@ -122,6 +122,7 @@ public class PlayerManager {
         inCombat.remove(player);
         String s = ChatColor.GREEN + "Out of combat";
         PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
-        (((CraftPlayer) Bukkit.getPlayer(player)).getHandle()).playerConnection.sendPacket(title);
+        if (OddJob.getInstance().getPlayerManager().getOffPlayer(player).isOnline())
+            (((CraftPlayer) Bukkit.getPlayer(player)).getHandle()).playerConnection.sendPacket(title);
     }
 }

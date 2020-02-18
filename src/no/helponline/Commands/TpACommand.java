@@ -5,6 +5,7 @@ import net.minecraft.server.v1_15_R1.PacketPlayOutChat;
 import net.minecraft.server.v1_15_R1.PlayerConnection;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,29 +26,28 @@ public class TpACommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (strings[0].equalsIgnoreCase("help")) {
-                OddJob.getInstance().getMessageManager().danger("Use: /tpa <name>", commandSender);
+                OddJob.getInstance().getMessageManager().danger("Use: /tpa <name>", commandSender,false);
                 return true;
             }
             Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
             if (target == null || !target.isOnline()) {
-                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                OddJob.getInstance().getMessageManager().danger("Sorry, we can't find " + strings[0], commandSender,false);
                 return true;
             }
             Player player = (Player) commandSender;
             if (OddJob.getInstance().getTeleportManager().hasRequest(player.getUniqueId())) {
-                OddJob.getInstance().getMessageManager().danger("You have already sent an request to " + strings[0], player.getUniqueId());
+                OddJob.getInstance().getMessageManager().danger("You have already sent an request to " + strings[0], player.getUniqueId(),false);
                 return true;
             }
             if (OddJob.getInstance().getTeleportManager().tpa(player.getUniqueId(), target.getUniqueId())) { // player (sends request) // target (teleport to)
-                OddJob.getInstance().getMessageManager().warning("You have requested to be teleported to " + target.getName(), player.getUniqueId());
-                OddJob.getInstance().getMessageManager().warning(player.getName() + " want to be teleported to you. To accept this, you can click on 'ACCEPT'", target.getUniqueId());
+                OddJob.getInstance().getMessageManager().success("You have requested to be teleported to " + ChatColor.DARK_AQUA+target.getName(), player.getUniqueId(),false);
+                OddJob.getInstance().getMessageManager().warning(ChatColor.DARK_AQUA+player.getName() + ChatColor.YELLOW+" want to be teleported to you. To accept this, you can click on 'ACCEPT'", target.getUniqueId(),false);
                 PlayerConnection connection = ((CraftPlayer) target).getHandle().playerConnection;
                 PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"ACCEPT\",\"color\":\"dark_green\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpaccept " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Accepting the teleport request\",\"color\":\"gold\"}]}}}"));
                 connection.sendPacket(packet);
                 packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"DENY\",\"color\":\"dark_red\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpdeny " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Declines the teleport request\",\"color\":\"gold\"}]}}}"));
                 connection.sendPacket(packet);
             }
-            OddJob.getInstance().log("tpa complete");
         }
         return true;
     }

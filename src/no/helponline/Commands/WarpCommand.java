@@ -22,9 +22,9 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
                 }
                 if (!OddJob.getInstance().getWarpManager().exists(strings[0])) {
                     OddJob.getInstance().getWarpManager().addWarp(player, strings[0], password);
-                    OddJob.getInstance().getMessageManager().success("Warp " + strings[0] + " added.", commandSender);
+                    OddJob.getInstance().getMessageManager().success("Warp " + strings[0] + " added.", commandSender,true);
                 } else {
-                    OddJob.getInstance().getMessageManager().danger("Sorry, name " + strings[0] + " already exists.", commandSender);
+                    OddJob.getInstance().getMessageManager().danger("Sorry, name " + strings[0] + " already exists.", commandSender,false);
                 }
             }
         }
@@ -36,9 +36,9 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
                 }
                 if (OddJob.getInstance().getWarpManager().exists(strings[0])) {
                     OddJob.getInstance().getWarpManager().delWarp(strings[0], password);
-                    OddJob.getInstance().getMessageManager().success("Warp " + strings[0] + " deleted.", commandSender);
+                    OddJob.getInstance().getMessageManager().success("Warp " + strings[0] + " deleted.", commandSender,true);
                 } else {
-                    OddJob.getInstance().getMessageManager().danger("Sorry, can't find " + strings[0] + ", or the password is wrong.", commandSender);
+                    OddJob.getInstance().getMessageManager().danger("Sorry, can't find " + strings[0] + ", or the password is wrong.", commandSender,false);
                 }
             }
         }
@@ -48,10 +48,10 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
                 if (strings.length >= 1) {
                     if (strings.length == 2) {
                         if (OddJob.getInstance().getWarpManager().warp(player, strings[0], strings[1]))
-                            OddJob.getInstance().getMessageManager().success("Warped to " + strings[0] + ". Zoooom Zooooooooooom.", commandSender);
+                            OddJob.getInstance().getMessageManager().success("Warped to " + strings[0] + ". Zoooom Zooooooooooom.", commandSender,false);
                     } else {
                         if (OddJob.getInstance().getWarpManager().warp(player, strings[0]))
-                            OddJob.getInstance().getMessageManager().success("Warped to " + strings[0] + ". Zoooom Zooooooooooom.", commandSender);
+                            OddJob.getInstance().getMessageManager().success("Warped to " + strings[0] + ". Zoooom Zooooooooooom.", commandSender,false);
                     }
                 }
             }

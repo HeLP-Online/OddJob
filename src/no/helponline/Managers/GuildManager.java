@@ -3,10 +3,7 @@ package no.helponline.Managers;
 import no.helponline.OddJob;
 import no.helponline.Utils.Role;
 import no.helponline.Utils.Zone;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -57,7 +54,7 @@ public class GuildManager {
 
             // CLAIM CHUNK
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
-            OddJob.getInstance().getMessageManager().sendMessage(player, "Claiming chunk X: " + chunk.getX() + "; Z: " + chunk.getZ() + "; to " + getZoneByGuild(guild).name());
+            OddJob.getInstance().getMessageManager().success("Claiming chunk " + ChatColor.GOLD + "X:" + chunk.getX() + " Y:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getZoneByGuild(guild).name(), player, true);
         }
     }
 
@@ -68,11 +65,11 @@ public class GuildManager {
         UUID guild = getGuildUUIDByMember(player.getUniqueId());
         if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
             // ALREADY CLAIMED
-            player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
+            OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())), player, false);
         } else {
             // CLAIM CHUNK
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
-            player.sendMessage("You have claimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
+            OddJob.getInstance().getMessageManager().success("You have claimed " + ChatColor.GOLD + "X:" + chunk.getX() + " Z:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
         }
     }
 
@@ -84,11 +81,11 @@ public class GuildManager {
         // DO CHUNK HAVE A GUILD
         UUID comp = getGuildUUIDByChunk(chunk, player.getWorld());
         if (!comp.equals(guild)) {
-            player.sendMessage("Sorry, you are not associated with the guild who claimed this chunk");
+            OddJob.getInstance().getMessageManager().danger("Sorry, you are not associated with the guild who claimed this chunk", player, false);
         } else {
             // UNCLAIM CHUNK
             OddJob.getInstance().getMySQLManager().deleteGuildChunks(guild, chunk, player);
-            player.sendMessage("You have unclaimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
+            OddJob.getInstance().getMessageManager().success("You have unclaimed " + ChatColor.GOLD + "X:" + chunk.getX() + " Z:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " from " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
         }
     }
 
@@ -125,14 +122,14 @@ public class GuildManager {
             if (autoClaim.containsKey(player.getUniqueId())) {
                 if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
                     autoClaim.put(player.getUniqueId(), guild);
-                    OddJob.getInstance().getMessageManager().sendMessage(player, "Changing Zone auto claim to " + getGuildNameByUUID(guild));
+                    OddJob.getInstance().getMessageManager().warning("Changing Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
                 } else {
                     autoClaim.remove(player.getUniqueId());
-                    OddJob.getInstance().getMessageManager().sendMessage(player, "Turning off Zone auto claim to " + getGuildNameByUUID(guild));
+                    OddJob.getInstance().getMessageManager().warning("Turning off Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
                 }
             } else {
                 autoClaim.put(player.getUniqueId(), guild);
-                OddJob.getInstance().getMessageManager().sendMessage(player, "You are now claiming zones for " + getGuildNameByUUID(guild));
+                OddJob.getInstance().getMessageManager().warning("You are now claiming zones for " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
                 OddJob.getInstance().getGuildManager().claim(player);
             }
         }
@@ -155,18 +152,47 @@ public class GuildManager {
     }
 
     public Role getGuildMemberRole(UUID player) {
-        OddJob.getInstance().log("role");
         return OddJob.getInstance().getMySQLManager().getGuildMemberRole(player);
     }
 
     public Role promoteMember(UUID guildUUID, UUID targetUUID) {
-        //TODO
-        return null;
+        Role prevRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
+        Role newRole = null;
+        switch (prevRole.level()) {
+            case 11:
+                newRole = Role.mods;
+                break;
+            case 22:
+                newRole = Role.admins;
+                break;
+            case 33:
+                newRole = Role.guildMaster;
+                break;
+        }
+        if (newRole != null) {
+            OddJob.getInstance().getMySQLManager().moteGuild(guildUUID, targetUUID, newRole.name());
+        }
+        return newRole;
     }
 
     public Role demoteMember(UUID guildUUID, UUID targetUUID) {
-        //TODO
-        return null;
+        Role prevRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
+        Role newRole = null;
+        switch (prevRole.level()) {
+            case 22:
+                newRole = Role.members;
+                break;
+            case 33:
+                newRole = Role.mods;
+                break;
+            case 99:
+                newRole = Role.admins;
+                break;
+        }
+        if (newRole != null) {
+            OddJob.getInstance().getMySQLManager().moteGuild(guildUUID, targetUUID, newRole.name());
+        }
+        return newRole;
     }
 
     public void changeName(UUID guild, String name) {
@@ -223,16 +249,13 @@ public class GuildManager {
         List<String> ret = new ArrayList<>();
         for (UUID guild : guilds) {
             if (isGuildOpen(guild)) {
-                OddJob.getInstance().log("open");
                 ret.add(getGuildNameByUUID(guild));
             } else if (invited != null) {
                 if (guild.equals(invited)) {
-                    OddJob.getInstance().log("invited");
                     ret.add(getGuildNameByUUID(guild));
                 }
             }
         }
-        OddJob.getInstance().log("ret: " + ret.size());
         return ret;
     }
 
@@ -256,10 +279,10 @@ public class GuildManager {
         Chunk chunk = player.getLocation().getChunk();
         UUID guild = getGuildUUIDByZone(zone);
         if (getGuildUUIDByChunk(chunk, player.getWorld()) != null) {
-            player.sendMessage("This chunk is owned by " + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())));
+            OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(chunk, player.getWorld())), player, false);
         } else {
             OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
-            player.sendMessage("You have claimed " + chunk.toString() + " to " + getGuildNameByUUID(guild));
+            OddJob.getInstance().getMessageManager().success("You have claimed " + ChatColor.GOLD + "X:" + chunk.getX() + " Z:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
         }
     }
 
@@ -279,10 +302,10 @@ public class GuildManager {
         join(guild, target);
         OddJob.getInstance().getMySQLManager().deletePending(target);
         OddJob.getInstance().getMySQLManager().deleteInvitation(target);
-        OddJob.getInstance().getMessageManager().success("Welcome to " + getGuildNameByUUID(guild) + " guild!", target);
+        OddJob.getInstance().getMessageManager().success("Welcome to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild) + ChatColor.RESET + " guild!", target, true);
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (OddJob.getInstance().getGuildManager().getGuildMembers(guild).contains(p.getUniqueId()) && p.getUniqueId() != target) {
-                p.sendMessage("Please welcome " + OddJob.getInstance().getPlayerManager().getName(target) + " to the guild");
+                OddJob.getInstance().getMessageManager().success("Please welcome " + ChatColor.GOLD + OddJob.getInstance().getPlayerManager().getName(target) + ChatColor.RESET + " to the guild", p, false);
             }
         }
     }
@@ -290,11 +313,11 @@ public class GuildManager {
     public void deny(UUID guild, UUID target) {
         OddJob.getInstance().getMySQLManager().deletePending(target);
         OddJob.getInstance().getMySQLManager().deleteInvitation(target);
-        OddJob.getInstance().getMessageManager().sendMessage(target, "You have declined " + OddJob.getInstance().getPlayerManager().getName(target) + " entrance to " + getGuildNameByUUID(guild) + "!");
+        OddJob.getInstance().getMessageManager().danger("You have declined " + ChatColor.GOLD + OddJob.getInstance().getPlayerManager().getName(target) + ChatColor.RESET + " entrance to guild!", target, true);
         for (UUID member : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
             OfflinePlayer op = Bukkit.getOfflinePlayer(member);
             if (op.isOnline()) {
-                op.getPlayer().sendMessage("Request from " + OddJob.getInstance().getPlayerManager().getName(target) + " to join " + getGuildNameByUUID(guild) + " has been declined");
+                OddJob.getInstance().getMessageManager().warning("Request from " + ChatColor.GOLD + OddJob.getInstance().getPlayerManager().getName(target) + ChatColor.RESET + " to join " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild) + ChatColor.RESET + " has been declined", op.getUniqueId(), false);
             }
         }
     }

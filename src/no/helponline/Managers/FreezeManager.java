@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class FreezeManager {
-    private HashMap<UUID, Location> frozen = new HashMap<>();
+    private final HashMap<UUID, Location> frozen = new HashMap<>();
+
     public void add(UUID player, Location location) {
         frozen.put(player, location);
     }

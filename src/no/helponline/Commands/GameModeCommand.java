@@ -36,7 +36,7 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
             if (strings.length == 2) {
                 target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[1]));
                 if (target == null || !target.isOnline()) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                     return true;
                 }
             } else if (strings.length == 1 && commandSender instanceof Player) {
@@ -45,7 +45,7 @@ public class GameModeCommand implements CommandExecutor, TabCompleter {
 
             if (target != null) {
                 OddJob.getInstance().getPlayerManager().setGameMode(target, gm);
-                OddJob.getInstance().getMessageManager().success("Gamemode changed to " + gm.name(), target.getUniqueId());
+                OddJob.getInstance().getMessageManager().success("Gamemode changed to " + gm.name(), target.getUniqueId(),true);
             }
         }
         return true;

@@ -22,21 +22,21 @@ public class TpCommand implements CommandExecutor, TabCompleter {
             if (strings.length == 2) {
                 Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender,false);
                     return true;
                 }
                 Player destination = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[1]));
                 if (destination == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                     return true;
                 }
 
                 OddJob.getInstance().getTeleportManager().teleport(target, destination, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
-                OddJob.getInstance().getMessageManager().success("You have been teleported to " + destination.getName(), target.getUniqueId());
+                OddJob.getInstance().getMessageManager().success("You have been teleported to " + destination.getName(), target.getUniqueId(),true);
             } else if (strings.length == 4 || strings.length == 5) {
                 Player player = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
                 if (player == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender,false);
                     return true;
                 }
                 int x = Integer.parseInt(strings[1]);
@@ -45,16 +45,16 @@ public class TpCommand implements CommandExecutor, TabCompleter {
                 World world = (strings.length == 5) ? Bukkit.getWorld(strings[4]) : player.getWorld();
 
                 OddJob.getInstance().getTeleportManager().teleport(player, new Location(world, x, y, z), 0, PlayerTeleportEvent.TeleportCause.COMMAND);
-                OddJob.getInstance().getMessageManager().success("You have been teleported to a specific location", player.getUniqueId());
+                OddJob.getInstance().getMessageManager().success("You have been teleported to a specific location", player.getUniqueId(),true);
             } else if (commandSender instanceof Player && strings.length == 1) {
                 Player target = (Player) commandSender;
                 Player destination = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
                 if (destination == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender,false);
                     return true;
                 }
                 OddJob.getInstance().getTeleportManager().teleport(target, destination, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
-                OddJob.getInstance().getMessageManager().success("You have been teleported to " + destination.getName(), target.getUniqueId());
+                OddJob.getInstance().getMessageManager().success("You have been teleported to " + destination.getName(), target.getUniqueId(),true);
             }
             //TODO permissions
         }

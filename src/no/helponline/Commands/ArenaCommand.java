@@ -72,7 +72,7 @@ public class ArenaCommand implements CommandExecutor, TabCompleter {
                 OddJob.getInstance().getArenaManager().setLobbySpawn(player);
             } else if (strings[0].equalsIgnoreCase("lobby")) {
                 if (OddJob.getInstance().getTeleportManager().teleport(player, OddJob.getInstance().getArenaManager().getLobbySpawn(), 0, PlayerTeleportEvent.TeleportCause.COMMAND)) {
-                    OddJob.getInstance().getMessageManager().success("Teleporting to Arena Lobby Spawn", player);
+                    OddJob.getInstance().getMessageManager().success("Teleporting to Arena Lobby Spawn", player,true);
                 }
             }
         }

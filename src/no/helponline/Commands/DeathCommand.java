@@ -15,7 +15,7 @@ public class DeathCommand implements CommandExecutor {
             OddJob.getInstance().log("int error");
         }
         int i = OddJob.getInstance().getDeathManager().timeCheck(timeCheck);
-        OddJob.getInstance().getMessageManager().sendMessage(commandSender, "Replaced " + i + " chests");
+        OddJob.getInstance().getMessageManager().console("Replaced " + i + " chests");
         return true;
     }
 }

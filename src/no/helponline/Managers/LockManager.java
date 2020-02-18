@@ -18,13 +18,13 @@ public class LockManager {
     public ItemStack unlockWand = new ItemStack(Material.TRIPWIRE_HOOK);
     public ItemStack infoWand = new ItemStack(Material.MAP);
     public Collection<ItemStack> keys = new ArrayList<>();
-    private ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
+    private final ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
     private ItemStack skeletonKey = new ItemStack(Material.REDSTONE_TORCH);
-    private Collection<UUID> locking = new ArrayList<>();
-    private Collection<UUID> unlocking = new ArrayList<>();
-    private Collection<UUID> lockinfo = new ArrayList<>();
+    private final Collection<UUID> locking = new ArrayList<>();
+    private final Collection<UUID> unlocking = new ArrayList<>();
+    private final Collection<UUID> lockinfo = new ArrayList<>();
     private HashMap<Location, UUID> locked = new HashMap<>();
-    private HashMap<Location, Location> two = new HashMap<>();
+    private final HashMap<Location, Location> two = new HashMap<>();
     private HashMap<UUID, UUID> armor = new HashMap<>();
 
     public LockManager() {
@@ -63,25 +63,25 @@ public class LockManager {
     public void infolock(UUID uniqueId) {
         if (lockinfo.contains(uniqueId)) {
             remove(uniqueId);
-            OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "No longer showing lock info.");
+            OddJob.getInstance().getMessageManager().warning("No longer showing lock info.", uniqueId, false);
             return;
         }
         remove(uniqueId);
         lockinfo.add(uniqueId);
         OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(infoWand);
-        OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Right click with the tool to show it's owner.");
+        OddJob.getInstance().getMessageManager().info("Right click with the tool to show it's owner.", uniqueId, false);
     }
 
     public void locking(UUID uniqueId) {
         if (locking.contains(uniqueId)) {
             remove(uniqueId);
-            OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Aborting");
+            OddJob.getInstance().getMessageManager().warning("Aborting", uniqueId, false);
             return;
         }
         remove(uniqueId);
         locking.add(uniqueId);
         OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(lockWand);
-        OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Right click with the tool to lock it.");
+        OddJob.getInstance().getMessageManager().info("Right click with the tool to lock it.", uniqueId, false);
     }
 
     public void remove(UUID uniqueId) {
@@ -98,13 +98,13 @@ public class LockManager {
     public void unlocking(UUID uniqueId) {
         if (unlocking.contains(uniqueId)) {
             remove(uniqueId);
-            OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Aborting");
+            OddJob.getInstance().getMessageManager().warning("Aborting", uniqueId, false);
             return;
         }
         remove(uniqueId);
         unlocking.add(uniqueId);
         OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(unlockWand);
-        OddJob.getInstance().getMessageManager().sendMessage(uniqueId, "Right click with the tool unlock it.");
+        OddJob.getInstance().getMessageManager().info("Right click with the tool unlock it.", uniqueId, false);
     }
 
     public boolean isLocking(UUID uuid) {
@@ -145,9 +145,6 @@ public class LockManager {
     }
 
     public UUID isLocked(Entity entity) {
-        /*if (armor.containsKey(entity.getUniqueId())) {
-            return armor.get(entity.getUniqueId());
-        }*/
         return OddJob.getInstance().getMySQLManager().hasLock(entity);
     }
 

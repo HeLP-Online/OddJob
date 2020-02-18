@@ -54,11 +54,11 @@ public class ArenaMechanics implements Listener {
             } else {
                 arena.getSpawn().put(arena.next, block.getLocation().add(0, 1, 0));
                 block.setType(Material.PINK_WOOL);
-                OddJob.getInstance().getMessageManager().success("Spawn point " + arena.next + "/" + arena.getMaxPlayers() + " set.", player);
+                OddJob.getInstance().getMessageManager().success("Spawn point " + arena.next + "/" + arena.getMaxPlayers() + " set.", player,false);
                 arena.next++;
                 if (arena.next > arena.getMaxPlayers()) {
                     arena.next = 1;
-                    OddJob.getInstance().getMessageManager().success("All spawn points are now set. You can now start the game.", player);
+                    OddJob.getInstance().getMessageManager().success("All spawn points are now set. You can now start the game.", player,false);
                     OddJob.getInstance().getArenaManager().createArena(arena);
                     cancel(player);
                 }

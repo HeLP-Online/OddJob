@@ -8,72 +8,79 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class MessageManager {
-    public void success(String message, CommandSender sender) {
+    public void success(String message, CommandSender sender, boolean console) {
         sender.sendMessage(ChatColor.GREEN + message);
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.GREEN + message);
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.GREEN + message);
         } else {
             Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + message);
         }
     }
 
-    public void success(String message, UUID sender) {
+    public void success(String message, UUID sender, boolean console) {
         Player player = Bukkit.getPlayer(sender);
-        player.sendMessage(ChatColor.GREEN + message);
-        Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.GREEN + message);
+        if (player != null) {
+            player.sendMessage(ChatColor.GREEN + message);
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.GREEN + message);
+        }
     }
 
-    public void warning(String message, CommandSender sender) {
+    public void warning(String message, CommandSender sender, boolean console) {
         sender.sendMessage(ChatColor.YELLOW + message);
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.YELLOW + message);
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.YELLOW + message);
         } else {
             Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + message);
         }
     }
 
-    public void warning(String message, UUID sender) {
+    public void warning(String message, UUID sender, boolean console) {
         Player player = Bukkit.getPlayer(sender);
-        player.sendMessage(ChatColor.YELLOW + message);
-        Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.YELLOW + message);
+        if (player != null) {
+            player.sendMessage(ChatColor.YELLOW + message);
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.YELLOW + message);
+        }
     }
 
-    public void danger(String message, CommandSender sender) {
+    public void danger(String message, CommandSender sender, boolean console) {
         sender.sendMessage(ChatColor.RED + message);
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.RED + message);
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.RED + message);
         } else {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED + message);
         }
     }
 
-    public void danger(String message, UUID sender) {
+    public void danger(String message, UUID sender, boolean console) {
         Player player = Bukkit.getPlayer(sender);
-        player.sendMessage(ChatColor.RED + message);
-        Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.RED + message);
-    }
-
-    public void sendMessage(Player player, String message) {
-        player.sendMessage(message);
-    }
-
-
-    public void sendMessage(UUID player, String message) {
-        Player send = Bukkit.getPlayer(player);
-        if (send != null) {
-            send.sendMessage(message);
+        if (player != null) {
+            player.sendMessage(ChatColor.RED + message);
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.RED + message);
         }
     }
-
 
     public void console(String s) {
         Bukkit.getConsoleSender().sendMessage(s);
     }
 
-    public void sendMessage(CommandSender commandSender, String message) {
-        commandSender.sendMessage(message);
+    public void info(String message, CommandSender sender, boolean console) {
+        sender.sendMessage(ChatColor.DARK_AQUA + message);
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.DARK_AQUA + message);
+        } else {
+            if (console) Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_AQUA + message);
+        }
+    }
+
+    public void info(String message, UUID sender, boolean console) {
+        Player player = Bukkit.getPlayer(sender);
+        if (player != null) {
+            player.sendMessage(ChatColor.DARK_AQUA + message);
+            if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.DARK_AQUA + message);
+        }
     }
 }

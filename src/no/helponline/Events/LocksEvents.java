@@ -42,10 +42,8 @@ public class LocksEvents implements Listener {
                     // DOOR?
                     if (OddJob.getInstance().getLockManager().getDoors().contains(t)) {
                         block = Utility.getLowerLeftDoor(block).getBlock();
-                        locked = OddJob.getInstance().getLockManager().isLocked(block.getLocation()) != null;
-                    } else {
-                        locked = OddJob.getInstance().getLockManager().isLocked(block.getLocation()) != null;
                     }
+                    locked = OddJob.getInstance().getLockManager().isLocked(block.getLocation()) != null;
                 } catch (Exception e) {
                     return;
                 }
@@ -63,8 +61,6 @@ public class LocksEvents implements Listener {
         Player player = event.getPlayer();
         boolean door = false;
         UUID uuid = null;
-
-        StringBuilder sb = new StringBuilder();
 
         if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null) || player.isOp()) {
             return;
@@ -101,7 +97,6 @@ public class LocksEvents implements Listener {
                         if (door) {
                             Utility.doorToggle(block);
                         }
-                        OddJob.getInstance().getMessageManager().console(sb.toString());
                         return;
                     }
                     // has skeletonkey?
@@ -112,7 +107,6 @@ public class LocksEvents implements Listener {
                             event.setCancelled(true);
                         }
                         player.sendMessage(ChatColor.RED + "! " + ChatColor.RESET + "Lock open by the awesome Skeletonkey!");
-                        OddJob.getInstance().getMessageManager().console(sb.toString());
                         return;
                     }
 
@@ -131,14 +125,14 @@ public class LocksEvents implements Listener {
                         }
                     }
 
-                    player.sendMessage(ChatColor.RED + "This block is locked by someone else.");
+                    OddJob.getInstance().getMessageManager().danger("This block is locked by someone else.", player, false);
                     event.setCancelled(true);
 
                 }
 
                 if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
                     if (OddJob.getInstance().getLockManager().isLockInfo(player.getUniqueId())) {
-                        OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.YELLOW + "The lock is owned by " + OddJob.getInstance().getPlayerManager().getName(uuid));
+                        OddJob.getInstance().getMessageManager().info("The lock is owned by " + OddJob.getInstance().getPlayerManager().getName(uuid), player,false);
                         event.setCancelled(true);
                         return;
                     }
@@ -147,16 +141,16 @@ public class LocksEvents implements Listener {
                 if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
                     if (OddJob.getInstance().getLockManager().isLocking(player.getUniqueId())) {
                         if (uuid == player.getUniqueId()) {
-                            OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.YELLOW + "You have already locked this.");
+                            OddJob.getInstance().getMessageManager().warning("You have already locked this.", player,false);
                             return;
                         }
                         if (uuid != null) {
-                            OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "A lock is already set on this.");
+                            OddJob.getInstance().getMessageManager().danger("A lock is already set on this.", player,false);
                             return;
                         }
                         OddJob.getInstance().getLockManager().lock(player.getUniqueId(), block.getLocation());
                         OddJob.getInstance().getLockManager().remove(player.getUniqueId());
-                        OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.GREEN + "Secured!");
+                        OddJob.getInstance().getMessageManager().success("Secured "+ChatColor.GOLD+block.getType().name(), player,true);
                         event.setCancelled(true);
 
                         return;
@@ -166,12 +160,12 @@ public class LocksEvents implements Listener {
                 if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().unlockWand)) {
                     if (OddJob.getInstance().getLockManager().isUnlocking(player.getUniqueId())) {
                         if (uuid != null && !uuid.equals(player.getUniqueId())) {
-                            OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.RED + "A lock is set by someone else.");
+                            OddJob.getInstance().getMessageManager().danger("A lock is set by someone else.", player,false);
                             return;
                         }
                         OddJob.getInstance().getLockManager().unlock(block.getLocation());
                         OddJob.getInstance().getLockManager().remove(player.getUniqueId());
-                        OddJob.getInstance().getMessageManager().sendMessage(player, ChatColor.YELLOW + "Unsecured!");
+                        OddJob.getInstance().getMessageManager().warning("Unsecured "+ChatColor.GOLD+block.getType().name(), player,true);
                         event.setCancelled(true);
                         return;
                     }
@@ -183,7 +177,6 @@ public class LocksEvents implements Listener {
                 UUID yourGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
 
                 // you are in a guild, and block is owned by a guild
-                sb = new StringBuilder();
                 if (blockGuild != null && yourGuild != null) {
                     if (blockGuild.equals(yourGuild)) {
                         if (door) {
@@ -197,7 +190,7 @@ public class LocksEvents implements Listener {
                         }
                     } else {
                         // IS OWNED BY A GUILD, BUT NOT YOURS!
-                        OddJob.getInstance().getMessageManager().warning("Block is locked by a guild.", player);
+                        OddJob.getInstance().getMessageManager().warning("Block is locked by a guild.", player,false);
                         event.setCancelled(true);
                     }
                 }
@@ -212,11 +205,11 @@ public class LocksEvents implements Listener {
                 if (lore.size() > 1) {
                     String one = ChatColor.stripColor(lore.get(1));
                     if (!one.equalsIgnoreCase(uuid.toString())) {
-                        OddJob.getInstance().getMessageManager().warning("You don't have the correct key", player);
+                        OddJob.getInstance().getMessageManager().warning("You don't have the correct key", player,false);
                         event.setCancelled(true);
                         return true;
                     }
-                    OddJob.getInstance().getMessageManager().success("Lock open by key!", player);
+                    OddJob.getInstance().getMessageManager().success("Lock open by key!", player,false);
                     if (door) {
                         Utility.doorToggle(block);
                         player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
@@ -241,7 +234,7 @@ public class LocksEvents implements Listener {
         }
         if (event.getItemInHand().getType().equals(Material.TRIPWIRE_HOOK)) {
             ItemMeta meta = event.getItemInHand().getItemMeta();
-            if (ChatColor.stripColor(meta.getDisplayName()).startsWith("Key to")) {
+            if (meta != null && ChatColor.stripColor(meta.getDisplayName()).startsWith("Key to")) {
                 event.setCancelled(true);
             }
         }
@@ -267,9 +260,9 @@ public class LocksEvents implements Listener {
         if (uuid != null) {
             if (uuid.equals(event.getPlayer().getUniqueId())) {
                 OddJob.getInstance().getLockManager().unlock(block.getLocation());
-                OddJob.getInstance().getMessageManager().sendMessage(event.getPlayer(), ChatColor.YELLOW + "Lock broken!");
+                OddJob.getInstance().getMessageManager().warning("Lock broken!",event.getPlayer(),true);
             } else {
-                OddJob.getInstance().getMessageManager().sendMessage(event.getPlayer(), ChatColor.RED + "This lock is owned by someone else!");
+                OddJob.getInstance().getMessageManager().danger("This lock is owned by someone else!",event.getPlayer(),false);
                 event.setCancelled(true);
             }
         }

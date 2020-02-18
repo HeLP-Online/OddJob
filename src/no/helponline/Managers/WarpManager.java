@@ -19,7 +19,7 @@ public class WarpManager {
             OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
             return true;
         } else {
-            OddJob.getInstance().getMessageManager().danger("Sorry, can't find " + name + ", or the password is wrong.", player);
+            OddJob.getInstance().getMessageManager().danger("Sorry, can't find " + name + ", or the password is wrong.", player, false);
         }
         return false;
     }

@@ -235,14 +235,17 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                location = new Location(
-                        Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))),
-                        resultSet.getDouble("x"),
-                        resultSet.getDouble("y"),
-                        resultSet.getDouble("z"),
-                        resultSet.getFloat("yaw"),
-                        resultSet.getFloat("pitch")
-                );
+                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                if (world != null) {
+                    location = new Location(
+                            world,
+                            resultSet.getDouble("x"),
+                            resultSet.getDouble("y"),
+                            resultSet.getDouble("z"),
+                            resultSet.getFloat("yaw"),
+                            resultSet.getFloat("pitch")
+                    );
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -504,7 +507,6 @@ public class MySQLManager {
 
             if (resultSet.next()) {
                 role = Role.valueOf(resultSet.getString("role"));
-                OddJob.getInstance().log("test: " + role.name());
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -1640,5 +1642,20 @@ public class MySQLManager {
             close();
         }
         return is;
+    }
+
+    public void moteGuild(UUID guildUUID, UUID targetUUID, String role) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `role` = ? WHERE `uuid` = ? AND `player` = ?");
+            preparedStatement.setString(1, role);
+            preparedStatement.setString(2, guildUUID.toString());
+            preparedStatement.setString(3, targetUUID.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
     }
 }

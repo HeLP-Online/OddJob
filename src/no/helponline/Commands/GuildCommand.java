@@ -1,6 +1,7 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Role;
 import no.helponline.Utils.Zone;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -29,7 +30,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 if (commandSender instanceof Player) {
                     // args length
                     if (strings.length == 1) {
-                        OddJob.getInstance().getMessageManager().danger("Missing a guild name", commandSender);
+                        OddJob.getInstance().getMessageManager().danger("Missing a guild name", commandSender,false);
                         return true;
                     }
 
@@ -37,23 +38,23 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
 
                     // checking name
                     if (OddJob.getInstance().getGuildManager().getGuildUUIDByName(ChatColor.stripColor(strings[1])) != null) {
-                        OddJob.getInstance().getMessageManager().warning("We already know a guild by that name", commandSender);
+                        OddJob.getInstance().getMessageManager().warning("We already know a guild by that name", commandSender,false);
                         return true;
                     }
 
                     // check if player is already in a guild
                     if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) != null) {
-                        OddJob.getInstance().getMessageManager().warning("You are already connected to a guild, to create a new use '/guild leave'", commandSender);
+                        OddJob.getInstance().getMessageManager().warning("You are already connected to a guild, to create a new use '/guild leave'", commandSender,false);
                         return true;
                     }
 
                     // trying to create guild
                     if (OddJob.getInstance().getGuildManager().create(player.getUniqueId(), strings[1])) {
-                        OddJob.getInstance().getMessageManager().success("Guild `" + strings[1] + "` created", commandSender);
+                        OddJob.getInstance().getMessageManager().success("Guild "+ChatColor.DARK_AQUA + strings[1] + ChatColor.GREEN+"` created", commandSender,true);
                         return true;
                     }
 
-                    OddJob.getInstance().getMessageManager().danger("Something went wrong when creating guild!", commandSender);
+                    OddJob.getInstance().getMessageManager().danger("Something went wrong when creating guild!", commandSender,false);
                     return true;
                 }
                 // guild create executed by console, creating default zones
@@ -102,9 +103,9 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
                     if (guild != null) {
                         OddJob.getInstance().getGuildManager().leave(player.getUniqueId());
-                        OddJob.getInstance().getMessageManager().sendMessage(player, "You have now left " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild) + "!");
+                        OddJob.getInstance().getMessageManager().success( "You have now left " +ChatColor.DARK_AQUA+ OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild),player,true);
                     } else {
-                        OddJob.getInstance().getMessageManager().sendMessage(player, "You are not connected to any guild.");
+                        OddJob.getInstance().getMessageManager().warning( "You are not connected to any guild.",player,false);
                     }
                 }
             }
@@ -120,7 +121,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         if (guild != null) {
                             OddJob.getInstance().getGuildManager().accept(guild, player.getUniqueId());
                         } else {
-                            OddJob.getInstance().getMessageManager().warning("Nothing to accept.", player);
+                            OddJob.getInstance().getMessageManager().warning("Nothing to accept.", player,false);
                         }
                         return true;
                     }
@@ -143,7 +144,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         } else {
                             UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
                             if (target == null) {
-                                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], player);
+                                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], player,false);
                                 return true;
                             }
 
@@ -166,7 +167,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     if (strings.length == 2) {
                         UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
                         if (target == null) {
-                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                             return true;
                         }
                         UUID invite = OddJob.getInstance().getGuildManager().getGuildInvitation(target);
@@ -213,13 +214,13 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     if (strings.length == 2) {
                         UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
                         if (target == null) {
-                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                             return true;
                         }
                         if (guild.equals(OddJob.getInstance().getGuildManager().getGuildInvitation(target))) {
                             OddJob.getInstance().getGuildManager().uninviteToGuild(target);
                             player.sendMessage(strings[1] + " is no longer invited to " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
-                            OddJob.getInstance().getMessageManager().sendMessage(target, "You are no longer invited to the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
+                            OddJob.getInstance().getMessageManager().success("You are no longer invited to the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild),target,false);
                             return true;
                         } else {
                             player.sendMessage(strings[1] + " has never been invited to your guild.");
@@ -243,7 +244,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     }
                     UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
                     if (target == null) {
-                        OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                        OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                         return true;
                     }
                     StringBuilder reason = new StringBuilder();
@@ -263,64 +264,85 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     if (strings[1].equalsIgnoreCase("guilds")) {
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds()) {
-                            sb.append(OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid)).append(": ").append(OddJob.getInstance().getGuildManager().getGuildMembers(uuid).size()).append(", ");
+                            if (OddJob.getInstance().getGuildManager().getZoneByGuild(uuid).equals(Zone.GUILD)) {
+                                sb.append(OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid)).append(": ").append(OddJob.getInstance().getGuildManager().getGuildMembers(uuid).size()).append(", ");
+                            }
                         }
-                        OddJob.getInstance().getMessageManager().console("Guilds:\n" + sb.toString());
+                        commandSender.sendMessage("Guilds:\n" + sb.toString());
                     }
                 }
                 if (strings.length == 3) {
                     if (strings[1].equalsIgnoreCase("members")) {
                         UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByName(strings[2]);
                         if (guildUUID == null) {
-                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                            OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                             return true;
                         }
                         StringBuilder sb = new StringBuilder();
                         for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildMembers(guildUUID)) {
                             sb.append(OddJob.getInstance().getPlayerManager().getName(uuid)).append(", ");
                         }
-                        OddJob.getInstance().getMessageManager().sendMessage(commandSender, "Guilds:\n" + sb.toString());
+                        commandSender.sendMessage("Members of " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guildUUID) + ":\n" + sb.toString());
                     }
                 }
-
-            /*} else if (strings.length == 2 && strings[0].equalsIgnoreCase("promote")) {
+            } else if (strings.length == 2 && strings[0].equalsIgnoreCase("promote")) {
                 if (!(commandSender instanceof Player)) return true;
+
                 Player player = (Player) commandSender;
                 UUID targetUUID = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
-                Player target = OddJob.getInstance().getPlayerManager().getPlayer(targetUUID);
-                if (target == null || !target.isOnline()) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                if (targetUUID == null) {
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                     return true;
                 }
                 UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-                if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(targetUUID) == guildUUID) {
-                    Role roleT = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
-                    Role roleC = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
-                    if (roleC.level() > roleT.level()) {
-                        roleT = OddJob.getInstance().getGuildManager().promoteMember(guildUUID, targetUUID);
-                        OddJob.getInstance().getMessageManager().success("Promoted " + target.getName() + " to " + roleT.toString(), commandSender);
-                        OddJob.getInstance().getMessageManager().success("You have been promoted to " + roleT.toString() + " by " + commandSender.getName(), targetUUID);
+                if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(targetUUID).equals(guildUUID)) {
+                    Role targetRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
+                    Role triggerRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
+
+                    if (targetRole.equals(Role.admins)) {
+                        OddJob.getInstance().getMessageManager().danger(OddJob.getInstance().getPlayerManager().getName(targetUUID) + " already have the highest rank.", commandSender,false);
+                        return true;
                     }
+                    if (targetRole.level() >= triggerRole.level()) {
+                        OddJob.getInstance().getMessageManager().danger(OddJob.getInstance().getPlayerManager().getName(targetUUID) + " have same or higher rank than you.", commandSender,false);
+                        return true;
+                    }
+                    targetRole = OddJob.getInstance().getGuildManager().promoteMember(guildUUID, targetUUID);
+                    OddJob.getInstance().getMessageManager().success("Promoted " + OddJob.getInstance().getPlayerManager().getName(targetUUID) + " to " + ChatColor.GOLD + targetRole.name(), commandSender,true);
+                    if (OddJob.getInstance().getPlayerManager().getOffPlayer(targetUUID).isOnline()) {
+                        OddJob.getInstance().getMessageManager().success("You have been promoted to " + ChatColor.GOLD + targetRole.name() + ChatColor.RESET + " by " + commandSender.getName(), targetUUID,false);
+                    }
+
                 }
             } else if (strings.length == 2 && strings[0].equalsIgnoreCase("demote")) {
                 if (!(commandSender instanceof Player)) return true;
+
                 Player player = (Player) commandSender;
                 UUID targetUUID = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
-                Player target = OddJob.getInstance().getPlayerManager().getPlayer(targetUUID);
-                if (target == null || !target.isOnline()) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender);
+                if (targetUUID == null) {
+                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender,false);
                     return true;
                 }
                 UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-                if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(targetUUID) == guildUUID) {
-                    Role roleT = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
-                    Role roleC = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
-                    if (roleC.level() > roleT.level()) {
-                        roleT = OddJob.getInstance().getGuildManager().demoteMember(guildUUID, targetUUID);
-                        OddJob.getInstance().getMessageManager().success("Demoted " + target.getName() + " to " + roleT.toString(), commandSender);
-                        OddJob.getInstance().getMessageManager().success("You have been demoted to " + roleT.toString() + " by " + commandSender.getName(), targetUUID);
+                if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(targetUUID).equals(guildUUID)) {
+                    Role targetRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
+                    Role triggerRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
+
+                    if (targetRole.equals(Role.members)) {
+                        OddJob.getInstance().getMessageManager().danger(OddJob.getInstance().getPlayerManager().getName(targetUUID) + " already have the lowest rank.", commandSender,false);
+                        return true;
                     }
-                }*/
+                    if (targetRole.level() >= triggerRole.level()) {
+                        OddJob.getInstance().getMessageManager().danger(OddJob.getInstance().getPlayerManager().getName(targetUUID) + " have same or higher rank than you.", commandSender,false);
+                        return true;
+                    }
+                    targetRole = OddJob.getInstance().getGuildManager().demoteMember(guildUUID, targetUUID);
+                    OddJob.getInstance().getMessageManager().success("Demoted " + OddJob.getInstance().getPlayerManager().getName(targetUUID) + " to " + ChatColor.GOLD + targetRole.name(), commandSender,true);
+                    if (OddJob.getInstance().getPlayerManager().getOffPlayer(targetUUID).isOnline()) {
+                        OddJob.getInstance().getMessageManager().success("You have been demoted to " + ChatColor.GOLD + targetRole.name() + ChatColor.RESET + " by " + commandSender.getName(), targetUUID,false);
+                    }
+
+                }
             } else if (strings[0].equalsIgnoreCase("unclaim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
@@ -430,7 +452,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         OddJob.getInstance().log(join.toString());
                         OddJob.getInstance().log("members: " + OddJob.getInstance().getGuildManager().getGuildMembers(join).size());
                         for (UUID member : OddJob.getInstance().getGuildManager().getGuildMembers(join)) {
-                            OddJob.getInstance().getMessageManager().sendMessage(member, "Your guild has got a new member request from " + player.getName());
+                            OddJob.getInstance().getMessageManager().info( "Your guild has got a new member request from " + player.getName(),member,false);
                         }
                         return true;
                     }
@@ -448,7 +470,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         if (strings.length == 1 || strings.length == 0) {
             String[] st;
             if ((commandSender instanceof Player) && OddJob.getInstance().getGuildManager().getGuildUUIDByMember(((Player) commandSender).getUniqueId()) != null) {
-                st = new String[]{"claim", "unclaim", "set", "list", "invite", "uninvite", "kick"};
+                st = new String[]{"claim", "unclaim", "set", "list", "invite", "uninvite", "kick", "promote", "demote"};
             } else if (commandSender instanceof Player) {
                 st = new String[]{"create", "join"};
             } else {
@@ -458,6 +480,38 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             for (String t : st) {
                 if (t.startsWith(strings[0])) {
                     list.add(t);
+                }
+            }
+        }
+        if (strings[0].equalsIgnoreCase("promote")) {
+            String[] st;
+            if (commandSender instanceof Player) {
+                Player player = (Player) commandSender;
+                Role role = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
+                UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                if (guild != null) {
+                    for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
+                        Role rule = OddJob.getInstance().getGuildManager().getGuildMemberRole(uuid);
+                        if (role.level() > rule.level() && !rule.equals(Role.admins)) {
+                            list.add(OddJob.getInstance().getPlayerManager().getName(uuid));
+                        }
+                    }
+                }
+            }
+        }
+        if (strings[0].equalsIgnoreCase("demote")) {
+            String[] st;
+            if (commandSender instanceof Player) {
+                Player player = (Player) commandSender;
+                Role role = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
+                UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                if (guild != null) {
+                    for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
+                        Role rule = OddJob.getInstance().getGuildManager().getGuildMemberRole(uuid);
+                        if (role.level() > rule.level() && !rule.equals(Role.members)) {
+                            list.add(OddJob.getInstance().getPlayerManager().getName(uuid));
+                        }
+                    }
                 }
             }
         }
