@@ -46,25 +46,21 @@ public class TeleportManager {
                     OddJob.getInstance().getMessageManager().success("Your request has been accepted by " + ChatColor.DARK_AQUA + destination.getName(), target.getUniqueId(), false);
                     OddJob.getInstance().getMessageManager().success("You have accepted the request from " + ChatColor.DARK_AQUA + target.getName(), destination.getUniqueId(), true);
                     remove(from);
-                    teleport(target, destination, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
+                    teleport(target, destination, PlayerTeleportEvent.TeleportCause.COMMAND);
                     if (reset.containsKey(from)) reset.get(from).cancel();
                 }
             }
         }
     }
 
-    public void teleport(Player target, Player destination, double cost, PlayerTeleportEvent.TeleportCause cause) {
+    public void teleport(Player target, Player destination, PlayerTeleportEvent.TeleportCause cause) {
         boolean test = true;
-        if (OddJob.getInstance().getPlayerManager().isInCombat(target.getUniqueId())) test = false;
-        else if (OddJob.getInstance().getArenaManager().isInArena(target.getUniqueId())) test = false;
-        else if (cost > 0) {
-            if (cost > OddJob.getInstance().getEconManager().getBalance(target.getUniqueId())) {
-                OddJob.getInstance().getEconManager().subtract(target.getUniqueId(), cost, false);
-            } else {
-                test = false;
-                target.sendMessage("Sorry, but you can't afford the request");
-            }
+        if (OddJob.getInstance().getPlayerManager().isInCombat(target.getUniqueId())) {
+            test = false;
+        } else if (OddJob.getInstance().getArenaManager().isInArena(target.getUniqueId())) {
+            test = false;
         }
+
         if (test) {
             OddJob.getInstance().getMySQLManager().updateTeleport(target);
             UUID t = target.getUniqueId();
@@ -97,16 +93,12 @@ public class TeleportManager {
 
     public boolean teleport(Player target, Location destination, double cost, PlayerTeleportEvent.TeleportCause cause) {
         boolean test = true;
-        if (OddJob.getInstance().getPlayerManager().isInCombat(target.getUniqueId())) test = false;
-        else if (OddJob.getInstance().getArenaManager().isInArena(target.getUniqueId())) test = false;
-        else if (cost > 0) {
-            if (cost > OddJob.getInstance().getEconManager().getBalance(target.getUniqueId())) {
-                OddJob.getInstance().getEconManager().subtract(target.getUniqueId(), cost, false);
-            } else {
-                test = false;
-                target.sendMessage("Sorry, but you can't afford the request");
-            }
+        if (OddJob.getInstance().getPlayerManager().isInCombat(target.getUniqueId())) {
+            test = false;
+        } else if (OddJob.getInstance().getArenaManager().isInArena(target.getUniqueId())) {
+            test = false;
         }
+
         if (test) {
             OddJob.getInstance().getMySQLManager().updateTeleport(target);
             UUID t = target.getUniqueId();
