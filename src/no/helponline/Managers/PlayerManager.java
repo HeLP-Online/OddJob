@@ -64,17 +64,17 @@ public class PlayerManager {
         return OddJob.getInstance().getMySQLManager().getPlayer(uniqueId);
     }
 
-    public boolean request(UUID to, UUID from) {
-        boolean request = OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to); // false
-        if (OddJob.getInstance().getMySQLManager().getPlayerWhiteList(to).contains(from)) { //false
+    public boolean request(UUID moving, UUID destination) {
+        boolean request = OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(destination); // false
+        if (OddJob.getInstance().getMySQLManager().getPlayerWhiteList(destination).contains(moving)) { //false
             OddJob.getInstance().log("whitelist");
             request = true;
-        } else if (OddJob.getInstance().getMySQLManager().getPlayerBlackList(to).contains(from)) { // false
+        } else if (OddJob.getInstance().getMySQLManager().getPlayerBlackList(destination).contains(moving)) { // false
             OddJob.getInstance().log("blacklist");
             request = false;
-        } else if (OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(to)) { // false
+        } else if (OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(destination)) { // false
             OddJob.getInstance().log("tpa deny");
-            OddJob.getInstance().getMessageManager().warning(getName(to) + " is denying all request!", from, false);
+            OddJob.getInstance().getMessageManager().warning(getName(destination) + " is denying all request!", moving, false);
             request = false;
         }
         OddJob.getInstance().log("request : deny");

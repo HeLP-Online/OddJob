@@ -6,12 +6,15 @@ import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
 import no.helponline.Utils.ArenaPlayer;
+import no.helponline.Utils.Broadcaster;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.management.Query;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -35,6 +38,7 @@ public class OddJob extends JavaPlugin {
     private DeathManager deathManager;
     private WarpManager warpManager;
     private ArenaManager arenaManager;
+    private JailManager jailManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -52,6 +56,7 @@ public class OddJob extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
+
         instance = this;
         banManager = new BanManager();
         configManager = new ConfigManager();
@@ -68,6 +73,7 @@ public class OddJob extends JavaPlugin {
         deathManager = new DeathManager();
         warpManager = new WarpManager();
         arenaManager = new ArenaManager();
+        jailManager = new JailManager();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());
@@ -99,6 +105,7 @@ public class OddJob extends JavaPlugin {
         getCommand("death").setExecutor(new DeathCommand());
         getCommand("backup").setExecutor(new RollbackCommand());
         getCommand("rollback").setExecutor(new RollbackCommand());
+        getCommand("spawn").setExecutor(new SpawnCommand());
 
         configManager.load();
 
@@ -120,6 +127,10 @@ public class OddJob extends JavaPlugin {
         }
 
         OddJob.getInstance().getArenaManager().loadArenas();
+
+        Server server = getServer();
+        Broadcaster broadcaster = new Broadcaster(Broadcaster.createSocket(), server.getPort(), server.getMotd(), server.getIp());
+        getServer().getScheduler().runTaskAsynchronously(this, broadcaster);
     }
 
     public void onDisable() {
@@ -193,5 +204,9 @@ public class OddJob extends JavaPlugin {
 
     public Location getSpawn() {
         return getServer().getWorld("world").getSpawnLocation();
+    }
+
+    public JailManager getJailManager() {
+        return jailManager;
     }
 }

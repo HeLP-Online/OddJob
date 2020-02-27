@@ -30,4 +30,8 @@ public class EconManager {
     public void subtract(UUID player, double cost, boolean guild) {
         setBalance(player, getBalance(player) - cost, guild);
     }
+
+    public Double cost(String name) {
+        return OddJob.getInstance().getConfig().getDouble("econ.cost."+name,0.0);
+    }
 }

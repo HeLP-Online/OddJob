@@ -20,7 +20,7 @@ public class TpAllCommand implements CommandExecutor, TabCompleter {
             Player sender = (Player) commandSender;
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (!player.equals(sender)) {
-                    OddJob.getInstance().getTeleportManager().teleport(player, sender, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
+                    OddJob.getInstance().getTeleportManager().teleport(player, sender.getLocation(), 0, PlayerTeleportEvent.TeleportCause.COMMAND);
                     //player.teleport(sender);
                 }
                 player.sendMessage("Everyone was teleported!");

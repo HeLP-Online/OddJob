@@ -35,7 +35,7 @@ public class TpACommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             Player player = (Player) commandSender;
-            if (OddJob.getInstance().getTeleportManager().hasRequest(player.getUniqueId())) {
+            if (OddJob.getInstance().getTeleportManager().has(player.getUniqueId())) {
                 OddJob.getInstance().getMessageManager().danger("You have already sent an request to " + strings[0], player.getUniqueId(),false);
                 return true;
             }

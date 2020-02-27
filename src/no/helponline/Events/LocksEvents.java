@@ -15,6 +15,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -224,7 +225,7 @@ public class LocksEvents implements Listener {
         return false;
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGH)
     public void onPlaceLock(BlockPlaceEvent event) {
         if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().unlockWand) ||
                 event.getItemInHand().equals(OddJob.getInstance().getLockManager().lockWand) ||
@@ -237,6 +238,10 @@ public class LocksEvents implements Listener {
             if (meta != null && ChatColor.stripColor(meta.getDisplayName()).startsWith("Key to")) {
                 event.setCancelled(true);
             }
+        }
+        if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
+            OddJob.getInstance().getMessageManager().danger("Sorry, The SKELETON KEY is tooooooooo powerful!",event.getPlayer().getUniqueId(),true);
+            event.setCancelled(true);
         }
     }
 
@@ -265,6 +270,14 @@ public class LocksEvents implements Listener {
                 OddJob.getInstance().getMessageManager().danger("This lock is owned by someone else!",event.getPlayer(),false);
                 event.setCancelled(true);
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDrop(PlayerDropItemEvent event) {
+        if (event.getItemDrop().getItemStack().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
+            OddJob.getInstance().getMessageManager().danger("Sorry, The SKELETON KEY can't be cast away like that!",event.getPlayer().getUniqueId(),true);
+            event.setCancelled(true);
         }
     }
 }

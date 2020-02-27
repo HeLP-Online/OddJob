@@ -26,23 +26,6 @@ public class MoveEvent implements Listener {
         }
     }
 
-    @EventHandler
-    public void onWorldChange(PlayerChangedWorldEvent event) {
-        World world = event.getPlayer().getWorld();
-        Player player = event.getPlayer();
-
-        GameMode playerMode = OddJob.getInstance().getPlayerManager().getGamemode(player, world);
-        GameMode worldMode = OddJob.getInstance().getWorldManager().getGamemode(world);
-        boolean forceMode = OddJob.getInstance().getWorldManager().getForceMode(world);
-
-        if (forceMode) {
-            player.setGameMode(worldMode);
-        } else {
-            if (player.getGameMode() != playerMode) {
-                player.setGameMode(playerMode);
-            }
-        }
-    }
 
     @EventHandler
     public void onGuildMove(PlayerMoveEvent event) {

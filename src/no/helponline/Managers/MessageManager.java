@@ -83,4 +83,11 @@ public class MessageManager {
             if (console) Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + ChatColor.DARK_AQUA + message);
         }
     }
+
+    public void errorPlayer(String string, CommandSender commandSender) {
+        warning("Sorry we can't find the player: "+string,commandSender,false);
+    }
+    public void errorWorld(String string, CommandSender commandSender) {
+        warning("Sorry we can't find the world: "+string,commandSender,false);
+    }
 }

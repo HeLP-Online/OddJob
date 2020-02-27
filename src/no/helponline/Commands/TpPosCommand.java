@@ -16,25 +16,24 @@ import java.util.List;
 public class TpPosCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (command.getName().equalsIgnoreCase("tppos")) {
-            if (!(commandSender instanceof Player)) return true;
-            World world = null;
-            Player player = (Player) commandSender;
-            if (strings.length == 4) {
-                world = Bukkit.getWorld(strings[3]);
+        if (strings.length == 4 || strings.length == 5) {
+            Player player = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
+            if (player == null) {
+                OddJob.getInstance().getMessageManager().errorPlayer(strings[0], commandSender);
+                return true;
             }
-            if (world == null) {
+            // tp <player> <x> <y> <z> <world>
+            World world;
+            if (strings.length == 5) {
+                world = Bukkit.getWorld(strings[4]);
+                if (world == null) {
+                    OddJob.getInstance().getMessageManager().errorWorld(strings[4],commandSender);
+                    return true;
+                }
+            } else {
                 world = player.getWorld();
             }
-
-            try {
-                int x = Integer.parseInt(strings[0]);
-                int y = Integer.parseInt(strings[1]);
-                int z = Integer.parseInt(strings[2]);
-
-                OddJob.getInstance().getTeleportManager().teleport(player, new Location(world, x, y, z), 0, PlayerTeleportEvent.TeleportCause.COMMAND);
-            } catch (Exception e) {
-            }
+            OddJob.getInstance().getTeleportManager().teleport(commandSender, strings[0], strings[1], strings[2], strings[3], world);
         }
         return true;
     }

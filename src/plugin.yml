@@ -40,7 +40,7 @@ commands:
     permission: essentials.tpall
   tppos:
     description: Teleport you to a given coordinate
-    usage: /<command> <X> <Y> <Z> [World]
+    usage: /<command> <player> <X> <Y> <Z> [World]
     permission: essentials.tppos
   kick:
     description: Kicks a given player from the server
@@ -105,6 +105,8 @@ commands:
   backup:
     usage: /<command>
   rollback:
+    usage: /<command>
+  spawn:
     usage: /<command>
 permissions:
   essentials.death:

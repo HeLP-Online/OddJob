@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class Arena {
-    private int maxPlayers;
-    private int minPlayers;
-    private Status status;
-    private Type type;
-    private HashMap<Integer, Location> spawn;
-    private String name;
-    private List<UUID> players = new ArrayList<>();
-    private List<UUID> queue = new ArrayList<>();
+    private final int maxPlayers;
+    private final int minPlayers;
+    private final Status status;
+    private final Type type;
+    private final HashMap<Integer, Location> spawn;
+    private final String name;
+    private final List<UUID> players = new ArrayList<>();
+    private final List<UUID> queue = new ArrayList<>();
 
     public int next = 1;
 

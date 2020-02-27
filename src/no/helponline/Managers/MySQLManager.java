@@ -1422,16 +1422,19 @@ public class MySQLManager {
         return location;
     }
 
-    public Location getWarp(String world, String password) {
+    public Location getWarp(String name, String password) {
         Location location = null;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_warps` WHERE `name` = ? AND `passw` = ?");
-            preparedStatement.setString(1, world);
+            preparedStatement.setString(1, name);
             preparedStatement.setString(2, password);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                location = new Location(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))), resultSet.getDouble("x"), resultSet.getDouble("y"), resultSet.getDouble("z"), resultSet.getFloat("yaw"), resultSet.getFloat("pitch"));
+                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                if (world != null) {
+                    location = new Location(world, resultSet.getDouble("x"), resultSet.getDouble("y"), resultSet.getDouble("z"), resultSet.getFloat("yaw"), resultSet.getFloat("pitch"));
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
