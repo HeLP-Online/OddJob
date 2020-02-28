@@ -1,6 +1,7 @@
 package no.helponline.Utils;
 
 import no.helponline.OddJob;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -194,5 +195,18 @@ public class Utility {
             }
         }
         return block.getLocation();
+    }
+
+    public static String serializeLoc(Location l) {
+        String ret = "";
+        if (l.getWorld() != null)
+            ret = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getYaw() + "," + l.getPitch();
+        return ret;
+    }
+
+    public static Location deserializeLoc(String string) {
+        if (string.equals("")) return null;
+        String[] st = string.split(",");
+        return new Location(Bukkit.getWorld(st[0]), Integer.parseInt(st[1]), Integer.parseInt(st[2]), Integer.parseInt(st[3]), Float.parseFloat(st[4]), Float.parseFloat(st[5]));
     }
 }

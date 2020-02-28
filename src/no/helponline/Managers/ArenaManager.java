@@ -2,6 +2,7 @@ package no.helponline.Managers;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Arena;
+import no.helponline.Utils.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -50,7 +51,7 @@ public class ArenaManager {
     }
 
     public void setLobbySpawn(Player player) {
-        config.set("lobby.spawn", serializeLoc(player.getLocation()));
+        config.set("lobby.spawn", Utility.serializeLoc(player.getLocation()));
         OddJob.getInstance().saveConfig();
         OddJob.getInstance().getMessageManager().success("Arena Lobby Spawn set!", player, false);
     }
@@ -108,7 +109,7 @@ public class ArenaManager {
         arenas.put(name, arena);
 
         for (Integer i : spawn.keySet()) {
-            config.set("arenas." + name + ".spawn." + i, serializeLoc(spawn.get(i)));
+            config.set("arenas." + name + ".spawn." + i, Utility.serializeLoc(spawn.get(i)));
         }
         config.set("arenas." + name + ".type", type.name());
         config.set("arenas." + name + ".name", name);
@@ -123,7 +124,7 @@ public class ArenaManager {
     public Arena createArena(Arena arena) {
         arenas.put(arena.getName(), arena);
         for (Integer i : arena.getSpawn().keySet()) {
-            config.set("arenas." + arena.getName() + ".spawn." + i, serializeLoc(arena.getSpawn().get(i)));
+            config.set("arenas." + arena.getName() + ".spawn." + i, Utility.serializeLoc(arena.getSpawn().get(i)));
         }
         config.set("arenas." + arena.getName() + ".type", arena.getType().name());
         config.set("arenas." + arena.getName() + ".name", arena.getName());
@@ -179,7 +180,7 @@ public class ArenaManager {
 
                     for (int i = 1; i <= maxPlayers; i++) {
                         if (config.getString("arenas." + name + ".spawn." + i) != null) {
-                            spawn.put(i, deserializeLoc(config.getString("arenas." + name + ".spawn." + i)));
+                            spawn.put(i, Utility.deserializeLoc(config.getString("arenas." + name + ".spawn." + i)));
                         }
                     }
 
@@ -190,17 +191,7 @@ public class ArenaManager {
         return c;
     }
 
-    public String serializeLoc(Location l) {
-        String ret = "";
-        if (l.getWorld() != null)
-            ret = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + "," + l.getYaw() + "," + l.getPitch();
-        return ret;
-    }
 
-    public Location deserializeLoc(String string) {
-        String[] st = string.split(",");
-        return new Location(Bukkit.getWorld(st[0]), Integer.parseInt(st[1]), Integer.parseInt(st[2]), Integer.parseInt(st[3]), Float.parseFloat(st[4]), Float.parseFloat(st[5]));
-    }
 
     public List<Arena> listArenas() {
         return new ArrayList<>(arenas.values());
@@ -239,5 +230,9 @@ public class ArenaManager {
 
     public Location getLobbySpawn() {
         return lobbySpawn;
+    }
+
+    public void abort(UUID uuidPlayer) {
+        removePlayer(OddJob.getInstance().getPlayerManager().getPlayer(uuidPlayer));
     }
 }

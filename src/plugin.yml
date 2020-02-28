@@ -108,6 +108,8 @@ commands:
     usage: /<command>
   spawn:
     usage: /<command>
+  jail:
+    usage: /<command>
 permissions:
   essentials.death:
     default: op

@@ -14,7 +14,6 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.management.Query;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -56,24 +55,24 @@ public class OddJob extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
-
         instance = this;
+
+        arenaManager = new ArenaManager();
         banManager = new BanManager();
         configManager = new ConfigManager();
+        deathManager = new DeathManager();
         econManager = new EconManager();
+        freezeManager = new FreezeManager();
         guildManager = new GuildManager();
         homesManager = new HomesManager();
+        jailManager = new JailManager();
         lockManager = new LockManager();
         messageManager = new MessageManager();
+        mySQLManager = new MySQLManager();
         playerManager = new PlayerManager();
         teleportManager = new TeleportManager();
-        mySQLManager = new MySQLManager();
-        worldManager = new WorldManger();
-        freezeManager = new FreezeManager();
-        deathManager = new DeathManager();
         warpManager = new WarpManager();
-        arenaManager = new ArenaManager();
-        jailManager = new JailManager();
+        worldManager = new WorldManger();
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());
@@ -106,6 +105,7 @@ public class OddJob extends JavaPlugin {
         getCommand("backup").setExecutor(new RollbackCommand());
         getCommand("rollback").setExecutor(new RollbackCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
+        getCommand("jail").setExecutor(new JailCommand());
 
         configManager.load();
 

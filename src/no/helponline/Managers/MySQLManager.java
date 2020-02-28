@@ -2,6 +2,7 @@ package no.helponline.Managers;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Role;
+import no.helponline.Utils.Utility;
 import no.helponline.Utils.Zone;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
@@ -1660,5 +1661,119 @@ public class MySQLManager {
         } finally {
             close();
         }
+    }
+
+    public void addPlayerJail(UUID uuidPlayer, UUID world) {
+        try {
+            connect();
+            // PLAYER ; WORLD ; DATE SET IN JAIL ; IS IN JAIL ; COUNT JAIL TIMES ; SERVED TIME
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_jailed` (`uuid`,`world`,`date`) VALUES (?,?,UNIX_TIMESTAMP())");
+            preparedStatement.setString(1, uuidPlayer.toString());
+            preparedStatement.setString(2, world.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void deletePlayerJail(UUID player) {
+        try {
+            connect();
+
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_players_jailed` WHERE `uuid` = ? ");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.executeQuery();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public World inPlayerJail(UUID player) {
+        World world = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `world` FROM `mine_players_jailed` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+
+            world = Bukkit.getWorld(resultSet.getString("world"));
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return world;
+    }
+
+    public boolean setJail(UUID world, String name, Location location) {
+        boolean ret = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_worlds` SET `jail_" + name + "` = ? WHERE `uuid` = ?");
+            preparedStatement.setString(1, Utility.serializeLoc(location));
+            preparedStatement.setString(2, world.toString());
+            preparedStatement.executeUpdate();
+            ret = true;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
+        return ret;
+    }
+
+    public Location getJail(UUID world, String name) {
+        Location location = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `jail_"+name+"` FROM `mine_worlds` WHERE `uuid` = ?");
+            preparedStatement.setString(1, world.toString());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String s = resultSet.getString("jail_" + name);
+                location = Utility.deserializeLoc(s);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return location;
+    }
+
+    public void updateWorlds(World world) {
+        UUID uuid = world.getUID();
+        String name = world.getName();
+
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_worlds` WHERE `uuid` = ?");
+            preparedStatement.setString(1, uuid.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                preparedStatementsec = connection.prepareStatement("UPDATE `mine_worlds` SET `name` = ? WHERE `uuid` = ?");
+                preparedStatementsec.setString(2, uuid.toString());
+                preparedStatementsec.setString(1, name);
+                preparedStatementsec.executeUpdate();
+                OddJob.getInstance().getMessageManager().console("UPDATING: "+name);
+            } else {
+                preparedStatementsec = connection.prepareStatement("INSERT INTO `mine_worlds` (`uuid`,`name`) VALUES (?,?)");
+                preparedStatementsec.setString(1, uuid.toString());
+                preparedStatementsec.setString(2, name);
+                preparedStatementsec.execute();
+                OddJob.getInstance().getMessageManager().console("INSERTING: "+name);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
     }
 }

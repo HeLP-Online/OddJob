@@ -71,7 +71,7 @@ public class TeleportManager {
             test = false;
         } else if (OddJob.getInstance().getArenaManager().isInArena(moving.getUniqueId())) {
             test = false;
-        } else if (OddJob.getInstance().getJailManager().in(moving.getUniqueId())) {
+        } else if (OddJob.getInstance().getJailManager().in(moving.getUniqueId()) != null) {
             test = false;
         } else if (OddJob.getInstance().getFreezeManager().get(moving.getUniqueId()) != null) {
             test = false;
@@ -117,7 +117,7 @@ public class TeleportManager {
             test = false;
         } else if (OddJob.getInstance().getArenaManager().isInArena(target.getUniqueId())) {
             test = false;
-        } else if (OddJob.getInstance().getJailManager().in(target.getUniqueId())) {
+        } else if (OddJob.getInstance().getJailManager().in(target.getUniqueId()) != null) {
             test = false;
         } else if (OddJob.getInstance().getFreezeManager().get(target.getUniqueId()) != null) {
             test = false;
@@ -276,5 +276,9 @@ public class TeleportManager {
     public void spawn(Player player,Location location) {
         teleport(player,location,cost_spawn, PlayerTeleportEvent.TeleportCause.COMMAND);
         OddJob.getInstance().getMessageManager().success("You have been teleported to spawn", player.getUniqueId(), true);
+    }
+
+    public void jail(Player player, Location lobby) {
+        player.teleport(lobby, PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 }

@@ -5,10 +5,14 @@ import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.world.WorldEvent;
+import org.bukkit.event.world.WorldInitEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +20,9 @@ import java.util.UUID;
 public class PlayerJoin implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
+
+        OddJob.getInstance().getMySQLManager().updateWorlds(event.getPlayer().getWorld());
+
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
@@ -59,5 +66,10 @@ public class PlayerJoin implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void init(PlayerChangedWorldEvent event) {
+        OddJob.getInstance().getMySQLManager().updateWorlds(event.getPlayer().getWorld());
     }
 }
