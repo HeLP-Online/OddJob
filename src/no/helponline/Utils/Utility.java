@@ -208,5 +208,6 @@ public class Utility {
         if (string.equals("")) return null;
         String[] st = string.split(",");
         return new Location(Bukkit.getWorld(st[0]), Integer.parseInt(st[1]), Integer.parseInt(st[2]), Integer.parseInt(st[3]), Float.parseFloat(st[4]), Float.parseFloat(st[5]));
+
     }
 }

@@ -2,15 +2,12 @@ package no.helponline.Commands;
 
 import no.helponline.Managers.JailManager.Slot;
 import no.helponline.OddJob;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class JailCommand implements CommandExecutor {
@@ -21,7 +18,7 @@ public class JailCommand implements CommandExecutor {
         if (strings.length == 1 && strings[0].equalsIgnoreCase("status")) {
             if (OddJob.getInstance().getJailManager().has(player.getWorld().getUID())) {
                 OddJob.getInstance().getJailManager().revertPoints();
-                OddJob.getInstance().getMessageManager().console("All set!");
+                OddJob.getInstance().getMessageManager().success("Jail set!", commandSender, true);
             }
             return true;
         }

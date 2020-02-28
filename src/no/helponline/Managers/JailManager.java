@@ -4,6 +4,7 @@ import no.helponline.OddJob;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
@@ -23,7 +24,11 @@ public class JailManager {
     //Location jailWarden;
 
     public UUID in(UUID uniqueId) {
-        return OddJob.getInstance().getMySQLManager().inPlayerJail(uniqueId).getUID();
+        World world = OddJob.getInstance().getMySQLManager().inPlayerJail(uniqueId);
+        if (world != null) {
+            return world.getUID();
+        }
+        return null;
     }
 
     public boolean setInJail(UUID uuidPlayer, UUID world, CommandSender sender) {

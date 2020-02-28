@@ -1684,7 +1684,7 @@ public class MySQLManager {
 
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_players_jailed` WHERE `uuid` = ? ");
             preparedStatement.setString(1, player.toString());
-            preparedStatement.executeQuery();
+            preparedStatement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
@@ -1700,7 +1700,10 @@ public class MySQLManager {
             preparedStatement.setString(1, player.toString());
             resultSet = preparedStatement.executeQuery();
 
-            world = Bukkit.getWorld(resultSet.getString("world"));
+            if (resultSet.next()) {
+                world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                OddJob.getInstance().getMessageManager().console(resultSet.getString("world"));
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
