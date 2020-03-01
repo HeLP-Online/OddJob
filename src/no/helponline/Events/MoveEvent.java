@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class MoveEvent implements Listener {
@@ -33,9 +34,10 @@ public class MoveEvent implements Listener {
         Player player = event.getPlayer();
         UUID movingToGuild;
         UUID movingFromGuild;
+        boolean print = false;
 
         // Have the player changed chunk?
-        if (event.getFrom().getChunk().equals(movingToChunk)) {
+        if (movingFromChunk.equals(movingToChunk)) {
             // Player is within the same guild
             return;
         }
@@ -61,32 +63,42 @@ public class MoveEvent implements Listener {
         // Prison break!
         if (OddJob.getInstance().getJailManager().in(player.getUniqueId()) != null) {
             if (movingToGuild != OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.JAIL)) {
-                OddJob.getInstance().getJailManager().freeFromJail(player.getUniqueId(),null,true);
+                OddJob.getInstance().getJailManager().freeFromJail(player.getUniqueId(), null, true);
             }
         }
 
-        // Printing to Actionbar
-        StringBuilder s = new StringBuilder();
-        switch (OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild)) {
-            case GUILD:
-                s.append(ChatColor.DARK_BLUE).append(OddJob.getInstance().getMySQLManager().getGuildNameByUUID(movingToGuild)).append(" hails you!");
-                break;
-            case ARENA:
-            case WAR:
-                s.append(ChatColor.RED).append("Draw your weapon!");
-                break;
-            case JAIL:
-                s.append(ChatColor.GOLD).append("Nap time!");
-                break;
-            case SAFE:
-                s.append(ChatColor.GREEN).append("Take a break and prepare!");
-                break;
-            default:
-                s.append(ChatColor.YELLOW).append("Welcome to the wild!");
-                break;
-
+        if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
+            OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
+            print = true;
+        } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()))) {
+            OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
+            print = true;
         }
-        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s.toString() + "\"}"), 40, 20, 20);
-        (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
+
+        if (print) {
+            // Printing to Actionbar
+            StringBuilder s = new StringBuilder();
+            switch (OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild)) {
+                case GUILD:
+                    s.append(ChatColor.DARK_BLUE).append(OddJob.getInstance().getMySQLManager().getGuildNameByUUID(movingToGuild)).append(" hails you!");
+                    break;
+                case ARENA:
+                case WAR:
+                    s.append(ChatColor.RED).append("Draw your weapon!");
+                    break;
+                case JAIL:
+                    s.append(ChatColor.GOLD).append("Nap time!");
+                    break;
+                case SAFE:
+                    s.append(ChatColor.GREEN).append("Take a break and prepare!");
+                    break;
+                default:
+                    s.append(ChatColor.YELLOW).append("Welcome to the wild!");
+                    break;
+
+            }
+            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s.toString() + "\"}"), 40, 20, 20);
+            (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
+        }
     }
 }

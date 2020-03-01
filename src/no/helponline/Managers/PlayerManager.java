@@ -17,6 +17,7 @@ public class PlayerManager {
 
     private HashMap<UUID, Long> inCombat = new HashMap<>();
     private HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
+    public HashMap<UUID, UUID> in = new HashMap<>();
 
     public void updatePlayer(UUID uuid, String name) {
         OddJob.getInstance().getMySQLManager().updatePlayer(uuid, name);

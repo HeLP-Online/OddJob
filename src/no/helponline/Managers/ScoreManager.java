@@ -37,8 +37,8 @@ public class ScoreManager {
         if (objective != null) {
             zone = scoreboardGuild.getTeam("zone");
             guild = scoreboardGuild.getTeam("guild");
-            playerEcon = scoreboardGuild.getTeam("playerEcon");
-            guildEcon = scoreboardGuild.getTeam("guildEcon");
+            playerEcon = scoreboardGuild.getTeam("playerEcon"); // TODO
+            guildEcon = scoreboardGuild.getTeam("guildEcon");   // TODO
             rank = scoreboardGuild.getTeam("rank");
             members = scoreboardGuild.getTeam("members");
         } else {
@@ -73,7 +73,7 @@ public class ScoreManager {
             }
 
             members = scoreboardGuild.registerNewTeam("members");
-            members.addEntry(ChatColor.GOLD+"Members: ");
+            members.addEntry(ChatColor.GOLD + "Members: ");
             members.setSuffix(i + "/" + mem.size());
 
         }

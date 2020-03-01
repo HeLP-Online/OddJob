@@ -61,9 +61,9 @@ public class GuildManager {
     public void claim(Player player) {
         Chunk inChunk = player.getLocation().getChunk();
         UUID playerGuild = getGuildUUIDByMember(player.getUniqueId());
+        UUID chunkGuild = getGuildUUIDByChunk(inChunk, player.getWorld());
 
-        // Is the Chunk claimed by any Guild
-        if (getGuildUUIDByChunk(inChunk, player.getWorld()) != null) {
+        if (chunkGuild != null && !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
             // Chunk is already claimed by Guild
             OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk, player.getWorld())), player, false);
         } else {
@@ -283,9 +283,10 @@ public class GuildManager {
     public void claim(Player player, Zone zone) {
         Chunk inChunk = player.getLocation().getChunk();
         UUID zoneGuild = getGuildUUIDByZone(zone);
+        UUID chunkGuild = getGuildUUIDByChunk(inChunk, player.getWorld());
 
-        // Is the Chunk already claimed by a Guild
-        if (getGuildUUIDByChunk(inChunk, player.getWorld()) != null) {
+        if (chunkGuild != null && !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
+            // The Chunk is already claimed by a Guild
             OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk, player.getWorld())), player, false);
         } else {
             // Claiming to Zone
