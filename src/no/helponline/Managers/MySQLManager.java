@@ -642,7 +642,7 @@ public class MySQLManager {
     }
 
     public UUID getGuildUUIDByChunk(Chunk chunk, World world) {
-        UUID uuid = null;
+        UUID uuid = getGuildUUIDByZone(Zone.WILD);
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? ");
@@ -681,6 +681,7 @@ public class MySQLManager {
 
     public String getGuildNameByUUID(UUID guild) {
         String name = null;
+        if (guild != null) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_guilds` WHERE `uuid` = ? ");
@@ -694,7 +695,7 @@ public class MySQLManager {
         } finally {
             close();
         }
-        return name;
+        return name; } else return "The Wild!";
     }
 
     public void deleteGuildChunks(UUID guild, Chunk chunk, Player player) {

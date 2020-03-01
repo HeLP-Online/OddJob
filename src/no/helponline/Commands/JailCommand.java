@@ -21,8 +21,7 @@ public class JailCommand implements CommandExecutor {
                 OddJob.getInstance().getMessageManager().success("Jail set!", commandSender, true);
             }
             return true;
-        }
-        if (strings.length == 2 && strings[0].equalsIgnoreCase("set")) {
+        } else if (strings.length == 2 && strings[0].equalsIgnoreCase("set")) {
             switch (Slot.valueOf(strings[1])) {
                 case warden:
                 case free:
@@ -34,32 +33,31 @@ public class JailCommand implements CommandExecutor {
                     OddJob.getInstance().getMessageManager().danger("Syntax error", player, false);
             }
             return true;
-        }
-        if (strings.length == 1 && strings[0].equalsIgnoreCase("warden")) {
+        } else if (strings.length == 1 && strings[0].equalsIgnoreCase("warden")) {
             if (OddJob.getInstance().getJailManager().has(player.getWorld().getUID())) {
-                OddJob.getInstance().getTeleportManager().teleport(player,OddJob.getInstance().getJailManager().jailWarden(player.getWorld().getUID()),0, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                OddJob.getInstance().getTeleportManager().teleport(player, OddJob.getInstance().getJailManager().jailWarden(player.getWorld().getUID()), 0, PlayerTeleportEvent.TeleportCause.PLUGIN);
             }
             return true;
-        }
-
-        if (strings.length == 2 && strings[0].equalsIgnoreCase("catch")) {
+        } else if (strings.length == 2 && strings[0].equalsIgnoreCase("catch")) {
             UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
             if (target == null) {
-                OddJob.getInstance().getMessageManager().errorPlayer(strings[1],commandSender);
+                OddJob.getInstance().getMessageManager().errorPlayer(strings[1], commandSender);
                 return true;
             }
 
-            OddJob.getInstance().getJailManager().setInJail(target,OddJob.getInstance().getPlayerManager().getPlayer(target).getWorld().getUID(),commandSender);
+            OddJob.getInstance().getJailManager().setInJail(target, OddJob.getInstance().getPlayerManager().getPlayer(target).getWorld().getUID(), commandSender);
             return true;
-        }
-        if (strings.length == 2 && strings[0].equalsIgnoreCase("free")) {
+        } else if (strings.length == 2 && strings[0].equalsIgnoreCase("free")) {
             UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
             if (target == null) {
-                OddJob.getInstance().getMessageManager().errorPlayer(strings[1],commandSender);
+                OddJob.getInstance().getMessageManager().errorPlayer(strings[1], commandSender);
                 return true;
             }
 
-            OddJob.getInstance().getJailManager().freeFromJail(target,commandSender);
+            OddJob.getInstance().getJailManager().freeFromJail(target, commandSender,false);
+        } else if (strings.length == 1 && strings[0].equalsIgnoreCase("edit")) {
+            OddJob.getInstance().getJailManager().edit(player.getWorld().getUID());
+            return true;
         }
         return true;
     }

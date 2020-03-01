@@ -3,6 +3,7 @@ package no.helponline.Events;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -13,6 +14,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.WorldEvent;
 import org.bukkit.event.world.WorldInitEvent;
+import org.bukkit.scoreboard.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,9 +30,14 @@ public class PlayerJoin implements Listener {
 
         // Making an OddPlayer
         OddJob.getInstance().getPlayerManager().updatePlayer(uuid, player.getName());
+
+        // If banned Player
         if (OddJob.getInstance().getBanManager().getBan(uuid) != null) {
             OddJob.getInstance().getBanManager().kick(player);
         } else {
+
+            // Scoreboad
+            OddJob.getInstance().getScoreManager().guild(player);
 
             if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
                 OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D, false);

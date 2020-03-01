@@ -85,9 +85,16 @@ public class MessageManager {
     }
 
     public void errorPlayer(String string, CommandSender commandSender) {
-        warning("Sorry we can't find the player: "+string,commandSender,false);
+        warning("Sorry we can't find the player: " + string, commandSender, false);
     }
+
     public void errorWorld(String string, CommandSender commandSender) {
-        warning("Sorry we can't find the world: "+string,commandSender,false);
+        warning("Sorry we can't find the world: " + string, commandSender, false);
+    }
+
+    public void broadcastAchievement(String string) {
+        for (Player pl : Bukkit.getOnlinePlayers()) {
+            pl.sendMessage(string);
+        }
     }
 }

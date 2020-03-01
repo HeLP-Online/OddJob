@@ -19,25 +19,26 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
-    public static HashMap<UUID, Location> deathChest = new HashMap<>();
+    //public static HashMap<UUID, Location> deathChest = new HashMap<>();
     public HashMap<UUID, ArenaPlayer> arenaPlayer = new HashMap<>();
     private static OddJob instance;
+    private ArenaManager arenaManager;
+    private BanManager banManager;
+    private ConfigManager configManager;
+    private DeathManager deathManager;
     private EconManager econManager;
+    private FreezeManager freezeManager;
     private GuildManager guildManager;
-    private PlayerManager playerManager;
+    private HomesManager homesManager;
+    private JailManager jailManager;
     private LockManager lockManager;
     private MessageManager messageManager;
-    private HomesManager homesManager;
-    private ConfigManager configManager;
-    private BanManager banManager;
-    private TeleportManager teleportManager;
     private MySQLManager mySQLManager;
+    private PlayerManager playerManager;
+    private ScoreManager scoreManager;
+    private TeleportManager teleportManager;
     private WorldManger worldManager;
-    private FreezeManager freezeManager;
-    private DeathManager deathManager;
     private WarpManager warpManager;
-    private ArenaManager arenaManager;
-    private JailManager jailManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -46,7 +47,7 @@ public class OddJob extends JavaPlugin {
     private static final Economy econ = null;
     private static final Permission perms = null;
 
-    public static HashMap<UUID, UUID> inChunk = new HashMap<>(); //player - guild
+    //public static HashMap<UUID, UUID> inChunk = new HashMap<>(); //player - guild
     public static boolean vault;
 
     public void onEnable() {
@@ -70,6 +71,7 @@ public class OddJob extends JavaPlugin {
         messageManager = new MessageManager();
         mySQLManager = new MySQLManager();
         playerManager = new PlayerManager();
+        scoreManager = new ScoreManager();
         teleportManager = new TeleportManager();
         warpManager = new WarpManager();
         worldManager = new WorldManger();
@@ -136,77 +138,62 @@ public class OddJob extends JavaPlugin {
     public void onDisable() {
 
     }
-
+    public Location getSpawn() {
+        return getServer().getWorld("world").getSpawnLocation();
+    }
 
     public void log(String message) {
         getLogger().log(Level.INFO, ChatColor.YELLOW + message);
     }
 
-    public GuildManager getGuildManager() {
-        return guildManager;
-    }
-
-    public HomesManager getHomesManager() {
-        return homesManager;
-    }
-
-    public MessageManager getMessageManager() {
-        return messageManager;
-    }
-
-    public ConfigManager getConfigManager() {
-        return configManager;
-    }
-
-    public PlayerManager getPlayerManager() {
-        return playerManager;
-    }
-
-    public EconManager getEconManager() {
-        return econManager;
-    }
-
-    public TeleportManager getTeleportManager() {
-        return teleportManager;
-    }
-
-    public BanManager getBanManager() {
-        return banManager;
-    }
-
-    public LockManager getLockManager() {
-        return lockManager;
-    }
-
-    public MySQLManager getMySQLManager() {
-        return mySQLManager;
-    }
-
-    public WorldManger getWorldManager() {
-        return worldManager;
-    }
-
-    public FreezeManager getFreezeManager() {
-        return freezeManager;
-    }
-
-    public DeathManager getDeathManager() {
-        return deathManager;
-    }
-
-    public WarpManager getWarpManager() {
-        return warpManager;
-    }
 
     public ArenaManager getArenaManager() {
         return arenaManager;
     }
-
-    public Location getSpawn() {
-        return getServer().getWorld("world").getSpawnLocation();
+    public BanManager getBanManager() {
+        return banManager;
     }
-
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+    public DeathManager getDeathManager() {
+        return deathManager;
+    }
+    public EconManager getEconManager() {
+        return econManager;
+    }
+    public FreezeManager getFreezeManager() {
+        return freezeManager;
+    }
+    public GuildManager getGuildManager() {
+        return guildManager;
+    }
+    public HomesManager getHomesManager() {
+        return homesManager;
+    }
     public JailManager getJailManager() {
         return jailManager;
+    }
+    public LockManager getLockManager() {
+        return lockManager;
+    }
+    public MessageManager getMessageManager() {
+        return messageManager;
+    }
+    public MySQLManager getMySQLManager() {
+        return mySQLManager;
+    }
+    public PlayerManager getPlayerManager() {
+        return playerManager;
+    }
+    public ScoreManager getScoreManager() { return scoreManager; }
+    public TeleportManager getTeleportManager() {
+        return teleportManager;
+    }
+    public WarpManager getWarpManager() {
+        return warpManager;
+    }
+    public WorldManger getWorldManager() {
+        return worldManager;
     }
 }

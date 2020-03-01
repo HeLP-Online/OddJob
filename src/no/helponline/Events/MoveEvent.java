@@ -4,12 +4,13 @@ import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
 import no.helponline.Utils.Zone;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.UUID;
@@ -17,71 +18,75 @@ import java.util.UUID;
 public class MoveEvent implements Listener {
     @EventHandler
     public void freeze(PlayerMoveEvent event) {
-        //TODO block teleport
         Player player = event.getPlayer();
+        // If Player is frozen
         if (OddJob.getInstance().getFreezeManager().get(player.getUniqueId()) != null) {
-            if (event.getTo().getBlock() != null && !event.getFrom().getBlock().equals(event.getTo().getBlock())) {
-                player.teleport(new Location(player.getWorld(), event.getFrom().getBlockX(), event.getFrom().getBlockY(), event.getFrom().getBlockZ()));
-            }
+            player.teleport(new Location(player.getWorld(), event.getFrom().getBlockX(), event.getFrom().getBlockY(), event.getFrom().getBlockZ()));
         }
     }
 
 
     @EventHandler
     public void onGuildMove(PlayerMoveEvent event) {
-        Chunk chunk = event.getTo().getChunk();
+        Chunk movingToChunk = event.getTo().getChunk();
+        Chunk movingFromChunk = event.getFrom().getChunk();
         Player player = event.getPlayer();
-        UUID guild = null;
+        UUID movingToGuild;
+        UUID movingFromGuild;
 
         // Have the player changed chunk?
-        if (event.getFrom().getChunk().equals(chunk)) {
-            // within same chunk
+        if (event.getFrom().getChunk().equals(movingToChunk)) {
+            // Player is within the same guild
             return;
         }
 
-        // Who owns the chunk?
-        guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
-        if (guild == null) {
-            guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
+        // Who owns the chunk the Player is going to?
+        movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk, player.getWorld());
+        if (movingToGuild == null) {
+            movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         }
-        if (OddJob.inChunk.containsKey(player.getUniqueId())) {
-            // If nobody, it's the wild
-            if (guild == null) {
-                guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
-            }
-
-            if (OddJob.inChunk.get(player.getUniqueId()) == guild) {
-                if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
-                    OddJob.getInstance().getGuildManager().autoClaim(player, chunk);
-                }
-                return;
-            }
-
+        // Who owns the chunk the Player is going from?
+        movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingFromChunk, player.getWorld());
+        if (movingFromGuild == null) {
+            movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         }
 
-        OddJob.inChunk.put(player.getUniqueId(), guild);
-        /* PRINT GUILD NAME */
-        String s = "";
-        if (guild != null) {
-            switch (OddJob.getInstance().getGuildManager().getZoneByGuild(guild)) {
-                case GUILD:
-                    s = s + ChatColor.DARK_BLUE + OddJob.getInstance().getMySQLManager().getGuildNameByUUID(guild) + " hails you!";
-                    break;
-                case ARENA:
-                case WAR:
-                    s = s + ChatColor.RED + "Draw your weapon!";
-                    break;
-                case JAIL:
-                    s = s + ChatColor.GOLD + "Nap time!";
-                    break;
-                case SAFE:
-                    s = s + ChatColor.GREEN + "Take a break and prepare!";
-                    break;
+        // Auto claiming
+        if (movingFromGuild != movingToGuild && movingToGuild == OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
+            if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
+                OddJob.getInstance().getGuildManager().autoClaim(player, movingToChunk);
             }
-        } else {
-            s = s + ChatColor.YELLOW + "Welcome to the wild!";
         }
-        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
+
+        // Prison break!
+        if (OddJob.getInstance().getJailManager().in(player.getUniqueId()) != null) {
+            if (movingToGuild != OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.JAIL)) {
+                OddJob.getInstance().getJailManager().freeFromJail(player.getUniqueId(),null,true);
+            }
+        }
+
+        // Printing to Actionbar
+        StringBuilder s = new StringBuilder();
+        switch (OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild)) {
+            case GUILD:
+                s.append(ChatColor.DARK_BLUE).append(OddJob.getInstance().getMySQLManager().getGuildNameByUUID(movingToGuild)).append(" hails you!");
+                break;
+            case ARENA:
+            case WAR:
+                s.append(ChatColor.RED).append("Draw your weapon!");
+                break;
+            case JAIL:
+                s.append(ChatColor.GOLD).append("Nap time!");
+                break;
+            case SAFE:
+                s.append(ChatColor.GREEN).append("Take a break and prepare!");
+                break;
+            default:
+                s.append(ChatColor.YELLOW).append("Welcome to the wild!");
+                break;
+
+        }
+        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s.toString() + "\"}"), 40, 20, 20);
         (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
     }
 }

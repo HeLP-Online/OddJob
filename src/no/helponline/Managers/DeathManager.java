@@ -17,13 +17,11 @@ public class DeathManager {
     private final HashMap<Location, BukkitTask> task = new HashMap<>();
 
     public void add(Block chest, UUID player) {
-
-        // FIND BLOCK TO THE RIGHT
         Block right = chest.getRelative(0, 0, -1);
 
-        // SAVING AS LEFT SIDE
+        // Saving left side of the DoubleChest with the timer of disappearance
         task.put(chest.getLocation(), new BukkitRunnable() {
-                    int i = 300;
+                    int i = 300; // 5 min.
 
                     @Override
                     public void run() {
@@ -43,34 +41,39 @@ public class DeathManager {
 
                 }.runTaskTimer(OddJob.getInstance(), 20L, 20L)
         );
+
+        // Storing the DoubleChest replacement blocks to the database
         OddJob.getInstance().getMySQLManager().addDeathChest(chest.getLocation(), chest.getType(), right.getType(), player);
     }
 
-    public void replace(Location location, UUID player) {
-        // LEFT OR RIGHT?
+    public void replace(Location location, UUID findingPlayer) {
+
         if (location.getBlock().getType().equals(Material.CHEST)) {
             Chest chest = (Chest) location.getBlock().getState();
 
             HashMap<String, String> ret = OddJob.getInstance().getMySQLManager().getDeathChest(location);
             if (!ret.isEmpty()) {
-                // EMPTY IT
+                // Empty the DoubleChest
                 chest.getInventory().clear();
-                // LEFT BLOCK
+
+                // Replace the blocks
                 location.getBlock().setType(Material.valueOf(ret.get("left")));
-                // BLOCK TO THE RIGHT
                 Block right = location.getBlock().getRelative(0, 0, -1);
                 right.setType(Material.valueOf(ret.get("right")));
 
-                // WHO OWNS IT?
-                UUID owner = UUID.fromString(ret.get("uuid"));
-                if (!owner.equals(player)) {
-                    if (player != null) {
-                        if (Bukkit.getPlayer(owner).isOnline()) {
-                            OddJob.getInstance().getMessageManager().danger("Somebody found your stuff.", player,false);
+                // Notify the owner, if the Player is online
+                UUID ownerOfChest = UUID.fromString(ret.get("uuid"));
+                if (!ownerOfChest.equals(findingPlayer)) {
+                    // Finders keepers
+                    if (findingPlayer != null) {
+                        if (Bukkit.getPlayer(ownerOfChest).isOnline()) {
+                            OddJob.getInstance().getMessageManager().danger("Somebody found your stuff.", ownerOfChest,false);
                         }
-                        OddJob.getInstance().getMessageManager().console(ChatColor.AQUA+OddJob.getInstance().getPlayerManager().getName(player) +ChatColor.RESET+ " found the stuff from "+ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(UUID.fromString(ret.get("uuid"))));
+                        OddJob.getInstance().getMessageManager().console(ChatColor.AQUA+OddJob.getInstance().getPlayerManager().getName(findingPlayer) +ChatColor.RESET+ " found the stuff from "+ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(ownerOfChest));
                     }
                 }
+
+                // Remove from database
                 remove(location);
             }
         }
@@ -81,11 +84,15 @@ public class DeathManager {
     }
 
     public void remove(Location location) {
+        // If task is not cancelled
         if (task.get(location) != null) {
             task.get(location).cancel();
         }
+
+        // Remove task
         task.remove(location);
 
+        // Remove from database
         OddJob.getInstance().getMySQLManager().deleteDeathChest(location);
     }
 
@@ -94,20 +101,37 @@ public class DeathManager {
     }
 
     public void replace(UUID world, double x, double y, double z, Material leftBlock, Material rightBlock) {
+        // Does the World exists
         if (Bukkit.getWorld(world) == null) {
             return;
         }
+
         Location location = new Location(Bukkit.getWorld(world), x, y, z);
-        OddJob.getInstance().log(location.toString());
         Block left = location.getBlock();
+
+        // Is it a DoubleChest
         if (!left.getType().equals(Material.CHEST)) {
             return;
         }
+
+        // Replace blocks
         Chest chest = (Chest) left.getState();
         chest.getInventory().clear();
         left.setType(leftBlock);
         Block right = left.getRelative(0, 0, -1);
         right.setType(rightBlock);
+
+        // Remove from database
         OddJob.getInstance().getMySQLManager().deleteDeathChest(left.getLocation());
+    }
+
+    public UUID getOwner(Location location) {
+        UUID uuid = null;
+        try {
+            uuid = UUID.fromString(OddJob.getInstance().getMySQLManager().getDeathChest(location).get("uuid"));
+        } catch (Exception ex) {
+            OddJob.getInstance().getMessageManager().console("getOwner of DeathChest failed");
+        }
+        return uuid;
     }
 }
