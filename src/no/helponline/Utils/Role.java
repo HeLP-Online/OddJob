@@ -1,10 +1,10 @@
 package no.helponline.Utils;
 
 public enum Role {
-    guildMaster(99),
-    admins(33),
-    mods(22),
-    members(11),
+    Master(99),
+    Admins(33),
+    Mods(22),
+    Members(11),
     all(0);
 
     private int level;

@@ -35,7 +35,7 @@ public class GuildManager {
         memberOfGuild.put("invited_only", Boolean.toString(false));
         memberOfGuild.put("friendly_fire", Boolean.toString(false));
         OddJob.getInstance().getMySQLManager().createGuild(memberOfGuild);
-        addGuildMember(guild, player, Role.guildMaster);
+        addGuildMember(guild, player, Role.Master);
         return true;
     }
 
@@ -104,7 +104,7 @@ public class GuildManager {
         // Delete the Players pending invitations to Guilds
         OddJob.getInstance().getMySQLManager().deletePending(player);
         // Add a Player to Guild as Member
-        OddJob.getInstance().getMySQLManager().addGuildMember(guild, player, Role.members);
+        OddJob.getInstance().getMySQLManager().addGuildMember(guild, player, Role.Members);
     }
 
     public UUID getGuildUUIDByName(String name) {
@@ -165,13 +165,13 @@ public class GuildManager {
         Role newRole = null;
         switch (prevRole.level()) {
             case 11:
-                newRole = Role.mods;
+                newRole = Role.Mods;
                 break;
             case 22:
-                newRole = Role.admins;
+                newRole = Role.Admins;
                 break;
             case 33:
-                newRole = Role.guildMaster;
+                newRole = Role.Master;
                 break;
         }
         if (newRole != null) {
@@ -185,13 +185,13 @@ public class GuildManager {
         Role newRole = null;
         switch (prevRole.level()) {
             case 22:
-                newRole = Role.members;
+                newRole = Role.Members;
                 break;
             case 33:
-                newRole = Role.mods;
+                newRole = Role.Mods;
                 break;
             case 99:
-                newRole = Role.admins;
+                newRole = Role.Admins;
                 break;
         }
         if (newRole != null) {

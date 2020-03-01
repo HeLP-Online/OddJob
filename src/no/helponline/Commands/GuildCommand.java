@@ -299,7 +299,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     Role targetRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
                     Role triggerRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
 
-                    if (targetRole.equals(Role.admins)) {
+                    if (targetRole.equals(Role.Admins)) {
                         OddJob.getInstance().getMessageManager().danger(OddJob.getInstance().getPlayerManager().getName(targetUUID) + " already have the highest rank.", commandSender,false);
                         return true;
                     }
@@ -328,7 +328,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     Role targetRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(targetUUID);
                     Role triggerRole = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
 
-                    if (targetRole.equals(Role.members)) {
+                    if (targetRole.equals(Role.Members)) {
                         OddJob.getInstance().getMessageManager().danger(OddJob.getInstance().getPlayerManager().getName(targetUUID) + " already have the lowest rank.", commandSender,false);
                         return true;
                     }
@@ -492,7 +492,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 if (guild != null) {
                     for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
                         Role rule = OddJob.getInstance().getGuildManager().getGuildMemberRole(uuid);
-                        if (role.level() > rule.level() && !rule.equals(Role.admins)) {
+                        if (role.level() > rule.level() && !rule.equals(Role.Admins)) {
                             list.add(OddJob.getInstance().getPlayerManager().getName(uuid));
                         }
                     }
@@ -508,7 +508,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 if (guild != null) {
                     for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
                         Role rule = OddJob.getInstance().getGuildManager().getGuildMemberRole(uuid);
-                        if (role.level() > rule.level() && !rule.equals(Role.members)) {
+                        if (role.level() > rule.level() && !rule.equals(Role.Members)) {
                             list.add(OddJob.getInstance().getPlayerManager().getName(uuid));
                         }
                     }
