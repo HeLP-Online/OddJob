@@ -1,13 +1,19 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.BukkitSerializers;
 import no.helponline.Utils.Role;
 import no.helponline.Utils.Utility;
 import no.helponline.Utils.Zone;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -682,20 +688,21 @@ public class MySQLManager {
     public String getGuildNameByUUID(UUID guild) {
         String name = null;
         if (guild != null) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_guilds` WHERE `uuid` = ? ");
-            preparedStatement.setString(1, guild.toString());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                name = resultSet.getString("name");
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_guilds` WHERE `uuid` = ? ");
+                preparedStatement.setString(1, guild.toString());
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    name = resultSet.getString("name");
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return name; } else return "The Wild!";
+            return name;
+        } else return "The Wild!";
     }
 
     public void deleteGuildChunks(UUID guild, Chunk chunk, Player player) {
@@ -1664,11 +1671,37 @@ public class MySQLManager {
         }
     }
 
-    public void addPlayerJail(UUID uuidPlayer, UUID world) {
+    public void addPlayerJail(UUID uuidPlayer, UUID world, ItemStack[] contents) { //, ItemStack[] armors, ItemStack[] extras) {
+
+        /* FROM Exerosis
+        try (final var connection = source.getConnection()) {
+          try (final var query = connection.prepareStatement(...)) {
+            final Blob blob = connection.createBlob();
+            //This operation is only sometimes supported unfortunately.
+            try (final var out = blob.setBinaryStream(0)) {
+              BukkitSerializers.saveItems(inventory.getContents(), out);
+            }
+            query.setBlob(..., blob);
+          }
+        } catch (Throwable reason) { throw new RuntimeException(reason); }
+         */
+        Player player = Bukkit.getPlayer(uuidPlayer);
         try {
             connect();
             // PLAYER ; WORLD ; DATE SET IN JAIL ; IS IN JAIL ; COUNT JAIL TIMES ; SERVED TIME
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_jailed` (`uuid`,`world`,`date`) VALUES (?,?,UNIX_TIMESTAMP())");
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_jailed` (`uuid`,`world`,`date`,`contents`) VALUES (?,?,UNIX_TIMESTAMP(),?)");
+
+            final var bytes = new ByteArrayOutputStream();
+            try {
+                BukkitSerializers.saveItems(player.getInventory().getContents(),bytes);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            final var in = new ByteArrayInputStream(bytes.toByteArray());
+            OddJob.getInstance().getMessageManager().console("Byte length:"+bytes.toByteArray().length+"");
+            OddJob.getInstance().getMessageManager().console("Inventory size:"+bytes.toByteArray().length+"");
+            preparedStatement.setBinaryStream(3,in);
+
             preparedStatement.setString(1, uuidPlayer.toString());
             preparedStatement.setString(2, world.toString());
             preparedStatement.execute();
@@ -1691,6 +1724,39 @@ public class MySQLManager {
         } finally {
             close();
         }
+    }
+
+    public HashMap<String, ItemStack[]> getJailItems(UUID player) {
+        HashMap<String, ItemStack[]> items = new HashMap<>();
+        /* FROM Exerosis
+        try (final var results = query.execute()) {
+            if (!results.first()) return new ItemStack[0];
+            try (final var in = results.getBinaryStream(...)) {
+                return BukkitSerializers.loadItems(in);
+            }
+        }
+
+         */
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `contents`,`armors`,`extras` FROM `mine_players_jailed` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                try {
+                    InputStream in = resultSet.getBinaryStream("contents");
+                    items.put("contents", BukkitSerializers.loadItems(in));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return items;
     }
 
     public World inPlayerJail(UUID player) {
@@ -1735,7 +1801,7 @@ public class MySQLManager {
         Location location = null;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT `jail_"+name+"` FROM `mine_worlds` WHERE `uuid` = ?");
+            preparedStatement = connection.prepareStatement("SELECT `jail_" + name + "` FROM `mine_worlds` WHERE `uuid` = ?");
             preparedStatement.setString(1, world.toString());
             resultSet = preparedStatement.executeQuery();
 
@@ -1765,13 +1831,13 @@ public class MySQLManager {
                 preparedStatementsec.setString(2, uuid.toString());
                 preparedStatementsec.setString(1, name);
                 preparedStatementsec.executeUpdate();
-                OddJob.getInstance().getMessageManager().console("UPDATING: "+name);
+                OddJob.getInstance().getMessageManager().console("UPDATING: " + name);
             } else {
                 preparedStatementsec = connection.prepareStatement("INSERT INTO `mine_worlds` (`uuid`,`name`) VALUES (?,?)");
                 preparedStatementsec.setString(1, uuid.toString());
                 preparedStatementsec.setString(2, name);
                 preparedStatementsec.execute();
-                OddJob.getInstance().getMessageManager().console("INSERTING: "+name);
+                OddJob.getInstance().getMessageManager().console("INSERTING: " + name);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

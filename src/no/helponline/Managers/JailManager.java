@@ -11,7 +11,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class JailManager {
 
@@ -51,12 +54,9 @@ public class JailManager {
             OddJob.getInstance().getArenaManager().abort(uuidPlayer);
         }
 
-        // Teleport to Jail lobby
-        OddJob.getInstance().getMySQLManager().addPlayerJail(uuidPlayer, world);
-
         Player player = OddJob.getInstance().getPlayerManager().getPlayer(uuidPlayer);
         // Storing Inventory
-        List<ItemStack> inv = new ArrayList<>(Arrays.asList(player.getInventory().getContents()));
+        /*List<ItemStack> inv = new ArrayList<>(Arrays.asList(player.getInventory().getContents()));
         OddJob.getInstance().getMessageManager().console("items:" + inv.toString());
         savedInventories.put(uuidPlayer, inv);
         List<ItemStack> arm = new ArrayList<>(Arrays.asList(player.getInventory().getArmorContents()));
@@ -66,6 +66,11 @@ public class JailManager {
         OddJob.getInstance().getMessageManager().console("extras:" + ext.toString());
         savedExtras.put(uuidPlayer, ext);
         player.getInventory().clear();
+*/
+
+        // Teleport to Jail lobby
+        OddJob.getInstance().getMySQLManager().addPlayerJail(uuidPlayer, world, player.getInventory().getContents());
+        player.getInventory().setContents(new ItemStack[]{});
 
         // Finishing up
         OddJob.getInstance().getPlayerManager().setGameMode(player, GameMode.ADVENTURE);
@@ -84,11 +89,8 @@ public class JailManager {
             return;
         }
 
-        // Remove from Jail
-        OddJob.getInstance().getMySQLManager().deletePlayerJail(uuidPlayer);
-
         // Restoring Inventory
-        player.getInventory().clear();
+        /*player.getInventory().clear();
         List<ItemStack> savedArmor = savedArmors.get(uuidPlayer);
         ItemStack[] equippedArmor = player.getInventory().getArmorContents();
         for (int i = 0; i < savedArmor.size(); i++) {
@@ -115,6 +117,18 @@ public class JailManager {
         }
         player.getInventory().setExtraContents(equippedExtra);
         savedExtras.remove(uuidPlayer);
+        */
+
+
+
+
+        // Remove from Jail
+        HashMap<String, ItemStack[]> items = OddJob.getInstance().getMySQLManager().getJailItems(uuidPlayer);
+        if (items.containsKey("contents")) {
+            player.getInventory().setContents(items.get("contents"));
+
+        }
+        OddJob.getInstance().getMySQLManager().deletePlayerJail(uuidPlayer);
 
         // Finishing up
         OddJob.getInstance().getPlayerManager().setGameMode(player, GameMode.SURVIVAL);

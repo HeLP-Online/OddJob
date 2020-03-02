@@ -47,7 +47,7 @@ public class BlockBreak implements Listener {
         }
         // CHUNK
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
-        if (chunkInGuild == null) {
+        if (chunkInGuild == null || chunkInGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
             return;
         }
 
@@ -78,7 +78,7 @@ public class BlockBreak implements Listener {
         }
         // CHUNK
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
-        if (chunkInGuild == null) {
+        if (chunkInGuild == null || chunkInGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
             return;
         }
 
@@ -150,7 +150,7 @@ public class BlockBreak implements Listener {
         for (Block block : blocks) {
             Chunk chunk = block.getChunk();
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, block.getWorld());
-            if (guild != null) {
+            if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
             }
@@ -208,7 +208,7 @@ public class BlockBreak implements Listener {
             memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         }
 
-        if (chunkInGuild == null) {
+        if (chunkInGuild == null || chunkInGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
             return;
         }
         if (memberOfGuild.equals(chunkInGuild)) {

@@ -3,18 +3,15 @@ package no.helponline.Events;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
-import org.bukkit.Bukkit;
+import no.helponline.Utils.Zone;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.world.WorldEvent;
-import org.bukkit.event.world.WorldInitEvent;
-import org.bukkit.scoreboard.*;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +19,7 @@ import java.util.UUID;
 public class PlayerJoin implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
-
+        // Update the list of World
         OddJob.getInstance().getMySQLManager().updateWorlds(event.getPlayer().getWorld());
 
         Player player = event.getPlayer();
@@ -37,23 +34,26 @@ public class PlayerJoin implements Listener {
         } else {
 
             // Scoreboad
-            OddJob.getInstance().getScoreManager().guild(player);
+            if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid) != null)
+                OddJob.getInstance().getScoreManager().guild(player);
 
-            if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
+            // Economy
+            /*if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
                 OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D, false);
-                //player.sendMessage("Your first balance is initialized!");
                 OddJob.getInstance().log("Initializing account for " + player.getName());
-            }
+            }*/
 
+            // Welcome message
             PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
             (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
 
+            // Remove locking items if the player has any
             OddJob.getInstance().getLockManager().remove(uuid);
 
-            // has a guild
+            // Player is in a guild
             player.sendMessage("Hi " + player.getName() + ". We are using our own plugin named OddJob to manage 'homes', 'guild' and 'warp'.\nYou may find more information at our Facebook group: https://www.facebook.com/groups/help.online.minecraft/");
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-            if (guild != null) {
+            if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 player.sendMessage("You are a loyal member of " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                 List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendings(guild);
                 if (pending.size() > 0) {
@@ -78,5 +78,10 @@ public class PlayerJoin implements Listener {
     @EventHandler
     public void init(PlayerChangedWorldEvent event) {
         OddJob.getInstance().getMySQLManager().updateWorlds(event.getPlayer().getWorld());
+    }
+
+    @EventHandler
+    public void leave(PlayerQuitEvent event) {
+        // TODO
     }
 }
