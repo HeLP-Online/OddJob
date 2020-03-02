@@ -34,4 +34,8 @@ public class EconManager {
     public Double cost(String name) {
         return OddJob.getInstance().getConfig().getDouble("econ.cost."+name,0.0);
     }
+
+    public void createAccount(UUID uuid, double v, boolean b) {
+        OddJob.getInstance().getMySQLManager().createBalance(uuid,v,b);
+    }
 }

@@ -29,23 +29,23 @@ public class TpACommand implements CommandExecutor, TabCompleter {
                 OddJob.getInstance().getMessageManager().danger("Use: /tpa <name>", commandSender,false);
                 return true;
             }
-            Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
-            if (target == null || !target.isOnline()) {
-                OddJob.getInstance().getMessageManager().danger("Sorry, we can't find " + strings[0], commandSender,false);
+            Player destinationPlayer = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
+            if (destinationPlayer == null || !destinationPlayer.isOnline()) {
+                OddJob.getInstance().getMessageManager().errorPlayer(strings[0],commandSender);
                 return true;
             }
-            Player player = (Player) commandSender;
-            if (OddJob.getInstance().getTeleportManager().has(player.getUniqueId())) {
-                OddJob.getInstance().getMessageManager().danger("You have already sent an request to " + strings[0], player.getUniqueId(),false);
+            Player movingPlayer = (Player) commandSender;
+            if (OddJob.getInstance().getTeleportManager().hasRequest(movingPlayer.getUniqueId())) {
+                OddJob.getInstance().getMessageManager().danger("You have already sent an request to " + strings[0], movingPlayer.getUniqueId(),false);
                 return true;
             }
-            if (OddJob.getInstance().getTeleportManager().tpa(player.getUniqueId(), target.getUniqueId())) { // player (sends request) // target (teleport to)
-                OddJob.getInstance().getMessageManager().success("You have requested to be teleported to " + ChatColor.DARK_AQUA+target.getName(), player.getUniqueId(),false);
-                OddJob.getInstance().getMessageManager().warning(ChatColor.DARK_AQUA+player.getName() + ChatColor.YELLOW+" want to be teleported to you. To accept this, you can click on 'ACCEPT'", target.getUniqueId(),false);
-                PlayerConnection connection = ((CraftPlayer) target).getHandle().playerConnection;
-                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"ACCEPT\",\"color\":\"dark_green\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpaccept " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Accepting the teleport request\",\"color\":\"gold\"}]}}}"));
+            if (OddJob.getInstance().getTeleportManager().request(movingPlayer.getUniqueId(), destinationPlayer.getUniqueId())) { // player (sends request) // target (teleport to)
+                OddJob.getInstance().getMessageManager().success("You have requested to be teleported to " + ChatColor.DARK_AQUA+destinationPlayer.getName(), movingPlayer.getUniqueId(),false);
+                OddJob.getInstance().getMessageManager().warning(ChatColor.DARK_AQUA+movingPlayer.getName() + ChatColor.YELLOW+" want to be teleported to you. To accept this, you can click on 'ACCEPT'", destinationPlayer.getUniqueId(),false);
+                PlayerConnection connection = ((CraftPlayer) destinationPlayer).getHandle().playerConnection;
+                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"ACCEPT\",\"color\":\"dark_green\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpaccept " + movingPlayer.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Accepting the teleport request\",\"color\":\"gold\"}]}}}"));
                 connection.sendPacket(packet);
-                packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"DENY\",\"color\":\"dark_red\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpdeny " + player.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Declines the teleport request\",\"color\":\"gold\"}]}}}"));
+                packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"DENY\",\"color\":\"dark_red\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpdeny " + movingPlayer.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Declines the teleport request\",\"color\":\"gold\"}]}}}"));
                 connection.sendPacket(packet);
             }
         }

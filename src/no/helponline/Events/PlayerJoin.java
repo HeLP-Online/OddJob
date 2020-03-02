@@ -38,10 +38,10 @@ public class PlayerJoin implements Listener {
                 OddJob.getInstance().getScoreManager().guild(player);
 
             // Economy
-            /*if (OddJob.getInstance().getEconManager().hasAccount(uuid)) {
-                OddJob.getInstance().getEconManager().setBalance(player.getUniqueId(), 200.0D, false);
+            if (!OddJob.getInstance().getEconManager().hasAccount(uuid)) {
+                OddJob.getInstance().getEconManager().createAccount(uuid, 200.0D, false);
                 OddJob.getInstance().log("Initializing account for " + player.getName());
-            }*/
+            }
 
             // Welcome message
             PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
@@ -82,6 +82,10 @@ public class PlayerJoin implements Listener {
 
     @EventHandler
     public void leave(PlayerQuitEvent event) {
-        // TODO
+        UUID uuid = event.getPlayer().getUniqueId();
+        if (OddJob.getInstance().getScoreManager().scores.containsKey(uuid)) {
+            OddJob.getInstance().getScoreManager().scores.get(uuid).cancel();
+            OddJob.getInstance().getScoreManager().scores.remove(uuid);
+        }
     }
 }
