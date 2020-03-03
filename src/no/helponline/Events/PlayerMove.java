@@ -16,7 +16,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class MoveEvent implements Listener {
+public class PlayerMove implements Listener {
     @EventHandler
     public void freeze(PlayerMoveEvent event) {
         Player player = event.getPlayer();

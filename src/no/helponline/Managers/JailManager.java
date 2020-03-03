@@ -69,6 +69,7 @@ public class JailManager {
 */
 
         // Teleport to Jail lobby
+        OddJob.getInstance().getMessageManager().console("Jailing "+player.getName()+" has "+player.getInventory().getContents().length);
         OddJob.getInstance().getMySQLManager().addPlayerJail(uuidPlayer, world, player.getInventory().getContents());
         player.getInventory().setContents(new ItemStack[]{});
 

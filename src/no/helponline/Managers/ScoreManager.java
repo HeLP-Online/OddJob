@@ -1,6 +1,7 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Zone;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -101,10 +102,8 @@ public class ScoreManager {
             public void run() {
                 if (!player.isOnline()) cancel();
                 UUID playerUUID = player.getUniqueId();
-                OddJob.getInstance().getMessageManager().console("scores:"+scores.size());
-                OddJob.getInstance().getMessageManager().console("boards:"+boards.size());
                 if (boards.containsKey(playerUUID)) scoreboardGuild = boards.get(playerUUID);
-                if (guild == null) cancel();
+                if (playerGuild == null || playerGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) cancel();
                 Team zzone = scoreboardGuild.getTeam("zone-" + playerUUID.toString().substring(0, 8));
                 Team gguild = scoreboardGuild.getTeam("guild-" + playerUUID.toString().substring(0, 8));
                 //playerEcon = scoreboardGuild.getTeam("pEcon-" + playerUUID.toString().substring(0, 8)); // TODO
@@ -118,10 +117,8 @@ public class ScoreManager {
                         i++;
                     }
                 }
-                if (gguild != null) {
-                    OddJob.getInstance().getMessageManager().console(OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld())));
+                if (gguild != null)
                     gguild.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld())));
-                }
                 if (zzone != null)
                     zzone.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getZoneByGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld())).name());
                 if (rrank != null)
@@ -131,7 +128,7 @@ public class ScoreManager {
 
             }
         }.runTaskTimer(OddJob.getInstance(), 0, 10));
-        boards.put(playerUUID,scoreboardGuild);
+        boards.put(playerUUID, scoreboardGuild);
         player.setScoreboard(scoreboardGuild);
     }
 }

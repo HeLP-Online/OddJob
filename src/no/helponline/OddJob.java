@@ -5,6 +5,7 @@ import net.milkbowl.vault.permission.Permission;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
+import no.helponline.Utils.ArenaMechanics;
 import no.helponline.Utils.ArenaPlayer;
 import no.helponline.Utils.Broadcaster;
 import org.bukkit.Bukkit;
@@ -112,14 +113,24 @@ public class OddJob extends JavaPlugin {
         configManager.load();
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
+        Bukkit.getPluginManager().registerEvents(new BlockExplode(), this);
+        Bukkit.getPluginManager().registerEvents(new BlockIgnite(), this);
+        Bukkit.getPluginManager().registerEvents(new BlockPlace(), this);
+        Bukkit.getPluginManager().registerEvents(new EntityDamage(), this);
+        Bukkit.getPluginManager().registerEvents(new EntityDamageByEntity(), this);
+        Bukkit.getPluginManager().registerEvents(new EntityExplode(), this);
+        Bukkit.getPluginManager().registerEvents(new EntityInteract(), this);
+        Bukkit.getPluginManager().registerEvents(new EntitySpawn(), this);
+        Bukkit.getPluginManager().registerEvents(new InventoryClose(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerBucketEmpty(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerChangesWorld(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerDeath(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerDropItem(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerInteract(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
-        Bukkit.getPluginManager().registerEvents(new LocksEvents(), this);
-        //Bukkit.getPluginManager().registerEvents(new SofaEvent(), this);  //TODO Sleep?
-        Bukkit.getPluginManager().registerEvents(new MoveEvent(), this);
-        Bukkit.getPluginManager().registerEvents(new ArmorstandEvent(), this);
-        Bukkit.getPluginManager().registerEvents(new onDeath(), this);
-        Bukkit.getPluginManager().registerEvents(new ArenaMechanics(), this);
-        Bukkit.getPluginManager().registerEvents(new PortalEvents(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerMove(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerPortal(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             OddJob.getInstance().log(playerManager.getGamemode(player, player.getWorld()).name());

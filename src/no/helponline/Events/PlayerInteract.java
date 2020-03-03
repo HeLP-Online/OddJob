@@ -1,8 +1,7 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Utility;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
@@ -12,49 +11,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityInteractEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.List;
 import java.util.UUID;
 
-public class LocksEvents implements Listener {
-
-    /**
-     * @param event Interact made by a non player entity
-     *              <p>
-     *              No need to check if block is a chest
-     */
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onEntityOpen(EntityInteractEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
-            // Interacted by non Player
-            Block block = event.getBlock();
-            boolean locked = false;
-
-            Material t = block.getType();
-            if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
-                // Lockable Block
-                try {
-                    if (OddJob.getInstance().getLockManager().getDoors().contains(t)) {
-                        // Door
-                        block = Utility.getLowerLeftDoor(block).getBlock();
-                    }
-                    locked = OddJob.getInstance().getLockManager().isLocked(block.getLocation()) != null;
-                } catch (Exception e) {
-                    return;
-                }
-            }
-
-            if (locked) event.setCancelled(true);
-        }
-    }
-
+public class PlayerInteract implements Listener {
     /**
      * @param event Interact made by player
      */
@@ -63,6 +27,10 @@ public class LocksEvents implements Listener {
         Player player = event.getPlayer();
         boolean door = false;
         UUID uuid = null;
+
+        // Log Diamond & Emerald
+        ItemStack item = event.getItem();
+        if ((item != null) && (item.getType().equals(Material.DIAMOND_BLOCK) || item.getType().equals(Material.EMERALD) || item.getType().equals(Material.EMERALD) || item.getType().equals(Material.EMERALD_BLOCK)) && !player.hasPermission("noLog")) OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(),item,"interact");
 
         if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null) || player.isOp()) {
             return;
@@ -119,14 +87,14 @@ public class LocksEvents implements Listener {
                     if (player.getInventory().getItemInMainHand().getType().equals(Material.TRIPWIRE_HOOK)) {
                         // Has a Key in hand
                         ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
-                        if (lore(event, player, door, uuid, block, meta, false)) {
+                        if (Lore.lore(event, player, door, uuid, block, meta, false)) {
                             // Has the correct key
                             return;
                         }
                     } else if (player.getInventory().getItemInOffHand().getType().equals(Material.TRIPWIRE_HOOK)) {
                         // Has a key in offhand
                         ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
-                        if (lore(event, player, door, uuid, block, meta, false)) {
+                        if (Lore.lore(event, player, door, uuid, block, meta, false)) {
                             // Has the correct key
                             return;
                         }
@@ -223,7 +191,7 @@ public class LocksEvents implements Listener {
                         } else if (player.getInventory().getItemInOffHand().getType().equals(Material.TRIPWIRE_HOOK)) {
                             // Has a key in offhand
                             ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
-                            if (lore(event, player, door, yourGuild, block, meta, true)) {
+                            if (Lore.lore(event, player, door, yourGuild, block, meta, true)) {
                                 // Has the correct key
                                 return;
                             }
@@ -236,96 +204,31 @@ public class LocksEvents implements Listener {
         }
     }
 
-    private boolean lore(PlayerInteractEvent event, Player player, boolean door, UUID uuid, Block block, ItemMeta meta, boolean guild) {
-        try {
-            if (meta.hasLore()) {
-                List<String> lore = meta.getLore();
-                if (lore != null && lore.size() > 1) {
-                    // Key has Lore
-                    String one = ChatColor.stripColor(lore.get(1));
-                    UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld());
-                    if (!guild && !one.equalsIgnoreCase(uuid.toString())) {
-                        // Wrong Player Key
-                        OddJob.getInstance().getMessageManager().warning("You don't have the correct Player-Key", player, false);
-                        event.setCancelled(true);
-                        return true;
-                    } else if (guild && !one.equalsIgnoreCase(guildUUID.toString())) {
-                        // Wrong Guild Key
-                        OddJob.getInstance().getMessageManager().warning("You don't have the correct Guild-Key", player, false);
-                        event.setCancelled(true);
-                        return true;
-                    }
-
-                    // Opened with the correct Key
-                    OddJob.getInstance().getMessageManager().success("Lock opened by " + meta.getDisplayName(), player, true);
-                    if (door) {
-                        // Door
-                        Utility.doorToggle(block);
-                        player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
-                        event.setCancelled(true);
-                    }
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlaceLock(BlockPlaceEvent event) {
-        if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().unlockWand) ||
-                event.getItemInHand().equals(OddJob.getInstance().getLockManager().lockWand) ||
-                event.getItemInHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
-            event.setCancelled(true);
+    @EventHandler
+    public void playerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Block block = event.getClickedBlock();
+        if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null)) {
             return;
         }
-        if (event.getItemInHand().getType().equals(Material.TRIPWIRE_HOOK)) {
-            ItemMeta meta = event.getItemInHand().getItemMeta();
-            if (meta != null && ChatColor.stripColor(meta.getDisplayName()).startsWith("Key to")) {
-                event.setCancelled(true);
-            }
-        }
-        if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
-            OddJob.getInstance().getMessageManager().danger("Sorry, The SKELETON KEY is tooooooooo powerful!", event.getPlayer().getUniqueId(), true);
+        if (block == null) return;
+        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getArenaManager().spawnTool)) {
             event.setCancelled(true);
-        }
-    }
-
-    /**
-     * @param event Breaking block
-     */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onBreakLock(BlockBreakEvent event) {
-        Block block = event.getBlock();
-        // CHEST ?
-        if (block.getType().equals(Material.CHEST)) {
-            block = Utility.getChestPosition(block).getBlock();
-        }
-        // DOOR ?
-        else if (OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {
-            block = Utility.getLowerLeftDoor(block).getBlock();
-        }
-
-        UUID uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
-        // LOCKED BY A PLAYER ?
-        if (uuid != null) {
-            if (uuid.equals(event.getPlayer().getUniqueId())) {
-                OddJob.getInstance().getLockManager().unlock(block.getLocation());
-                OddJob.getInstance().getMessageManager().warning("Lock broken!", event.getPlayer(), true);
+            Arena arena = OddJob.getInstance().getArenaManager().editArena.get(player.getUniqueId());
+            if (arena.next > arena.getMaxPlayers()) {
+                ArenaMechanics.cancel(player);
             } else {
-                OddJob.getInstance().getMessageManager().danger("This lock is owned by someone else!", event.getPlayer(), false);
-                event.setCancelled(true);
+                arena.getSpawn().put(arena.next, block.getLocation().add(0, 1, 0));
+                block.setType(Material.PINK_WOOL);
+                OddJob.getInstance().getMessageManager().success("Spawn point " + arena.next + "/" + arena.getMaxPlayers() + " set.", player,false);
+                arena.next++;
+                if (arena.next > arena.getMaxPlayers()) {
+                    arena.next = 1;
+                    OddJob.getInstance().getMessageManager().success("All spawn points are now set. You can now start the game.", player,false);
+                    OddJob.getInstance().getArenaManager().createArena(arena);
+                    ArenaMechanics.cancel(player);
+                }
             }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onDrop(PlayerDropItemEvent event) {
-        if (event.getItemDrop().getItemStack().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
-            OddJob.getInstance().getMessageManager().danger("Sorry, The SKELETON KEY can't be cast away like that!", event.getPlayer().getUniqueId(), true);
-            event.setCancelled(true);
         }
     }
 }

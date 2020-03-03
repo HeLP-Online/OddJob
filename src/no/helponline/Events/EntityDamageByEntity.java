@@ -11,7 +11,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 import java.util.UUID;
 
-public class ArmorstandEvent implements Listener {
+public class EntityDamageByEntity implements Listener {
     @EventHandler
     public void armorStandLock(EntityDamageByEntityEvent event) {
         if (event.getEntity().getType().equals(EntityType.ARMOR_STAND) && event.getDamager() instanceof Player) {

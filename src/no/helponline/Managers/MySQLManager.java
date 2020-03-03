@@ -6,6 +6,7 @@ import no.helponline.Utils.Role;
 import no.helponline.Utils.Utility;
 import no.helponline.Utils.Zone;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -1693,7 +1694,7 @@ public class MySQLManager {
 
             final var bytes = new ByteArrayOutputStream();
             try {
-                BukkitSerializers.saveItems(player.getInventory().getContents(),bytes);
+                BukkitSerializers.saveItems(contents,bytes);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -1845,5 +1846,44 @@ public class MySQLManager {
             close();
         }
 
+    }
+
+    public void addLog(UUID uniqueId, Block block, String action) {
+        OddJob.getInstance().getMessageManager().console("logging");
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_log_DE` (`uuid`,`world`,`x`,`y`,`z`,`action`,`item`,`time`) VALUES (?,?,?,?,?,?,?,UNIX_TIMESTAMP())");
+            preparedStatement.setString(1,uniqueId.toString());
+            preparedStatement.setString(2,block.getLocation().getWorld().getUID().toString());
+            preparedStatement.setInt(3,block.getLocation().getBlockX());
+            preparedStatement.setInt(4,block.getLocation().getBlockY());
+            preparedStatement.setInt(5,block.getLocation().getBlockZ());
+            preparedStatement.setString(6,action);
+            preparedStatement.setString(7,block.getType().name());
+        } catch (SQLException ex){
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+    public void addLog(UUID uniqueId, ItemStack stack, String action) {
+        OddJob.getInstance().getMessageManager().console("logging");
+        try {
+            Player player = Bukkit.getPlayer(uniqueId);
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_log_DE` (`uuid`,`world`,`x`,`y`,`z`,`action`,`item`,`count`,`time`) VALUES (?,?,?,?,?,?,?,?,UNIX_TIMESTAMP())");
+            preparedStatement.setString(1,uniqueId.toString());
+            preparedStatement.setString(2,player.getLocation().getWorld().getUID().toString());
+            preparedStatement.setInt(3,player.getLocation().getBlockX());
+            preparedStatement.setInt(4,player.getLocation().getBlockY());
+            preparedStatement.setInt(5,player.getLocation().getBlockZ());
+            preparedStatement.setString(6,action);
+            preparedStatement.setString(7,stack.getType().name());
+            preparedStatement.setInt(8,stack.getAmount());
+        } catch (SQLException ex){
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
     }
 }

@@ -75,17 +75,7 @@ public class PlayerJoin implements Listener {
         }
     }
 
-    @EventHandler
-    public void init(PlayerChangedWorldEvent event) {
-        OddJob.getInstance().getMySQLManager().updateWorlds(event.getPlayer().getWorld());
-    }
 
-    @EventHandler
-    public void leave(PlayerQuitEvent event) {
-        UUID uuid = event.getPlayer().getUniqueId();
-        if (OddJob.getInstance().getScoreManager().scores.containsKey(uuid)) {
-            OddJob.getInstance().getScoreManager().scores.get(uuid).cancel();
-            OddJob.getInstance().getScoreManager().scores.remove(uuid);
-        }
-    }
+
+
 }
