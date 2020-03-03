@@ -1,16 +1,21 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class BlockExplode implements Listener {
     @EventHandler
@@ -35,5 +40,31 @@ public class BlockExplode implements Listener {
             }
         }
     }
-
+    /**
+     * Cancel Explode
+     *
+     * @param event
+     */
+    @EventHandler
+    public void blockExplode(BlockExplodeEvent event) {
+        List<Block> blocks = event.blockList();
+        HashMap<Location, BlockData> keep = new HashMap<>();
+        for (Block block : blocks) {
+            Chunk chunk = block.getChunk();
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, block.getWorld());
+            if (guild != null) {
+                event.setCancelled(true);
+                keep.put(block.getLocation(), block.getBlockData());
+            }
+        }
+        BukkitRunnable runnable = new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Location location : keep.keySet()) {
+                    location.getBlock().setBlockData(keep.get(location));
+                }
+            }
+        };
+        runnable.runTaskLater(OddJob.getInstance(), 20L);
+    }
 }

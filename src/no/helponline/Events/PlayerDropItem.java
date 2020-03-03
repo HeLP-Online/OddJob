@@ -17,11 +17,24 @@ public class PlayerDropItem implements Listener {
         Player player = event.getPlayer();
         Item item = event.getItemDrop();
         ItemStack itemStack = item.getItemStack();
-        if ((itemStack.getType().equals(Material.DIAMOND_BLOCK) || itemStack.getType().equals(Material.EMERALD) || itemStack.getType().equals(Material.EMERALD) || itemStack.getType().equals(Material.EMERALD_BLOCK)) && !player.hasPermission("noLog")) OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(),itemStack,"drop");
+
+        // Log Diamond & Emerald
+        if ((itemStack.getType().equals(Material.DIAMOND_BLOCK)
+                || itemStack.getType().equals(Material.EMERALD_BLOCK)
+                || itemStack.getType().equals(Material.EMERALD)
+                || itemStack.getType().equals(Material.DIAMOND)
+                || itemStack.getType().equals(Material.EMERALD_ORE)
+                || itemStack.getType().equals(Material.DIAMOND_ORE)
+        ) && !player.hasPermission("noLog"))
+            OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(), itemStack, "drop");
 
         // Locks prevent drop of Skeletonkey
         if (event.getItemDrop().getItemStack().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
             OddJob.getInstance().getMessageManager().danger("Sorry, The SKELETON KEY can't be cast away like that!", event.getPlayer().getUniqueId(), true);
+            event.setCancelled(true);
+        } else if (itemStack.equals(OddJob.getInstance().getLockManager().unlockWand) ||
+                itemStack.equals(OddJob.getInstance().getLockManager().lockWand) ||
+                itemStack.equals(OddJob.getInstance().getLockManager().infoWand)) {
             event.setCancelled(true);
         }
     }

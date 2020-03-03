@@ -13,15 +13,6 @@ import org.bukkit.event.entity.EntityInteractEvent;
 import java.util.UUID;
 
 public class EntityInteract implements Listener {
-    @EventHandler
-    public void entityInteract(EntityInteractEvent event) {
-        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getChunk(), event.getBlock().getWorld());
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
-            UUID playerInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-//TODO
-        }
-    }
 
     /**
      * @param event Interact made by a non player entity
@@ -30,7 +21,6 @@ public class EntityInteract implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityOpen(EntityInteractEvent event) {
-
         if (!(event.getEntity() instanceof Player)) {
             // Interacted by non Player
             Block block = event.getBlock();

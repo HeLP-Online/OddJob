@@ -1860,6 +1860,7 @@ public class MySQLManager {
             preparedStatement.setInt(5,block.getLocation().getBlockZ());
             preparedStatement.setString(6,action);
             preparedStatement.setString(7,block.getType().name());
+            preparedStatement.execute();
         } catch (SQLException ex){
             ex.printStackTrace();
         } finally {
@@ -1880,6 +1881,7 @@ public class MySQLManager {
             preparedStatement.setString(6,action);
             preparedStatement.setString(7,stack.getType().name());
             preparedStatement.setInt(8,stack.getAmount());
+            preparedStatement.execute();
         } catch (SQLException ex){
             ex.printStackTrace();
         } finally {
