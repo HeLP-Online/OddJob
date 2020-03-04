@@ -21,7 +21,7 @@ public class EntityPickupItem implements Listener {
                     || itemStack.getType().equals(Material.DIAMOND_ORE)
                     || itemStack.getType().equals(Material.EMERALD_ORE)
             ) && !player.hasPermission("noLog"))
-                OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(), itemStack, "break");
+                OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(), itemStack, "pickup");
         }
     }
 }

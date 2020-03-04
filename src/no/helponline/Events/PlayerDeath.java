@@ -30,14 +30,18 @@ public class PlayerDeath implements Listener {
             playerSkull.setItemMeta(skull);
         }
 
+
+
         // Find the ChestBlocks
         Block leftSide = player.getLocation().getBlock();
         Block rightSide = leftSide.getRelative(0, 0, -1);
-        leftSide.setType(Material.CHEST);
-        rightSide.setType(Material.CHEST);
 
         // Add it to the list
         OddJob.getInstance().getDeathManager().add(leftSide, player.getUniqueId());
+
+        // Make them Chest
+        leftSide.setType(Material.CHEST);
+        rightSide.setType(Material.CHEST);
 
         // Make the chest the correct side
         BlockData leftData = leftSide.getBlockData();
@@ -55,9 +59,7 @@ public class PlayerDeath implements Listener {
         rightSide.setBlockData(chestDataRight);
 
         // Put Items inside the Chest
-        leftChest.getInventory().setContents(player.getInventory().getContents());
-        leftChest.getInventory().addItem(player.getInventory().getArmorContents());
-        leftChest.getInventory().addItem(player.getInventory().getExtraContents());
+        if (player.getInventory().getContents().length > 0) leftChest.getInventory().setContents(player.getInventory().getContents().clone());
         leftChest.getInventory().addItem(playerSkull);
 
         // Clean up

@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1605,35 +1604,6 @@ public class MySQLManager {
         }
     }
 
-    public int timeCheck(int t) {
-        int i = 0;
-        OddJob.getInstance().log(t + "s");
-        OddJob.getInstance().log(((System.currentTimeMillis() / 1000L) - t) + "");
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `time` < ?");
-            preparedStatement.setLong(1, (System.currentTimeMillis() / 1000L) - t);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                OddJob.getInstance().log(resultSet.getLong("time") + "");
-                OddJob.getInstance().getDeathManager().replace(
-                        UUID.fromString(resultSet.getString("world")),
-                        resultSet.getDouble("x"),
-                        resultSet.getDouble("y"),
-                        resultSet.getDouble("z"),
-                        Material.valueOf(resultSet.getString("leftBlock")),
-                        Material.valueOf(resultSet.getString("rightBlock")));
-                i++;
-            }
-            OddJob.getInstance().log("chests " + i);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return i;
-    }
-
     public boolean isDeathChest(Location location) {
         boolean is = false;
         try {
@@ -1694,14 +1664,14 @@ public class MySQLManager {
 
             final var bytes = new ByteArrayOutputStream();
             try {
-                BukkitSerializers.saveItems(contents,bytes);
+                BukkitSerializers.saveItems(contents, bytes);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             final var in = new ByteArrayInputStream(bytes.toByteArray());
-            OddJob.getInstance().getMessageManager().console("Byte length:"+bytes.toByteArray().length+"");
-            OddJob.getInstance().getMessageManager().console("Inventory size:"+bytes.toByteArray().length+"");
-            preparedStatement.setBinaryStream(3,in);
+            OddJob.getInstance().getMessageManager().console("Byte length:" + bytes.toByteArray().length + "");
+            OddJob.getInstance().getMessageManager().console("Inventory size:" + bytes.toByteArray().length + "");
+            preparedStatement.setBinaryStream(3, in);
 
             preparedStatement.setString(1, uuidPlayer.toString());
             preparedStatement.setString(2, world.toString());
@@ -1824,15 +1794,17 @@ public class MySQLManager {
 
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_worlds` WHERE `uuid` = ?");
+            preparedStatement = connection.prepareStatement("SELECT `uuid`,`name` FROM `mine_worlds` WHERE `uuid` = ?");
             preparedStatement.setString(1, uuid.toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                preparedStatementsec = connection.prepareStatement("UPDATE `mine_worlds` SET `name` = ? WHERE `uuid` = ?");
-                preparedStatementsec.setString(2, uuid.toString());
-                preparedStatementsec.setString(1, name);
-                preparedStatementsec.executeUpdate();
-                OddJob.getInstance().getMessageManager().console("UPDATING: " + name);
+                if (name.equalsIgnoreCase(resultSet.getString("name"))) {
+                    preparedStatementsec = connection.prepareStatement("UPDATE `mine_worlds` SET `name` = ? WHERE `uuid` = ?");
+                    preparedStatementsec.setString(2, uuid.toString());
+                    preparedStatementsec.setString(1, name);
+                    preparedStatementsec.executeUpdate();
+                    OddJob.getInstance().getMessageManager().console("UPDATING: " + name);
+                }
             } else {
                 preparedStatementsec = connection.prepareStatement("INSERT INTO `mine_worlds` (`uuid`,`name`) VALUES (?,?)");
                 preparedStatementsec.setString(1, uuid.toString());
@@ -1849,43 +1821,111 @@ public class MySQLManager {
     }
 
     public void addLog(UUID uniqueId, Block block, String action) {
-        OddJob.getInstance().getMessageManager().console("logging");
         try {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_log_DE` (`uuid`,`world`,`x`,`y`,`z`,`action`,`item`,`time`) VALUES (?,?,?,?,?,?,?,UNIX_TIMESTAMP())");
-            preparedStatement.setString(1,uniqueId.toString());
-            preparedStatement.setString(2,block.getLocation().getWorld().getUID().toString());
-            preparedStatement.setInt(3,block.getLocation().getBlockX());
-            preparedStatement.setInt(4,block.getLocation().getBlockY());
-            preparedStatement.setInt(5,block.getLocation().getBlockZ());
-            preparedStatement.setString(6,action);
-            preparedStatement.setString(7,block.getType().name());
+            preparedStatement.setString(1, uniqueId.toString());
+            preparedStatement.setString(2, block.getLocation().getWorld().getUID().toString());
+            preparedStatement.setInt(3, block.getLocation().getBlockX());
+            preparedStatement.setInt(4, block.getLocation().getBlockY());
+            preparedStatement.setInt(5, block.getLocation().getBlockZ());
+            preparedStatement.setString(6, action);
+            preparedStatement.setString(7, block.getType().name());
             preparedStatement.execute();
-        } catch (SQLException ex){
+        } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
     }
+
     public void addLog(UUID uniqueId, ItemStack stack, String action) {
-        OddJob.getInstance().getMessageManager().console("logging");
         try {
             Player player = Bukkit.getPlayer(uniqueId);
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_log_DE` (`uuid`,`world`,`x`,`y`,`z`,`action`,`item`,`count`,`time`) VALUES (?,?,?,?,?,?,?,?,UNIX_TIMESTAMP())");
-            preparedStatement.setString(1,uniqueId.toString());
-            preparedStatement.setString(2,player.getLocation().getWorld().getUID().toString());
-            preparedStatement.setInt(3,player.getLocation().getBlockX());
-            preparedStatement.setInt(4,player.getLocation().getBlockY());
-            preparedStatement.setInt(5,player.getLocation().getBlockZ());
-            preparedStatement.setString(6,action);
-            preparedStatement.setString(7,stack.getType().name());
-            preparedStatement.setInt(8,stack.getAmount());
+            preparedStatement.setString(1, uniqueId.toString());
+            preparedStatement.setString(2, player.getLocation().getWorld().getUID().toString());
+            preparedStatement.setInt(3, player.getLocation().getBlockX());
+            preparedStatement.setInt(4, player.getLocation().getBlockY());
+            preparedStatement.setInt(5, player.getLocation().getBlockZ());
+            preparedStatement.setString(6, action);
+            preparedStatement.setString(7, stack.getType().name());
+            preparedStatement.setInt(8, stack.getAmount());
             preparedStatement.execute();
-        } catch (SQLException ex){
+        } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
+    }
+
+    public int cleanDeathChests(World world) {
+        int i = 0;
+        if (world != null) {
+            return getDeathChest(world);
+        } else {
+            for (World w : Bukkit.getWorlds()) {
+                i += getDeathChest(w);
+            }
+            return i;
+        }
+    }
+
+    private int getDeathChest(World world) {
+        int i = 0;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `time` < UNIX_TIMESTAMP()-3600 AND `world` = ?");
+            preparedStatement.setString(1, world.getUID().toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                while (resultSet.next()) {
+                    OddJob.getInstance().getDeathManager().replace(
+                            UUID.fromString(resultSet.getString("world")),
+                            resultSet.getInt("x"),
+                            resultSet.getInt("y"),
+                            resultSet.getInt("z"),
+                            Material.valueOf(resultSet.getString("leftBlock")),
+                            Material.valueOf(resultSet.getString("rightBlock"))
+                    );
+                    i++;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return i;
+    }
+
+    public HashMap<UUID, Location> locksInWorld(UUID world) {
+        HashMap<UUID,Location> chests = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_blocks` WHERE `world` = ?");
+            preparedStatement.setString(1,world.toString());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                while (resultSet.next()) {
+                    chests.put(
+                            UUID.fromString(resultSet.getString("uuid")),
+                            new Location(
+                                    Bukkit.getWorld(world),
+                                    resultSet.getInt("x"),
+                                    resultSet.getInt("y"),
+                                    resultSet.getInt("z")
+                            )
+                    );
+                }
+            }
+        }catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return chests;
     }
 }

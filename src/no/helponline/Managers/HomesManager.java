@@ -1,6 +1,7 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Zone;
 import org.bukkit.Location;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class HomesManager {
     public boolean add(UUID uuid, String name, Location location) {
         Location loc = OddJob.getInstance().getMySQLManager().getHome(uuid, name);
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(location.getChunk(), location.getWorld());
-        if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid))) {
+        if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid)) && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
             OddJob.getInstance().getMessageManager().danger("You can't set home inside someone else guild", uuid,false);
             return true;
         }

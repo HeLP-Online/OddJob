@@ -11,17 +11,11 @@ import java.util.UUID;
 public class PlayerQuit implements Listener {
     @EventHandler
     public void leave(PlayerQuitEvent event) {
+        ArenaMechanics.cancel(event.getPlayer());
         UUID uuid = event.getPlayer().getUniqueId();
         if (OddJob.getInstance().getScoreManager().scores.containsKey(uuid)) {
             OddJob.getInstance().getScoreManager().scores.get(uuid).cancel();
             OddJob.getInstance().getScoreManager().scores.remove(uuid);
         }
-    }
-
-    @EventHandler
-    public void onLeave(PlayerQuitEvent event) {
-        ArenaMechanics.cancel(event.getPlayer());
-        UUID uuid = event.getPlayer().getUniqueId();
-
     }
 }

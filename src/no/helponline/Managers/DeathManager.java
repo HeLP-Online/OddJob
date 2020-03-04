@@ -1,12 +1,10 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -18,22 +16,30 @@ public class DeathManager {
 
     public void add(Block chest, UUID player) {
         Block right = chest.getRelative(0, 0, -1);
+        Player p = Bukkit.getPlayer(player);
 
         // Saving left side of the DoubleChest with the timer of disappearance
         task.put(chest.getLocation(), new BukkitRunnable() {
-                    int i = 300; // 5 min.
+                    int i = 1200; // 20 min.
 
                     @Override
                     public void run() {
-                        if (i == 300) {
-                            OddJob.getInstance().getMessageManager().info("Sorry to hear about your death. Your deathchest despawning in " + ChatColor.WHITE + "5" + ChatColor.RESET + " min, if you don't get it!", player,true);
+                        if (i == 1200) {
+                            if (p != null && p.isOnline())
+                                OddJob.getInstance().getMessageManager().info("Sorry to hear about your death. Your deathchest despawning in " + ChatColor.WHITE + "20" + ChatColor.RESET + " min, if you don't get it!", player, true);
+                        } else if (i == 600) {
+                            if (p != null && p.isOnline())
+                                OddJob.getInstance().getMessageManager().info("Deathchest despawning in " + ChatColor.WHITE + "10" + ChatColor.RESET + " min.", player, false);
                         } else if (i == 60) {
-                            OddJob.getInstance().getMessageManager().info("Deathchest despawning in " + ChatColor.WHITE + "1" + ChatColor.RESET + " min.", player,false);
+                            if (p != null && p.isOnline())
+                                OddJob.getInstance().getMessageManager().info("Deathchest despawning in " + ChatColor.WHITE + "1" + ChatColor.RESET + " min.", player, false);
                         } else if (i < 10 && i > 0) {
-                            OddJob.getInstance().getMessageManager().danger("Deathchest despawning in " + ChatColor.WHITE + i + ChatColor.RESET + " sec.", player, false);
+                            if (p != null && p.isOnline())
+                                OddJob.getInstance().getMessageManager().danger("Deathchest despawning in " + ChatColor.WHITE + i + ChatColor.RESET + " sec.", player, false);
                         } else if (i < 1) {
                             OddJob.getInstance().getDeathManager().replace(chest.getLocation(), null);
-                            OddJob.getInstance().getMessageManager().danger("All your item from your deathchest is gone, sorry.", player,true);
+                            if (p != null && p.isOnline())
+                                OddJob.getInstance().getMessageManager().danger("All your item from your deathchest is gone, sorry.", player, true);
                             cancel();
                         }
                         i--;
@@ -66,10 +72,11 @@ public class DeathManager {
                 if (!ownerOfChest.equals(findingPlayer)) {
                     // Finders keepers
                     if (findingPlayer != null) {
-                        if (Bukkit.getPlayer(ownerOfChest).isOnline()) {
-                            OddJob.getInstance().getMessageManager().danger("Somebody found your stuff.", ownerOfChest,false);
+                        Player player = Bukkit.getPlayer(ownerOfChest);
+                        if (player != null && player.isOnline()) {
+                            OddJob.getInstance().getMessageManager().danger("Somebody found your stuff.", ownerOfChest, false);
                         }
-                        OddJob.getInstance().getMessageManager().console(ChatColor.AQUA+OddJob.getInstance().getPlayerManager().getName(findingPlayer) +ChatColor.RESET+ " found the stuff from "+ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(ownerOfChest));
+                        OddJob.getInstance().getMessageManager().console(ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(findingPlayer) + ChatColor.RESET + " found the stuff from " + ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(ownerOfChest));
                     }
                 }
 
@@ -96,10 +103,6 @@ public class DeathManager {
         OddJob.getInstance().getMySQLManager().deleteDeathChest(location);
     }
 
-    public int timeCheck(int t) {
-        return OddJob.getInstance().getMySQLManager().timeCheck(t);
-    }
-
     public void replace(UUID world, double x, double y, double z, Material leftBlock, Material rightBlock) {
         // Does the World exists
         if (Bukkit.getWorld(world) == null) {
@@ -111,6 +114,9 @@ public class DeathManager {
 
         // Is it a DoubleChest
         if (!left.getType().equals(Material.CHEST)) {
+            // Remove from database
+            OddJob.getInstance().getMessageManager().console("Chest is not there removing from DB");
+            OddJob.getInstance().getMySQLManager().deleteDeathChest(left.getLocation());
             return;
         }
 
@@ -125,13 +131,7 @@ public class DeathManager {
         OddJob.getInstance().getMySQLManager().deleteDeathChest(left.getLocation());
     }
 
-    public UUID getOwner(Location location) {
-        UUID uuid = null;
-        try {
-            uuid = UUID.fromString(OddJob.getInstance().getMySQLManager().getDeathChest(location).get("uuid"));
-        } catch (Exception ex) {
-            OddJob.getInstance().getMessageManager().console("getOwner of DeathChest failed");
-        }
-        return uuid;
+    public int cleanUp(World world) {
+        return OddJob.getInstance().getMySQLManager().cleanDeathChests(world);
     }
 }

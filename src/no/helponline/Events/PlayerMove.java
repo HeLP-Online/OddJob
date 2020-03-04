@@ -13,7 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class PlayerMove implements Listener {
@@ -68,9 +67,14 @@ public class PlayerMove implements Listener {
         }
 
         if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
+            OddJob.getInstance().getMessageManager().console("1Moving from " + movingFromGuild + " to " + movingToGuild);
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
             print = true;
-        } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()))) {
+        } else if (!OddJob.getInstance().getPlayerManager().in.get(
+                player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(),
+                player.getLocation().getWorld()))
+        ) {
+            OddJob.getInstance().getMessageManager().console("2Moving from " + movingFromGuild + " to " + movingToGuild);
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
             print = true;
         }

@@ -53,9 +53,24 @@ public class GuildManager {
             UUID claimingGuild = autoClaim.get(player.getUniqueId());
 
             // Claim Chunk to Guild
-            OddJob.getInstance().getMySQLManager().addGuildChunks(claimingGuild, chunk, player);
+            claim(claimingGuild, chunk, player);
             OddJob.getInstance().getMessageManager().success("Claiming chunk " + ChatColor.GOLD + "X:" + chunk.getX() + " Y:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getZoneByGuild(claimingGuild).name(), player, true);
         }
+    }
+
+    private void claim(UUID guild, Chunk chunk, Player player) {
+        UUID world = player.getWorld().getUID();
+        HashMap<UUID, Location> listLocksInWorld = OddJob.getInstance().getMySQLManager().locksInWorld(world);
+        for (UUID owner : listLocksInWorld.keySet()) {
+            if (!guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()))) {
+                Location location = listLocksInWorld.get(owner);
+                if (chunk.equals(location.getChunk())) {
+                    OddJob.getInstance().getMessageManager().warning("Your locked " + location.getBlock().getType().name() + " is inside a claimed area and will be unlocked", owner, false);
+                    OddJob.getInstance().getLockManager().unlock(location);
+                }
+            }
+        }
+        OddJob.getInstance().getMySQLManager().addGuildChunks(guild, chunk, player);
     }
 
     public void claim(Player player) {
@@ -68,7 +83,7 @@ public class GuildManager {
             OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk, player.getWorld())), player, false);
         } else {
             // Claiming Chunk to Guild
-            OddJob.getInstance().getMySQLManager().addGuildChunks(playerGuild, inChunk, player);
+            claim(playerGuild, inChunk, player);
             OddJob.getInstance().getMessageManager().success("You have claimed " + ChatColor.GOLD + "X:" + inChunk.getX() + " Z:" + inChunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuildNameByUUID(playerGuild), player, true);
         }
     }
