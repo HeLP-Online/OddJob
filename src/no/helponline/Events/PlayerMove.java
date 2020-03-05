@@ -66,15 +66,14 @@ public class PlayerMove implements Listener {
             }
         }
 
+        // Actionbar
         if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
-            OddJob.getInstance().getMessageManager().console("1Moving from " + movingFromGuild + " to " + movingToGuild);
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
             print = true;
-        } else if (!OddJob.getInstance().getPlayerManager().in.get(
-                player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(),
-                player.getLocation().getWorld()))
-        ) {
-            OddJob.getInstance().getMessageManager().console("2Moving from " + movingFromGuild + " to " + movingToGuild);
+        } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(
+                player.getLocation().getChunk(),
+                player.getLocation().getWorld()
+        ))) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
             print = true;
         }
@@ -91,7 +90,7 @@ public class PlayerMove implements Listener {
                     s.append(ChatColor.RED).append("Draw your weapon!");
                     break;
                 case JAIL:
-                    s.append(ChatColor.GOLD).append("Nap time!");
+                    s.append(ChatColor.GOLD).append("Serve your time!");
                     break;
                 case SAFE:
                     s.append(ChatColor.GREEN).append("Take a break and prepare!");

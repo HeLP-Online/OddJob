@@ -273,6 +273,6 @@ public class JailManager {
 
     /* One world can only contain one jail */
     public enum Slot {
-        lobby, free, warden
+        lobby, free, warden,cell
     }
 }

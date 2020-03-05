@@ -15,13 +15,14 @@ public class JailCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         Player player = (Player) commandSender;
-        if (strings.length == 1 && strings[0].equalsIgnoreCase("status")) {
+        if (strings.length == 1 && strings[0].equalsIgnoreCase("save")) {
             if (OddJob.getInstance().getJailManager().has(player.getWorld().getUID())) {
                 OddJob.getInstance().getJailManager().revertPoints();
                 OddJob.getInstance().getMessageManager().success("Jail set!", commandSender, true);
             }
             return true;
         } else if (strings.length == 2 && strings[0].equalsIgnoreCase("set")) {
+
             switch (Slot.valueOf(strings[1])) {
                 case warden:
                 case free:
@@ -29,9 +30,12 @@ public class JailCommand implements CommandExecutor {
                     OddJob.getInstance().getJailManager().set(Slot.valueOf(strings[1]), player);
                     OddJob.getInstance().getMessageManager().success("Point of " + Slot.valueOf(strings[1]).name() + " set!", player, false);
                     break;
+                case cell:
+                    break;
                 default:
                     OddJob.getInstance().getMessageManager().danger("Syntax error", player, false);
             }
+
             return true;
         } else if (strings.length == 1 && strings[0].equalsIgnoreCase("warden")) {
             if (OddJob.getInstance().getJailManager().has(player.getWorld().getUID())) {
@@ -54,7 +58,7 @@ public class JailCommand implements CommandExecutor {
                 return true;
             }
 
-            OddJob.getInstance().getJailManager().freeFromJail(target, commandSender,false);
+            OddJob.getInstance().getJailManager().freeFromJail(target, commandSender, false);
         } else if (strings.length == 1 && strings[0].equalsIgnoreCase("edit")) {
             OddJob.getInstance().getJailManager().edit(player.getWorld().getUID());
             return true;

@@ -1879,18 +1879,16 @@ public class MySQLManager {
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `time` < UNIX_TIMESTAMP()-3600 AND `world` = ?");
             preparedStatement.setString(1, world.getUID().toString());
             resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                while (resultSet.next()) {
-                    OddJob.getInstance().getDeathManager().replace(
-                            UUID.fromString(resultSet.getString("world")),
-                            resultSet.getInt("x"),
-                            resultSet.getInt("y"),
-                            resultSet.getInt("z"),
-                            Material.valueOf(resultSet.getString("leftBlock")),
-                            Material.valueOf(resultSet.getString("rightBlock"))
-                    );
-                    i++;
-                }
+            while (resultSet.next()) {
+                OddJob.getInstance().getDeathManager().replace(
+                        UUID.fromString(resultSet.getString("world")),
+                        resultSet.getInt("x"),
+                        resultSet.getInt("y"),
+                        resultSet.getInt("z"),
+                        Material.valueOf(resultSet.getString("leftBlock")),
+                        Material.valueOf(resultSet.getString("rightBlock"))
+                );
+                i++;
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -1901,11 +1899,11 @@ public class MySQLManager {
     }
 
     public HashMap<UUID, Location> locksInWorld(UUID world) {
-        HashMap<UUID,Location> chests = new HashMap<>();
+        HashMap<UUID, Location> chests = new HashMap<>();
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_blocks` WHERE `world` = ?");
-            preparedStatement.setString(1,world.toString());
+            preparedStatement.setString(1, world.toString());
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -1921,7 +1919,7 @@ public class MySQLManager {
                     );
                 }
             }
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
