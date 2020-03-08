@@ -1,10 +1,8 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.BukkitSerializers;
-import no.helponline.Utils.Role;
 import no.helponline.Utils.Utility;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -25,6 +23,7 @@ public class MySQLManager {
     private PreparedStatement preparedStatementsec = null;
     private Connection connection = null;
     private ResultSet resultSet = null;
+    private ResultSet resultSetsec = null;
 
     private void connect() throws SQLException {
         if (connection == null)
@@ -33,6 +32,10 @@ public class MySQLManager {
 
     private void close() {
         try {
+            if (resultSetsec != null) {
+                resultSetsec.close();
+                resultSetsec = null;
+            }
             if (resultSet != null) {
                 resultSet.close();
                 resultSet = null;
@@ -1925,5 +1928,108 @@ public class MySQLManager {
             close();
         }
         return chests;
+    }
+
+    public void saveGuild(String uuidGuild, String name, String zone, boolean invitedOnly, boolean friendlyFire, String permissionInviteRole) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `uuid` = ?");
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.wasNull()) {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`invite_permission`) VALUES (?,?,?,?,?,?)");
+                preparedStatement.setString(1, uuidGuild);
+                preparedStatement.setString(2, name);
+                preparedStatement.setString(3, zone);
+                preparedStatement.setInt(4, invitedOnly ? 1 : 0);
+                preparedStatement.setInt(5, friendlyFire ? 1 : 0);
+                preparedStatement.setString(6, permissionInviteRole);
+                preparedStatement.execute();
+            } else {
+                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`invite_permission` = ? WHERE `uuid` = ?");
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, zone);
+                preparedStatement.setInt(3, invitedOnly ? 1 : 0);
+                preparedStatement.setInt(4, friendlyFire ? 1 : 0);
+                preparedStatement.setString(5, permissionInviteRole);
+                preparedStatement.setString(6, uuidGuild);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public HashMap<UUID, Guild> loadGuilds() {
+        HashMap<UUID, Guild> guilds = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds`");
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                HashMap<UUID, Role> members = new HashMap<>();
+                preparedStatementsec = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
+                preparedStatementsec.setString(1, resultSet.getString("uuid"));
+                resultSetsec = preparedStatementsec.executeQuery();
+
+                if (!resultSetsec.wasNull()) {
+                    while (resultSetsec.next()) {
+                        members.put(UUID.fromString(resultSetsec.getString("player")), Role.valueOf(resultSetsec.getString("role")));
+                    }
+                }
+                guilds.put(uuid, new Guild(
+                        uuid,
+                        resultSet.getString("name"),
+                        Zone.valueOf(resultSet.getString("zone")),
+                        resultSet.getInt("invited_only") == 1,
+                        resultSet.getInt("friendly_fire") == 1,
+                        Role.valueOf(resultSet.getString("invite_permission")),
+                        members
+                ));
+                OddJob.getInstance().getMessageManager().console("Loaded " + resultSet.getString("name") + ": " + members.size());
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return guilds;
+    }
+
+    public void saveGuildMembers(String toString, String toString1, String name) {
+    }
+
+    public void saveChunks(String toString, World world, int x, int z) {
+    }
+
+    public HashMap<Chunk, UUID> loadChunks() {
+        HashMap<Chunk, UUID> chunks = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks`");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                if (Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))) != null) {
+                    chunks.put(Bukkit.getWorld(
+                            UUID.fromString(resultSet.getString("world"))
+                            ).getChunkAt(
+                            resultSet.getInt("x"),
+                            resultSet.getInt("z")
+                            ),
+                            UUID.fromString(resultSet.getString("uuid"))
+                    );
+                }
+            }
+            OddJob.getInstance().getMessageManager().console("Loaded chunks: " + chunks.size());
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
+        return chunks;
     }
 }

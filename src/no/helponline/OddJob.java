@@ -111,6 +111,9 @@ public class OddJob extends JavaPlugin {
         getCommand("jail").setExecutor(new JailCommand());
 
         configManager.load();
+        guildManager.loadGuilds();
+        guildManager.loadChunks();
+
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
         Bukkit.getPluginManager().registerEvents(new BlockExplode(), this);

@@ -11,6 +11,7 @@ import org.bukkit.scoreboard.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class ScoreManager {
@@ -67,7 +68,7 @@ public class ScoreManager {
             rank.addEntry(ChatColor.GOLD + "Role: ");
             rank.setSuffix(OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()).name());
 
-            List<UUID> mem = OddJob.getInstance().getGuildManager().getGuildMembers(playerGuild);
+            Set<UUID> mem = OddJob.getInstance().getGuildManager().getGuildMembers(playerGuild);
             int i = 0;
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (mem.contains(p.getUniqueId())) {
@@ -110,7 +111,7 @@ public class ScoreManager {
                 //guildEcon = scoreboardGuild.getTeam("gEcon-" + playerUUID.toString().substring(0, 8));   // TODO
                 Team rrank = scoreboardGuild.getTeam("rank-" + playerUUID.toString().substring(0, 8));
                 Team mmembers = scoreboardGuild.getTeam("members-" + playerUUID.toString().substring(0, 8));
-                List<UUID> mem = OddJob.getInstance().getGuildManager().getGuildMembers(playerGuild);
+                Set<UUID> mem = OddJob.getInstance().getGuildManager().getGuildMembers(playerGuild);
                 int i = 0;
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     if (mem.contains(p.getUniqueId())) {
