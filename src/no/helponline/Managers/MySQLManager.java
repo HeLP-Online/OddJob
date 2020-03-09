@@ -74,7 +74,7 @@ public class MySQLManager {
     }
 
     public synchronized String getPlayerName(UUID uuid) {
-        String name = "";
+        String name = null;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_players` WHERE `uuid` = ?");
@@ -1989,6 +1989,7 @@ public class MySQLManager {
                         Role.valueOf(resultSet.getString("invite_permission")),
                         members
                 ));
+                OddJob.getInstance().getMessageManager().console("Zone: " + Zone.valueOf(resultSet.getString("zone")).name());
                 OddJob.getInstance().getMessageManager().console("Loaded " + resultSet.getString("name") + ": " + members.size());
             }
         } catch (SQLException ex) {
@@ -2084,5 +2085,20 @@ public class MySQLManager {
         }
 
         return chunks;
+    }
+
+    public void disbandGuild(UUID guild) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.execute();
+
+            OddJob.getInstance().getMessageManager().console("Guild disbanded");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
     }
 }

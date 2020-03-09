@@ -56,6 +56,10 @@ public class GuildManager {
         // Add the new Guild
         guilds.put(guild, new Guild(name, Zone.GUILD, guild, false, false, player, Role.Master));
         members.put(player, guild);
+        Player p = Bukkit.getPlayer(player);
+        if (p != null) {
+            OddJob.getInstance().getScoreManager().guild(p);
+        }
         //HashMap<String, String> memberOfGuild = new HashMap<>();
         //memberOfGuild.put("name", name);
         //memberOfGuild.put("zone", Zone.GUILD.name());
@@ -147,7 +151,7 @@ public class GuildManager {
     // NEW
     public UUID getGuildUUIDByChunk(Chunk chunk, World world) {
         //return OddJob.getInstance().getMySQLManager().getGuildUUIDByChunk(chunk, world);
-        return chunkGuild.get(chunk);
+        return chunkGuild.get(chunk) == null ? OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD) : chunkGuild.get(chunk);
     }
 
     // NEW
@@ -162,6 +166,10 @@ public class GuildManager {
         //OddJob.getInstance().getMySQLManager().addGuildMember(guild, player, Role.Members);
         guilds.get(guild).getMembers().put(player, Role.Members);
         members.put(player, guild);
+        Player p = Bukkit.getPlayer(player);
+        if (p != null) {
+            OddJob.getInstance().getScoreManager().guild(p);
+        }
     }
 
     // NEW
@@ -299,6 +307,10 @@ public class GuildManager {
         //OddJob.getInstance().getMySQLManager().deleteMemberFromGuild(player);
         guilds.get(getGuildUUIDByMember(player)).getMembers().remove(player);
         members.remove(player);
+        Player p = Bukkit.getPlayer(player);
+        if (p != null) {
+            OddJob.getInstance().getScoreManager().clear(p);
+        }
     }
 
     // NEW
@@ -482,4 +494,10 @@ public class GuildManager {
     }
 
 
+    public void disband(UUID guild) {
+        for (Chunk chunk : chunkGuild.keySet()) {
+            if (chunkGuild.get(chunk).equals(guild)) chunkGuild.remove(chunk);
+        }
+        OddJob.getInstance().getMySQLManager().disbandGuild(guild);
+    }
 }

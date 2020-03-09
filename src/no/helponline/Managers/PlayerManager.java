@@ -21,29 +21,17 @@ public class PlayerManager {
 
     public void updatePlayer(UUID uuid, String name) {
         OddJob.getInstance().getMySQLManager().updatePlayer(uuid, name);
-        /*if (oddPlayers.containsKey(uuid)) {
-            OddPlayer oddPlayer = oddPlayers.get(uuid);
-            oddPlayer.setName(name);
-            oddPlayers.put(uuid, oddPlayer);
-        } else {
-            create(uuid, Bukkit.getPlayer(uuid).getName(), false, new ArrayList<>(), new ArrayList<>());
-            OddJob.getInstance().log("created " + uuid.toString());
-        }*/
     }
 
     public String getName(UUID uuid) {
         return OddJob.getInstance().getMySQLManager().getPlayerName(uuid);
-        //return oddPlayers.get(uuid).getName();
     }
 
     public UUID getUUID(String name) {
-
-        UUID uuid = OddJob.getInstance().getMySQLManager().getPlayerUUID(name);
-        if (uuid == null) {
-            for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
-                if (op.getName().equalsIgnoreCase(name)) {
-                    uuid = op.getUniqueId();
-                }
+        UUID uuid = null;
+        for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+            if (op.getPlayer().getName().equalsIgnoreCase(name)) {
+                uuid = op.getUniqueId();
             }
         }
         return uuid;
@@ -78,7 +66,6 @@ public class PlayerManager {
             OddJob.getInstance().getMessageManager().warning(getName(destination) + " is denying all request!", moving, false);
             request = false;
         }
-        OddJob.getInstance().log("request : deny");
         return !request;
     }
 
@@ -86,14 +73,14 @@ public class PlayerManager {
         return OddJob.getInstance().getMySQLManager().getPlayerMapNames();
     }
 
-    public GameMode getGamemode(Player player, World world) {
+    public GameMode getGameMode(Player player, World world) {
         return OddJob.getInstance().getMySQLManager().getPlayerMode(player, world);
     }
 
     public void setGameMode(Player player, GameMode gameMode) {
         OddJob.getInstance().getMySQLManager().setGameMode(player, gameMode);
         player.setGameMode(gameMode);
-        player.sendMessage("Your GameMode is set to " + gameMode.name() + " in " + player.getWorld().getName());
+        OddJob.getInstance().getMessageManager().success("Your GameMode is set to " + ChatColor.GOLD + gameMode.name() + ChatColor.GREEN + " in " + ChatColor.DARK_AQUA + player.getWorld().getName(), player.getUniqueId(), true);
     }
 
     public boolean isInCombat(UUID player) {
@@ -112,9 +99,9 @@ public class PlayerManager {
         timerCombat.put(player, new BukkitRunnable() {
             @Override
             public void run() {
-                OddJob.getInstance().getPlayerManager().removeInCombat(player);
+                removeInCombat(player);
             }
-        }.runTaskLater(OddJob.getInstance(), 200));
+        }.runTaskLater(OddJob.getInstance(), 200L)); // 200 = 10s (20 ticks/s)
     }
 
     private void removeInCombat(UUID player) {
@@ -125,5 +112,19 @@ public class PlayerManager {
         PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
         if (OddJob.getInstance().getPlayerManager().getOffPlayer(player).isOnline())
             (((CraftPlayer) Bukkit.getPlayer(player)).getHandle()).playerConnection.sendPacket(title);
+    }
+
+    public void abort(UUID player) {
+        inCombat.put(player, System.currentTimeMillis());
+        String s = ChatColor.YELLOW + "Aborted";
+        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
+        if (OddJob.getInstance().getPlayerManager().getOffPlayer(player).isOnline())
+            (((CraftPlayer) Bukkit.getPlayer(player)).getHandle()).playerConnection.sendPacket(title);
+        timerCombat.put(player, new BukkitRunnable() {
+            @Override
+            public void run() {
+                removeInCombat(player);
+            }
+        }.runTaskLater(OddJob.getInstance(), 40L)); // 40 = 2s (20 ticks/s)
     }
 }

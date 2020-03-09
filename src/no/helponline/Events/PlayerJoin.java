@@ -9,9 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,9 +31,10 @@ public class PlayerJoin implements Listener {
             OddJob.getInstance().getBanManager().kick(player);
         } else {
 
-            // Scoreboad
-            if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid) != null)
+            // Scoreboard
+            if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid) != null) {
                 OddJob.getInstance().getScoreManager().guild(player);
+            } else OddJob.getInstance().getScoreManager().clear(player);
 
             // Economy
             if (!OddJob.getInstance().getEconManager().hasAccount(uuid)) {

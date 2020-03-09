@@ -5,14 +5,12 @@ import net.milkbowl.vault.permission.Permission;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
-import no.helponline.Utils.ArenaMechanics;
 import no.helponline.Utils.ArenaPlayer;
 import no.helponline.Utils.Broadcaster;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -135,13 +133,6 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerMove(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerPortal(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            OddJob.getInstance().log(playerManager.getGamemode(player, player.getWorld()).name());
-            if (!player.getGameMode().equals(playerManager.getGamemode(player, player.getWorld()))) {
-                playerManager.setGameMode(player, playerManager.getGamemode(player, player.getWorld()));
-            }
-        }
 
         OddJob.getInstance().getArenaManager().loadArenas();
 

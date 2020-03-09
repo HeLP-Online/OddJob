@@ -1,5 +1,6 @@
 package no.helponline.Managers;
 
+import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -95,6 +96,21 @@ public class MessageManager {
     public void broadcastAchievement(String string) {
         for (Player pl : Bukkit.getOnlinePlayers()) {
             pl.sendMessage(string);
+        }
+    }
+
+    public void broadcast(String s) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(s);
+        }
+    }
+
+    public void guild(String s, UUID guild) {
+        for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline()) {
+                player.sendMessage(s);
+            }
         }
     }
 }

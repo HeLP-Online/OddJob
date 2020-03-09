@@ -10,8 +10,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityInteractEvent;
 
-import java.util.UUID;
-
 public class EntityInteract implements Listener {
 
     /**
@@ -41,6 +39,8 @@ public class EntityInteract implements Listener {
             }
 
             if (locked) event.setCancelled(true);
+        } else {
+            OddJob.getInstance().getPlayerManager().abort(event.getEntity().getUniqueId());
         }
     }
 }

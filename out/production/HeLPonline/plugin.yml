@@ -1,7 +1,7 @@
 main: no.helponline.OddJob
 name: OddJob
-version: 0.5
-api-version: 1.14
+version: "0.6"
+api-version: "1.15"
 
 commands:
   locks:
@@ -40,7 +40,7 @@ commands:
     permission: essentials.tpall
   tppos:
     description: Teleport you to a given coordinate
-    usage: /<command> <X> <Y> <Z> [World]
+    usage: /<command> <player> <X> <Y> <Z> [World]
     permission: essentials.tppos
   kick:
     description: Kicks a given player from the server
@@ -103,7 +103,13 @@ commands:
     usage: /<command>
     description: Cleans up chests
   backup:
+    usage: /<command>
   rollback:
+    usage: /<command>
+  spawn:
+    usage: /<command>
+  jail:
+    usage: /<command>
 permissions:
   essentials.death:
     default: op

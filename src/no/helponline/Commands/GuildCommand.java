@@ -49,7 +49,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
 
                     if (OddJob.getInstance().getGuildManager().create(player.getUniqueId(), strings[1])) {
                         // Creating Guild
-                        OddJob.getInstance().getMessageManager().success("Guild " + ChatColor.DARK_AQUA + strings[1] + ChatColor.GREEN + "` created", commandSender, true);
+                        OddJob.getInstance().getMessageManager().success("Guild `" + ChatColor.DARK_AQUA + strings[1] + ChatColor.GREEN + "` created", commandSender, true);
                         return true;
                     }
 
@@ -105,7 +105,13 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
                     if (guild != null) {
                         OddJob.getInstance().getGuildManager().leave(player.getUniqueId());
-                        OddJob.getInstance().getMessageManager().success("You have now left " + ChatColor.DARK_AQUA + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), player, true);
+                        if (OddJob.getInstance().getGuildManager().getGuildMembers(guild).size() > 0) {
+                            OddJob.getInstance().getMessageManager().success("You have now left " + ChatColor.DARK_AQUA + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), player, true);
+                            OddJob.getInstance().getMessageManager().guild(ChatColor.YELLOW + "We are sorry to announce that " + ChatColor.DARK_AQUA + player.getName() + ChatColor.YELLOW + " has left the Guild", guild);
+                        } else {
+                            OddJob.getInstance().getGuildManager().disband(guild);
+                            OddJob.getInstance().getMessageManager().broadcast(ChatColor.YELLOW + "No one left in " + ChatColor.DARK_AQUA + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild) + ChatColor.YELLOW + ", Guild disbanded!");
+                        }
                     } else {
                         OddJob.getInstance().getMessageManager().warning("You are not associated with any guild.", player, false);
                     }
