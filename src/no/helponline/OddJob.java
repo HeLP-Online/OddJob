@@ -142,8 +142,10 @@ public class OddJob extends JavaPlugin {
     }
 
     public void onDisable() {
-
+        getGuildManager().saveChunks();
+        getGuildManager().saveGuilds();
     }
+
     public Location getSpawn() {
         return getServer().getWorld("world").getSpawnLocation();
     }
@@ -156,49 +158,67 @@ public class OddJob extends JavaPlugin {
     public ArenaManager getArenaManager() {
         return arenaManager;
     }
+
     public BanManager getBanManager() {
         return banManager;
     }
+
     public ConfigManager getConfigManager() {
         return configManager;
     }
+
     public DeathManager getDeathManager() {
         return deathManager;
     }
+
     public EconManager getEconManager() {
         return econManager;
     }
+
     public FreezeManager getFreezeManager() {
         return freezeManager;
     }
+
     public GuildManager getGuildManager() {
         return guildManager;
     }
+
     public HomesManager getHomesManager() {
         return homesManager;
     }
+
     public JailManager getJailManager() {
         return jailManager;
     }
+
     public LockManager getLockManager() {
         return lockManager;
     }
+
     public MessageManager getMessageManager() {
         return messageManager;
     }
+
     public MySQLManager getMySQLManager() {
         return mySQLManager;
     }
+
     public PlayerManager getPlayerManager() {
         return playerManager;
     }
-    public ScoreManager getScoreManager() { return scoreManager; }
+
+    public ScoreManager getScoreManager() {
+        return scoreManager;
+    }
+
     public TeleportManager getTeleportManager() {
         return teleportManager;
     }
+
     public WarpManager getWarpManager() {
         return warpManager;
     }
+
     public WorldManger getWorldManager() {
         return worldManager;
     }
