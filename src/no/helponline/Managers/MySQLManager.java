@@ -1999,10 +1999,66 @@ public class MySQLManager {
         return guilds;
     }
 
-    public void saveGuildMembers(String toString, String toString1, String name) {
+    public void saveGuildMembers(UUID guild, UUID player, Role role) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
+            preparedStatement.setString(1, player.toString());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `guild` = ?, `role` = ? WHERE `uuid` = ?");
+                preparedStatement.setString(1, guild.toString());
+                preparedStatement.setString(2, role.name());
+                preparedStatement.setString(3, player.toString());
+                preparedStatement.executeUpdate();
+                OddJob.getInstance().getMessageManager().console("Member update");
+            } else {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`guild`,`role`) VALUES (?,?,?)");
+                preparedStatement.setString(1,player.toString());
+                preparedStatement.setString(2, guild.toString());
+                preparedStatement.setString(3, role.name());
+                preparedStatement.execute();
+                OddJob.getInstance().getMessageManager().console("Member insert");
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
     }
 
-    public void saveChunks(String toString, World world, int x, int z) {
+    public void saveChunks(UUID guild, World world, int x, int z) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+            preparedStatement.setString(1, world.getUID().toString());
+            preparedStatement.setInt(2, x);
+            preparedStatement.setInt(3, z);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ?");
+                preparedStatement.setString(1, guild.toString());
+                preparedStatement.setString(2, world.getUID().toString());
+                preparedStatement.setInt(3, x);
+                preparedStatement.setInt(4, z);
+                preparedStatement.executeUpdate();
+                OddJob.getInstance().getMessageManager().console("Chunk update");
+            } else {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
+                preparedStatement.setString(1, guild.toString());
+                preparedStatement.setString(2, world.getUID().toString());
+                preparedStatement.setInt(3, x);
+                preparedStatement.setInt(4, z);
+                preparedStatement.execute();
+                OddJob.getInstance().getMessageManager().console("Chunk insert");
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
     }
 
     public HashMap<Chunk, UUID> loadChunks() {
@@ -2012,15 +2068,12 @@ public class MySQLManager {
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks`");
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                if (Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))) != null) {
-                    chunks.put(Bukkit.getWorld(
-                            UUID.fromString(resultSet.getString("world"))
-                            ).getChunkAt(
-                            resultSet.getInt("x"),
-                            resultSet.getInt("z")
-                            ),
-                            UUID.fromString(resultSet.getString("uuid"))
-                    );
+                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                UUID guild = UUID.fromString(resultSet.getString("uuid"));
+                int x = resultSet.getInt("x");
+                int z = resultSet.getInt("z");
+                if (world != null) {
+                    chunks.put(world.getChunkAt(x, z), guild);
                 }
             }
             OddJob.getInstance().getMessageManager().console("Loaded chunks: " + chunks.size());

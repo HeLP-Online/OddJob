@@ -23,37 +23,23 @@ public class GuildManager {
     public void loadGuilds() {
         guilds = OddJob.getInstance().getMySQLManager().loadGuilds();
     }
+
     public void loadChunks() {
         chunkGuild = OddJob.getInstance().getMySQLManager().loadChunks();
     }
 
     public void saveGuilds() {
-        for(UUID uuid : guilds.keySet()) {
-            OddJob.getInstance().getMySQLManager().saveGuild(
-                    uuid.toString(),
-                    guilds.get(uuid).getName(),
-                    guilds.get(uuid).getZone().name(),
-                    guilds.get(uuid).getInvitedOnly(),
-                    guilds.get(uuid).getFriendlyFire(),
-                    guilds.get(uuid).getPermissionInvite().name());
+        for (UUID uuid : guilds.keySet()) {
+            OddJob.getInstance().getMySQLManager().saveGuild(uuid.toString(), guilds.get(uuid).getName(), guilds.get(uuid).getZone().name(), guilds.get(uuid).getInvitedOnly(), guilds.get(uuid).getFriendlyFire(), guilds.get(uuid).getPermissionInvite().name());
             for (UUID player : guilds.get(uuid).getMembers().keySet()) {
-                OddJob.getInstance().getMySQLManager().saveGuildMembers(
-                        uuid.toString(),
-                        player.toString(),
-                        guilds.get(uuid).getMembers().get(player).name()
-                );
+                OddJob.getInstance().getMySQLManager().saveGuildMembers(uuid, player, guilds.get(uuid).getMembers().get(player));
             }
         }
     }
 
     public void saveChunks() {
         for (Chunk chunk : chunkGuild.keySet()) {
-            OddJob.getInstance().getMySQLManager().saveChunks(
-                    chunkGuild.get(chunk).toString(),
-                    chunk.getWorld(),
-                    chunk.getX(),
-                    chunk.getZ()
-            );
+            OddJob.getInstance().getMySQLManager().saveChunks(chunkGuild.get(chunk), chunk.getWorld(), chunk.getX(), chunk.getZ());
         }
     }
 
@@ -151,7 +137,7 @@ public class GuildManager {
             OddJob.getInstance().getMessageManager().danger("Sorry, you are not associated with the guild who claimed this chunk", player, false);
         } else {
             // Unclaim the Chunk from Guild
-            //OddJob.getInstance().getMySQLManager().deleteGuildChunks(playerGuild, inChunk, player);
+            OddJob.getInstance().getMySQLManager().deleteGuildChunks(playerGuild, inChunk, player);
             this.chunkGuild.remove(player.getLocation().getChunk());
             this.guilds.get(chunkGuild).removeChunks();
             OddJob.getInstance().getMessageManager().success("You have unclaimed " + ChatColor.GOLD + "X:" + inChunk.getX() + " Z:" + inChunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " from " + ChatColor.DARK_AQUA + getGuildNameByUUID(playerGuild), player, true);
@@ -244,7 +230,12 @@ public class GuildManager {
     // NEW
     public UUID getGuildUUIDByMember(UUID player) {
         //return OddJob.getInstance().getMySQLManager().getGuildUUIDByMember(player);
-        return members.get(player);
+        for (UUID uuid : guilds.keySet()) {
+            if (guilds.get(uuid).getMembers().containsKey(player)) {
+                return uuid;
+            }
+        }
+        return null;
     }
 
     // NEW
