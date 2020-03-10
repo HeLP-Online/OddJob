@@ -708,14 +708,13 @@ public class MySQLManager {
         } else return "The Wild!";
     }
 
-    public void deleteGuildChunks(UUID guild, Chunk chunk, Player player) {
+    public void deleteGuildChunks(Chunk chunk) {
         try {
             connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `uuid` = ? AND `world` = ? AND `x` = ? AND `z` = ?");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, player.getWorld().getUID().toString());
-            preparedStatement.setInt(3, chunk.getX());
-            preparedStatement.setInt(4, chunk.getZ());
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
+            preparedStatement.setInt(2, chunk.getX());
+            preparedStatement.setInt(3, chunk.getZ());
             preparedStatement.execute();
 
         } catch (SQLException ex) {

@@ -113,4 +113,8 @@ public class MessageManager {
             }
         }
     }
+
+    public void errorGuild(CommandSender commandSender) {
+        commandSender.sendMessage(ChatColor.YELLOW+"Sorry, you are not associated with any guild yet.");
+    }
 }
