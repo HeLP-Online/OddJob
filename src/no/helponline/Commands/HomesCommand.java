@@ -11,10 +11,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class HomesCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -23,35 +20,22 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args.length == 1 && args[0].equalsIgnoreCase("help")) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(ChatColor.AQUA + "__-- HELP menu for /").append(cmd.getName()).append(" --__\n").append(ChatColor.AQUA + "-----------------------------------------\n");
-            for (Args y : Args.values()) {
-                if (sender.hasPermission("homes." + y.name())) {
-                    sb.append(ChatColor.GOLD + "- Command:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append("\n").append(ChatColor.GOLD + "Description:" + ChatColor.RESET + " ").append(y.get()).append("\n");
-
-                    if (sender instanceof Player) {
-                        if (!args[0].equalsIgnoreCase("list")) {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append(" [name_of_home]\n");
-                        } else {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append("\n");
-                        }
-                    }
-                    if (sender.hasPermission("homes." + y.name() + ".others") &&
-                            !args[0].equalsIgnoreCase("set")) {
-                        if (!args[0].equalsIgnoreCase("list")) {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append(" <player> <name_of_home>\n");
-                        } else {
-                            sb.append(ChatColor.GOLD + "Usage:" + ChatColor.RESET + " /").append(cmd.getName()).append(" ").append(y.name()).append(" <player>\n");
-                        }
-                    }
-                }
-            }
-
-            sender.sendMessage(sb.toString());
             return true;
         }
         if (args[0].equalsIgnoreCase("del")) {
+            if (args.length == 2) {
+                String name = args[1];
+                UUID uuid = ((Player)sender).getUniqueId();
+                if (!OddJob.getInstance().getHomesManager().has(uuid, name)) {
+                    OddJob.getInstance().getMessageManager().errorHome(name, sender);
+                    return true;
+                }
+                OddJob.getInstance().getHomesManager().del(uuid, name);
+                OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " deleted", sender, true);
+                return true;
+            }
 
+            // Command /homes del <player> <name>
             if (args.length == 3) {
                 UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                 String name = args[2];
@@ -61,94 +45,114 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
-                    OddJob.getInstance().getHomesManager().del(uuid, name);
-                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " deleted from " + ChatColor.DARK_AQUA + args[1], sender, true);
+                if (!OddJob.getInstance().getHomesManager().has(uuid, name)) {
+                    OddJob.getInstance().getMessageManager().errorHome(name, sender);
                     return true;
                 }
-                OddJob.getInstance().getMessageManager().warning("No home named " + ChatColor.GOLD + name + ChatColor.YELLOW + " found at " + ChatColor.DARK_AQUA + args[1], sender, false);
+
+                OddJob.getInstance().getHomesManager().del(uuid, name);
+                OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " deleted from " + ChatColor.DARK_AQUA + args[1], sender, true);
                 return true;
             }
         }
 
 
         if (args[0].equalsIgnoreCase("set")) {
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
-
-                if (args.length == 2) {
-                    String name = args[1];
-                    OddJob.getInstance().getHomesManager().add(player.getUniqueId(), name, player.getLocation());
-                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set!", sender, true);
-                    return true;
-                }
-
-                if (args.length == 3) {
-                    String name = args[2];
-                    UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
-                    if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
-                        return true;
-                    }
-                    OddJob.getInstance().getHomesManager().add(uuid, name, player.getLocation());
-                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set for " + ChatColor.DARK_AQUA + args[1], sender, true);
-                    return true;
-                }
-                OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender, false);
+            if (!(sender instanceof Player)) {
+                OddJob.getInstance().getMessageManager().errorConsole();
+                return true;
+            }
+            Player player = (Player) sender;
+            // Command /homes set <name>
+            if (args.length == 2) {
+                String name = args[1];
+                OddJob.getInstance().getHomesManager().add(player.getUniqueId(), name, player.getLocation());
+                OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set!", sender, true);
                 return true;
             }
 
-            OddJob.getInstance().getMessageManager().danger("This command can only be done by a player!", sender, false);
+            // Command /homes set <player> <name>
+            if (args.length == 3) {
+                String name = args[2];
+                UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
+                if (uuid == null) {
+                    OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
+                    return true;
+                }
+
+                OddJob.getInstance().getHomesManager().add(uuid, name, player.getLocation());
+                OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set for " + ChatColor.DARK_AQUA + args[1], sender, true);
+                return true;
+            }
+            OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender, false);
             return true;
+
         }
 
         if (args[0].equalsIgnoreCase("tp")) {
-            Location location;
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
-
-                if (args.length == 2) {
-                    String name = args[1];
-                    if (OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
-                        location = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
-                        if (location != null)
-                            OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
-                    } else {
-                        OddJob.getInstance().getMessageManager().warning("Can't find any home named " + ChatColor.GOLD + name, sender, false);
-                    }
-                    return true;
-                }
-
-                if (args.length == 3) {
-                    UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
-                    if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
-                        return true;
-                    }
-                    String name = args[2];
-                    if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
-                        location = OddJob.getInstance().getHomesManager().get(uuid, name);
-                        if (location != null) {
-                            OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
-                            OddJob.getInstance().getMessageManager().success("Teleporting to home named `" + ChatColor.GOLD + name + ChatColor.GREEN + "` of " + args[1], sender, true);
-                        } else {
-                            OddJob.getInstance().getMessageManager().danger("Your home is gone, removing...", sender, true);
-                            OddJob.getInstance().getHomesManager().del(uuid, name);
-                        }
-                    } else {
-                        OddJob.getInstance().getMessageManager().warning("Can't find any home named " + ChatColor.GOLD + name, sender, false);
-                    }
-                    return true;
-                }
-                OddJob.getInstance().getMessageManager().danger("Too many arguments.", sender, false);
+            if (!(sender instanceof Player)) {
+                OddJob.getInstance().getMessageManager().errorConsole();
                 return true;
             }
 
-            OddJob.getInstance().getMessageManager().danger("This command can only be done by a player!", sender, false);
+            Location location;
+            Player player = (Player) sender;
+
+            // Command /homes tp <name>
+            if (args.length == 2) {
+                String name = args[1];
+                if (!OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
+                    OddJob.getInstance().getMessageManager().errorHome(name, player);
+                    return true;
+                }
+
+                location = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), name);
+
+                if (location == null) {
+                    OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender, false);
+                    return true;
+                }
+
+                OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
+                return true;
+            }
+
+            if (args.length == 3) {
+                // Command /homes tp <player> <name>
+                UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
+                if (uuid == null) {
+                    OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
+                    return true;
+                }
+
+                String name = args[2];
+                if (!OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
+                    OddJob.getInstance().getMessageManager().errorHome(name, player);
+                    return true;
+                }
+                location = OddJob.getInstance().getHomesManager().get(uuid, name);
+                if (location == null) {
+                    OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender, false);
+                    return true;
+                }
+
+                OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
+                OddJob.getInstance().getMessageManager().success("Teleporting to home named `" + ChatColor.GOLD + name + ChatColor.GREEN + "` of " + args[1], sender, true);
+                return true;
+            }
+
+            OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender, false);
             return true;
+        }
+        if (args[0].equalsIgnoreCase("save")) {
+            OddJob.getInstance().getHomesManager().save();
+        }
+        if (args[0].equalsIgnoreCase("load")) {
+            OddJob.getInstance().getHomesManager().load();
         }
 
         if (args[0].equalsIgnoreCase("list")) {
+            // Command /homes list
             if (sender instanceof Player && args.length == 1) {
                 Player player = (Player) sender;
                 StringBuilder string = new StringBuilder();
@@ -156,7 +160,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 string.append("List of your homes:\n");
                 string.append("-------------------\n");
 
-                List<String> homes = OddJob.getInstance().getHomesManager().list(player.getUniqueId());
+                Set<String> homes = OddJob.getInstance().getHomesManager().list(player.getUniqueId());
 
                 int i = 0;
                 if (homes.size() > 0) {
@@ -172,15 +176,16 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
             if (args.length == 2) {
                 UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                 if (uuid == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + ChatColor.DARK_AQUA + args[0], sender, false);
+                    OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
                     return true;
                 }
+
                 StringBuilder string = new StringBuilder();
 
                 string.append("List of your homes:\n");
                 string.append("-------------------\n");
 
-                List<String> homes = OddJob.getInstance().getHomesManager().list(uuid);
+                Set<String> homes = OddJob.getInstance().getHomesManager().list(uuid);
 
                 int i = 1;
                 for (String s : homes) {

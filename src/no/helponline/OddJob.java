@@ -113,6 +113,7 @@ public class OddJob extends JavaPlugin {
         getCommand("shop").setExecutor(new ShopCommand());
 
         configManager.load();
+        homesManager.load();
         playerManager.loadPlayers();
         guildManager.loadGuilds();
         guildManager.loadChunks();

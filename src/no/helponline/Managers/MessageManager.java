@@ -137,4 +137,8 @@ public class MessageManager {
     public void errorNumber(String string, Player player) {
         player.sendMessage(ChatColor.RED+"Invalid number '"+ChatColor.YELLOW+string+ChatColor.RED+"'");
     }
+
+    public void errorHome(String name, CommandSender player) {
+        player.sendMessage(ChatColor.RED+"Unknown home '"+ChatColor.YELLOW+name+ChatColor.RED+"'");
+    }
 }
