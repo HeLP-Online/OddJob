@@ -117,4 +117,24 @@ public class MessageManager {
     public void errorGuild(CommandSender commandSender) {
         commandSender.sendMessage(ChatColor.YELLOW+"Sorry, you are not associated with any guild yet.");
     }
+
+    public void insufficientItems(Player player) {
+        player.sendMessage(ChatColor.YELLOW+"Insufficient number of items.");
+    }
+
+    public void insufficientFunds(Player player) {
+        player.sendMessage(ChatColor.YELLOW+"Insufficient funds.");
+    }
+
+    public void errorConsole() {
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Onl usable as a player");
+    }
+
+    public void errorMaterial(String string, Player player) {
+        player.sendMessage(ChatColor.RED+"Unknown material '"+ChatColor.YELLOW+string+ChatColor.RED+"'");
+    }
+
+    public void errorNumber(String string, Player player) {
+        player.sendMessage(ChatColor.RED+"Invalid number '"+ChatColor.YELLOW+string+ChatColor.RED+"'");
+    }
 }

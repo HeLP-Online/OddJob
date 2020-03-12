@@ -112,6 +112,8 @@ commands:
     usage: /<command>
   trade:
     usage: /<command>
+  shop:
+    usage: /<command>
 permissions:
   essentials.death:
     default: op

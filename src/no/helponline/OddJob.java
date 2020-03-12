@@ -35,6 +35,7 @@ public class OddJob extends JavaPlugin {
     private MySQLManager mySQLManager;
     private PlayerManager playerManager;
     private ScoreManager scoreManager;
+    private ShopManager shopManager;
     private TeleportManager teleportManager;
     private WorldManger worldManager;
     private WarpManager warpManager;
@@ -71,6 +72,7 @@ public class OddJob extends JavaPlugin {
         mySQLManager = new MySQLManager();
         playerManager = new PlayerManager();
         scoreManager = new ScoreManager();
+        shopManager = new ShopManager();
         teleportManager = new TeleportManager();
         warpManager = new WarpManager();
         worldManager = new WorldManger();
@@ -108,6 +110,7 @@ public class OddJob extends JavaPlugin {
         getCommand("spawn").setExecutor(new SpawnCommand());
         getCommand("jail").setExecutor(new JailCommand());
         getCommand("trade").setExecutor(new TradeCommand());
+        getCommand("shop").setExecutor(new ShopCommand());
 
         configManager.load();
         playerManager.loadPlayers();
@@ -212,6 +215,10 @@ public class OddJob extends JavaPlugin {
 
     public ScoreManager getScoreManager() {
         return scoreManager;
+    }
+
+    public ShopManager getShopManager() {
+        return shopManager;
     }
 
     public TeleportManager getTeleportManager() {

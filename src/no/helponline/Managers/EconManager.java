@@ -35,7 +35,11 @@ public class EconManager {
         return OddJob.getInstance().getConfig().getDouble("econ.cost."+name,0.0);
     }
 
-    public void createAccount(UUID uuid, double v, boolean b) {
-        OddJob.getInstance().getMySQLManager().createBalance(uuid,v,b);
+    public void createAccount(UUID uuid, double startValue, boolean guild) {
+        OddJob.getInstance().getMySQLManager().createBalance(uuid,startValue,guild);
+    }
+
+    public void add(UUID player, Double cost, boolean guild) {
+        setBalance(player,getBalance(player)+cost,guild);
     }
 }

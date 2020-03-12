@@ -51,66 +51,35 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args[0].equalsIgnoreCase("del")) {
-            if (args.length == 1) {
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
-                    if (OddJob.getInstance().getHomesManager().has(player.getUniqueId())) {
-                        OddJob.getInstance().getHomesManager().del(player.getUniqueId());
-                        OddJob.getInstance().getMessageManager().success("Home deleted.", sender,true);
-                        return true;
-                    }
-                    OddJob.getInstance().getMessageManager().warning("No home found.", sender,false);
-                    return true;
-                }
-            } else {
-                if (args.length == 2) {
-                    String name = args[1];
-                    if (sender instanceof Player) {
-                        Player player = (Player) sender;
-                        if (OddJob.getInstance().getHomesManager().has(player.getUniqueId())) {
-                            OddJob.getInstance().getHomesManager().del(player.getUniqueId(), name);
-                            OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " deleted.", sender, true);
-                            return true;
-                        }
-                        OddJob.getInstance().getMessageManager().warning("No home named " + ChatColor.GOLD + name + ChatColor.YELLOW + " found.", sender,false);
-                    }
+
+            if (args.length == 3) {
+                UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
+                String name = args[2];
+
+                if (uuid == null) {
+                    OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
                     return true;
                 }
 
-                if (args.length == 3) {
-                    UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
-                    String name = args[2];
-
-                    if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().errorPlayer(args[1],sender);
-                        return true;
-                    }
-
-                    if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
-                        OddJob.getInstance().getHomesManager().del(uuid, name);
-                        OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " deleted from " + ChatColor.DARK_AQUA + args[1], sender,true);
-                        return true;
-                    }
-                    OddJob.getInstance().getMessageManager().warning("No home named " + ChatColor.GOLD + name + ChatColor.YELLOW + " found at " + ChatColor.DARK_AQUA + args[1], sender,false);
+                if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
+                    OddJob.getInstance().getHomesManager().del(uuid, name);
+                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " deleted from " + ChatColor.DARK_AQUA + args[1], sender, true);
                     return true;
                 }
+                OddJob.getInstance().getMessageManager().warning("No home named " + ChatColor.GOLD + name + ChatColor.YELLOW + " found at " + ChatColor.DARK_AQUA + args[1], sender, false);
+                return true;
             }
         }
+
 
         if (args[0].equalsIgnoreCase("set")) {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
 
-                if (args.length == 1) {
-                    OddJob.getInstance().getHomesManager().add(player.getUniqueId(), player.getLocation());
-                    OddJob.getInstance().getMessageManager().success("Home set!", sender,true);
-                    return true;
-                }
-
                 if (args.length == 2) {
                     String name = args[1];
                     OddJob.getInstance().getHomesManager().add(player.getUniqueId(), name, player.getLocation());
-                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set!", sender,true);
+                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set!", sender, true);
                     return true;
                 }
 
@@ -118,18 +87,18 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                     String name = args[2];
                     UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                     if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().errorPlayer(args[1],sender);
+                        OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
                         return true;
                     }
                     OddJob.getInstance().getHomesManager().add(uuid, name, player.getLocation());
-                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set for " + ChatColor.DARK_AQUA + args[1], sender,true);
+                    OddJob.getInstance().getMessageManager().success("Home " + ChatColor.GOLD + name + ChatColor.GREEN + " set for " + ChatColor.DARK_AQUA + args[1], sender, true);
                     return true;
                 }
-                OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender,false);
+                OddJob.getInstance().getMessageManager().danger("Something went wrong!", sender, false);
                 return true;
             }
 
-            OddJob.getInstance().getMessageManager().danger("This command can only be done by a player!", sender,false);
+            OddJob.getInstance().getMessageManager().danger("This command can only be done by a player!", sender, false);
             return true;
         }
 
@@ -138,17 +107,6 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
 
-                if (args.length == 1) {
-                    if (OddJob.getInstance().getHomesManager().has(player.getUniqueId())) {
-                        location = OddJob.getInstance().getHomesManager().get(player.getUniqueId());
-                        if (location != null)
-                            OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                    } else {
-                        OddJob.getInstance().getMessageManager().warning("No home found.", sender,false);
-                    }
-                    return true;
-                }
-
                 if (args.length == 2) {
                     String name = args[1];
                     if (OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
@@ -156,7 +114,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                         if (location != null)
                             OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
                     } else {
-                        OddJob.getInstance().getMessageManager().warning("Can't find any home named " + ChatColor.GOLD + name, sender,false);
+                        OddJob.getInstance().getMessageManager().warning("Can't find any home named " + ChatColor.GOLD + name, sender, false);
                     }
                     return true;
                 }
@@ -164,21 +122,21 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 if (args.length == 3) {
                     UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                     if (uuid == null) {
-                        OddJob.getInstance().getMessageManager().errorPlayer(args[1],sender);
+                        OddJob.getInstance().getMessageManager().errorPlayer(args[1], sender);
                         return true;
                     }
                     String name = args[2];
                     if (OddJob.getInstance().getHomesManager().has(uuid, name)) {
                         location = OddJob.getInstance().getHomesManager().get(uuid, name);
                         if (location != null) {
-                            OddJob.getInstance().getTeleportManager().teleport(player,location,0, PlayerTeleportEvent.TeleportCause.COMMAND);
-                            OddJob.getInstance().getMessageManager().success("Teleporting to home named `" + ChatColor.GOLD + name + ChatColor.GREEN + "` of " + args[1], sender,true);
+                            OddJob.getInstance().getTeleportManager().teleport(player, location, 0, PlayerTeleportEvent.TeleportCause.COMMAND);
+                            OddJob.getInstance().getMessageManager().success("Teleporting to home named `" + ChatColor.GOLD + name + ChatColor.GREEN + "` of " + args[1], sender, true);
                         } else {
-                            OddJob.getInstance().getMessageManager().danger("Your home is gone, removing...", sender,true);
-                            OddJob.getInstance().getHomesManager().del(uuid,name);
+                            OddJob.getInstance().getMessageManager().danger("Your home is gone, removing...", sender, true);
+                            OddJob.getInstance().getHomesManager().del(uuid, name);
                         }
                     } else {
-                        OddJob.getInstance().getMessageManager().warning("Can't find any home named " + ChatColor.GOLD + name, sender,false);
+                        OddJob.getInstance().getMessageManager().warning("Can't find any home named " + ChatColor.GOLD + name, sender, false);
                     }
                     return true;
                 }
@@ -186,7 +144,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            OddJob.getInstance().getMessageManager().danger("This command can only be done by a player!", sender,false);
+            OddJob.getInstance().getMessageManager().danger("This command can only be done by a player!", sender, false);
             return true;
         }
 
@@ -214,7 +172,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
             if (args.length == 2) {
                 UUID uuid = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                 if (uuid == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + ChatColor.DARK_AQUA + args[0], sender,false);
+                    OddJob.getInstance().getMessageManager().warning("Sorry, I can't find " + ChatColor.DARK_AQUA + args[0], sender, false);
                     return true;
                 }
                 StringBuilder string = new StringBuilder();

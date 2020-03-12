@@ -11,22 +11,6 @@ import java.util.UUID;
 public class HomesManager {
     private HashMap<UUID, HashMap<String, Location>> homes = new HashMap<>();
 
-    public boolean add(UUID uuid, Location location) {
-        return add(uuid, "home", location);
-    }
-
-    public boolean del(UUID uuid) {
-        return del(uuid, "home");
-    }
-
-    public Location get(UUID uuid) {
-        return get(uuid, "home");
-    }
-
-    public boolean has(UUID uuid) {
-        return has(uuid, "home");
-    }
-
     public boolean add(UUID uuid, String name, Location location) {
         Location loc = OddJob.getInstance().getMySQLManager().getHome(uuid, name);
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(location.getChunk());
