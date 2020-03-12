@@ -7,6 +7,7 @@ import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,6 +30,10 @@ public class PlayerInteract implements Listener {
         boolean door = false;
         UUID uuid = null;
 
+        // Prevent generating map from InfoLockTool
+        if (event.getItem() != null && event.getItem().equals(OddJob.getInstance().getLockManager().infoWand))
+            event.setUseItemInHand(Event.Result.DENY);
+
         // Log Diamond & Emerald
         ItemStack item = event.getItem();
         if ((item != null) && (item.getType().equals(Material.DIAMOND_BLOCK) || item.getType().equals(Material.EMERALD) || item.getType().equals(Material.EMERALD) || item.getType().equals(Material.EMERALD_BLOCK)) && !player.hasPermission("noLog"))
@@ -40,6 +45,7 @@ public class PlayerInteract implements Listener {
 
         if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (event.getAction().equals(Action.PHYSICAL))) {
             OddJob.getInstance().getMessageManager().console("action");
+
             // Opening or Stepping
             Block block = event.getClickedBlock();
             Material t = block.getType();
@@ -164,7 +170,7 @@ public class PlayerInteract implements Listener {
 
 
                 // GUILD owning block
-                UUID blockGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(block.getChunk(), block.getWorld());
+                UUID blockGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(block.getChunk());
                 // GUILD associated with you
                 UUID yourGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
 

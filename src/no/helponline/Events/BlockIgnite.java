@@ -17,7 +17,7 @@ public class BlockIgnite implements Listener {
     @EventHandler
     public void blockIgnite(BlockIgniteEvent event) {
         if (event.getBlock().getType() == Material.TNT) {
-            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getLocation().getChunk(), event.getBlock().getWorld());
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getLocation().getChunk());
             if (guild != null) {
                 event.setCancelled(true);
             }

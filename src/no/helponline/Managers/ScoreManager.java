@@ -25,7 +25,7 @@ public class ScoreManager {
     }
 
     public void clear(Player player) {
-        scores.get(player.getUniqueId()).cancel();
+        if (scores.containsKey(player.getUniqueId())) scores.get(player.getUniqueId()).cancel();
         scores.remove(player.getUniqueId());
 
         player.setScoreboard(scoreboardManager.getMainScoreboard());
@@ -58,12 +58,12 @@ public class ScoreManager {
             zone.addEntry(ChatColor.GOLD + "Zone: ");
             OddJob.getInstance().getMessageManager().console("chunk: " + player.getLocation().getChunk().toString());
             OddJob.getInstance().getMessageManager().console("world: " + player.getLocation().getWorld().getName());
-            OddJob.getInstance().getMessageManager().console("guild-uuid: " + OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
-            zone.setSuffix(OddJob.getInstance().getGuildManager().getZoneByGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld())).name());
+            OddJob.getInstance().getMessageManager().console("guild-uuid: " + OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()));
+            zone.setSuffix(OddJob.getInstance().getGuildManager().getZoneByGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())).name());
 
             guild = scoreboardGuild.registerNewTeam("guild-" + player.getUniqueId().toString().substring(0, 8));
             guild.addEntry(ChatColor.GOLD + "Guild: ");
-            guild.setSuffix(OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld())));
+            guild.setSuffix(OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())));
 
             playerEcon = scoreboardGuild.registerNewTeam("pEcon-" + player.getUniqueId().toString().substring(0, 8));
             playerEcon.addEntry(ChatColor.GOLD + "Player-Money: ");
@@ -129,9 +129,9 @@ public class ScoreManager {
                     }
                 }
                 if (gguild != null)
-                    gguild.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld())));
+                    gguild.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())));
                 if (zzone != null)
-                    zzone.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getZoneByGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld())).name());
+                    zzone.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getZoneByGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())).name());
                 if (rrank != null)
                     rrank.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildMemberRole(playerUUID).name());
                 if (mmembers != null)

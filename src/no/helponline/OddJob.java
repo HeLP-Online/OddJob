@@ -107,8 +107,10 @@ public class OddJob extends JavaPlugin {
         getCommand("rollback").setExecutor(new RollbackCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
         getCommand("jail").setExecutor(new JailCommand());
+        getCommand("trade").setExecutor(new TradeCommand());
 
         configManager.load();
+        playerManager.loadPlayers();
         guildManager.loadGuilds();
         guildManager.loadChunks();
 
@@ -124,6 +126,7 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new EntityPickupItem(), this);
         Bukkit.getPluginManager().registerEvents(new EntitySpawn(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClose(), this);
+        Bukkit.getPluginManager().registerEvents(new InventoryClick(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerBucketEmpty(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerChangesWorld(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerDeath(), this);

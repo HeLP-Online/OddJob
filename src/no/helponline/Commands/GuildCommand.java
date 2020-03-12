@@ -5,7 +5,6 @@ import no.helponline.Utils.Role;
 import no.helponline.Utils.Zone;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -161,7 +160,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                             // Command '/guild accept <player>'
                             UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
                             if (target == null) {
-                                OddJob.getInstance().getMessageManager().errorPlayer("Sorry, we can't find " + strings[1],player);
+                                OddJob.getInstance().getMessageManager().errorPlayer("Sorry, we can't find " + strings[1], player);
                                 return true;
                             }
 
@@ -232,10 +231,10 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                             // Invite Player to the Guild
                             OddJob.getInstance().getGuildManager().inviteToGuild(guild, target);
 
-                            OddJob.getInstance().getMessageManager().info("You have invited " + strings[1] + " to join " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild),player,false);
+                            OddJob.getInstance().getMessageManager().info("You have invited " + strings[1] + " to join " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), player, false);
                             Player op = Bukkit.getPlayer(target);
                             if (op != null) {
-                                OddJob.getInstance().getMessageManager().info("You have been invited to join the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild),target,false);
+                                OddJob.getInstance().getMessageManager().info("You have been invited to join the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), target, false);
                             }
                         }
                     }
@@ -266,7 +265,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                             // Remove the invitation to the Guild
                             OddJob.getInstance().getGuildManager().unInviteToGuild(target);
 
-                            OddJob.getInstance().getMessageManager().info(strings[1] + " is no longer invited to " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild),player,false);
+                            OddJob.getInstance().getMessageManager().info(strings[1] + " is no longer invited to " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), player, false);
                             OddJob.getInstance().getMessageManager().success("You are no longer invited to the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), target, false);
                             return true;
                         } else {
@@ -335,7 +334,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 Player player = (Player) commandSender;
                 UUID targetUUID = OddJob.getInstance().getPlayerManager().getUUID(strings[1]);
                 if (targetUUID == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[1], commandSender, false);
+                    OddJob.getInstance().getMessageManager().errorPlayer(strings[1], commandSender);
                     return true;
                 }
                 UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
@@ -353,7 +352,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     }
                     targetRole = OddJob.getInstance().getGuildManager().promoteMember(guildUUID, targetUUID);
                     OddJob.getInstance().getMessageManager().success("Promoted " + OddJob.getInstance().getPlayerManager().getName(targetUUID) + " to " + ChatColor.GOLD + targetRole.name(), commandSender, true);
-                    if (OddJob.getInstance().getPlayerManager().getOffPlayer(targetUUID).isOnline()) {
+                    if (OddJob.getInstance().getPlayerManager().getPlayer(targetUUID).isOnline()) {
                         OddJob.getInstance().getMessageManager().success("You have been promoted to " + ChatColor.GOLD + targetRole.name() + ChatColor.RESET + " by " + commandSender.getName(), targetUUID, false);
                     }
 
@@ -382,7 +381,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     }
                     targetRole = OddJob.getInstance().getGuildManager().demoteMember(guildUUID, targetUUID);
                     OddJob.getInstance().getMessageManager().success("Demoted " + OddJob.getInstance().getPlayerManager().getName(targetUUID) + " to " + ChatColor.GOLD + targetRole.name(), commandSender, true);
-                    if (OddJob.getInstance().getPlayerManager().getOffPlayer(targetUUID).isOnline()) {
+                    if (OddJob.getInstance().getPlayerManager().getPlayer(targetUUID).isOnline()) {
                         OddJob.getInstance().getMessageManager().success("You have been demoted to " + ChatColor.GOLD + targetRole.name() + ChatColor.RESET + " by " + commandSender.getName(), targetUUID, false);
                     }
 
@@ -502,7 +501,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         if (strings.length == 1 || strings.length == 0) {
             String[] st;
             if ((commandSender instanceof Player) && OddJob.getInstance().getGuildManager().getGuildUUIDByMember(((Player) commandSender).getUniqueId()) != null) {
-                st = new String[]{"claim", "unclaim", "set", "list", "invite", "uninvite", "kick", "promote", "demote","accept","deny"};
+                st = new String[]{"claim", "unclaim", "set", "list", "invite", "uninvite", "kick", "promote", "demote", "accept", "deny"};
             } else if (commandSender instanceof Player) {
                 st = new String[]{"create", "join"};
             } else {

@@ -11,14 +11,47 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.UUID;
+
 public class InventoryClose implements Listener {
     @EventHandler
     public void inventory(InventoryCloseEvent event) {
+        // Closing trade windows for both traders
+        if (event.getView().getTitle().equals("TRADE INVENTORY")) {
+            // Player closing trade windows
+            UUID closing = event.getPlayer().getUniqueId();
+
+            if (OddJob.getInstance().getPlayerManager().getTradingPlayers().containsKey(closing)) {
+                // Trading player
+                UUID uuid = OddJob.getInstance().getPlayerManager().getTradingPlayers().get(closing);
+                // Removing from the list
+                OddJob.getInstance().getPlayerManager().getTradingPlayers().remove(closing);
+                // Closing inventory
+                OddJob.getInstance().getPlayerManager().getPlayer(uuid).closeInventory();
+
+                OddJob.getInstance().getMessageManager().danger("Trading aborted by " + OddJob.getInstance().getPlayerManager().getName(closing), uuid, false);
+            } else if (OddJob.getInstance().getPlayerManager().getTradingPlayers().containsValue(closing)) {
+                // Looping through the list
+                for (UUID uuid : OddJob.getInstance().getPlayerManager().getTradingPlayers().keySet()) {
+                    // Found a Player in the list
+                    if (OddJob.getInstance().getPlayerManager().getTradingPlayers().get(uuid).equals(closing)) {
+                        // Removing from the lost
+                        OddJob.getInstance().getPlayerManager().getTradingPlayers().remove(uuid);
+                        // Closing inventory
+                        OddJob.getInstance().getPlayerManager().getPlayer(uuid).closeInventory();
+
+                        OddJob.getInstance().getMessageManager().danger("Trading aborted by " + OddJob.getInstance().getPlayerManager().getName(closing), uuid, false);
+                    }
+                }
+            }
+        }
+
         Player player = null;
         HumanEntity human = event.getPlayer();
         if (human instanceof Player) {
             player = (Player) human;
         }
+
 
         Inventory inventory = event.getInventory();
 

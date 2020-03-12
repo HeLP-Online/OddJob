@@ -30,7 +30,7 @@ public class EntityExplode implements Listener {
         HashMap<Location, BlockData> keep = new HashMap<>();
         for (Block block : blocks) {
             Chunk chunk = block.getChunk();
-            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, block.getWorld());
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
             if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());

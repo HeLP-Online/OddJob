@@ -110,6 +110,8 @@ commands:
     usage: /<command>
   jail:
     usage: /<command>
+  trade:
+    usage: /<command>
 permissions:
   essentials.death:
     default: op

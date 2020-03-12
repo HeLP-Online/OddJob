@@ -16,7 +16,7 @@ public class PlayerBucketEmpty implements Listener {
      */
     @EventHandler
     public void bucketEmpty(PlayerBucketEmptyEvent event) {
-        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlockClicked().getChunk(), event.getBlockClicked().getWorld());
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlockClicked().getChunk());
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(event.getPlayer().getUniqueId());
         if (memberOfGuild == null) {
             memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);

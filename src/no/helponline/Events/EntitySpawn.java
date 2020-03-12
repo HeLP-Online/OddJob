@@ -19,7 +19,7 @@ public class EntitySpawn implements Listener {
     @EventHandler
     public void entitySpawn(EntitySpawnEvent event) {
         Chunk chunk = event.getLocation().getChunk();
-        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, event.getLocation().getWorld());
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
         if (guild != null) {
             Zone zone = OddJob.getInstance().getGuildManager().getZoneByGuild(guild);
             if (zone == Zone.GUILD || zone == Zone.SAFE || zone == Zone.JAIL || zone == Zone.ARENA) {

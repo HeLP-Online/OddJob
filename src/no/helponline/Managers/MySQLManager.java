@@ -2014,7 +2014,7 @@ public class MySQLManager {
                 OddJob.getInstance().getMessageManager().console("Member update");
             } else {
                 preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`guild`,`role`) VALUES (?,?,?)");
-                preparedStatement.setString(1,player.toString());
+                preparedStatement.setString(1, player.toString());
                 preparedStatement.setString(2, guild.toString());
                 preparedStatement.setString(3, role.name());
                 preparedStatement.execute();
@@ -2099,5 +2099,24 @@ public class MySQLManager {
         } finally {
             close();
         }
+    }
+
+    public void loadPlayers() {
+        HashMap<UUID, String> map = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players`");
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                map.put(UUID.fromString(resultSet.getString("uuid")), resultSet.getString("name"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        OddJob.getInstance().getPlayerManager().setNames(map);
+        OddJob.getInstance().getMessageManager().console("Loaded names:" + map.size());
     }
 }

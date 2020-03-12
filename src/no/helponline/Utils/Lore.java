@@ -19,7 +19,7 @@ public class Lore {
                 if (lore != null && lore.size() > 1) {
                     // Key has Lore
                     String one = ChatColor.stripColor(lore.get(1));
-                    UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld());
+                    UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk());
                     if (!guild && !one.equalsIgnoreCase(uuid.toString())) {
                         // Wrong Player Key
                         OddJob.getInstance().getMessageManager().warning("You don't have the correct Player-Key", player, false);

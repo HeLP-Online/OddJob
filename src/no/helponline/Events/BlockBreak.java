@@ -74,7 +74,7 @@ public class BlockBreak implements Listener {
         }
 
         // What Guild owns the Chunk
-        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk, player.getWorld());
+        UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
         if (chunkInGuild == null || chunkInGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
             // If no Guilds owns the Chunk, feel free
             return;

@@ -54,7 +54,7 @@ public class PlayerJoin implements Listener {
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
             if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 player.sendMessage("You are a loyal member of " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
-                List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendings(guild);
+                List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendingList(guild);
                 if (pending.size() > 0) {
                     player.sendMessage("Your guild has " + pending.size() + " request to join your guild. Use the command '/guild accept' to see the list of players");
                 }

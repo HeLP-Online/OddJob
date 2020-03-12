@@ -42,12 +42,12 @@ public class PlayerMove implements Listener {
         }
 
         // Who owns the chunk the Player is going to?
-        movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk, player.getWorld());
+        movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk);
         if (movingToGuild == null) {
             movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         }
         // Who owns the chunk the Player is going from?
-        movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingFromChunk, player.getWorld());
+        movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingFromChunk);
         if (movingFromGuild == null) {
             movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         }
@@ -68,13 +68,10 @@ public class PlayerMove implements Listener {
 
         // Actionbar
         if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
-            OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
+            OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()));
             print = true;
-        } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(
-                player.getLocation().getChunk(),
-                player.getLocation().getWorld()
-        ))) {
-            OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk(), player.getLocation().getWorld()));
+        } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()))) {
+            OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()));
             print = true;
         }
 
