@@ -70,7 +70,7 @@ public class JailManager {
 
         // Teleport to Jail lobby
         OddJob.getInstance().getMessageManager().console("Jailing "+player.getName()+" has "+player.getInventory().getContents().length);
-        OddJob.getInstance().getMySQLManager().addPlayerJail(uuidPlayer, world, player.getInventory().getContents());
+        OddJob.getInstance().getMySQLManager().addPlayerJail(uuidPlayer, world);
         player.getInventory().setContents(new ItemStack[]{});
 
         // Finishing up
@@ -124,11 +124,10 @@ public class JailManager {
 
 
         // Remove from Jail
-        HashMap<String, ItemStack[]> items = OddJob.getInstance().getMySQLManager().getJailItems(uuidPlayer);
+        /*HashMap<String, ItemStack[]> items = OddJob.getInstance().getMySQLManager().getJailItems(uuidPlayer);
         if (items.containsKey("contents")) {
             player.getInventory().setContents(items.get("contents"));
-
-        }
+        }*/
         OddJob.getInstance().getMySQLManager().deletePlayerJail(uuidPlayer);
 
         // Finishing up

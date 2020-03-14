@@ -9,9 +9,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,120 +63,30 @@ public class MySQLManager {
     public synchronized void updatePlayer(UUID uuid, String name) {
         try {
             connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players` (`uuid`,`name`) VALUES (?,?) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`)");
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setString(2, name);
-            preparedStatement.execute();
-            close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public synchronized String getPlayerName(UUID uuid) {
-        String name = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_players` WHERE `uuid` = ?");
-            preparedStatement.setString(1, uuid.toString());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                name = resultSet.getString("name");
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return name;
-    }
-
-    public synchronized UUID getPlayerUUID(String name) {
-        UUID uuid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players` WHERE `name` = ?");
-            preparedStatement.setString(1, name);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                uuid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuid;
-    }
-
-    public synchronized List<UUID> getPlayerMapUUIDs() {
-        List<UUID> uuids = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players`");
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                uuids.add(UUID.fromString(resultSet.getString("uuid")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuids;
-    }
-
-    public synchronized HashMap<String, Object> getPlayer(UUID uniqueId) {
-        HashMap<String, Object> player = new HashMap<>();
-        try {
-            connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players` WHERE `uuid` = ?");
-            preparedStatement.setString(1, uniqueId.toString());
+            preparedStatement.setString(1, uuid.toString());
             resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                player.put("uuid", UUID.fromString(resultSet.getString("uuid")));
-                player.put("name", resultSet.getString("name"));
-                player.put("denytpa", resultSet.getBoolean("denytpa"));
-                List<UUID> whitelist = new ArrayList<>();
-                if (resultSet.getString("whitelist") != null) {
-                    for (String uid : resultSet.getString("whitelist").split(",")) {
-                        whitelist.add(UUID.fromString(uid));
-                    }
-                }
-                player.put("whitelist", whitelist);
-                List<UUID> blacklist = new ArrayList<>();
-                if (resultSet.getString("blacklist") != null) {
-                    for (String uid : resultSet.getString("blacklist").split(",")) {
-                        blacklist.add(UUID.fromString(uid));
-                    }
-                }
-                player.put("blacklist", blacklist);
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return (!player.isEmpty()) ? player : null;
-    }
 
-    public synchronized List<String> getPlayerMapNames() {
-        List<String> names = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_players`");
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                names.add(resultSet.getString("name"));
+            if (resultSet.next()) {
+                if (name.equals(resultSet.getString("name"))) {
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `name` = ? WHERE `uuid` = ?");
+                    preparedStatement.setString(1, name);
+                    preparedStatement.setString(2, uuid.toString());
+                    preparedStatement.executeUpdate();
+                    OddJob.getInstance().getMessageManager().console("Player updated");
+                }
+            } else {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_players` (`uuid`,`name`) VALUES (?,?)");
+                preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setString(2, name);
+                preparedStatement.execute();
+                OddJob.getInstance().getMessageManager().console("Player inserted");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
-        return names;
     }
 
     public synchronized void setPlayerDenyTpa(UUID uniqueId, boolean deny) {
@@ -201,7 +108,7 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ? WHERE `uuid` = ?");
             StringBuilder list = new StringBuilder();
-            if (blacklist.isEmpty()) {
+            if (!blacklist.isEmpty()) {
                 for (UUID uuid : blacklist) {
                     list.append(uuid.toString()).append(";");
                 }
@@ -223,7 +130,7 @@ public class MySQLManager {
             connect();
             preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `whitelist` = ? WHERE `uuid` = ?");
             StringBuilder list = new StringBuilder();
-            if (whitelist.isEmpty()) {
+            if (!whitelist.isEmpty()) {
                 for (UUID uuid : whitelist) {
                     list.append(uuid.toString()).append(";");
                 }
@@ -240,109 +147,6 @@ public class MySQLManager {
         }
     }
 
-    public synchronized Location getHome(UUID uuid, String name) {
-        Location location = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes` WHERE `uuid` = ? AND `name` = ?");
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setString(2, name);
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                if (world != null) {
-                    location = new Location(
-                            world,
-                            resultSet.getDouble("x"),
-                            resultSet.getDouble("y"),
-                            resultSet.getDouble("z"),
-                            resultSet.getFloat("yaw"),
-                            resultSet.getFloat("pitch")
-                    );
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return location;
-    }
-
-    public synchronized void createHome(UUID uuid, String name, Location location) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_homes` (`name`,`uuid`,`world`,`x`,`y`,`z`,`yaw`,`pitch`) VALUES (?,?,?,?,?,?,?,?)");
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, uuid.toString());
-            preparedStatement.setString(3, location.getWorld().getUID().toString());
-            preparedStatement.setDouble(4, location.getBlockX());
-            preparedStatement.setDouble(5, location.getBlockY());
-            preparedStatement.setDouble(6, location.getBlockZ());
-            preparedStatement.setFloat(7, location.getYaw());
-            preparedStatement.setFloat(8, location.getPitch());
-            preparedStatement.execute();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public synchronized void updateHome(UUID uuid, String name, Location location) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_homes` SET `world` = ?,`x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ? WHERE `name` = ? AND `uuid` = ?");
-            preparedStatement.setString(1, location.getWorld().getUID().toString());
-            preparedStatement.setDouble(2, location.getBlockX());
-            preparedStatement.setDouble(3, location.getBlockY());
-            preparedStatement.setDouble(4, location.getBlockZ());
-            preparedStatement.setFloat(5, location.getYaw());
-            preparedStatement.setFloat(6, location.getPitch());
-            preparedStatement.setString(7, name);
-            preparedStatement.setString(8, uuid.toString());
-            preparedStatement.executeUpdate();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public synchronized void deleteHome(UUID uuid, String name) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_homes` WHERE `name` = ? AND `uuid` = ?");
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, uuid.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public synchronized List<String> listHomes(UUID uuid) {
-        List<String> list = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_homes` WHERE `uuid` = ? ");
-            preparedStatement.setString(1, uuid.toString());
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                list.add(resultSet.getString("name"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return list;
-    }
-
     public synchronized void createLock(UUID uuid, Entity entity) {
         try {
             connect();
@@ -355,24 +159,6 @@ public class MySQLManager {
         } finally {
             close();
         }
-    }
-
-    public synchronized UUID hasLock(Entity entity) {
-        UUID uid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_secured_armorstands` WHERE `entity` = ?");
-            preparedStatement.setString(1, entity.toString());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                uid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uid;
     }
 
     public synchronized void deleteLock(Entity entity) {
@@ -405,27 +191,6 @@ public class MySQLManager {
         }
     }
 
-    public synchronized UUID hasLock(Location location) {
-        UUID uid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_secured_blocks` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ? ");
-            preparedStatement.setString(1, location.getWorld().getUID().toString());
-            preparedStatement.setInt(2, location.getBlockX());
-            preparedStatement.setInt(3, location.getBlockY());
-            preparedStatement.setInt(4, location.getBlockZ());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                uid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uid;
-    }
-
     public synchronized void deleteLock(Location location) {
         try {
             connect();
@@ -442,277 +207,6 @@ public class MySQLManager {
         }
     }
 
-    public synchronized HashMap<String, Object> getGuildByPlayer(UUID uniqueId) {
-        HashMap<String, Object> guild = new HashMap<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT b.* FROM `mine_guilds_members` a LEFT JOIN `mine_guilds` b ON a.`uuid` = b.`uuid` WHERE `player` = ? ");
-            preparedStatement.setString(1, uniqueId.toString());
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                guild.put("uuid", resultSet.getString("uuid"));
-                guild.put("name", resultSet.getString("name"));
-                guild.put("zone", Zone.valueOf(resultSet.getString("zone")));
-                guild.put("invited_only", resultSet.getBoolean("invited_only"));
-                guild.put("friendly_fire", resultSet.getBoolean("friendly_fire"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return guild;
-    }
-
-    public synchronized void createGuild(HashMap<String, String> memberOfGuild) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`) VALUES (?,?,?,?)");
-            preparedStatement.setString(1, memberOfGuild.get("uuid"));
-            preparedStatement.setString(2, memberOfGuild.get("name"));
-            preparedStatement.setString(3, memberOfGuild.get("zone"));
-            preparedStatement.setBoolean(4, false);
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public synchronized void addGuildMember(UUID guild, UUID player, Role role) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, player.toString());
-            preparedStatement.setString(3, role.name());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public synchronized void addGuildChunks(UUID guild, Chunk chunk, Player player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, player.getWorld().getUID().toString());
-            preparedStatement.setInt(3, chunk.getX());
-            preparedStatement.setInt(4, chunk.getZ());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public synchronized Role getGuildMemberRole(UUID player) {
-        Role role = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `role` FROM `mine_guilds_members` WHERE `player` = ?");
-            preparedStatement.setString(1, player.toString());
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                role = Role.valueOf(resultSet.getString("role"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return role;
-    }
-
-    public void deleteMemberFromGuild(UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `player` = ?");
-            preparedStatement.setString(1, player.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public void setGuildInvitedOnly(UUID guildUUIDByMember, boolean bol) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `invited_only` = ? WHERE `uuid` = ?");
-            preparedStatement.setBoolean(1, bol);
-            preparedStatement.setString(2, guildUUIDByMember.toString());
-            preparedStatement.executeQuery();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public void setGuildFriendlyFire(UUID guildUUIDByMember, boolean bol) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `friendly_fire` = ? WHERE `uuid` = ?");
-            preparedStatement.setBoolean(1, bol);
-            preparedStatement.setString(2, guildUUIDByMember.toString());
-            preparedStatement.executeQuery();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public UUID getGuildInvite(UUID player) {
-        UUID uid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_invites` WHERE `player` = ?");
-            preparedStatement.setString(1, player.toString());
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                uid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uid;
-    }
-
-    public UUID getGuildPending(UUID player) {
-        UUID uid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_pendings` WHERE `player` = ?");
-            preparedStatement.setString(1, player.toString());
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                uid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uid;
-    }
-
-    public void addGuildInvite(UUID guild, UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_invites` (`uuid`,`player`) VALUES (?,?)");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, player.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public void deleteGuildInvite(UUID guild, UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_invites` WHERE `uuid` = ? AND `player` = ?");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, player.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public boolean setGuildName(UUID uniqueId, String string) {
-        boolean change = false;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ? WHERE `uuid` = ?");
-            preparedStatement.setString(1, string);
-            preparedStatement.setString(2, uniqueId.toString());
-            preparedStatement.executeQuery();
-            change = true;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return change;
-    }
-
-    public UUID getGuildUUIDByChunk(Chunk chunk, World world) {
-        UUID uuid = getGuildUUIDByZone(Zone.WILD);
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? ");
-            preparedStatement.setString(1, world.getUID().toString());
-            preparedStatement.setInt(2, chunk.getX());
-            preparedStatement.setInt(3, chunk.getZ());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                uuid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuid;
-    }
-
-    public String getZoneByGuild(UUID guild) {
-        String zone = "";
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `zone` FROM `mine_guilds` WHERE `uuid` = ? ");
-            preparedStatement.setString(1, guild.toString());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                zone = resultSet.getString("zone");
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return zone;
-    }
-
-    public String getGuildNameByUUID(UUID guild) {
-        String name = null;
-        if (guild != null) {
-            try {
-                connect();
-                preparedStatement = connection.prepareStatement("SELECT `name` FROM `mine_guilds` WHERE `uuid` = ? ");
-                preparedStatement.setString(1, guild.toString());
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    name = resultSet.getString("name");
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            } finally {
-                close();
-            }
-            return name;
-        } else return "The Wild!";
-    }
-
     public void deleteGuildChunks(Chunk chunk) {
         try {
             connect();
@@ -721,7 +215,6 @@ public class MySQLManager {
             preparedStatement.setInt(2, chunk.getX());
             preparedStatement.setInt(3, chunk.getZ());
             preparedStatement.execute();
-
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
@@ -745,225 +238,6 @@ public class MySQLManager {
             close();
         }
         return materials;
-    }
-
-    public String getGuildPermission(String permission, String uuid) {
-        String ret = "";
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `" + permission + "_permission` FROM `mine_guilds` WHERE `uuid` = ?");
-            preparedStatement.setString(1, uuid);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                ret = resultSet.getString(permission + "_permission");
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return ret;
-    }
-
-    public UUID getGuildUUIDByMemeber(UUID player) {
-        UUID uuid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT b.`uuid` FROM `mine_guilds_members` a LEFT JOIN `mine_guilds` b ON a.`uuid` = b.`uuid` WHERE `player` = ? ");
-            preparedStatement.setString(1, player.toString());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                uuid = UUID.fromString(resultSet.getString("b.uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuid;
-    }
-
-    public UUID getGuildUUIDByZone(Zone zone) {
-        UUID uuid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `zone` = ? ");
-            preparedStatement.setString(1, zone.name());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                uuid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuid;
-    }
-
-    public UUID getGuildUUIDByName(String name) {
-        UUID uuid = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `name` = ? ");
-            preparedStatement.setString(1, name);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                uuid = UUID.fromString(resultSet.getString("uuid"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuid;
-    }
-
-    public List<Chunk> getGuildChunksByUUID(UUID guild) {
-        List<Chunk> chunks = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `uuid` = ? ");
-            preparedStatement.setString(1, guild.toString());
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                chunks.add(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))).getChunkAt(resultSet.getInt("x"), resultSet.getInt("y")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return chunks;
-    }
-
-    public List<UUID> getGuildUUIDs() {
-        List<UUID> uuids = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` ");
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                uuids.add(UUID.fromString(resultSet.getString("uuid")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuids;
-    }
-
-    public boolean getGuildSettings(String settings, UUID guild) {
-        boolean bol = false;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `" + settings + "` FROM `mine_guilds` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                bol = resultSet.getInt(settings) == 1;
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return bol;
-    }
-
-    public List<UUID> getGuildInvitations(UUID guild) {
-        List<UUID> uuids = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_invites` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                uuids.add(UUID.fromString(resultSet.getString("player")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuids;
-    }
-
-    public List<UUID> getGuildPendings(UUID guild) {
-        List<UUID> uuids = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_pendings` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                uuids.add(UUID.fromString(resultSet.getString("player")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuids;
-    }
-
-    public void deletePending(UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_pendings` WHERE `player` = ?");
-            preparedStatement.setString(1, player.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public void deleteInvitation(UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_invites` WHERE `player` = ?");
-            preparedStatement.setString(1, player.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public void addGuildPending(UUID guild, UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_pendings` (`uuid`,`player`) VALUES (?,?)");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.setString(2, player.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public List<UUID> getGuildMembers(UUID guild) {
-        List<UUID> uuids = new ArrayList<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_members` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                uuids.add(UUID.fromString(resultSet.getString("player")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return uuids;
     }
 
     public GameMode getPlayerMode(Player player, World world) {
@@ -1550,89 +824,6 @@ public class MySQLManager {
         return location;
     }
 
-    public void addDeathChest(Location location, Material left, Material right, UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_death_chests` (`uuid`,`world`,`x`,`y`,`z`,`leftBlock`,`rightBlock`,`time`) VALUES (?,?,?,?,?,?,?,?)");
-            preparedStatement.setString(1, player.toString());
-            preparedStatement.setString(2, location.getWorld().getUID().toString());
-            preparedStatement.setDouble(3, location.getBlockX());
-            preparedStatement.setDouble(4, location.getBlockY());
-            preparedStatement.setDouble(5, location.getBlockZ());
-            preparedStatement.setString(6, left.toString());
-            preparedStatement.setString(7, right.toString());
-            preparedStatement.setLong(8, System.currentTimeMillis() / 1000L);
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public HashMap<String, String> getDeathChest(Location location) {
-        HashMap<String, String> ret = new HashMap<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
-            preparedStatement.setString(1, location.getWorld().getUID().toString());
-            preparedStatement.setDouble(2, location.getBlockX());
-            preparedStatement.setDouble(3, location.getBlockY());
-            preparedStatement.setDouble(4, location.getBlockZ());
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                ret.put("uuid", resultSet.getString("uuid"));
-                ret.put("left", resultSet.getString("leftBlock"));
-                ret.put("right", resultSet.getString("rightBlock"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-
-        return ret;
-    }
-
-    public void deleteDeathChest(Location location) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_players_death_chests` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
-            preparedStatement.setString(1, location.getWorld().getUID().toString());
-            preparedStatement.setDouble(2, location.getBlockX());
-            preparedStatement.setDouble(3, location.getBlockY());
-            preparedStatement.setDouble(4, location.getBlockZ());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
-
-    public boolean isDeathChest(Location location) {
-        boolean is = false;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_death_chests` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
-            preparedStatement.setString(1, location.getWorld().getUID().toString());
-            preparedStatement.setDouble(2, location.getBlockX());
-            preparedStatement.setDouble(3, location.getBlockY());
-            preparedStatement.setDouble(4, location.getBlockZ());
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                is = true;
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return is;
-    }
 
     public void moteGuild(UUID guildUUID, UUID targetUUID, String role) {
         try {
@@ -1649,51 +840,23 @@ public class MySQLManager {
         }
     }
 
-    public void addPlayerJail(UUID uuidPlayer, UUID world, ItemStack[] contents) { //, ItemStack[] armors, ItemStack[] extras) {
-
-        /* FROM Exerosis
-        try (final var connection = source.getConnection()) {
-          try (final var query = connection.prepareStatement(...)) {
-            final Blob blob = connection.createBlob();
-            //This operation is only sometimes supported unfortunately.
-            try (final var out = blob.setBinaryStream(0)) {
-              BukkitSerializers.saveItems(inventory.getContents(), out);
-            }
-            query.setBlob(..., blob);
-          }
-        } catch (Throwable reason) { throw new RuntimeException(reason); }
-
-        Player player = Bukkit.getPlayer(uuidPlayer);
+    public void addPlayerJail(UUID playerUUID, UUID worldUUID) {
         try {
             connect();
-            // PLAYER ; WORLD ; DATE SET IN JAIL ; IS IN JAIL ; COUNT JAIL TIMES ; SERVED TIME
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_jailed` (`uuid`,`world`,`date`,`contents`) VALUES (?,?,UNIX_TIMESTAMP(),?)");
-
-            final var bytes = new ByteArrayOutputStream();
-            try {
-                BukkitSerializers.saveItems(contents, bytes);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            final var in = new ByteArrayInputStream(bytes.toByteArray());
-            OddJob.getInstance().getMessageManager().console("Byte length:" + bytes.toByteArray().length + "");
-            OddJob.getInstance().getMessageManager().console("Inventory size:" + bytes.toByteArray().length + "");
-            preparedStatement.setBinaryStream(3, in);
-
-            preparedStatement.setString(1, uuidPlayer.toString());
-            preparedStatement.setString(2, world.toString());
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_jailed` (`world`,`uuid`,`date`,`release`) VALUES (?,?,UNIX_TIMESTAMP(),?)");
+            preparedStatement.setString(1, worldUUID.toString());
+            preparedStatement.setString(2, playerUUID.toString());
+            preparedStatement.setInt(3, Math.toIntExact((System.currentTimeMillis() / 1000)));
             preparedStatement.execute();
         } catch (SQLException ex) {
-            ex.printStackTrace();
         } finally {
             close();
-        }*/
+        }
     }
 
     public void deletePlayerJail(UUID player) {
         try {
             connect();
-
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_players_jailed` WHERE `uuid` = ? ");
             preparedStatement.setString(1, player.toString());
             preparedStatement.execute();
@@ -1702,39 +865,6 @@ public class MySQLManager {
         } finally {
             close();
         }
-    }
-
-    public HashMap<String, ItemStack[]> getJailItems(UUID player) {
-        HashMap<String, ItemStack[]> items = new HashMap<>();
-        /* FROM Exerosis
-        try (final var results = query.execute()) {
-            if (!results.first()) return new ItemStack[0];
-            try (final var in = results.getBinaryStream(...)) {
-                return BukkitSerializers.loadItems(in);
-            }
-        }
-
-
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `contents`,`armors`,`extras` FROM `mine_players_jailed` WHERE `uuid` = ?");
-            preparedStatement.setString(1, player.toString());
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                try {
-                    InputStream in = resultSet.getBinaryStream("contents");
-                    items.put("contents", BukkitSerializers.loadItems(in));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }*/
-        return items;
     }
 
     public World inPlayerJail(UUID player) {
@@ -1795,36 +925,32 @@ public class MySQLManager {
         return location;
     }
 
-    public void updateWorlds(World world) {
-        UUID uuid = world.getUID();
+    public void updateWorld(World world) {
+        UUID worldUUID = world.getUID();
         String name = world.getName();
-
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT `uuid`,`name` FROM `mine_worlds` WHERE `uuid` = ?");
-            preparedStatement.setString(1, uuid.toString());
+            preparedStatement.setString(1, worldUUID.toString());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 if (name.equalsIgnoreCase(resultSet.getString("name"))) {
                     preparedStatementsec = connection.prepareStatement("UPDATE `mine_worlds` SET `name` = ? WHERE `uuid` = ?");
-                    preparedStatementsec.setString(2, uuid.toString());
+                    preparedStatementsec.setString(2, worldUUID.toString());
                     preparedStatementsec.setString(1, name);
                     preparedStatementsec.executeUpdate();
-                    OddJob.getInstance().getMessageManager().console("UPDATING: " + name);
                 }
             } else {
                 preparedStatementsec = connection.prepareStatement("INSERT INTO `mine_worlds` (`uuid`,`name`) VALUES (?,?)");
-                preparedStatementsec.setString(1, uuid.toString());
+                preparedStatementsec.setString(1, worldUUID.toString());
                 preparedStatementsec.setString(2, name);
                 preparedStatementsec.execute();
-                OddJob.getInstance().getMessageManager().console("INSERTING: " + name);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
-
     }
 
     public void addLog(UUID uniqueId, Block block, String action) {
@@ -1934,59 +1060,74 @@ public class MySQLManager {
         return chests;
     }
 
-    public void saveGuild(String uuidGuild, String name, String zone, boolean invitedOnly, boolean friendlyFire, String permissionInviteRole) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `uuid` = ?");
-            preparedStatement.setString(1,uuidGuild);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.wasNull()) {
-                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`invite_permission`) VALUES (?,?,?,?,?,?)");
-                preparedStatement.setString(1, uuidGuild);
-                preparedStatement.setString(2, name);
-                preparedStatement.setString(3, zone);
-                preparedStatement.setInt(4, invitedOnly ? 1 : 0);
-                preparedStatement.setInt(5, friendlyFire ? 1 : 0);
-                preparedStatement.setString(6, permissionInviteRole);
-                preparedStatement.execute();
-            } else {
-                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`invite_permission` = ? WHERE `uuid` = ?");
-                preparedStatement.setString(1, name);
-                preparedStatement.setString(2, zone);
-                preparedStatement.setInt(3, invitedOnly ? 1 : 0);
-                preparedStatement.setInt(4, friendlyFire ? 1 : 0);
-                preparedStatement.setString(5, permissionInviteRole);
-                preparedStatement.setString(6, uuidGuild);
-                preparedStatement.executeUpdate();
+    public void saveGuild() {
+        int i = 0, u = 0;
+        for (UUID guildUUID : OddJob.getInstance().getGuildManager().getGuilds()) {
+            Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
+            String name = guild.getName();
+            Zone zone = guild.getZone();
+            boolean invitedOnly = guild.getInvitedOnly();
+            boolean friendlyFire = guild.getFriendlyFire();
+            Role permissionInviteRole = guild.getPermissionInvite();
+
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `uuid` = ?");
+                preparedStatement.setString(1, guildUUID.toString());
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.wasNull()) {
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`invite_permission`) VALUES (?,?,?,?,?,?)");
+                    preparedStatement.setString(1, guildUUID.toString());
+                    preparedStatement.setString(2, name);
+                    preparedStatement.setString(3, zone.name());
+                    preparedStatement.setInt(4, invitedOnly ? 1 : 0);
+                    preparedStatement.setInt(5, friendlyFire ? 1 : 0);
+                    preparedStatement.setString(6, permissionInviteRole.name());
+                    preparedStatement.execute();
+                    i++;
+                } else {
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`invite_permission` = ? WHERE `uuid` = ?");
+                    preparedStatement.setString(1, name);
+                    preparedStatement.setString(2, zone.name());
+                    preparedStatement.setInt(3, invitedOnly ? 1 : 0);
+                    preparedStatement.setInt(4, friendlyFire ? 1 : 0);
+                    preparedStatement.setString(5, permissionInviteRole.name());
+                    preparedStatement.setString(6, guildUUID.toString());
+                    preparedStatement.executeUpdate();
+                    u++;
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
         }
+        OddJob.getInstance().getMessageManager().console("Saved Guilds: insert:" + i + "; update:" + u + ";");
     }
 
     public HashMap<UUID, Guild> loadGuilds() {
         HashMap<UUID, Guild> guilds = new HashMap<>();
+        int m = 0, g = 0;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds`");
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                 HashMap<UUID, Role> members = new HashMap<>();
+                UUID guildUUID = UUID.fromString(resultSet.getString("uuid"));
                 preparedStatementsec = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
                 preparedStatementsec.setString(1, resultSet.getString("uuid"));
                 resultSetsec = preparedStatementsec.executeQuery();
 
                 if (!resultSetsec.wasNull()) {
                     while (resultSetsec.next()) {
+                        m++;
                         members.put(UUID.fromString(resultSetsec.getString("player")), Role.valueOf(resultSetsec.getString("role")));
                     }
                 }
-                guilds.put(uuid, new Guild(
-                        uuid,
+                guilds.put(guildUUID, new Guild(
+                        guildUUID,
                         resultSet.getString("name"),
                         Zone.valueOf(resultSet.getString("zone")),
                         resultSet.getInt("invited_only") == 1,
@@ -1994,77 +1135,97 @@ public class MySQLManager {
                         Role.valueOf(resultSet.getString("invite_permission")),
                         members
                 ));
-                OddJob.getInstance().getMessageManager().console("Zone: " + Zone.valueOf(resultSet.getString("zone")).name());
-                OddJob.getInstance().getMessageManager().console("Loaded " + resultSet.getString("name") + ": " + members.size());
+                g++;
+
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
+        OddJob.getInstance().getMessageManager().console("Loaded Guilds: guilds:" + g + "; members:" + m + ";");
         return guilds;
     }
 
-    public void saveGuildMembers(UUID guild, UUID player, Role role) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `player` = ?");
-            preparedStatement.setString(1, player.toString());
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `uuid` = ?, `role` = ? WHERE `player` = ?");
-                preparedStatement.setString(1, guild.toString());
-                preparedStatement.setString(2, role.name());
-                preparedStatement.setString(3, player.toString());
-                preparedStatement.executeUpdate();
-                OddJob.getInstance().getMessageManager().console("Member update");
-            } else {
-                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
-                preparedStatement.setString(1, guild.toString());
-                preparedStatement.setString(2, player.toString());
-                preparedStatement.setString(3, role.name());
-                preparedStatement.execute();
-                OddJob.getInstance().getMessageManager().console("Member insert");
-            }
+    public void saveGuildMembers() {
+        int i = 0, u = 0;
+        for (UUID guildUUID : OddJob.getInstance().getGuildManager().getGuilds()) {
+            HashMap<UUID, Role> members = OddJob.getInstance().getGuildManager().getGuild(guildUUID).getMembers();
+            if (members.isEmpty()) continue;
+            for (UUID playerUUID : members.keySet()) {
+                Role role = members.get(playerUUID);
 
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
+
+                try {
+                    connect();
+                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `player` = ?");
+                    preparedStatement.setString(1, playerUUID.toString());
+                    resultSet = preparedStatement.executeQuery();
+                    if (resultSet.next()) {
+                        preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `uuid` = ?, `role` = ? WHERE `player` = ?");
+                        preparedStatement.setString(1, guildUUID.toString());
+                        preparedStatement.setString(2, role.name());
+                        preparedStatement.setString(3, playerUUID.toString());
+                        preparedStatement.executeUpdate();
+                        u++;
+                    } else {
+                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
+                        preparedStatement.setString(1, guildUUID.toString());
+                        preparedStatement.setString(2, playerUUID.toString());
+                        preparedStatement.setString(3, role.name());
+                        preparedStatement.execute();
+                        i++;
+                    }
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                } finally {
+                    close();
+                }
+            }
         }
     }
 
-    public void saveChunks(UUID guild, World world, int x, int z) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
-            preparedStatement.setString(1, world.getUID().toString());
-            preparedStatement.setInt(2, x);
-            preparedStatement.setInt(3, z);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ?");
-                preparedStatement.setString(1, guild.toString());
-                preparedStatement.setString(2, world.getUID().toString());
-                preparedStatement.setInt(3, x);
-                preparedStatement.setInt(4, z);
-                preparedStatement.executeUpdate();
-                OddJob.getInstance().getMessageManager().console("Chunk update");
-            } else {
-                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
-                preparedStatement.setString(1, guild.toString());
-                preparedStatement.setString(2, world.getUID().toString());
-                preparedStatement.setInt(3, x);
-                preparedStatement.setInt(4, z);
-                preparedStatement.execute();
-                OddJob.getInstance().getMessageManager().console("Chunk insert");
-            }
+    public void saveChunks(HashMap<Chunk, UUID> chunks) {
+        int i = 0, u = 0;
+        for (Chunk chunk : chunks.keySet()) {
+            World world = chunk.getWorld();
+            int x = chunk.getX();
+            int z = chunk.getZ();
+            UUID guild = chunks.get(chunk);
 
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+                preparedStatement.setString(1, world.getUID().toString());
+                preparedStatement.setInt(2, x);
+                preparedStatement.setInt(3, z);
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ?");
+                    preparedStatement.setString(1, guild.toString());
+                    preparedStatement.setString(2, world.getUID().toString());
+                    preparedStatement.setInt(3, x);
+                    preparedStatement.setInt(4, z);
+                    preparedStatement.executeUpdate();
+                    u++;
+                } else {
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
+                    preparedStatement.setString(1, guild.toString());
+                    preparedStatement.setString(2, world.getUID().toString());
+                    preparedStatement.setInt(3, x);
+                    preparedStatement.setInt(4, z);
+                    preparedStatement.execute();
+                    i++;
+                }
+
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
+            }
         }
+        OddJob.getInstance().getMessageManager().console("Saved Chunks: insert:" + i + "; update:" + u + "; total:" + (i + u) + ";");
     }
 
     public HashMap<Chunk, UUID> loadChunks() {
@@ -2082,13 +1243,12 @@ public class MySQLManager {
                     chunks.put(world.getChunkAt(x, z), guild);
                 }
             }
-            OddJob.getInstance().getMessageManager().console("Loaded chunks: " + chunks.size());
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
-
+        OddJob.getInstance().getMessageManager().console("Loaded chunks: total:" + chunks.size() + ";");
         return chunks;
     }
 
@@ -2107,28 +1267,75 @@ public class MySQLManager {
         }
     }
 
-    public void loadPlayers() {
-        HashMap<UUID, String> map = new HashMap<>();
+    public void savePlayers(HashMap<UUID, OddPlayer> players) {
+        for (UUID uuid : players.keySet()) {
+            OddPlayer data = players.get(uuid);
+            StringBuilder white = new StringBuilder();
+            for (UUID uw : data.getWhitelist()) {
+                white.append(uw.toString()).append(",");
+            }
+            StringBuilder black = new StringBuilder();
+            for (UUID ub : data.getBlacklist()) {
+                black.append(ub.toString()).append(",");
+            }
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?, `whitelist` = ?, `denytpa` = ?, `banned` = ? WHERE `uuid` = ?");
+                preparedStatement.setString(1, white.substring(0, white.length() - 1));
+                preparedStatement.setString(2, black.substring(0, black.length() - 1));
+                preparedStatement.setInt(3, data.isDeny_tpa() ? 1 : 0);
+                preparedStatement.setString(4, data.getBanned());
+                preparedStatement.setString(5, uuid.toString());
+                preparedStatement.executeUpdate();
+            } catch (SQLException ex) {
+            } finally {
+                close();
+            }
+        }
+    }
+
+    public HashMap<UUID, OddPlayer> loadPlayers() {
+        HashMap<UUID, OddPlayer> map = new HashMap<>();
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players`");
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                map.put(UUID.fromString(resultSet.getString("uuid")), resultSet.getString("name"));
+                List<UUID> whitelist = new ArrayList<>();
+                if (resultSet.getString("whitelist") != null) {
+                    for (String uid : resultSet.getString("whitelist").split(",")) {
+                        whitelist.add(UUID.fromString(uid));
+                    }
+                }
+                List<UUID> blacklist = new ArrayList<>();
+                if (resultSet.getString("blacklist") != null) {
+                    for (String uid : resultSet.getString("blacklist").split(",")) {
+                        blacklist.add(UUID.fromString(uid));
+                    }
+                }
+                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                OddPlayer data = new OddPlayer(
+                        uuid,
+                        blacklist, whitelist,
+                        resultSet.getInt("denytpa") == 1,
+                        resultSet.getString("name"),
+                        resultSet.getString("banned")
+                );
+                map.put(uuid, data);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
-        OddJob.getInstance().getPlayerManager().setNames(map);
-        OddJob.getInstance().getMessageManager().console("Loaded names:" + map.size());
+        OddJob.getInstance().getMessageManager().console("Loaded Players:" + map.size());
+        return map;
     }
 
     public HashMap<UUID, Home> loadHomes() {
         HashMap<UUID, Home> homes = new HashMap<>();
-
+        int i = 0;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes`");
@@ -2137,6 +1344,7 @@ public class MySQLManager {
             while (resultSet.next()) {
                 World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
                 if (world != null) {
+                    i++;
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                     Home home = homes.get(uuid);
                     String name = resultSet.getString("name");
@@ -2155,6 +1363,7 @@ public class MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().getMessageManager().console("Loaded Homes: total:" + i + ";");
         return homes;
     }
 
@@ -2206,7 +1415,7 @@ public class MySQLManager {
 
             }
         }
-        OddJob.getInstance().getMessageManager().console("Inserted " + i + "; Updated " + u);
+        OddJob.getInstance().getMessageManager().console("Saved Homes: insert:" + i + "; update:" + u);
     }
 
     public void createAccount(UUID uuid, double startValue, boolean guild) {
@@ -2227,9 +1436,7 @@ public class MySQLManager {
     }
 
     public void loadEcon() {
-        int g = 0;
-        int p = 0;
-        int i = 0;
+        int g = 0, p = 0, i = 0;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances`");
@@ -2238,7 +1445,6 @@ public class MySQLManager {
             while (resultSet.next()) {
                 i++;
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                OddJob.getInstance().getMessageManager().console("UUID:"+uuid.toString());
                 double bank = resultSet.getDouble("bank");
                 double pocket = resultSet.getDouble("pocket");
                 boolean guild = resultSet.getInt("guild") == 1;
@@ -2257,32 +1463,31 @@ public class MySQLManager {
         } finally {
             close();
         }
-        OddJob.getInstance().getMessageManager().console("Loaded p" + p + "; g" + g + "; i" + i + ";");
+        OddJob.getInstance().getMessageManager().console("Loaded Econ: player:" + p + "; guild:" + g + "; total:" + i + ";");
     }
 
     public void saveEcon() {
-        int b = 0, p = 0, g = 0;
+        int i = 0, p = 0, g = 0;
         try {
 
             connect();
             for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds()) {
                 if (OddJob.getInstance().getEconManager().hasBankAccount(uuid, true)) {
-                    g++;
                     double amount = OddJob.getInstance().getEconManager().getBankBalance(uuid, true);
                     preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `amount` = ? WHERE `uuid` = ?");
                     preparedStatement.setDouble(1, amount);
                     preparedStatement.setString(2, uuid.toString());
                     preparedStatement.executeUpdate();
+                    g++;
+                    i++;
                 }
             }
             for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
                 double pocket = 0.0, bank = 0.0;
                 if (OddJob.getInstance().getEconManager().hasBankAccount(uuid, false)) {
-                    b++;
                     bank = OddJob.getInstance().getEconManager().getBankBalance(uuid, false);
                 }
                 if (OddJob.getInstance().getEconManager().hasPocket(uuid)) {
-                    p++;
                     pocket = OddJob.getInstance().getEconManager().getPocketBalance(uuid);
                 }
                 preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ?, `pocket` = ? WHERE `uuid` = ?");
@@ -2290,13 +1495,15 @@ public class MySQLManager {
                 preparedStatement.setDouble(2, pocket);
                 preparedStatement.setString(3, uuid.toString());
                 preparedStatement.executeUpdate();
+                p++;
+                i++;
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
-        OddJob.getInstance().getMessageManager().console("UPDATED g" + g + "; b" + b + "; p" + p + ";");
+        OddJob.getInstance().getMessageManager().console("Saved Econ: guild:" + g + "; player:" + p + "; total:" + i + ";");
     }
 
     public void econSet(UUID uuid, double amount, Econ type) {
@@ -2314,33 +1521,39 @@ public class MySQLManager {
     }
 
     public HashMap<UUID, UUID> loadArmorStands() {
-        HashMap<UUID,UUID> stands = new HashMap<>();
+        HashMap<UUID, UUID> stands = new HashMap<>();
+        int i = 0;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_armorstands`");
             resultSet = preparedStatement.executeQuery();
 
-            while(resultSet.next()) {
-                stands.put(UUID.fromString(resultSet.getString("entity")),UUID.fromString(resultSet.getString("player")));
+            while (resultSet.next()) {
+                i++;
+                stands.put(UUID.fromString(resultSet.getString("entity")), UUID.fromString(resultSet.getString("player")));
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
+        OddJob.getInstance().getMessageManager().console("Loaded LockedArmorStands: total:" + i + ";");
         return stands;
     }
+
     public HashMap<Location, UUID> loadLockedBlocks() {
-        HashMap<Location,UUID> blocks = new HashMap<>();
+        HashMap<Location, UUID> blocks = new HashMap<>();
+        int i = 0;
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_blocks`");
             resultSet = preparedStatement.executeQuery();
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
                 if (world != null) {
-                    Location location = new Location(world,resultSet.getInt("x"),resultSet.getInt("y"),resultSet.getInt("z"));
+                    i++;
+                    Location location = new Location(world, resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"));
                     blocks.put(location, UUID.fromString(resultSet.getString("uuid")));
                 }
             }
@@ -2349,6 +1562,20 @@ public class MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().getMessageManager().console("loaded LockedBlocks: total:" + i + ";");
         return blocks;
+    }
+
+    public void deleteHome(UUID uuid, String name) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_homes` WHERE `uuid` = ? AND `name` = ?");
+            preparedStatement.setString(1,uuid.toString());
+            preparedStatement.setString(2,name);
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+        } finally {
+            close();
+        }
     }
 }

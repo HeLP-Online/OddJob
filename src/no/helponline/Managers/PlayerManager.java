@@ -3,6 +3,7 @@ package no.helponline.Managers;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
+import no.helponline.Utils.OddPlayer;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -16,11 +17,12 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 public class PlayerManager {
-    private HashMap<UUID, String> names = new HashMap<>();
-    private HashMap<UUID, UUID> requestTrade;
-    private HashMap<UUID, UUID> tradingPlayers;
-    private HashMap<UUID, Long> inCombat = new HashMap<>();
-    private HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
+    private HashMap<UUID, OddPlayer> players = new HashMap<>();
+    private final HashMap<UUID, String> names = new HashMap<>();
+    private final HashMap<UUID, UUID> requestTrade;
+    private final HashMap<UUID, UUID> tradingPlayers;
+    private final HashMap<UUID, Long> inCombat = new HashMap<>();
+    private final HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
     public HashMap<UUID, UUID> in = new HashMap<>();
     private final HashMap<UUID,List<UUID>> inBed = new HashMap<>();
     private final HashMap<UUID,List<UUID>> notInBed = new HashMap<>();
@@ -28,6 +30,13 @@ public class PlayerManager {
     public PlayerManager() {
         requestTrade = new HashMap<>();
         tradingPlayers = new HashMap<>();
+    }
+
+    public void save() {
+        OddJob.getInstance().getMySQLManager().savePlayers(players);
+    }
+    public void load() {
+        players = OddJob.getInstance().getMySQLManager().loadPlayers();
     }
 
     public void updatePlayer(UUID uuid, String name) {
@@ -57,8 +66,8 @@ public class PlayerManager {
         return Bukkit.getServer().getPlayer(uniqueId);
     }
 
-    public HashMap<String, Object> getOddPlayer(UUID uniqueId) {
-        return OddJob.getInstance().getMySQLManager().getPlayer(uniqueId);
+    public OddPlayer getOddPlayer(UUID uniqueId) {
+        return players.get(uniqueId);
     }
 
     public boolean request(UUID moving, UUID destination) {
@@ -77,8 +86,8 @@ public class PlayerManager {
         return !request;
     }
 
-    public List<String> getNames() {
-        return OddJob.getInstance().getMySQLManager().getPlayerMapNames();
+    public Collection<String> getNames() {
+        return names.values();
     }
 
     public GameMode getGameMode(Player player, World world) {

@@ -1,6 +1,7 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -23,7 +24,7 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                 OddJob.getInstance().log("HELP");
                 //TODO
             } else if (strings[0].equalsIgnoreCase("list")) {
-                List<String> list = OddJob.getInstance().getPlayerManager().getNames();
+                Collection<String> list = OddJob.getInstance().getPlayerManager().getNames();
                 OddJob.getInstance().getMessageManager().console(Arrays.toString(list.toArray()));
             } else if (strings[0].equalsIgnoreCase("whitelist")) {
                 UUID target = null;
@@ -36,25 +37,23 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 Player player = (Player) commandSender;
-                List<UUID> whitelist = (List<UUID>) OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId()).get("whitelist");
+                OddPlayer odd = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
+                OddPlayer oddTarget = OddJob.getInstance().getPlayerManager().getOddPlayer(target);
                 if (strings[1].equalsIgnoreCase("add")) {
-                    whitelist.add(target);
-                    OddJob.getInstance().getMessageManager().success("You have added " + OddJob.getInstance().getMySQLManager().getPlayerName(target) + " to your Whitelist of tpa", commandSender, true);
-                    OddJob.getInstance().getMySQLManager().updatePlayerWhitelist(player.getUniqueId(), whitelist);
+                    odd.addWhitelist(target);
+                    OddJob.getInstance().getMessageManager().success("You have added " + oddTarget.getName() + " to your Whitelist of tpa", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("del")) {
-                    whitelist.remove(target);
-                    OddJob.getInstance().getMessageManager().success("You have removed " + OddJob.getInstance().getMySQLManager().getPlayerName(target) + " from your Whitelist of tpa", commandSender, true);
-                    OddJob.getInstance().getMySQLManager().updatePlayerWhitelist(player.getUniqueId(), whitelist);
+                    odd.removeWhitelist(target);
+                    OddJob.getInstance().getMessageManager().success("You have removed " + oddTarget.getName() + " from your Whitelist of tpa", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("show")) {
-                    StringBuilder l = new StringBuilder("Showing whitelist: count: " + whitelist.size() + "\n");
-                    for (UUID uuid : whitelist) {
+                    StringBuilder l = new StringBuilder("Showing whitelist: count: " + odd.getWhitelist().size() + "\n");
+                    for (UUID uuid : odd.getWhitelist()) {
                         l.append(OddJob.getInstance().getPlayerManager().getName(uuid));
                     }
                     player.sendMessage(l.toString());
                 }
             } else if (strings[0].equalsIgnoreCase("blacklist")) {
                 UUID target = null;
-                //OfflinePlayer target = OddJob.getInstance().getPlayerManager().getOddPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[2]));
                 for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
                     if (offlinePlayer.getName().equalsIgnoreCase(strings[2])) target = offlinePlayer.getUniqueId();
                 }
@@ -63,18 +62,17 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 Player player = (Player) commandSender;
-                List<UUID> blacklist = (List<UUID>) OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId()).get("blacklist");
+                OddPlayer odd = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
+                OddPlayer oddTarget = OddJob.getInstance().getPlayerManager().getOddPlayer(target);
                 if (strings[1].equalsIgnoreCase("add")) {
-                    blacklist.add(target);
-                    OddJob.getInstance().getMessageManager().success("You have added " + OddJob.getInstance().getMySQLManager().getPlayerName(target) + " to your blacklist of tpa", commandSender, true);
-                    OddJob.getInstance().getMySQLManager().updatePlayerBlacklist(player.getUniqueId(), blacklist);
+                    odd.addBlacklist(target);
+                    OddJob.getInstance().getMessageManager().success("You have added " + oddTarget.getName() + " to your blacklist of tpa", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("del")) {
-                    blacklist.remove(target);
-                    OddJob.getInstance().getMessageManager().success("You have removed " + OddJob.getInstance().getMySQLManager().getPlayerName(target) + " from your blacklist of tpa", commandSender, true);
-                    OddJob.getInstance().getMySQLManager().updatePlayerBlacklist(player.getUniqueId(), blacklist);
+                    odd.removeBlacklist(target);
+                    OddJob.getInstance().getMessageManager().success("You have removed " + oddTarget.getName() + " from your blacklist of tpa", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("show")) {
-                    StringBuilder l = new StringBuilder("Showing blacklist: count: " + blacklist.size() + "\n");
-                    for (UUID uuid : blacklist) {
+                    StringBuilder l = new StringBuilder("Showing blacklist: count: " + odd.getBlacklist().size() + "\n");
+                    for (UUID uuid : odd.getBlacklist()) {
                         l.append(OddJob.getInstance().getPlayerManager().getName(uuid));
                     }
                     player.sendMessage(l.toString());
@@ -82,21 +80,21 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
             } else if (strings[0].equalsIgnoreCase("info")) {
                 if (strings.length == 1 && commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    HashMap<String, Object> op = OddJob.getInstance().getMySQLManager().getPlayer(player.getUniqueId());
-                    String sb = "Player INFO " + op.get("name") + "\n" +
-                            "UUID: " + op.get("uuid") + "\n" +
-                            "denyTPA: " + op.get("denytpa") + "\n" +
-                            "BlackList count: " + ((List<UUID>) op.get("blacklist")).size() + "\n" +
-                            "WhiteList count: " + ((List<UUID>) op.get("whitelist")).size() + "\n";
+                    OddPlayer op = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
+                    String sb = "Player INFO " + op.getName() + "\n" +
+                            "UUID: " + op.getUuid() + "\n" +
+                            "denyTPA: " + op.isDeny_tpa() + "\n" +
+                            "BlackList count: " + op.getBlacklist().size() + "\n" +
+                            "WhiteList count: " + op.getWhitelist().size() + "\n";
                     player.sendMessage(sb);
                 }
             } else if (strings[0].equalsIgnoreCase("set")) {
                 if (strings.length == 3 && commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    HashMap<String, Object> op = OddJob.getInstance().getMySQLManager().getPlayer(player.getUniqueId());
+                    OddPlayer op = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
                     if (strings[1].equalsIgnoreCase("denytpa")) {
                         boolean deny = Boolean.parseBoolean(strings[2]);
-                        OddJob.getInstance().getMySQLManager().setPlayerDenyTpa(player.getUniqueId(), deny);
+                        op.setDeny_tpa(deny);
                         OddJob.getInstance().getMessageManager().success("SET " + strings[1] + " to " + deny, player, true);
                     }
                 }

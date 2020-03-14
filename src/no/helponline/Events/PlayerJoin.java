@@ -18,7 +18,7 @@ public class PlayerJoin implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         // Update the list of World
-        OddJob.getInstance().getMySQLManager().updateWorlds(event.getPlayer().getWorld());
+        OddJob.getInstance().getMySQLManager().updateWorld(event.getPlayer().getWorld());
 
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
@@ -40,9 +40,9 @@ public class PlayerJoin implements Listener {
 
             // Scoreboard
             if (guild != OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
-                if (OddJob.getInstance().getEconManager().hasBankAccount(guild,true)) {
-                    OddJob.getInstance().getEconManager().createAccounts(guild,200.0D,true);
-                    OddJob.getInstance().getMessageManager().console("Initializing account for the guild "+OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
+                if (OddJob.getInstance().getEconManager().hasBankAccount(guild, true)) {
+                    OddJob.getInstance().getEconManager().createAccounts(guild, 200.0D, true);
+                    OddJob.getInstance().getMessageManager().console("Initializing account for the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                 }
                 OddJob.getInstance().getScoreManager().guild(player);
             } else OddJob.getInstance().getScoreManager().clear(player);
@@ -77,8 +77,6 @@ public class PlayerJoin implements Listener {
             }
         }
     }
-
-
 
 
 }

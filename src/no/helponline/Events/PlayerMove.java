@@ -76,7 +76,7 @@ public class PlayerMove implements Listener {
             StringBuilder s = new StringBuilder();
             switch (OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild)) {
                 case GUILD:
-                    s.append(ChatColor.DARK_BLUE).append(OddJob.getInstance().getMySQLManager().getGuildNameByUUID(movingToGuild)).append(" hails you!");
+                    s.append(ChatColor.DARK_BLUE).append(OddJob.getInstance().getGuildManager().getGuildNameByUUID(movingToGuild)).append(" hails you!");
                     break;
                 case ARENA:
                 case WAR:
