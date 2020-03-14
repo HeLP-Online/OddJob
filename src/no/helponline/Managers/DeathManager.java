@@ -13,6 +13,9 @@ import java.util.UUID;
 
 public class DeathManager {
     private final HashMap<Location, BukkitTask> task = new HashMap<>();
+    private final HashMap<Location, Block> leftSide = new HashMap<>();
+    private final HashMap<Location, Block> rightSide = new HashMap<>();
+    private final HashMap<Location, UUID> owner = new HashMap<>();
 
     public void add(Block chest, UUID player) {
         Block right = chest.getRelative(0, 0, -1);
@@ -49,7 +52,10 @@ public class DeathManager {
         );
 
         // Storing the DoubleChest replacement blocks to the database
-        OddJob.getInstance().getMySQLManager().addDeathChest(chest.getLocation(), chest.getType(), right.getType(), player);
+        leftSide.put(chest.getLocation(), chest);
+        rightSide.put(chest.getLocation(), right);
+        owner.put(chest.getLocation(), player);
+        //OddJob.getInstance().getMySQLManager().addDeathChest(chest.getLocation(), chest.getType(), right.getType(), player);
     }
 
     public void replace(Location location, UUID findingPlayer) {
@@ -57,37 +63,42 @@ public class DeathManager {
         if (location.getBlock().getType().equals(Material.CHEST)) {
             Chest chest = (Chest) location.getBlock().getState();
 
-            HashMap<String, String> ret = OddJob.getInstance().getMySQLManager().getDeathChest(location);
-            if (!ret.isEmpty()) {
-                // Empty the DoubleChest
-                chest.getInventory().clear();
+            //HashMap<String, String> ret = OddJob.getInstance().getMySQLManager().getDeathChest(location);
+            //if (!ret.isEmpty()) {
+            // Empty the DoubleChest
+            chest.getInventory().clear();
 
-                // Replace the blocks
-                location.getBlock().setType(Material.valueOf(ret.get("left")));
-                Block right = location.getBlock().getRelative(0, 0, -1);
-                right.setType(Material.valueOf(ret.get("right")));
+            // Replace the blocks
+            location.getBlock().setType(leftSide.get(location).getType(), true);
+            location.getBlock().setBlockData(leftSide.get(location).getBlockData(), true);
+            //location.getBlock().setType(Material.valueOf(ret.get("left")));
 
-                // Notify the owner, if the Player is online
-                UUID ownerOfChest = UUID.fromString(ret.get("uuid"));
-                if (!ownerOfChest.equals(findingPlayer)) {
-                    // Finders keepers
-                    if (findingPlayer != null) {
-                        Player player = Bukkit.getPlayer(ownerOfChest);
-                        if (player != null && player.isOnline()) {
-                            OddJob.getInstance().getMessageManager().danger("Somebody found your stuff.", ownerOfChest, false);
-                        }
-                        OddJob.getInstance().getMessageManager().console(ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(findingPlayer) + ChatColor.RESET + " found the stuff from " + ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(ownerOfChest));
+            Block right = location.getBlock().getRelative(0, 0, -1);
+            right.setType(rightSide.get(location).getType(), true);
+            right.setBlockData(rightSide.get(location).getBlockData(), true);
+            //right.setType(Material.valueOf(ret.get("right")));
+
+            // Notify the owner, if the Player is online
+            UUID ownerOfChest = owner.get(location);
+            if (!ownerOfChest.equals(findingPlayer)) {
+                // Finders keepers
+                if (findingPlayer != null) {
+                    Player player = Bukkit.getPlayer(ownerOfChest);
+                    if (player != null && player.isOnline()) {
+                        OddJob.getInstance().getMessageManager().danger("Somebody found your stuff.", ownerOfChest, false);
                     }
+                    OddJob.getInstance().getMessageManager().console(ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(findingPlayer) + ChatColor.RESET + " found the stuff from " + ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(ownerOfChest));
                 }
-
-                // Remove from database
-                remove(location);
             }
+
+            // Remove from database
+            remove(location);
+            //}
         }
     }
 
     public boolean isDeathChest(Location location) {
-        return OddJob.getInstance().getMySQLManager().isDeathChest(location);
+        return owner.containsKey(location);
     }
 
     public void remove(Location location) {
@@ -100,7 +111,10 @@ public class DeathManager {
         task.remove(location);
 
         // Remove from database
-        OddJob.getInstance().getMySQLManager().deleteDeathChest(location);
+        //OddJob.getInstance().getMySQLManager().deleteDeathChest(location);
+        leftSide.remove(location);
+        rightSide.remove(location);
+        owner.remove(location);
     }
 
     public void replace(UUID world, double x, double y, double z, Material leftBlock, Material rightBlock) {
@@ -116,7 +130,10 @@ public class DeathManager {
         if (!left.getType().equals(Material.CHEST)) {
             // Remove from database
             OddJob.getInstance().getMessageManager().console("Chest is not there removing from DB");
-            OddJob.getInstance().getMySQLManager().deleteDeathChest(left.getLocation());
+            //OddJob.getInstance().getMySQLManager().deleteDeathChest(left.getLocation());
+            leftSide.remove(location);
+            rightSide.remove(location);
+            owner.remove(location);
             return;
         }
 
@@ -128,7 +145,10 @@ public class DeathManager {
         right.setType(rightBlock);
 
         // Remove from database
-        OddJob.getInstance().getMySQLManager().deleteDeathChest(left.getLocation());
+        //OddJob.getInstance().getMySQLManager().deleteDeathChest(left.getLocation());
+        leftSide.remove(location);
+        rightSide.remove(location);
+        owner.remove(location);
     }
 
     public int cleanUp(World world) {

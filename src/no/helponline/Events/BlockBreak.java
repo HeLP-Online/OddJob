@@ -27,37 +27,48 @@ public class BlockBreak implements Listener {
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
 
-        // Is it a Chest or a Door
+        // CHECK DEATHCHEST
         if (block.getType().equals(Material.CHEST)) {
+            // Is a Chest
             block = Utility.getChestPosition(block).getBlock();
             Chest chest = (Chest) event.getBlock().getState();
-            // Is a DoubleChest
+
             if (chest.getInventory().getHolder() instanceof DoubleChest) {
+                // Is a DoubleChest
                 DoubleChest doubleChest = (DoubleChest) ((Chest) event.getBlock().getState()).getInventory().getHolder();
                 if (doubleChest != null) {
                     location = ((Chest) doubleChest.getLeftSide()).getLocation();
                     // Left side
                     if (OddJob.getInstance().getDeathManager().isDeathChest(location)) {
+                        // Is a DeathChest
                         OddJob.getInstance().getDeathManager().replace(location, event.getPlayer().getUniqueId());
                         event.setCancelled(true);
                     }
                 }
             }
-        } else if (OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {
+        }
+
+        // CHECK DOOR LOCK
+        if (OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {
+            // Door has a Lock
             block = Utility.getLowerLeftDoor(block).getBlock();
         }
 
-        // Does it have Lock
-        UUID uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
-        if (uuid != null) {
+        // CHECK BLOCK LOCK
+        if (OddJob.getInstance().getLockManager().isLocked(block.getLocation())) {
+            // Block is Locked
+            UUID uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
             if (uuid.equals(event.getPlayer().getUniqueId())) {
+                // I own it
                 OddJob.getInstance().getLockManager().unlock(block.getLocation());
                 OddJob.getInstance().getMessageManager().warning("Lock broken!", event.getPlayer(), true);
             } else {
+                // Someone else owns it
                 OddJob.getInstance().getMessageManager().danger("This lock is owned by someone else!", event.getPlayer(), false);
                 event.setCancelled(true);
             }
         }
+
 
         // Log Diamond & Emerald
         if ((block.getType().equals(Material.DIAMOND_BLOCK)
@@ -70,6 +81,7 @@ public class BlockBreak implements Listener {
         // What Guild is the Player member of
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
         if (memberOfGuild == null) {
+            // Player has no associated Guild
             memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         }
 

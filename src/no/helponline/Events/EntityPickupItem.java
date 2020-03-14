@@ -12,6 +12,7 @@ public class EntityPickupItem implements Listener {
     @EventHandler
     public void pickup(EntityPickupItemEvent event) {
         if (event.getEntity() instanceof Player) {
+            // A Player picking up items
             ItemStack itemStack = event.getItem().getItemStack();
             Player player = (Player) event.getEntity();
             if ((itemStack.getType().equals(Material.DIAMOND_BLOCK)
@@ -21,6 +22,7 @@ public class EntityPickupItem implements Listener {
                     || itemStack.getType().equals(Material.DIAMOND_ORE)
                     || itemStack.getType().equals(Material.EMERALD_ORE)
             ) && !player.hasPermission("noLog"))
+                // Log the event
                 OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(), itemStack, "pickup");
         }
     }

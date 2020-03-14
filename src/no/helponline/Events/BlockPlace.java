@@ -50,7 +50,7 @@ public class BlockPlace implements Listener {
                 event.setCancelled(true);
                 return;
             }
-        } else if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
+        } else if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().skeletonKey)) {
             OddJob.getInstance().getMessageManager().danger("Sorry, The SKELETON KEY is tooooooooo powerful!", event.getPlayer().getUniqueId(), true);
             event.setCancelled(true);
             return;

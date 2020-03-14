@@ -30,8 +30,6 @@ public class PlayerDeath implements Listener {
             playerSkull.setItemMeta(skull);
         }
 
-
-
         // Find the ChestBlocks
         Block leftSide = player.getLocation().getBlock();
         Block rightSide = leftSide.getRelative(0, 0, -1);

@@ -1,5 +1,6 @@
 package no.helponline.Managers;
 
+import com.sk89q.worldedit.bukkit.fastutil.Hash;
 import no.helponline.OddJob;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -17,15 +18,17 @@ public class LockManager {
     public ItemStack lockWand = new ItemStack(Material.TRIPWIRE_HOOK);
     public ItemStack unlockWand = new ItemStack(Material.TRIPWIRE_HOOK);
     public ItemStack infoWand = new ItemStack(Material.MAP);
-    public Collection<ItemStack> keys = new ArrayList<>();
+    public ItemStack skeletonKey = new ItemStack(Material.REDSTONE_TORCH);
     private final ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
-    private ItemStack skeletonKey = new ItemStack(Material.REDSTONE_TORCH);
+
     private final Collection<UUID> locking = new ArrayList<>();
     private final Collection<UUID> unlocking = new ArrayList<>();
     private final Collection<UUID> lockinfo = new ArrayList<>();
+
     private HashMap<Location, UUID> locked = new HashMap<>();
-    private final HashMap<Location, Location> two = new HashMap<>();
     private HashMap<UUID, UUID> armor = new HashMap<>();
+    private List<Material> lockAble = new ArrayList<>();
+    private final List<Material> doors = new ArrayList<>();
 
     public LockManager() {
         ItemMeta meta = lockWand.getItemMeta();
@@ -49,7 +52,12 @@ public class LockManager {
         meta.setLore(lore);
         infoWand.setItemMeta(meta);
 
-        skeletonKey = makeSkeletonKey();
+        meta = skeletonKey.getItemMeta();
+        meta.setDisplayName(ChatColor.GOLD + "The Skeletonkey");
+        List<String> list = new ArrayList<>();
+        list.add(ChatColor.YELLOW + "This key may open any locked object.");
+        meta.setLore(list);
+        skeletonKey.setItemMeta(meta);
     }
 
     public int count(UUID uniqueId) {
@@ -60,7 +68,7 @@ public class LockManager {
         return i;
     }
 
-    public void infolock(UUID uniqueId) {
+    public void lockInfo(UUID uniqueId) {
         if (lockinfo.contains(uniqueId)) {
             remove(uniqueId);
             OddJob.getInstance().getMessageManager().warning("No longer showing lock info.", uniqueId, false);
@@ -72,7 +80,7 @@ public class LockManager {
         OddJob.getInstance().getMessageManager().info("Right click with the tool to show it's owner.", uniqueId, false);
     }
 
-    public void locking(UUID uniqueId) {
+    public void lockLocking(UUID uniqueId) {
         if (locking.contains(uniqueId)) {
             remove(uniqueId);
             OddJob.getInstance().getMessageManager().warning("Aborting", uniqueId, false);
@@ -84,18 +92,7 @@ public class LockManager {
         OddJob.getInstance().getMessageManager().info("Right click with the tool to lock it.", uniqueId, false);
     }
 
-    public void remove(UUID uniqueId) {
-        Player player = OddJob.getInstance().getPlayerManager().getPlayer(uniqueId);
-        PlayerInventory playerInventory = player.getInventory();
-        playerInventory.remove(lockWand);
-        playerInventory.remove(unlockWand);
-        playerInventory.remove(infoWand);
-        lockinfo.remove(uniqueId);
-        unlocking.remove(uniqueId);
-        locking.remove(uniqueId);
-    }
-
-    public void unlocking(UUID uniqueId) {
+    public void lockUnlocking(UUID uniqueId) {
         if (unlocking.contains(uniqueId)) {
             remove(uniqueId);
             OddJob.getInstance().getMessageManager().warning("Aborting", uniqueId, false);
@@ -105,6 +102,17 @@ public class LockManager {
         unlocking.add(uniqueId);
         OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(unlockWand);
         OddJob.getInstance().getMessageManager().info("Right click with the tool unlock it.", uniqueId, false);
+    }
+
+    public void remove(UUID uniqueId) {
+        Player player = OddJob.getInstance().getPlayerManager().getPlayer(uniqueId);
+        PlayerInventory playerInventory = player.getInventory();
+        playerInventory.remove(lockWand);
+        playerInventory.remove(unlockWand);
+        playerInventory.remove(infoWand);
+        lockinfo.remove(uniqueId);
+        unlocking.remove(uniqueId);
+        locking.remove(uniqueId);
     }
 
     public boolean isLocking(UUID uuid) {
@@ -144,29 +152,21 @@ public class LockManager {
         OddJob.getInstance().getMySQLManager().deleteLock(location);
     }
 
-    public UUID isLocked(Entity entity) {
-        return OddJob.getInstance().getMySQLManager().hasLock(entity);
+    public boolean isLocked(Entity entity) {
+        return getArmorStands().containsKey(entity);
     }
 
-    public UUID isLocked(Location location) {
-        return OddJob.getInstance().getMySQLManager().hasLock(location);
+    public boolean isLocked(Location location) {
+        return getLocks().containsKey(location);
     }
 
     public HashMap<Location, UUID> getLocks() {
         if (locked.isEmpty()) return null;
         return locked;
     }
-
-    public ItemStack makeSkeletonKey() {
-        ItemStack newKey = skeletonKey;
-        ItemMeta meta = newKey.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "THE SKELETONKEY");
-        List<String> list = new ArrayList<>();
-        list.add(ChatColor.YELLOW + "This key may open any chest.");
-        list.add(ChatColor.RED + "Do not lose it!");
-        meta.setLore(list);
-        newKey.setItemMeta(meta);
-        return newKey;
+    public HashMap<Location, UUID> getArmorStands() {
+        if (locked.isEmpty()) return null;
+        return locked;
     }
 
     public ItemStack makeKey(UUID target) {
@@ -179,10 +179,6 @@ public class LockManager {
         meta.setLore(list);
         newKey.setItemMeta(meta);
         return newKey;
-    }
-
-    public void setLocks(HashMap<Location, UUID> locked) {
-        this.locked = locked;
     }
 
     public Collection<UUID> getLocking() {
@@ -200,7 +196,20 @@ public class LockManager {
     }
 
     public List<Material> getDoors() {
-        List<Material> doors = new ArrayList<>();
+        return doors;
+    }
+
+    public List<Material> getLockable() {
+        return lockAble;
+    }
+
+    public UUID getLockOwner(Location location) {
+        return getLocks().get(location);
+    }
+    public UUID getLockOwner(Entity entity) {
+        return getArmorStands().get(entity);
+    }
+    public void load() {
         doors.add(Material.IRON_DOOR);
         doors.add(Material.DARK_OAK_DOOR);
         doors.add(Material.ACACIA_DOOR);
@@ -208,18 +217,9 @@ public class LockManager {
         doors.add(Material.JUNGLE_DOOR);
         doors.add(Material.OAK_DOOR);
         doors.add(Material.SPRUCE_DOOR);
-        return doors;
-    }
 
-    public List<Material> getLockable() {
-        return OddJob.getInstance().getMySQLManager().getLockableMaterials();
-    }
-
-    public void setArmorstand(HashMap<UUID, UUID> a) {
-        armor = a;
-    }
-
-    public HashMap<UUID, UUID> getArmorstands() {
-        return armor;
+        lockAble = OddJob.getInstance().getMySQLManager().getLockableMaterials();
+        armor = OddJob.getInstance().getMySQLManager().loadArmorStands();
+        locked = OddJob.getInstance().getMySQLManager().loadLockedBlocks();
     }
 }

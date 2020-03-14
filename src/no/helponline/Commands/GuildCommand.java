@@ -389,6 +389,11 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             } else if (strings[0].equalsIgnoreCase("unclaim")) {
                 if (commandSender instanceof Player) {
                     Player player = (Player) commandSender;
+                    UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+                    if (guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
+                        commandSender.sendMessage("Sorry, you are not associated with any guild yet.");
+                        return true;
+                    }
                     OddJob.getInstance().getGuildManager().unClaim(player);
                 }
             } else if (strings[0].equalsIgnoreCase("claim")) {
@@ -396,7 +401,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     Player player = (Player) commandSender;
                     if (strings.length == 1) {
                         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-                        if (guild == null) {
+                        if (guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                             commandSender.sendMessage("Sorry, you are not associated with any guild yet.");
                             return true;
                         }
@@ -490,6 +495,24 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         }
                         return true;
                     }
+                }
+            } else if (strings.length == 2 && strings[0].equalsIgnoreCase("save")) {
+                switch (strings[1]) {
+                    case "guilds":
+                        OddJob.getInstance().getGuildManager().saveGuilds();
+                        break;
+                    case "chunks":
+                        OddJob.getInstance().getGuildManager().saveChunks();
+                        break;
+                }
+            } else if (strings.length == 2 && strings[0].equalsIgnoreCase("load")) {
+                switch (strings[1]) {
+                    case "guilds":
+                        OddJob.getInstance().getGuildManager().loadGuilds();
+                        break;
+                    case "chunks":
+                        OddJob.getInstance().getGuildManager().loadChunks();
+                        break;
                 }
             }
         }

@@ -1,18 +1,21 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Guild;
-import no.helponline.Utils.Role;
-import no.helponline.Utils.Zone;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
+import no.helponline.Utils.*;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.dynmap.DynmapAPI;
+import org.dynmap.markers.*;
 
 import java.util.*;
 
 public class GuildManager {
+    public DynmapAPI dynmapApi;
+    public MarkerAPI markerApi;
+    public MarkerSet markerset;
+    /*DynmapAPI dapi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
+    MarkerAPI mapi = dapi.getMarkerAPI();
+    Set<MarkerIcon> micon = mapi.getMarkerIcons();*/
     /**
      * List of Players auto-claiming to a Guild
      */
@@ -46,6 +49,77 @@ public class GuildManager {
     public GuildManager() {
     }
 
+    private HashMap<String, TMarker> createHomes() {
+        HashMap<String,TMarker> homes = new HashMap<>();
+        for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds()) {
+            Location home = OddJob.getInstance().getHomesManager().get(uuid,"faction");
+            if (home == null) continue;
+            String markerId = "guilds-"+uuid.toString();
+            TMarker marker = new TMarker();
+            marker.label = OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid);
+            marker.world = home.getWorld().getName();
+            marker.x = home.getBlockX();
+            marker.y = home.getBlockY();
+            marker.z = home.getBlockZ();
+            marker.iconName = "greenflag";
+            marker.description = OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid);
+
+            homes.put(markerId,marker);
+        }
+        return homes;
+    }
+
+    private void updateHomes(HashMap<String, TMarker> homes) {
+        HashMap<String,Marker> markers = new HashMap<>();
+        for (Marker marker : markerset.getMarkers()) {
+            markers.put(marker.getMarkerID(),marker);
+        }
+
+        for (Map.Entry<String, TMarker> entry : homes.entrySet()) {
+            String markerId = entry.getKey();
+            TMarker temp = entry.getValue();
+
+            Marker marker = markers.remove(markerId);
+            if (marker == null) {
+                Optional<Marker> tMarker = temp.create(markerApi,markerset,markerId);
+                if (!tMarker.isPresent()) {
+                    OddJob.getInstance().getMessageManager().console("error");
+                }
+                marker = tMarker.get();
+            } else temp.update(markerApi,markerset,marker);
+        }
+        markers.values().forEach(Marker::deleteMarker);
+    }
+
+    private HashMap<String, TAreaMarker> createAreas() {
+        HashMap<String,HashMap<UUID,Set<Chunk>>> worldChunks = createWorldChunks();
+        return null;//createAreas(worldChunks);
+    }
+
+    private HashMap<String,HashMap<UUID,Set<Chunk>>> createWorldChunks() {
+        HashMap<String,HashMap<UUID,Set<Chunk>>> worldChunks = new HashMap<>();
+
+        for (World world : Bukkit.getWorlds()) {
+            String worldName = world.getName();
+            if (!worldChunks.containsKey(worldName)) {
+                worldChunks.put(worldName,new HashMap<>());
+            }
+
+            HashMap<UUID,Set<Chunk>> worldClaims = worldChunks.get(worldName);
+
+            for (UUID uuid : getGuilds()) {
+                if (!worldClaims.containsKey(uuid)) {
+                    worldClaims.put(uuid,new HashSet<>());
+                }
+
+                Set<Chunk> claims = worldClaims.get(uuid);
+
+                //for (Chunk chunk)
+            }
+        }
+        return worldChunks;
+    }
+
     /**
      * Loading the Guild-list from the Database
      */
@@ -58,6 +132,55 @@ public class GuildManager {
      */
     public void loadChunks() {
         chunkGuild = OddJob.getInstance().getMySQLManager().loadChunks();
+        try {
+            int i = 0;
+            HashMap<UUID, List<Chunk>> map = new HashMap<>();
+            DynmapAPI dapi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
+            MarkerAPI mapi = dapi.getMarkerAPI();
+            Set<MarkerIcon> micon = mapi.getMarkerIcons();
+            MarkerSet markerSet = mapi.createMarkerSet("guilds", "guilds", micon, false);
+
+            for (Chunk chunk : chunkGuild.keySet()) {
+                UUID uuid = chunkGuild.get(chunk);
+                if (!map.containsKey(uuid)) map.put(uuid, new ArrayList<>());
+                map.get(uuid).add(chunk);
+                i++;
+            }
+            int c = 0;
+            for (UUID uuid : map.keySet()) {
+                List<Chunk> chunks = map.get(uuid);
+                for (Chunk chunk : chunks) {
+                    c++;
+                    OddJob.getInstance().getMessageManager().console("x" + chunk.getX() * 16 + "; z" + chunk.getZ() * 16);
+                    AreaMarker areaMarker = markerSet.createAreaMarker(uuid.toString().substring(0, 8) + "-" + c, OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid), true, chunks.get(0).getWorld().getName(), new double[1000], new double[1000], false);
+                    double[] x = {chunk.getX() * 16, (chunk.getX() * 16) + 16};
+                    double[] z = {chunk.getZ() * 16, (chunk.getZ() * 16) + 16};
+                    areaMarker.setCornerLocations(x, z);
+                    areaMarker.setLabel(OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid));
+                    switch (OddJob.getInstance().getGuildManager().getZoneByGuild(uuid)) {
+                        case SAFE:
+                            areaMarker.setFillStyle(0.5, Integer.parseInt("00FF00", 16));
+                            areaMarker.setLineStyle(1, 1.0, Integer.parseInt("00FF00", 16));
+                            break;
+                        case ARENA:
+                            areaMarker.setFillStyle(0.5, Integer.parseInt("FFFF00", 16));
+                            areaMarker.setLineStyle(1, 1.0, Integer.parseInt("FF0000", 16));
+                            break;
+                        case JAIL:
+                        case WAR:
+                            areaMarker.setFillStyle(0.5, Integer.parseInt("FF0000", 16));
+                            areaMarker.setLineStyle(1, 1.0, Integer.parseInt("FF0000", 16));
+                            break;
+                        default:
+                            areaMarker.setFillStyle(0.5, Integer.parseInt("0000FF", 16));
+                            areaMarker.setLineStyle(1, 1.0, Integer.parseInt("0000FF", 16));
+                    }
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -212,7 +335,7 @@ public class GuildManager {
     /**
      * UnClaiming known Chunk
      *
-     * @param chunk Chunk to unClaim
+     * @param chunk  Chunk to unClaim
      * @param player Player to message
      */
     public void unClaim(Chunk chunk, Player player) {
@@ -233,7 +356,7 @@ public class GuildManager {
      * @return UUID of the Guild who has claimed the Chunk
      */
     public UUID getGuildUUIDByChunk(Chunk chunk) {
-        return chunkGuild.get(chunk) == null ? OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD) : chunkGuild.get(chunk);
+        return chunkGuild.get(chunk) == null ? getGuildUUIDByZone(Zone.WILD) : chunkGuild.get(chunk);
     }
 
     /**
@@ -362,7 +485,7 @@ public class GuildManager {
                 return uuid;
             }
         }
-        return null;
+        return getGuildUUIDByZone(Zone.WILD);
     }
 
     /**
@@ -715,5 +838,9 @@ public class GuildManager {
             chunkGuild.remove(chunk);
         }
         OddJob.getInstance().getMySQLManager().disbandGuild(guild);
+    }
+
+    enum Direction {
+        XPLUS, XMINUS, ZPLUS, ZMINUS
     }
 }

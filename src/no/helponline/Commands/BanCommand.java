@@ -17,9 +17,10 @@ public class BanCommand implements CommandExecutor, TabCompleter {
         if (command.getName().equalsIgnoreCase("ban")) {
             UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[0]);
             if (target == null) {
-                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender,false);
+                OddJob.getInstance().getMessageManager().errorPlayer(strings[0], commandSender);
                 return true;
             }
+
             String text = OddJob.getInstance().getConfigManager().getString("default.kick_message");
             if (strings.length >= 2) {
                 int length = strings.length;
@@ -29,6 +30,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 }
                 text = sb.toString();
             }
+
             OddJob.getInstance().getBanManager().ban(target, text);
             OddJob.getInstance().getMessageManager().success("Banned "+ ChatColor.AQUA+OddJob.getInstance().getPlayerManager().getName(target) +ChatColor.GREEN+ " banned with message: "+ChatColor.RESET + text,commandSender,true);
         }

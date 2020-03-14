@@ -25,7 +25,6 @@ public class PlayerInteract implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteractEvent(PlayerInteractEvent event) {
-        OddJob.getInstance().getMessageManager().console("event");
         Player player = event.getPlayer();
         boolean door = false;
         UUID uuid = null;
@@ -39,40 +38,36 @@ public class PlayerInteract implements Listener {
         if ((item != null) && (item.getType().equals(Material.DIAMOND_BLOCK) || item.getType().equals(Material.EMERALD) || item.getType().equals(Material.EMERALD) || item.getType().equals(Material.EMERALD_BLOCK)) && !player.hasPermission("noLog"))
             OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(), item, "interact");
 
+        // Check Authorization
         if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null) || player.isOp()) {
             return;
         }
 
         if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (event.getAction().equals(Action.PHYSICAL))) {
-            OddJob.getInstance().getMessageManager().console("action");
-
             // Opening or Stepping
             Block block = event.getClickedBlock();
             Material t = block.getType();
 
             if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
-                OddJob.getInstance().getMessageManager().console("lockable");
                 // Lockable Block
                 try {
                     if (OddJob.getInstance().getLockManager().getDoors().contains(t)) {
                         // Door
                         door = true;
                         block = Utility.getLowerLeftDoor(block).getBlock();
-                        uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
+                        uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
                     } else if (t.equals(Material.CHEST)) {
                         // Chest
                         block = Utility.getChestPosition(block).getBlock();
-                        uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
+                        uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
                     } else {
                         // Whatever right-clicked or stepped on
-                        uuid = OddJob.getInstance().getLockManager().isLocked(block.getLocation());
+                        uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-
-                OddJob.getInstance().getMessageManager().console("wand");
                 if (uuid != null) {
                     // This Block has a Lock by a Player
                     if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
@@ -111,7 +106,7 @@ public class PlayerInteract implements Listener {
                         return;
                     }
 
-                    if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
+                    if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().skeletonKey)) {
                         // Has SkeletonKey
                         if (door) {
                             // Door
@@ -143,6 +138,7 @@ public class PlayerInteract implements Listener {
                     event.setCancelled(true);
 
                 }
+
                 if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
                     // LockWand in hand
                     OddJob.getInstance().getMessageManager().console("In hand");
@@ -168,14 +164,13 @@ public class PlayerInteract implements Listener {
                     }
                 }
 
-
                 // GUILD owning block
                 UUID blockGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(block.getChunk());
                 // GUILD associated with you
                 UUID yourGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
 
 
-                if (blockGuild != null && yourGuild != null) {
+                if (!blockGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) && !yourGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                     // You are in a Guild, and Block is owned by a Guild
                     if (blockGuild.equals(yourGuild)) {
                         // Owned by your Guild
@@ -191,7 +186,7 @@ public class PlayerInteract implements Listener {
                         }
                     } else {
                         // Is owned by a Guild, but not yours
-                        if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().makeSkeletonKey())) {
+                        if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().skeletonKey)) {
                             // Has SkeletonKey
                             if (door) {
                                 // Door
@@ -209,7 +204,7 @@ public class PlayerInteract implements Listener {
                                 return;
                             }
                         }
-                        OddJob.getInstance().getMessageManager().warning("Block is locked by " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(blockGuild), player, false);
+                        OddJob.getInstance().getMessageManager().warning("Block is locked by the guild "+ChatColor.GOLD + OddJob.getInstance().getGuildManager().getGuildNameByUUID(blockGuild), player, false);
                         event.setCancelled(true);
                     }
                 }

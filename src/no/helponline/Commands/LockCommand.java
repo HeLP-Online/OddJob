@@ -47,19 +47,19 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                     Player player = (Player) sender;
-                    OddJob.getInstance().getLockManager().locking(player.getUniqueId());
+                    OddJob.getInstance().getLockManager().lockLocking(player.getUniqueId());
                 } else if (args[0].equalsIgnoreCase("unlock") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
                     }
                     Player player = (Player) sender;
-                    OddJob.getInstance().getLockManager().unlocking(player.getUniqueId());
+                    OddJob.getInstance().getLockManager().lockUnlocking(player.getUniqueId());
                 } else if (args[0].equalsIgnoreCase("info") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
                     }
                     Player player = (Player) sender;
-                    OddJob.getInstance().getLockManager().infolock(player.getUniqueId());
+                    OddJob.getInstance().getLockManager().lockInfo(player.getUniqueId());
                 } else if (args[0].equalsIgnoreCase("show") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
@@ -124,7 +124,7 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 Player player = (Player) sender;
-                player.getInventory().addItem(OddJob.getInstance().getLockManager().makeSkeletonKey());
+                player.getInventory().addItem(OddJob.getInstance().getLockManager().skeletonKey);
                 player.sendMessage(ChatColor.RED + " !!! Warning !!! " + ChatColor.RESET + "This is a dangerous key! Do not loose it!");
             }
         }

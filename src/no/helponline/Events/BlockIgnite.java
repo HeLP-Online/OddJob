@@ -1,6 +1,7 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Zone;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,8 +18,9 @@ public class BlockIgnite implements Listener {
     @EventHandler
     public void blockIgnite(BlockIgniteEvent event) {
         if (event.getBlock().getType() == Material.TNT) {
+            // CHECK GUILD
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlock().getLocation().getChunk());
-            if (guild != null) {
+            if (!guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 event.setCancelled(true);
             }
         }

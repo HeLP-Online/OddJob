@@ -22,6 +22,7 @@ public class PlayerJoin implements Listener {
 
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid);
 
         // Making an OddPlayer
         OddJob.getInstance().getPlayerManager().updatePlayer(uuid, player.getName());
@@ -31,16 +32,20 @@ public class PlayerJoin implements Listener {
             OddJob.getInstance().getBanManager().kick(player);
         } else {
 
-            // Scoreboard
-            if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid) != null) {
-                OddJob.getInstance().getScoreManager().guild(player);
-            } else OddJob.getInstance().getScoreManager().clear(player);
-
             // Economy
-            if (!OddJob.getInstance().getEconManager().hasAccount(uuid)) {
-                OddJob.getInstance().getEconManager().createAccount(uuid, 200.0D, false);
+            if (!OddJob.getInstance().getEconManager().hasPocket(uuid)) {
+                OddJob.getInstance().getEconManager().createAccounts(uuid, 200.0D, false);
                 OddJob.getInstance().log("Initializing account for " + player.getName());
             }
+
+            // Scoreboard
+            if (guild != OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
+                if (OddJob.getInstance().getEconManager().hasBankAccount(guild,true)) {
+                    OddJob.getInstance().getEconManager().createAccounts(guild,200.0D,true);
+                    OddJob.getInstance().getMessageManager().console("Initializing account for the guild "+OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
+                }
+                OddJob.getInstance().getScoreManager().guild(player);
+            } else OddJob.getInstance().getScoreManager().clear(player);
 
             // Welcome message
             PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
@@ -51,7 +56,6 @@ public class PlayerJoin implements Listener {
 
             // Player is in a guild
             player.sendMessage("Hi " + player.getName() + ". We are using our own plugin named OddJob to manage 'homes', 'guild' and 'warp'.\nYou may find more information at our Facebook group: https://www.facebook.com/groups/help.online.minecraft/");
-            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
             if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 player.sendMessage("You are a loyal member of " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                 List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendingList(guild);

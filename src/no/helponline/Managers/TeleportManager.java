@@ -129,7 +129,7 @@ public class TeleportManager {
                     }
                     i--;
                 }
-            }.runTaskTimer(OddJob.getInstance(), 20, 20));
+            }.runTaskTimer(OddJob.getInstance(), 20, 10));
         }
     }
 
@@ -188,7 +188,7 @@ public class TeleportManager {
                         }
                         i--;
                     }
-                }.runTaskTimer(OddJob.getInstance(), 20, 20));
+                }.runTaskTimer(OddJob.getInstance(), 20, 10));
             }
         }
         return test;

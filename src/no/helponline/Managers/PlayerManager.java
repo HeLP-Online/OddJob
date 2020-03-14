@@ -13,10 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerManager {
     private HashMap<UUID, String> names = new HashMap<>();
@@ -25,6 +22,8 @@ public class PlayerManager {
     private HashMap<UUID, Long> inCombat = new HashMap<>();
     private HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
     public HashMap<UUID, UUID> in = new HashMap<>();
+    private final HashMap<UUID,List<UUID>> inBed = new HashMap<>();
+    private final HashMap<UUID,List<UUID>> notInBed = new HashMap<>();
 
     public PlayerManager() {
         requestTrade = new HashMap<>();
@@ -194,5 +193,21 @@ public class PlayerManager {
 
     public void loadPlayers() {
         OddJob.getInstance().getMySQLManager().loadPlayers();
+    }
+
+    public List<UUID> getInBed(UUID worldUUID) {
+        return inBed.get(worldUUID);
+    }
+    public void setInBed(UUID worldUUID, UUID playerUUID) {
+        if (!inBed.containsKey(worldUUID)) inBed.put(worldUUID,new ArrayList<>());
+        inBed.get(worldUUID).add(playerUUID);
+    }
+    public List<UUID> getNotInBed(UUID worldUUID) {
+        return notInBed.get(worldUUID);
+    }
+    public int setNotInBed(UUID worldUUID, UUID playerUUID) {
+        if (!notInBed.containsKey(worldUUID)) notInBed.put(worldUUID,new ArrayList<>());
+        notInBed.get(worldUUID).add(playerUUID);
+        return notInBed.size();
     }
 }

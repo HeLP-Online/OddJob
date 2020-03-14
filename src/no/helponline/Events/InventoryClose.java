@@ -52,7 +52,6 @@ public class InventoryClose implements Listener {
             player = (Player) human;
         }
 
-
         Inventory inventory = event.getInventory();
 
         int i = 0;

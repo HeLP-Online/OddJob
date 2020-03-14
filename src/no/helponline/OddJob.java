@@ -1,7 +1,5 @@
 package no.helponline;
 
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.permission.Permission;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
@@ -44,18 +42,7 @@ public class OddJob extends JavaPlugin {
         return instance;
     }
 
-    private static final Economy econ = null;
-    private static final Permission perms = null;
-
-    //public static HashMap<UUID, UUID> inChunk = new HashMap<>(); //player - guild
-    public static boolean vault;
-
     public void onEnable() {
-        if (!Bukkit.getPluginManager().isPluginEnabled("Vault")) {
-            log("Needing vault");
-            Bukkit.getPluginManager().disablePlugin(this);
-        }
-
         instance = this;
 
         arenaManager = new ArenaManager();
@@ -113,6 +100,8 @@ public class OddJob extends JavaPlugin {
         getCommand("shop").setExecutor(new ShopCommand());
 
         configManager.load();
+        econManager.load();
+        lockManager.load();
         homesManager.load();
         playerManager.loadPlayers();
         guildManager.loadGuilds();

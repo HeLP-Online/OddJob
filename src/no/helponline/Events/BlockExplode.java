@@ -21,13 +21,25 @@ public class BlockExplode implements Listener {
     @EventHandler
     public void onExplosion(BlockExplodeEvent event) {
         List<Block> blocks = event.blockList();
+        HashMap<Location, BlockData> keep = new HashMap<>();
         Location location;
+
+
         for (Block block : blocks) {
-            // Is a Chest
+            // CHECK GUILD
+            Chunk chunk = block.getChunk();
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
+            if (guild != null) {
+                event.setCancelled(true);
+                keep.put(block.getLocation(), block.getBlockData());
+            }
+
+            // CHECK DEATHCHEST
             if (block.getType().equals(Material.CHEST)) {
+                // Block is a Chest
                 Chest chest = (Chest) block.getState();
-                // Is a DoubleChest
                 if (chest.getInventory().getHolder() instanceof DoubleChest) {
+                    // Is a DoubleChest
                     DoubleChest doubleChest = (DoubleChest) ((Chest) block.getState()).getInventory().getHolder();
                     if (doubleChest != null) {
                         location = ((Chest) doubleChest.getLeftSide()).getLocation();
@@ -38,23 +50,10 @@ public class BlockExplode implements Listener {
                     }
                 }
             }
-        }
-    }
-    /**
-     * Cancel Explode
-     *
-     * @param event
-     */
-    @EventHandler
-    public void blockExplode(BlockExplodeEvent event) {
-        List<Block> blocks = event.blockList();
-        HashMap<Location, BlockData> keep = new HashMap<>();
-        for (Block block : blocks) {
-            Chunk chunk = block.getChunk();
-            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
-            if (guild != null) {
-                event.setCancelled(true);
-                keep.put(block.getLocation(), block.getBlockData());
+
+            // CHECK LOCK
+            if (OddJob.getInstance().getLockManager().getLockable().contains(block.getType())) {
+
             }
         }
         BukkitRunnable runnable = new BukkitRunnable() {
