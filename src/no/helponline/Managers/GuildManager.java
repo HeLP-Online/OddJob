@@ -1,25 +1,35 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.*;
-import org.bukkit.*;
+import no.helponline.Utils.Enum.Role;
+import no.helponline.Utils.Enum.Zone;
+import no.helponline.Utils.Guild;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.dynmap.DynmapAPI;
-import org.dynmap.markers.*;
+import org.dynmap.markers.AreaMarker;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerIcon;
+import org.dynmap.markers.MarkerSet;
 
 import java.util.*;
 
 public class GuildManager {
-    public DynmapAPI dynmapApi;
-    public MarkerAPI markerApi;
-    public MarkerSet markerset;
+    private final DynmapAPI dynmapApi;
+    private final MarkerAPI markerApi;
+    private final MarkerSet markerSet;
+    private final Set<MarkerIcon> markerIcon;
+    private HashMap<String,AreaMarker> markers;
     /*DynmapAPI dapi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
     MarkerAPI mapi = dapi.getMarkerAPI();
     Set<MarkerIcon> micon = mapi.getMarkerIcons();*/
     /**
      * List of Players auto-claiming to a Guild
      */
-    private HashMap<UUID, UUID> autoClaim = new HashMap<>();      // PlayerUUID   | GuildUUID
+    private final HashMap<UUID, UUID> autoClaim = new HashMap<>();      // PlayerUUID   | GuildUUID
 
     /**
      * List of Guilds
@@ -47,81 +57,31 @@ public class GuildManager {
     private HashMap<UUID, UUID> members = new HashMap<>();        // PlayerUUID   | GuildUUID
 
     public GuildManager() {
+
+        dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
+        markerApi = dynmapApi.getMarkerAPI();
+        markerIcon = markerApi.getMarkerIcons();
+        markerSet = markerApi.createMarkerSet("guilds", "guilds", markerIcon, false);
+        markers = new HashMap<>();
     }
 
+    /**
+     * Getting the Guild by its UUID
+     *
+     * @param guild UUID of the Guild
+     * @return Guild
+     */
     public Guild getGuild(UUID guild) {
         return guilds.get(guild);
     }
 
-    private HashMap<String, TMarker> createHomes() {
-        HashMap<String, TMarker> homes = new HashMap<>();
-        for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds()) {
-            Location home = OddJob.getInstance().getHomesManager().get(uuid, "faction");
-            if (home == null) continue;
-            String markerId = "guilds-" + uuid.toString();
-            TMarker marker = new TMarker();
-            marker.label = OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid);
-            marker.world = home.getWorld().getName();
-            marker.x = home.getBlockX();
-            marker.y = home.getBlockY();
-            marker.z = home.getBlockZ();
-            marker.iconName = "greenflag";
-            marker.description = OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid);
-
-            homes.put(markerId, marker);
-        }
-        return homes;
-    }
-
-    private void updateHomes(HashMap<String, TMarker> homes) {
-        HashMap<String, Marker> markers = new HashMap<>();
-        for (Marker marker : markerset.getMarkers()) {
-            markers.put(marker.getMarkerID(), marker);
-        }
-
-        for (Map.Entry<String, TMarker> entry : homes.entrySet()) {
-            String markerId = entry.getKey();
-            TMarker temp = entry.getValue();
-
-            Marker marker = markers.remove(markerId);
-            if (marker == null) {
-                Optional<Marker> tMarker = temp.create(markerApi, markerset, markerId);
-                if (!tMarker.isPresent()) {
-                    OddJob.getInstance().getMessageManager().console("error");
-                }
-                marker = tMarker.get();
-            } else temp.update(markerApi, markerset, marker);
-        }
-        markers.values().forEach(Marker::deleteMarker);
-    }
-
-    private HashMap<String, TAreaMarker> createAreas() {
-        HashMap<String, HashMap<UUID, Set<Chunk>>> worldChunks = createWorldChunks();
-        return null;//createAreas(worldChunks);
-    }
-
-    private HashMap<String, HashMap<UUID, Set<Chunk>>> createWorldChunks() {
-        HashMap<String, HashMap<UUID, Set<Chunk>>> worldChunks = new HashMap<>();
-
-        for (World world : Bukkit.getWorlds()) {
-            String worldName = world.getName();
-            if (!worldChunks.containsKey(worldName)) {
-                worldChunks.put(worldName, new HashMap<>());
-            }
-
-            HashMap<UUID, Set<Chunk>> worldClaims = worldChunks.get(worldName);
-
-            for (UUID uuid : getGuilds()) {
-                if (!worldClaims.containsKey(uuid)) {
-                    worldClaims.put(uuid, new HashSet<>());
-                }
-
-                Set<Chunk> claims = worldClaims.get(uuid);
-
-                //for (Chunk chunk)
-            }
-        }
-        return worldChunks;
+    /**
+     * Getting all the Chunks and what Guild owns it
+     *
+     * @return HashMap with Chunk and UUID of the Guild
+     */
+    private HashMap<Chunk, UUID> getClaims() {
+        return chunkGuild;
     }
 
     /**
@@ -136,13 +96,16 @@ public class GuildManager {
      */
     public void loadChunks() {
         chunkGuild = OddJob.getInstance().getMySQLManager().loadChunks();
+        updateDynmap();
+    }
+
+    /**
+     * Updates the Dynmap with claimed Chunks
+     */
+    public void updateDynmap() {
         try {
             int i = 0;
             HashMap<UUID, List<Chunk>> map = new HashMap<>();
-            DynmapAPI dapi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-            MarkerAPI mapi = dapi.getMarkerAPI();
-            Set<MarkerIcon> micon = mapi.getMarkerIcons();
-            MarkerSet markerSet = mapi.createMarkerSet("guilds", "guilds", micon, false);
 
             for (Chunk chunk : chunkGuild.keySet()) {
                 UUID uuid = chunkGuild.get(chunk);
@@ -150,15 +113,17 @@ public class GuildManager {
                 map.get(uuid).add(chunk);
                 i++;
             }
-            int c = 0;
+            String coords;
             for (UUID uuid : map.keySet()) {
                 List<Chunk> chunks = map.get(uuid);
                 for (Chunk chunk : chunks) {
-                    c++;
-                    OddJob.getInstance().getMessageManager().console("x" + chunk.getX() * 16 + "; z" + chunk.getZ() * 16);
-                    AreaMarker areaMarker = markerSet.createAreaMarker(uuid.toString().substring(0, 8) + "-" + c, OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid), true, chunks.get(0).getWorld().getName(), new double[1000], new double[1000], false);
+                    coords = chunk.getX()+"x"+chunk.getZ();
+                    //OddJob.getInstance().getMessageManager().console("x" + chunk.getX() * 16 + "; z" + chunk.getZ() * 16);
+                    String markerId = uuid.toString().substring(0, 8) + "-" + coords;
+                    AreaMarker areaMarker = markerSet.createAreaMarker(markerId, OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid), true, chunks.get(0).getWorld().getName(), new double[1000], new double[1000], false);
                     double[] x = {chunk.getX() * 16, (chunk.getX() * 16) + 16};
                     double[] z = {chunk.getZ() * 16, (chunk.getZ() * 16) + 16};
+                    OddJob.getInstance().getMessageManager().console("x="+x.length+"; z="+z.length);
                     areaMarker.setCornerLocations(x, z);
                     areaMarker.setLabel(OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid));
                     switch (OddJob.getInstance().getGuildManager().getZoneByGuild(uuid)) {
@@ -179,6 +144,7 @@ public class GuildManager {
                             areaMarker.setFillStyle(0.5, Integer.parseInt("0000FF", 16));
                             areaMarker.setLineStyle(1, 1.0, Integer.parseInt("0000FF", 16));
                     }
+                    markers.put(markerId,areaMarker);
                 }
             }
 
@@ -191,10 +157,7 @@ public class GuildManager {
      * Saving the Guild-list to the Database
      */
     public void saveGuilds() {
-        for (UUID uuid : guilds.keySet()) {
-            OddJob.getInstance().getMySQLManager().saveGuild();
-            OddJob.getInstance().getMySQLManager().saveGuildMembers();
-        }
+        OddJob.getInstance().getMySQLManager().saveGuild(guilds);
     }
 
     /**
@@ -269,6 +232,8 @@ public class GuildManager {
      */
     public void claim(UUID guild, Chunk chunk, Player player) {
         UUID world = player.getWorld().getUID();
+        //TODO LOCKS REMOVE
+        /*
         HashMap<UUID, Location> listLocksInWorld = OddJob.getInstance().getMySQLManager().locksInWorld(world);
         for (UUID owner : listLocksInWorld.keySet()) {
             // Loop through all the Locks in this World
@@ -283,11 +248,11 @@ public class GuildManager {
                     OddJob.getInstance().getMessageManager().warning("Your locked " + location.getBlock().getType().name() + " is inside a claimed area and will be unlocked", owner, false);
                 }
             }
-        }
+        }*/
 
         // Adds the Chunk to the Guild
-        this.chunkGuild.put(chunk, guild);
-        this.guilds.get(guild).addChunks();
+        chunkGuild.put(chunk, guild);
+        updateDynmap();
     }
 
     /**
@@ -306,7 +271,6 @@ public class GuildManager {
         } else {
             // Claiming Chunk to Guild
             claim(playerGuild, inChunk, player);
-
             OddJob.getInstance().getMessageManager().success("You have claimed " + ChatColor.GOLD + "X:" + inChunk.getX() + " Z:" + inChunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuildNameByUUID(playerGuild), player, true);
         }
     }
@@ -326,7 +290,6 @@ public class GuildManager {
             OddJob.getInstance().getMessageManager().danger("Sorry, you are not associated with the guild who claimed this chunk", player, false);
         } else {
             // UnClaim the Chunk from Guild
-            guilds.get(chunkGuild).removeChunks();
             unClaim(inChunk, player);
         }
     }
@@ -343,6 +306,7 @@ public class GuildManager {
         // UnClaim the Chunk
         OddJob.getInstance().getMySQLManager().deleteGuildChunks(chunk);
         chunkGuild.remove(chunk);
+        updateDynmap();
 
         if (player != null)
             OddJob.getInstance().getMessageManager().success("You have unclaimed " + ChatColor.GOLD + "X:" + chunk.getX() + " Z:" + chunk.getZ() + " World:" + chunk.getWorld().getName(), player, true);
@@ -754,9 +718,7 @@ public class GuildManager {
             OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk)), player, false);
         } else {
             // Claiming to Zone
-            this.chunkGuild.put(inChunk, zoneGuild);
-            this.guilds.get(getGuildUUIDByZone(zone)).addChunks();
-
+            claim(zoneGuild, inChunk, player);
             OddJob.getInstance().getMessageManager().success("You have claimed " + ChatColor.GOLD + "X:" + inChunk.getX() + " Z:" + inChunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuildNameByUUID(zoneGuild), player, true);
         }
     }

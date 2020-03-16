@@ -3,7 +3,8 @@ package no.helponline.Events;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.Enum.ScoreBoard;
+import no.helponline.Utils.Enum.Zone;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,11 +41,13 @@ public class PlayerJoin implements Listener {
 
             // Scoreboard
             if (guild != OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
-                if (OddJob.getInstance().getEconManager().hasBankAccount(guild, true)) {
+                if (!OddJob.getInstance().getEconManager().hasBankAccount(guild, true)) {
                     OddJob.getInstance().getEconManager().createAccounts(guild, 200.0D, true);
                     OddJob.getInstance().getMessageManager().console("Initializing account for the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                 }
-                OddJob.getInstance().getScoreManager().guild(player);
+                if (OddJob.getInstance().getPlayerManager().getOddPlayer(uuid).getScoreboard() == ScoreBoard.Guild) {
+                    OddJob.getInstance().getScoreManager().guild(player);
+                }
             } else OddJob.getInstance().getScoreManager().clear(player);
 
             // Welcome message

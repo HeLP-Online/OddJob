@@ -1,33 +1,34 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class BanManager {
 
-    public void ban(UUID player, String text) {
-        OfflinePlayer op = Bukkit.getOfflinePlayer(player);
-        OddJob.getInstance().getMySQLManager().addPlayerBan(player, text);
-        if (op.isOnline()) {
-            kick(op.getPlayer());
-        }
+    public void ban(UUID playerUUID, String text) {
+        OddJob.getInstance().getPlayerManager().getOddPlayer(playerUUID).setBanned(text);
+        Player player = OddJob.getInstance().getPlayerManager().getPlayer(playerUUID);
+        if (player.isOnline()) kick(player, text);
     }
 
     public void unban(UUID player) {
-        OddJob.getInstance().getMySQLManager().deletePlayerBan(player);
+        OddJob.getInstance().getPlayerManager().getOddPlayer(player).setBanned(null);
     }
 
     public List<UUID> getBans() {
-        return OddJob.getInstance().getMySQLManager().getBans();
+        List<UUID> bans = new ArrayList<>();
+        for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
+            if (getBan(uuid) != null) bans.add(uuid);
+        }
+        return bans;
     }
 
     public String getBan(UUID uuid) {
-        return OddJob.getInstance().getMySQLManager().getBan(uuid);
+        return OddJob.getInstance().getPlayerManager().getOddPlayer(uuid).getBanned();
     }
 
     public void kick(Player player) {

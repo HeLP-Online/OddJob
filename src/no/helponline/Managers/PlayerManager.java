@@ -18,14 +18,14 @@ import java.util.*;
 
 public class PlayerManager {
     private HashMap<UUID, OddPlayer> players = new HashMap<>();
-    private final HashMap<UUID, String> names = new HashMap<>();
+    //private final HashMap<UUID, String> names = new HashMap<>();
     private final HashMap<UUID, UUID> requestTrade;
     private final HashMap<UUID, UUID> tradingPlayers;
     private final HashMap<UUID, Long> inCombat = new HashMap<>();
     private final HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
     public HashMap<UUID, UUID> in = new HashMap<>();
-    private final HashMap<UUID,List<UUID>> inBed = new HashMap<>();
-    private final HashMap<UUID,List<UUID>> notInBed = new HashMap<>();
+    private final HashMap<UUID, List<UUID>> inBed = new HashMap<>();
+    private final HashMap<UUID, List<UUID>> notInBed = new HashMap<>();
 
     public PlayerManager() {
         requestTrade = new HashMap<>();
@@ -35,6 +35,7 @@ public class PlayerManager {
     public void save() {
         OddJob.getInstance().getMySQLManager().savePlayers(players);
     }
+
     public void load() {
         players = OddJob.getInstance().getMySQLManager().loadPlayers();
     }
@@ -44,22 +45,18 @@ public class PlayerManager {
     }
 
     public String getName(UUID uuid) {
-        return names.getOrDefault(uuid, null);
-    }
-
-    public void setNames(HashMap<UUID, String> map) {
-        this.names.putAll(map);
+        return players.get(uuid).getName();
     }
 
     public UUID getUUID(String name) {
-        for (UUID uuid : names.keySet()) {
-            if (names.get(uuid).equalsIgnoreCase(name)) return uuid;
+        for (UUID uuid : players.keySet()) {
+            if (players.get(uuid).getName().equalsIgnoreCase(name)) return uuid;
         }
         return null;
     }
 
     public Set<UUID> getUUIDs() {
-        return names.keySet();
+        return players.keySet();
     }
 
     public Player getPlayer(UUID uniqueId) {
@@ -71,14 +68,15 @@ public class PlayerManager {
     }
 
     public boolean request(UUID moving, UUID destination) {
-        boolean request = OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(destination); // false
-        if (OddJob.getInstance().getMySQLManager().getPlayerWhiteList(destination).contains(moving)) { //false
+        OddPlayer odestination = OddJob.getInstance().getPlayerManager().getOddPlayer(destination);
+        boolean request = true; // false
+        if (odestination.getWhitelist().contains(moving)) { //false
             OddJob.getInstance().log("whitelist");
             request = true;
-        } else if (OddJob.getInstance().getMySQLManager().getPlayerBlackList(destination).contains(moving)) { // false
+        } else if (odestination.getBlacklist().contains(moving)) { // false
             OddJob.getInstance().log("blacklist");
             request = false;
-        } else if (OddJob.getInstance().getMySQLManager().getPlayerDenyTpa(destination)) { // false
+        } else if (odestination.isDeny_tpa()) { // false
             OddJob.getInstance().log("tpa deny");
             OddJob.getInstance().getMessageManager().warning(getName(destination) + " is denying all request!", moving, false);
             request = false;
@@ -87,7 +85,11 @@ public class PlayerManager {
     }
 
     public Collection<String> getNames() {
-        return names.values();
+        Collection<String> list = new ArrayList<>();
+        for (UUID uuid : players.keySet()){
+            list.add(players.get(uuid).getName());
+        }
+        return list;
     }
 
     public GameMode getGameMode(Player player, World world) {
@@ -200,23 +202,25 @@ public class PlayerManager {
         tradingPlayers.remove(one.getUniqueId());
     }
 
-    public void loadPlayers() {
-        OddJob.getInstance().getMySQLManager().loadPlayers();
-    }
-
     public List<UUID> getInBed(UUID worldUUID) {
+        if (!inBed.containsKey(worldUUID)) inBed.put(worldUUID, new ArrayList<>());
         return inBed.get(worldUUID);
     }
+
     public void setInBed(UUID worldUUID, UUID playerUUID) {
-        if (!inBed.containsKey(worldUUID)) inBed.put(worldUUID,new ArrayList<>());
+        if (!inBed.containsKey(worldUUID)) inBed.put(worldUUID, new ArrayList<>());
         inBed.get(worldUUID).add(playerUUID);
+        OddJob.getInstance().getMessageManager().console("inBed: "+inBed.size());
     }
+
     public List<UUID> getNotInBed(UUID worldUUID) {
+        if (!notInBed.containsKey(worldUUID)) notInBed.put(worldUUID, new ArrayList<>());
         return notInBed.get(worldUUID);
     }
-    public int setNotInBed(UUID worldUUID, UUID playerUUID) {
-        if (!notInBed.containsKey(worldUUID)) notInBed.put(worldUUID,new ArrayList<>());
+
+    public void setNotInBed(UUID worldUUID, UUID playerUUID) {
+        if (!notInBed.containsKey(worldUUID)) notInBed.put(worldUUID, new ArrayList<>());
         notInBed.get(worldUUID).add(playerUUID);
-        return notInBed.size();
+        OddJob.getInstance().getMessageManager().console("notInBed: "+notInBed.size());
     }
 }

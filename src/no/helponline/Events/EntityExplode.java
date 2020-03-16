@@ -1,7 +1,7 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.Enum.Zone;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,23 +38,6 @@ public class EntityExplode implements Listener {
                 // The Chunk is inside a Guild
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
-            }
-
-            // CHECK DEATHCHEST
-            if (block.getType().equals(Material.CHEST)) {
-                // The Block is a Chest
-                Chest chest = (Chest) block.getState();
-                if (chest.getInventory().getHolder() instanceof DoubleChest) {
-                    // The Block a DoubleChest
-                    DoubleChest doubleChest = (DoubleChest) ((Chest) block.getState()).getInventory().getHolder();
-                    if (doubleChest != null) {
-                        location = ((Chest) doubleChest.getLeftSide()).getLocation();
-                        if (OddJob.getInstance().getDeathManager().isDeathChest(location)) {
-                            // Is a DeathChest
-                            event.setCancelled(true);
-                        }
-                    }
-                }
             }
 
             // CHECK LOCKS

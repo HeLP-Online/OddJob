@@ -1,7 +1,6 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Econ;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -81,7 +80,10 @@ public class EconManager {
     }
 
     public void load() {
-        OddJob.getInstance().getMySQLManager().loadEcon();
+        HashMap<String,HashMap<UUID,Double>> values = OddJob.getInstance().getMySQLManager().loadEcon();
+        pocket.putAll(values.get("pocket"));
+        guildBank.putAll(values.get("guild"));
+        playerBank.putAll(values.get("bank"));
     }
 
     public void save() {

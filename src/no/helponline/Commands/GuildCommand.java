@@ -1,8 +1,8 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Role;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.Enum.Role;
+import no.helponline.Utils.Enum.Zone;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -398,15 +398,21 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                 }
             } else if (strings[0].equalsIgnoreCase("claim")) {
                 if (commandSender instanceof Player) {
+                    // Get Player
                     Player player = (Player) commandSender;
                     if (strings.length == 1) {
+                        // Command /guild claim
+                        // Getting your Guild
                         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
                         if (guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
+                            // Not associated with a Guild
                             commandSender.sendMessage("Sorry, you are not associated with any guild yet.");
                             return true;
                         }
+                        // Claim Chunk to your Guild
                         OddJob.getInstance().getGuildManager().claim(player);
                     } else if (strings.length == 2 && strings[1].equalsIgnoreCase("auto")) {
+                        // Command /guild claim auto
                         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
                         if (guild == null) {
                             commandSender.sendMessage("Sorry, you are not associated with any guild yet.");

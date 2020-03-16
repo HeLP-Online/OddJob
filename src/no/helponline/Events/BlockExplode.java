@@ -34,23 +34,6 @@ public class BlockExplode implements Listener {
                 keep.put(block.getLocation(), block.getBlockData());
             }
 
-            // CHECK DEATHCHEST
-            if (block.getType().equals(Material.CHEST)) {
-                // Block is a Chest
-                Chest chest = (Chest) block.getState();
-                if (chest.getInventory().getHolder() instanceof DoubleChest) {
-                    // Is a DoubleChest
-                    DoubleChest doubleChest = (DoubleChest) ((Chest) block.getState()).getInventory().getHolder();
-                    if (doubleChest != null) {
-                        location = ((Chest) doubleChest.getLeftSide()).getLocation();
-                        // Left side
-                        if (OddJob.getInstance().getDeathManager().isDeathChest(location)) {
-                            event.setCancelled(true);
-                        }
-                    }
-                }
-            }
-
             // CHECK LOCK
             if (OddJob.getInstance().getLockManager().getLockable().contains(block.getType())) {
 

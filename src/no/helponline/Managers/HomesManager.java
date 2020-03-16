@@ -2,11 +2,10 @@ package no.helponline.Managers;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Home;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.Enum.Zone;
 import org.bukkit.Location;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 

@@ -1,5 +1,8 @@
 package no.helponline.Utils;
 
+import no.helponline.Utils.Enum.Role;
+import no.helponline.Utils.Enum.Zone;
+
 import java.util.HashMap;
 import java.util.UUID;
 

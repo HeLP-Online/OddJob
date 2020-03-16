@@ -44,27 +44,12 @@ public class InventoryClose implements Listener {
                     }
                 }
             }
-        }
-
-        Player player = null;
-        HumanEntity human = event.getPlayer();
-        if (human instanceof Player) {
-            player = (Player) human;
-        }
-
-        Inventory inventory = event.getInventory();
-
-        int i = 0;
-        for (ItemStack is : inventory.getContents()) {
-            if (is != null) i++;
-        }
-
-        if (i < 1) {
-            if (inventory.getHolder() instanceof DoubleChest) {
-                DoubleChest doubleChest = (DoubleChest) inventory.getHolder();
-                Chest left = (Chest) doubleChest.getLeftSide();
-                if (left != null) {
-                    OddJob.getInstance().getDeathManager().replace(left.getLocation(), player.getUniqueId());
+        } else if (event.getView().getTitle().equals("DEATH CHEST")) {
+            for (HumanEntity human : event.getViewers()) {
+                for (UUID entityUUID : OddJob.getInstance().getDeathManager().getOwners().keySet()) {
+                    if (OddJob.getInstance().getDeathManager().getOwners().get(entityUUID).equals(human.getUniqueId())) {
+                        OddJob.getInstance().getDeathManager().replace(human.getWorld().getUID(),entityUUID,human.getUniqueId());
+                    }
                 }
             }
         }

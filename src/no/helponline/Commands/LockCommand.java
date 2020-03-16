@@ -10,7 +10,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class LockCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -40,8 +42,8 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                     }
                     Player player = (Player) sender;
                     player.getInventory().addItem(OddJob.getInstance().getLockManager().makeKey(player.getUniqueId()));
-                    OddJob.getInstance().getMessageManager().info(ChatColor.RED + "! " + ChatColor.RESET + "This is a key to all your chests, keep in mind who you share it with.",player,false);
-                    OddJob.getInstance().getMessageManager().info(ChatColor.RED + "! " + ChatColor.RESET + "Stolen item or lost keys will not be refunded.",player,false);
+                    OddJob.getInstance().getMessageManager().info(ChatColor.RED + "! " + ChatColor.RESET + "This is a key to all your chests, keep in mind who you share it with.", player, false);
+                    OddJob.getInstance().getMessageManager().info(ChatColor.RED + "! " + ChatColor.RESET + "Stolen item or lost keys will not be refunded.", player, false);
                 } else if (args[0].equalsIgnoreCase("lock") && sender.hasPermission(cmd.getName() + "." + args[0])) {
                     if (!(sender instanceof Player)) {
                         return true;
@@ -73,46 +75,6 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                                 sender.sendMessage(i + ") X=" + location.getBlockX() + "; Y=" + location.getBlockY() + "; Z=" + location.getBlockZ() + "; W=" + location.getWorld().getName() + ";");
                             }
                         }
-                    }
-
-                } else if (args[0].equalsIgnoreCase("list") && sender.hasPermission(cmd.getName() + "." + args[0])) {
-                    Collection<UUID> locking = OddJob.getInstance().getLockManager().getLocking();
-                    Collection<UUID> unlocking = OddJob.getInstance().getLockManager().getUnlocking();
-                    Collection<UUID> lockinfo = OddJob.getInstance().getLockManager().getLockinfo();
-                    if (sender instanceof Player) {
-                        return true;
-                    }
-                    sender.sendMessage(ChatColor.GOLD + "Locking: " + ChatColor.RESET);
-                    if (locking.isEmpty()) {
-                        sender.sendMessage("None");
-                    } else {
-                        StringBuilder sb = new StringBuilder();
-                        for (UUID uuid : locking) {
-                            sb.append(OddJob.getInstance().getPlayerManager().getName(uuid)).append(", ");
-                        }
-                        sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
-                    }
-
-                    sender.sendMessage(ChatColor.GOLD + "Unlocking: " + ChatColor.RESET);
-                    if (unlocking.isEmpty()) {
-                        sender.sendMessage("None");
-                    } else {
-                        StringBuilder sb = new StringBuilder();
-                        for (UUID uuid : unlocking) {
-                            sb.append(OddJob.getInstance().getPlayerManager().getName(uuid)).append(", ");
-                        }
-                        sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
-                    }
-
-                    sender.sendMessage(ChatColor.GOLD + "Lockinfo: " + ChatColor.RESET);
-                    if (lockinfo.isEmpty()) {
-                        sender.sendMessage("None");
-                    } else {
-                        StringBuilder sb = new StringBuilder();
-                        for (UUID uuid : lockinfo) {
-                            sb.append(OddJob.getInstance().getPlayerManager().getName(uuid)).append(", ");
-                        }
-                        sender.sendMessage(sb.toString().substring(0, sb.length() - 2));
                     }
                 }
             } else if (args.length == 2 &&

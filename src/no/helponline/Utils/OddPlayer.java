@@ -1,5 +1,7 @@
 package no.helponline.Utils;
 
+import no.helponline.Utils.Enum.ScoreBoard;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -8,14 +10,20 @@ public class OddPlayer {
     List<UUID> blacklist, whitelist;
     boolean tpa_deny;
     String name, banned;
+    private ScoreBoard scoreBoard;
 
-    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean tpa_deny, String name, String banned) {
+    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean tpa_deny, String name, String banned, ScoreBoard scoreBoard) {
         this.uuid = uuid;
         this.blacklist = blacklist;
         this.whitelist = whitelist;
         this.tpa_deny = tpa_deny;
         this.name = name;
         this.banned = banned;
+        this.scoreBoard = scoreBoard;
+    }
+
+    public void setScoreBoard(ScoreBoard scoreBoard) {
+        this.scoreBoard = scoreBoard;
     }
 
     public UUID getUuid() {
@@ -64,5 +72,9 @@ public class OddPlayer {
 
     public void setDeny_tpa(boolean tpa_deny) {
         this.tpa_deny = tpa_deny;
+    }
+
+    public ScoreBoard getScoreboard() {
+        return scoreBoard;
     }
 }

@@ -1,7 +1,7 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.Enum.Zone;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;

@@ -2,7 +2,7 @@ package no.helponline.Events;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Utility;
-import no.helponline.Utils.Zone;
+import no.helponline.Utils.Enum.Zone;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,27 +26,6 @@ public class BlockBreak implements Listener {
         Player player = event.getPlayer();
         Location location = block.getLocation();
         Chunk chunk = location.getChunk();
-
-        // CHECK DEATHCHEST
-        if (block.getType().equals(Material.CHEST)) {
-            // Is a Chest
-            block = Utility.getChestPosition(block).getBlock();
-            Chest chest = (Chest) event.getBlock().getState();
-
-            if (chest.getInventory().getHolder() instanceof DoubleChest) {
-                // Is a DoubleChest
-                DoubleChest doubleChest = (DoubleChest) ((Chest) event.getBlock().getState()).getInventory().getHolder();
-                if (doubleChest != null) {
-                    location = ((Chest) doubleChest.getLeftSide()).getLocation();
-                    // Left side
-                    if (OddJob.getInstance().getDeathManager().isDeathChest(location)) {
-                        // Is a DeathChest
-                        OddJob.getInstance().getDeathManager().replace(location, event.getPlayer().getUniqueId());
-                        event.setCancelled(true);
-                    }
-                }
-            }
-        }
 
         // CHECK DOOR LOCK
         if (OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {

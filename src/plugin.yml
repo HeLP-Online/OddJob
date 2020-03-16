@@ -28,10 +28,10 @@ commands:
   suicide:
     description: Take suicide
     usage: /<command>
-  kill:
-    description: Kill a given player
-    usage: /<command> <Player>
-    permission: essentials.kill
+  #kill:
+  #  description: Kill a given player
+  #  usage: /<command> <Player>
+  #  permission: essentials.kill
   tp:
     description: Teleports a player to another player
     usage: /<command> <Player> [OtherPlayer]

@@ -1,7 +1,11 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.*;
+import no.helponline.Utils.Arena;
+import no.helponline.Utils.ArenaMechanics;
+import no.helponline.Utils.Enum.Zone;
+import no.helponline.Utils.Lore;
+import no.helponline.Utils.Utility;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
@@ -72,7 +76,7 @@ public class PlayerInteract implements Listener {
                     // This Block has a Lock by a Player
                     if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
                         // InfoWand in hand
-                        if (OddJob.getInstance().getLockManager().isLockInfo(player.getUniqueId())) {
+                        if (OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
                             if (OddJob.getInstance().getPlayerManager().getName(uuid) != null)
                                 OddJob.getInstance().getMessageManager().info("The " + block.getType().name() + " is owned by " + OddJob.getInstance().getPlayerManager().getName(uuid), player, false);
                             event.setCancelled(true);
@@ -81,7 +85,7 @@ public class PlayerInteract implements Listener {
                     }
                     if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().unlockWand)) {
                         // UnlockWand in hand
-                        if (OddJob.getInstance().getLockManager().isUnlocking(player.getUniqueId())) {
+                        if (OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().unlockWand)) {
                             if (!uuid.equals(player.getUniqueId())) {
                                 OddJob.getInstance().getMessageManager().danger("A lock is set by someone else.", player, false);
                                 event.setCancelled(true);
@@ -142,7 +146,7 @@ public class PlayerInteract implements Listener {
                 if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
                     // LockWand in hand
                     OddJob.getInstance().getMessageManager().console("In hand");
-                    if (OddJob.getInstance().getLockManager().isLocking(player.getUniqueId())) {
+                    if (OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
                         OddJob.getInstance().getMessageManager().console("Locking");
                         if (uuid == player.getUniqueId()) {
                             OddJob.getInstance().getMessageManager().warning("You have already locked this.", player, false);
@@ -204,7 +208,7 @@ public class PlayerInteract implements Listener {
                                 return;
                             }
                         }
-                        OddJob.getInstance().getMessageManager().warning("Block is locked by the guild "+ChatColor.GOLD + OddJob.getInstance().getGuildManager().getGuildNameByUUID(blockGuild), player, false);
+                        OddJob.getInstance().getMessageManager().warning("Block is locked by the guild " + ChatColor.GOLD + OddJob.getInstance().getGuildManager().getGuildNameByUUID(blockGuild), player, false);
                         event.setCancelled(true);
                     }
                 }

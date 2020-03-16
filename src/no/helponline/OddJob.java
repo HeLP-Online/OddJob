@@ -5,10 +5,7 @@ import no.helponline.Events.*;
 import no.helponline.Managers.*;
 import no.helponline.Utils.ArenaPlayer;
 import no.helponline.Utils.Broadcaster;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Server;
+import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -70,7 +67,7 @@ public class OddJob extends JavaPlugin {
         getCommand("invsee").setExecutor(new InvseeCommand());
         getCommand("locks").setExecutor(new LockCommand());
         getCommand("suicide").setExecutor(new SuicideCommand());
-        getCommand("kill").setExecutor(new KillCommand());
+        //getCommand("kill").setExecutor(new KillCommand());
         getCommand("tp").setExecutor(new TpCommand());
         getCommand("tpall").setExecutor(new TpAllCommand());
         getCommand("kick").setExecutor(new KickCommand());
@@ -103,7 +100,7 @@ public class OddJob extends JavaPlugin {
         econManager.load();
         lockManager.load();
         homesManager.load();
-        playerManager.loadPlayers();
+        playerManager.load();
         guildManager.loadGuilds();
         guildManager.loadChunks();
 
@@ -112,7 +109,6 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new BlockExplode(), this);
         Bukkit.getPluginManager().registerEvents(new BlockIgnite(), this);
         Bukkit.getPluginManager().registerEvents(new BlockPlace(), this);
-        Bukkit.getPluginManager().registerEvents(new EntityDamage(), this);
         Bukkit.getPluginManager().registerEvents(new EntityDamageByEntity(), this);
         Bukkit.getPluginManager().registerEvents(new EntityExplode(), this);
         Bukkit.getPluginManager().registerEvents(new EntityInteract(), this);
@@ -120,6 +116,7 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new EntitySpawn(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClose(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClick(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerBedEnter(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerBucketEmpty(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerChangesWorld(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerDeath(), this);
@@ -140,6 +137,9 @@ public class OddJob extends JavaPlugin {
     public void onDisable() {
         getGuildManager().saveChunks();
         getGuildManager().saveGuilds();
+        for (World world : Bukkit.getWorlds()) {
+            getDeathManager().cleanUp(world);
+        }
     }
 
     public Location getSpawn() {

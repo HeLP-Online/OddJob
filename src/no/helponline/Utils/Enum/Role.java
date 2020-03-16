@@ -1,4 +1,4 @@
-package no.helponline.Utils;
+package no.helponline.Utils.Enum;
 
 public enum Role {
     Master(99),
