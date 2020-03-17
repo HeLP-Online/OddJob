@@ -1,9 +1,11 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Enum.ScoreBoard;
 import no.helponline.Utils.Enum.Zone;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -32,17 +34,18 @@ public class ScoreManager {
     }
 
     public void guild(Player player) {
-        UUID playerGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
         final UUID playerUUID = player.getUniqueId();
+        UUID playerGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(playerUUID);
+        Team zone, guild, playerPocket, playerBank, guildBank, role, members;
+        Objective objective = null;
+
+        // Make or Get Scoreboard
         if (!boards.containsKey(playerUUID)) {
             if (scoreboardManager != null) scoreboardGuild = scoreboardManager.getNewScoreboard();
         } else {
             scoreboardGuild = boards.get(playerUUID);
         }
-        Objective objective = scoreboardGuild.getObjective("guild-" + player.getUniqueId().toString().substring(0, 8));
-        //OddJob.getInstance().getMessageManager().console(objective.toString());
-
-        Team zone, guild, playerPocket, playerBank, guildBank, role, members;
+        objective = scoreboardGuild.getObjective("guild-" + player.getUniqueId().toString().substring(0, 8));
 
         if (objective != null) {
             zone = scoreboardGuild.getTeam("zone-" + player.getUniqueId().toString().substring(0, 8));
@@ -57,9 +60,6 @@ public class ScoreManager {
 
             zone = scoreboardGuild.registerNewTeam("zone-" + player.getUniqueId().toString().substring(0, 8));
             zone.addEntry(ChatColor.GOLD + "Zone: ");
-            OddJob.getInstance().getMessageManager().console("chunk: " + player.getLocation().getChunk().toString());
-            OddJob.getInstance().getMessageManager().console("world: " + player.getLocation().getWorld().getName());
-            OddJob.getInstance().getMessageManager().console("guild-uuid: " + OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()));
             zone.setSuffix(OddJob.getInstance().getGuildManager().getZoneByGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())).name());
 
             guild = scoreboardGuild.registerNewTeam("guild-" + player.getUniqueId().toString().substring(0, 8));
@@ -112,6 +112,7 @@ public class ScoreManager {
         objective.getScore(ChatColor.GOLD + "Guild: ").setScore(3);
         objective.getScore(" ").setScore(2);
         objective.getScore(ChatColor.GREEN + "www.mine-craft.no").setScore(1);
+
         scores.put(player.getUniqueId(), new BukkitRunnable() {
             @Override
             public void run() {
@@ -135,16 +136,17 @@ public class ScoreManager {
                         i++;
                     }
                 }
-                if (gguild != null)
-                    gguild.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildNameByUUID(
-                            OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(
-                                    player.getLocation().getChunk())));
-                if (zzone != null)
-                    zzone.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getZoneByGuild(
-                            OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(
-                                    player.getLocation().getChunk()
-                            )
-                    ).name());
+                Chunk playerInChunk = player.getLocation().getChunk();
+                UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(playerInChunk);
+                String guildName = OddJob.getInstance().getGuildManager().getGuildNameByUUID(guildUUID);
+                Zone zone = OddJob.getInstance().getGuildManager().getZoneByGuild(guildUUID);
+                String guildZone = zone.name();
+                if (gguild != null) {
+                    gguild.setSuffix(ChatColor.WHITE + guildName);
+                }
+                if (zzone != null) {
+                    zzone.setSuffix(ChatColor.WHITE + guildZone);
+                }
                 if (rrank != null)
                     rrank.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildMemberRole(playerUUID).name());
                 if (mmembers != null)
@@ -152,8 +154,28 @@ public class ScoreManager {
 
             }
         }.runTaskTimer(OddJob.getInstance(), 0, 10));
+
         boards.put(playerUUID, scoreboardGuild);
         player.setScoreboard(scoreboardGuild);
 
+    }
+
+    public void set(UUID uuid, ScoreBoard scoreBoard) {
+        Player player = OddJob.getInstance().getPlayerManager().getPlayer(uuid);
+        switch (scoreBoard) {
+
+            case Guild:
+                guild(player);
+                break;
+            case None:
+            default:
+                none(player);
+                break;
+
+        }
+    }
+
+    public void none(Player player) {
+        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 }

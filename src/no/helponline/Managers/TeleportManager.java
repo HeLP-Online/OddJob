@@ -25,8 +25,8 @@ public class TeleportManager {
     }
 
     public boolean request(UUID movingPlayer, UUID destinationPlayer) {
-        // Is the receiver denying all requests
-        if (!OddJob.getInstance().getPlayerManager().request(movingPlayer, destinationPlayer)) return false;
+        // Is the receiver denying requests | whitelist | blacklist
+        if (OddJob.getInstance().getPlayerManager().request(movingPlayer, destinationPlayer)) return false;
         if (hasRequest(movingPlayer)) {
             // The Player already sent a request
             OddJob.getInstance().getMessageManager().warning("Rewriting existing TPA request to " + ChatColor.DARK_AQUA + OddJob.getInstance().getPlayerManager().getName(teleportAccept.get(destinationPlayer)), movingPlayer, false);
@@ -39,7 +39,6 @@ public class TeleportManager {
     // player (sends request) | target (teleport to)
 
     public boolean hasRequest(UUID from) {
-        OddJob.getInstance().getMessageManager().console("teleportAccept check");
         return teleportAccept.containsKey(from);
     }
 

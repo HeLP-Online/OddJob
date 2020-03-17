@@ -3,6 +3,7 @@ package no.helponline.Managers;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
+import no.helponline.Utils.Enum.ScoreBoard;
 import no.helponline.Utils.OddPlayer;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
@@ -68,19 +69,21 @@ public class PlayerManager {
     }
 
     public boolean request(UUID moving, UUID destination) {
-        OddPlayer odestination = OddJob.getInstance().getPlayerManager().getOddPlayer(destination);
+        OddJob.getInstance().getMessageManager().console("request");
+        OddPlayer oddDestination = OddJob.getInstance().getPlayerManager().getOddPlayer(destination);
         boolean request = true; // false
-        if (odestination.getWhitelist().contains(moving)) { //false
+        if (oddDestination.getWhitelist().contains(moving)) { //false
             OddJob.getInstance().log("whitelist");
             request = true;
-        } else if (odestination.getBlacklist().contains(moving)) { // false
+        } else if (oddDestination.getBlacklist().contains(moving)) { // false
             OddJob.getInstance().log("blacklist");
             request = false;
-        } else if (odestination.isDeny_tpa()) { // false
+        } else if (oddDestination.getDenyTpa()) { // false
             OddJob.getInstance().log("tpa deny");
             OddJob.getInstance().getMessageManager().warning(getName(destination) + " is denying all request!", moving, false);
             request = false;
         }
+        OddJob.getInstance().getMessageManager().console("request "+request);
         return !request;
     }
 
@@ -210,7 +213,6 @@ public class PlayerManager {
     public void setInBed(UUID worldUUID, UUID playerUUID) {
         if (!inBed.containsKey(worldUUID)) inBed.put(worldUUID, new ArrayList<>());
         inBed.get(worldUUID).add(playerUUID);
-        OddJob.getInstance().getMessageManager().console("inBed: "+inBed.size());
     }
 
     public List<UUID> getNotInBed(UUID worldUUID) {
@@ -221,6 +223,11 @@ public class PlayerManager {
     public void setNotInBed(UUID worldUUID, UUID playerUUID) {
         if (!notInBed.containsKey(worldUUID)) notInBed.put(worldUUID, new ArrayList<>());
         notInBed.get(worldUUID).add(playerUUID);
-        OddJob.getInstance().getMessageManager().console("notInBed: "+notInBed.size());
+    }
+
+    public void sleep(UUID worldUUID) {
+        inBed.remove(worldUUID);
+        notInBed.remove(worldUUID);
+        Bukkit.getWorld(worldUUID).setTime(0L);
     }
 }

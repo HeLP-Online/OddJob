@@ -6,6 +6,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class MessageManager {
@@ -140,5 +143,26 @@ public class MessageManager {
 
     public void errorHome(String name, CommandSender player) {
         player.sendMessage(ChatColor.RED+"Unknown home '"+ChatColor.YELLOW+name+ChatColor.RED+"'");
+    }
+
+    public void infoListPlayers(String string, Collection<UUID> list, CommandSender commandSender) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(string).append("\n");
+        builder.append("---------------------\n");
+        int i = 0;
+        for (UUID uuid : list) {
+            builder.append(i).append(".) ").append(OddJob.getInstance().getPlayerManager().getName(uuid)).append("\n");
+        }
+        commandSender.sendMessage(builder.toString());
+    }
+
+    public void infoHashmap(String string, HashMap<String, String> info, CommandSender commandSender) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(string).append("\n");
+        builder.append("---------------------\n");
+        for (String st : info.keySet()) {
+            builder.append(st).append(" ").append(info.get(st)).append("\n");
+        }
+        commandSender.sendMessage(builder.toString());
     }
 }

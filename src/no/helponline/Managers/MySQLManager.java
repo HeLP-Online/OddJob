@@ -213,7 +213,8 @@ public class MySQLManager {
         }
     }
 
-    public void deleteGuildChunks(Chunk chunk) {
+    public boolean deleteGuildsChunks(Chunk chunk) {
+        boolean ret = false;
         try {
             connect();
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
@@ -221,11 +222,13 @@ public class MySQLManager {
             preparedStatement.setInt(2, chunk.getX());
             preparedStatement.setInt(3, chunk.getZ());
             preparedStatement.execute();
+            ret = true;
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
+        return ret;
     }
 
     public List<Material> getLockableMaterials() {
@@ -849,7 +852,7 @@ public class MySQLManager {
             }
         }
         OddJob.getInstance().getMessageManager().console("Saved Guilds: insert:" + gi + "; update:" + gu + ";");
-        OddJob.getInstance().getMessageManager().console("Saved Members: insert:" + mi + "; update:" + mu + "; nochange:"+mn+";");
+        OddJob.getInstance().getMessageManager().console("Saved Members: insert:" + mi + "; update:" + mu + "; nochange:" + mn + ";");
     }
 
     public HashMap<UUID, Guild> loadGuilds() {
@@ -897,6 +900,7 @@ public class MySQLManager {
     public void saveChunks(HashMap<Chunk, UUID> chunks) {
         int i = 0, u = 0;
         for (Chunk chunk : chunks.keySet()) {
+
             World world = chunk.getWorld();
             int x = chunk.getX();
             int z = chunk.getZ();
@@ -944,11 +948,12 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                UUID guild = UUID.fromString(resultSet.getString("uuid"));
-                int x = resultSet.getInt("x");
-                int z = resultSet.getInt("z");
                 if (world != null) {
-                    chunks.put(world.getChunkAt(x, z), guild);
+                    UUID guild = UUID.fromString(resultSet.getString("uuid"));
+                    int x = resultSet.getInt("x");
+                    int z = resultSet.getInt("z");
+                    Chunk chunk = world.getChunkAt(x, z);
+                    chunks.put(chunk, guild);
                 }
             }
         } catch (SQLException ex) {
@@ -982,18 +987,21 @@ public class MySQLManager {
             for (UUID uw : data.getWhitelist()) {
                 white.append(uw.toString()).append(",");
             }
+            if (white.length() > 1) white.substring(0, white.length() - 1);
             StringBuilder black = new StringBuilder();
             for (UUID ub : data.getBlacklist()) {
                 black.append(ub.toString()).append(",");
             }
+            if (black.length() > 1) black.substring(0, black.length() - 1);
             try {
                 connect();
-                preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?, `whitelist` = ?, `denytpa` = ?, `banned` = ? WHERE `uuid` = ?");
-                preparedStatement.setString(1, white.substring(0, white.length() - 1));
-                preparedStatement.setString(2, black.substring(0, black.length() - 1));
-                preparedStatement.setInt(3, data.isDeny_tpa() ? 1 : 0);
+                preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?, `whitelist` = ?, `denytpa` = ?, `banned` = ?, `denytrade` = ? WHERE `uuid` = ?");
+                preparedStatement.setString(1, white.toString());
+                preparedStatement.setString(2, black.toString());
+                preparedStatement.setInt(3, data.getDenyTpa() ? 1 : 0);
                 preparedStatement.setString(4, data.getBanned());
-                preparedStatement.setString(5, uuid.toString());
+                preparedStatement.setInt(5, data.getDenyTrade() ? 1 : 0);
+                preparedStatement.setString(6, uuid.toString());
                 preparedStatement.executeUpdate();
             } catch (SQLException ex) {
             } finally {
@@ -1034,7 +1042,9 @@ public class MySQLManager {
                         resultSet.getInt("denytpa") == 1,
                         resultSet.getString("name"),
                         resultSet.getString("banned"),
-                        scoreBoard
+                        scoreBoard,
+                        resultSet.getInt("denytrade") == 1
+
                 );
                 map.put(uuid, data);
             }
@@ -1069,7 +1079,6 @@ public class MySQLManager {
                         home = new Home(uuid, location, name);
                         homes.put(uuid, home);
                     }
-
                 }
             }
         } catch (SQLException ex) {
@@ -1170,9 +1179,9 @@ public class MySQLManager {
                 } else {
                     p++;
                     if (!values.containsKey("bank")) values.put("bank", new HashMap<>());
-                    values.get("bank").put(uuid,bank);
+                    values.get("bank").put(uuid, bank);
                     if (!values.containsKey("pocket")) values.put("pocket", new HashMap<>());
-                    values.get("pocket").put(uuid,bank);
+                    values.get("pocket").put(uuid, bank);
                 }
             }
 
@@ -1296,5 +1305,24 @@ public class MySQLManager {
         } finally {
             close();
         }
+    }
+
+    public boolean insertGuildsChunks(Chunk chunk, UUID guild) {
+        boolean ret = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`world`,`x`,`z`,`uuid`) VALUE (?,?,?,?)");
+            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
+            preparedStatement.setInt(2, chunk.getX());
+            preparedStatement.setInt(3, chunk.getZ());
+            preparedStatement.setString(4, guild.toString());
+            preparedStatement.execute();
+            ret = true;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return ret;
     }
 }

@@ -145,7 +145,7 @@ public class LockManager {
     }
 
     public boolean isLocked(Entity entity) {
-        return getArmorStands().containsKey(entity);
+        return getArmorStands().containsKey(entity.getUniqueId());
     }
 
     public boolean isLocked(Location location) {

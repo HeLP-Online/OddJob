@@ -25,7 +25,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("del")) {
             if (args.length == 2) {
                 String name = args[1];
-                UUID uuid = ((Player)sender).getUniqueId();
+                UUID uuid = ((Player) sender).getUniqueId();
                 if (!OddJob.getInstance().getHomesManager().has(uuid, name)) {
                     OddJob.getInstance().getMessageManager().errorHome(name, sender);
                     return true;
@@ -126,7 +126,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                 }
 
                 String name = args[2];
-                if (!OddJob.getInstance().getHomesManager().has(player.getUniqueId(), name)) {
+                if (!OddJob.getInstance().getHomesManager().has(uuid, name)) {
                     OddJob.getInstance().getMessageManager().errorHome(name, player);
                     return true;
                 }

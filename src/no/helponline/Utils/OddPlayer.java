@@ -1,29 +1,35 @@
 package no.helponline.Utils;
 
+import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;
 
 import java.util.List;
 import java.util.UUID;
 
 public class OddPlayer {
-    UUID uuid;
-    List<UUID> blacklist, whitelist;
-    boolean tpa_deny;
-    String name, banned;
+    private final UUID uuid;
+    private final List<UUID> blacklist;
+    private final List<UUID> whitelist;
+    private boolean denyTpa;
+    private final String name;
+    private String banned;
     private ScoreBoard scoreBoard;
+    private boolean denyTrade;
 
-    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean tpa_deny, String name, String banned, ScoreBoard scoreBoard) {
+    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean denyTpa, String name, String banned, ScoreBoard scoreBoard,boolean denyTrade) {
         this.uuid = uuid;
         this.blacklist = blacklist;
         this.whitelist = whitelist;
-        this.tpa_deny = tpa_deny;
+        this.denyTpa = denyTpa;
         this.name = name;
         this.banned = banned;
         this.scoreBoard = scoreBoard;
+        this.denyTrade = denyTrade;
     }
 
     public void setScoreBoard(ScoreBoard scoreBoard) {
         this.scoreBoard = scoreBoard;
+        OddJob.getInstance().getScoreManager().set(getUuid(),scoreBoard);
     }
 
     public UUID getUuid() {
@@ -54,10 +60,6 @@ public class OddPlayer {
         return whitelist;
     }
 
-    public boolean isDeny_tpa() {
-        return tpa_deny;
-    }
-
     public String getBanned() {
         return banned;
     }
@@ -70,11 +72,23 @@ public class OddPlayer {
         this.banned = banned;
     }
 
-    public void setDeny_tpa(boolean tpa_deny) {
-        this.tpa_deny = tpa_deny;
+    public void setDenyTpa(boolean tpaDeny) {
+        this.denyTpa = tpaDeny;
     }
 
     public ScoreBoard getScoreboard() {
         return scoreBoard;
+    }
+
+    public void setDenyTrade(boolean denyTrade) {
+        this.denyTrade = denyTrade;
+    }
+
+    public boolean getDenyTrade() {
+        return denyTrade;
+    }
+
+    public boolean getDenyTpa() {
+        return denyTpa;
     }
 }

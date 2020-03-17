@@ -1,16 +1,19 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Enum.ScoreBoard;
 import no.helponline.Utils.OddPlayer;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class PlayerCommand implements CommandExecutor, TabCompleter {
     @Override
@@ -24,80 +27,92 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                 OddJob.getInstance().log("HELP");
                 //TODO
             } else if (strings[0].equalsIgnoreCase("list")) {
-                Collection<String> list = OddJob.getInstance().getPlayerManager().getNames();
-                OddJob.getInstance().getMessageManager().console(Arrays.toString(list.toArray()));
+                // Command /player list
+                OddJob.getInstance().getMessageManager().infoListPlayers("List of known Players:", OddJob.getInstance().getPlayerManager().getUUIDs(), commandSender);
             } else if (strings[0].equalsIgnoreCase("whitelist")) {
-                UUID target = null;
-                //OfflinePlayer target = OddJob.getInstance().getPlayerManager().getOddPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[2]));
-                for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-                    if (offlinePlayer.getName().equalsIgnoreCase(strings[2])) target = offlinePlayer.getUniqueId();
-                }
+                // Command /player whitelist <add:del:show> [player]
+                // Find target Player
+                UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[2]);
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[2], commandSender, false);
+                    OddJob.getInstance().getMessageManager().errorPlayer(strings[2], commandSender);
                     return true;
                 }
+
                 Player player = (Player) commandSender;
-                OddPlayer odd = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
+                OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
                 OddPlayer oddTarget = OddJob.getInstance().getPlayerManager().getOddPlayer(target);
                 if (strings[1].equalsIgnoreCase("add")) {
-                    odd.addWhitelist(target);
-                    OddJob.getInstance().getMessageManager().success("You have added " + oddTarget.getName() + " to your Whitelist of tpa", commandSender, true);
+                    // Command /player whitelist add <player>
+                    oddPlayer.addWhitelist(target);
+                    OddJob.getInstance().getMessageManager().success("You have added " + oddTarget.getName() + " to your Whitelist", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("del")) {
-                    odd.removeWhitelist(target);
-                    OddJob.getInstance().getMessageManager().success("You have removed " + oddTarget.getName() + " from your Whitelist of tpa", commandSender, true);
+                    // Command /player whitelist del <player>
+                    oddPlayer.removeWhitelist(target);
+                    OddJob.getInstance().getMessageManager().success("You have removed " + oddTarget.getName() + " from your Whitelist", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("show")) {
-                    StringBuilder l = new StringBuilder("Showing whitelist: count: " + odd.getWhitelist().size() + "\n");
-                    for (UUID uuid : odd.getWhitelist()) {
-                        l.append(OddJob.getInstance().getPlayerManager().getName(uuid));
-                    }
-                    player.sendMessage(l.toString());
+                    // Command /player whitelist show
+                    OddJob.getInstance().getMessageManager().infoListPlayers("Your WHITELIST count: " + oddPlayer.getWhitelist().size(), oddPlayer.getWhitelist(), commandSender);
                 }
             } else if (strings[0].equalsIgnoreCase("blacklist")) {
-                UUID target = null;
-                for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-                    if (offlinePlayer.getName().equalsIgnoreCase(strings[2])) target = offlinePlayer.getUniqueId();
-                }
+                // Command /player blacklist <add:del:show> [player]
+                // Find target Player
+                UUID target = OddJob.getInstance().getPlayerManager().getUUID(strings[2]);
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[2], commandSender, false);
+                    OddJob.getInstance().getMessageManager().errorPlayer(strings[2], commandSender);
                     return true;
                 }
+
                 Player player = (Player) commandSender;
-                OddPlayer odd = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
+                OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
                 OddPlayer oddTarget = OddJob.getInstance().getPlayerManager().getOddPlayer(target);
                 if (strings[1].equalsIgnoreCase("add")) {
-                    odd.addBlacklist(target);
-                    OddJob.getInstance().getMessageManager().success("You have added " + oddTarget.getName() + " to your blacklist of tpa", commandSender, true);
+                    // Command /player whitelist add <player>
+                    oddPlayer.addBlacklist(target);
+                    OddJob.getInstance().getMessageManager().success("You have added " + oddTarget.getName() + " to your Blacklist", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("del")) {
-                    odd.removeBlacklist(target);
-                    OddJob.getInstance().getMessageManager().success("You have removed " + oddTarget.getName() + " from your blacklist of tpa", commandSender, true);
+                    // Command /player whitelist del <player>
+                    oddPlayer.removeBlacklist(target);
+                    OddJob.getInstance().getMessageManager().success("You have removed " + oddTarget.getName() + " from your Blacklist", commandSender, true);
                 } else if (strings[1].equalsIgnoreCase("show")) {
-                    StringBuilder l = new StringBuilder("Showing blacklist: count: " + odd.getBlacklist().size() + "\n");
-                    for (UUID uuid : odd.getBlacklist()) {
-                        l.append(OddJob.getInstance().getPlayerManager().getName(uuid));
-                    }
-                    player.sendMessage(l.toString());
+                    // Command /player whitelist show
+                    OddJob.getInstance().getMessageManager().infoListPlayers("Your BLACKLIST count: " + oddPlayer.getWhitelist().size(), oddPlayer.getWhitelist(), commandSender);
                 }
             } else if (strings[0].equalsIgnoreCase("info")) {
+                // Command /player info
                 if (strings.length == 1 && commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    OddPlayer op = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
-                    String sb = "Player INFO " + op.getName() + "\n" +
-                            "UUID: " + op.getUuid() + "\n" +
-                            "denyTPA: " + op.isDeny_tpa() + "\n" +
-                            "BlackList count: " + op.getBlacklist().size() + "\n" +
-                            "WhiteList count: " + op.getWhitelist().size() + "\n";
-                    player.sendMessage(sb);
+                    OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
+                    HashMap<String, String> info = new HashMap<>();
+                    info.put("Deny TPA:", oddPlayer.getDenyTpa() ? "true" : "false");
+                    info.put("Deny Trade:", oddPlayer.getDenyTrade() ? "true" : "false");
+                    info.put("Whitelist count:", oddPlayer.getWhitelist().size() + "");
+                    info.put("Blacklist count:", oddPlayer.getBlacklist().size() + "");
+                    info.put("Showing Scoreboard:", oddPlayer.getScoreboard().name());
+                    OddJob.getInstance().getMessageManager().infoHashmap("Info of " + oddPlayer.getName(), info, commandSender);
                 }
             } else if (strings[0].equalsIgnoreCase("set")) {
+                // Command /player set <denytpa:denytrade:scoreboard> [guild,none]
                 if (strings.length == 3 && commandSender instanceof Player) {
                     Player player = (Player) commandSender;
-                    OddPlayer op = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
+                    OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
                     if (strings[1].equalsIgnoreCase("denytpa")) {
                         boolean deny = Boolean.parseBoolean(strings[2]);
-                        op.setDeny_tpa(deny);
+                        oddPlayer.setDenyTpa(deny);
                         OddJob.getInstance().getMessageManager().success("SET " + strings[1] + " to " + deny, player, true);
+                    } else if (strings[1].equalsIgnoreCase("denytrade")) {
+                        boolean deny = Boolean.parseBoolean(strings[2]);
+                        oddPlayer.setDenyTrade(deny);
+                        OddJob.getInstance().getMessageManager().success("SET " + strings[1] + " to " + deny, player, true);
+                    } else if (strings[1].equalsIgnoreCase("scoreboard")) {
+                        ScoreBoard score = ScoreBoard.valueOf(strings[2]);
+                        oddPlayer.setScoreBoard(score);
+                        OddJob.getInstance().getMessageManager().success("SET " + strings[1] + " to " + score.name(), player, true);
                     }
                 }
+            } else if (strings[0].equalsIgnoreCase("save")) {
+                OddJob.getInstance().getPlayerManager().save();
+            } else if (strings[0].equalsIgnoreCase("load")) {
+                OddJob.getInstance().getPlayerManager().load();
             }
         }
         return true;
@@ -123,9 +138,15 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                 }
             } else if (strings.length == 2 && strings[0].equalsIgnoreCase("set")) {
                 list.add("denytpa");
-            } else if (strings.length == 3 && strings[0].equalsIgnoreCase("set") && strings[1].equalsIgnoreCase("denytpa")) {
+                list.add("denytrade");
+                list.add("scoreboard");
+            } else if (strings.length == 3 && strings[0].equalsIgnoreCase("set") && (strings[1].equalsIgnoreCase("denytpa") || strings[1].equalsIgnoreCase("denytrade"))) {
                 list.add("true");
                 list.add("false");
+            } else if (strings.length == 3 && strings[0].equalsIgnoreCase("set") && strings[1].equalsIgnoreCase("scoreboard")) {
+                for (ScoreBoard sb : ScoreBoard.values()) {
+                    list.add(sb.name());
+                }
             }
         }
         return list;

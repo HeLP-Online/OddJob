@@ -49,7 +49,7 @@ public class HomesManager {
     }
 
     public void load() {
-        homes.putAll(OddJob.getInstance().getMySQLManager().loadHomes());
+        homes = OddJob.getInstance().getMySQLManager().loadHomes();
     }
     public void save() {
         OddJob.getInstance().getMySQLManager().saveHomes(homes);

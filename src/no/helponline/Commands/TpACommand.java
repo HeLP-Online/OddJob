@@ -29,16 +29,21 @@ public class TpACommand implements CommandExecutor, TabCompleter {
                 OddJob.getInstance().getMessageManager().danger("Use: /tpa <name>", commandSender,false);
                 return true;
             }
+
+            // Finding a Player to teleport to
             Player destinationPlayer = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
             if (destinationPlayer == null || !destinationPlayer.isOnline()) {
                 OddJob.getInstance().getMessageManager().errorPlayer(strings[0],commandSender);
                 return true;
             }
+
+            // Finding yourself
             Player movingPlayer = (Player) commandSender;
             if (OddJob.getInstance().getTeleportManager().hasRequest(movingPlayer.getUniqueId())) {
                 OddJob.getInstance().getMessageManager().danger("You have already sent an request to " + strings[0], movingPlayer.getUniqueId(),false);
                 return true;
             }
+
             if (OddJob.getInstance().getTeleportManager().request(movingPlayer.getUniqueId(), destinationPlayer.getUniqueId())) { // player (sends request) // target (teleport to)
                 OddJob.getInstance().getMessageManager().success("You have requested to be teleported to " + ChatColor.DARK_AQUA+destinationPlayer.getName(), movingPlayer.getUniqueId(),false);
                 OddJob.getInstance().getMessageManager().warning(ChatColor.DARK_AQUA+movingPlayer.getName() + ChatColor.YELLOW+" want to be teleported to you. To accept this, you can click on 'ACCEPT'", destinationPlayer.getUniqueId(),false);

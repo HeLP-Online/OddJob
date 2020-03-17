@@ -25,7 +25,7 @@ public class Lore {
                         OddJob.getInstance().getMessageManager().warning("You don't have the correct Player-Key", player, false);
                         event.setCancelled(true);
                         return true;
-                    } else if (guild && !one.equalsIgnoreCase(guildUUID.toString())) {
+                    } else if (guild && guildUUID != null && !one.equalsIgnoreCase(guildUUID.toString())) {
                         // Wrong Guild Key
                         OddJob.getInstance().getMessageManager().warning("You don't have the correct Guild-Key", player, false);
                         event.setCancelled(true);
