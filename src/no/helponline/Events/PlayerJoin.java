@@ -40,7 +40,7 @@ public class PlayerJoin implements Listener {
             }
 
             // Scoreboard
-            if (guild != OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
+            if (guild != null) {
                 if (!OddJob.getInstance().getEconManager().hasBankAccount(guild, true)) {
                     OddJob.getInstance().getEconManager().createAccounts(guild, 200.0D, true);
                     OddJob.getInstance().getMessageManager().console("Initializing account for the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));

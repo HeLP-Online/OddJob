@@ -103,6 +103,9 @@ public class OddJob extends JavaPlugin {
         playerManager.load();
         guildManager.loadGuilds();
         guildManager.loadChunks();
+        warpManager.load();
+        worldManager.load();
+        deathManager.load();
 
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);

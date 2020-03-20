@@ -1,4 +1,4 @@
-package no.helponline.Utils;
+package no.helponline.Utils.Odd;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;

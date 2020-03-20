@@ -7,6 +7,8 @@ import no.helponline.Utils.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.AreaMarker;
@@ -68,7 +70,7 @@ public class GuildManager {
      * Getting the Guild by its UUID
      *
      * @param guild UUID of the Guild
-     * @return Guild
+     * @return Guild or NULL
      */
     public Guild getGuild(UUID guild) {
         return guilds.get(guild);
@@ -88,6 +90,8 @@ public class GuildManager {
      */
     public void loadGuilds() {
         guilds = OddJob.getInstance().getMySQLManager().loadGuilds();
+        guildPending = OddJob.getInstance().getMySQLManager().loadGuildsPendings();
+        guildInvite = OddJob.getInstance().getMySQLManager().loadGuildsInvites();
     }
 
     /**
@@ -96,6 +100,21 @@ public class GuildManager {
     public void loadChunks() {
         chunkGuild.clear();
         chunkGuild = OddJob.getInstance().getMySQLManager().loadChunks();
+        List<Chunk> rChunk = new ArrayList<>();
+
+        int i = 0;
+        for (Chunk chunk : chunkGuild.keySet()) {
+            UUID guild = chunkGuild.get(chunk);
+            if (getGuild(guild) == null) {
+                unClaim(chunk, null);
+                rChunk.add(chunk);
+                i++;
+            }
+        }
+
+        for (Chunk chunk : rChunk) chunkGuild.remove(chunk);
+        OddJob.getInstance().getMessageManager().console("Removed " + i + " chunks, missing guild");
+
         clearDynmap();
         updateDynmap();
     }
@@ -163,7 +182,7 @@ public class GuildManager {
      * Saving the Guild-list to the Database
      */
     public void saveGuilds() {
-        OddJob.getInstance().getMySQLManager().saveGuild(guilds);
+        OddJob.getInstance().getMySQLManager().saveGuilds(guilds);
     }
 
     /**
@@ -254,19 +273,20 @@ public class GuildManager {
         }*/
 
         // Adds the Chunk to the Guild
-        if (OddJob.getInstance().getMySQLManager().insertGuildsChunks(chunk, guild)) {
+        if (OddJob.getInstance().getMySQLManager().saveGuildsChunks(chunk, guild)) {
             chunkGuild.put(chunk, guild);
             updateDynmapChunk(chunk);
             OddJob.getInstance().getMessageManager().success("Claiming chunk " + ChatColor.GOLD + "X:" + chunk.getX() + " Y:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getZoneByGuild(guild).name(), player, true);
-        } else OddJob.getInstance().getMessageManager().danger("Already claimed",player,false);
+        } else OddJob.getInstance().getMessageManager().danger("Already claimed", player, false);
     }
 
     /**
      * Claiming the Players Location Chunk to it's Guild
      *
      * @param player Player to claim the Chunk
+     * @param zone
      */
-    public void claim(Player player) {
+    public void claim(Player player, UUID zone) {
         Chunk inChunk = player.getLocation().getChunk();
         UUID playerGuild = getGuildUUIDByMember(player.getUniqueId());
         UUID chunkGuild = getGuildUUIDByChunk(inChunk);
@@ -307,16 +327,13 @@ public class GuildManager {
      * @param player Player to message
      */
     public void unClaim(Chunk chunk, Player player) {
-
         // UnClaim the Chunk
         if (OddJob.getInstance().getMySQLManager().deleteGuildsChunks(chunk)) {
-            chunkGuild.remove(chunk);
             removeDynmapChunk(chunk);
-            OddJob.getInstance().getMessageManager().console("size:"+chunkGuild.size());
             if (player != null)
                 OddJob.getInstance().getMessageManager().success("You have unclaimed " + ChatColor.GOLD + "X:" + chunk.getX() + " Z:" + chunk.getZ() + " World:" + chunk.getWorld().getName(), player, true);
         } else
-            OddJob.getInstance().getMessageManager().warning("Not claimed",player,false);
+            OddJob.getInstance().getMessageManager().warning("Not claimed", player, false);
     }
 
 
@@ -328,7 +345,6 @@ public class GuildManager {
      */
     public UUID getGuildUUIDByChunk(Chunk chunk) {
         return chunkGuild.containsKey(chunk) ? chunkGuild.get(chunk) : getGuildUUIDByZone(Zone.WILD);
-
     }
 
     /**
@@ -376,37 +392,28 @@ public class GuildManager {
      * Toggles what Zone/Guild a Player is autoClaiming for
      *
      * @param player Player which is toggling the AutoClaim
-     * @param zone   Zone the Player is claiming for
+     * @param guild  Zone the Player is claiming for
      */
-    public void toggleAutoClaim(Player player, Zone zone) {
-        UUID guild;
-        if (zone != Zone.GUILD) {
-            // Claiming to Zone
-            guild = getGuildUUIDByZone(zone);
-        } else {
-            // Claiming to the Players Guild
-            guild = getGuildUUIDByMember(player.getUniqueId());
-        }
-        if (guild != null) {
-            if (autoClaim.containsKey(player.getUniqueId())) {
-                if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
-                    // Changing Zone to autoClaim for
-                    autoClaim.put(player.getUniqueId(), guild);
-                    OddJob.getInstance().getMessageManager().warning("Changing Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
-                } else {
-                    // Stops autoClaim
-                    autoClaim.remove(player.getUniqueId());
-                    OddJob.getInstance().getMessageManager().warning("Turning off Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
-                }
-            } else {
-                // Starts autoClaim
+    public void toggleAutoClaim(Player player, UUID guild) {
+        if (autoClaim.containsKey(player.getUniqueId())) {
+            if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
+                // Changing Zone to autoClaim for
                 autoClaim.put(player.getUniqueId(), guild);
-                OddJob.getInstance().getMessageManager().warning("You are now claiming zones for " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
-
-                // Claiming
-                claim(player);
+                OddJob.getInstance().getMessageManager().warning("Changing Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
+            } else {
+                // Stops autoClaim
+                autoClaim.remove(player.getUniqueId());
+                OddJob.getInstance().getMessageManager().warning("Turning off Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
             }
+        } else {
+            // Starts autoClaim
+            autoClaim.put(player.getUniqueId(), guild);
+            OddJob.getInstance().getMessageManager().warning("You are now claiming zones for " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
+
+            // Claiming
+            claim(player, guild);
         }
+
     }
 
     /**
@@ -430,7 +437,7 @@ public class GuildManager {
         UUID guildUUID = null;
         for (UUID uuid : guilds.keySet()) {
             // Looping through the Guilds
-            if (zone.equals(guilds.get(uuid).getZone())) {
+            if (zone != null && zone.equals(guilds.get(uuid).getZone())) {
                 guildUUID = uuid;
             }
         }
@@ -544,8 +551,24 @@ public class GuildManager {
      * @param player UUID of the Player
      */
     public void leave(UUID player) {
+        Role role = OddJob.getInstance().getGuildManager().getGuildMemberRole(player);
+        Guild guild = getGuild(getGuildUUIDByMember(player));
+        UUID next = null;
+        if (role.equals(Role.Master)){
+            for (UUID member : guild.getMembers().keySet()) {
+                if (member.equals(player)) continue;
+                if (next == null) {
+                next = member; }
+            }
+        }
+
         guilds.get(getGuildUUIDByMember(player)).getMembers().remove(player);
         members.remove(player);
+        OddJob.getInstance().getMySQLManager().deleteGuildMember(player);
+        if (next != null) {
+            guild.setMaster(next);
+            OddJob.getInstance().getMessageManager().guildNewMaster(guild,player,next);
+        }
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
             OddJob.getInstance().getScoreManager().clear(p);
@@ -593,8 +616,9 @@ public class GuildManager {
      * @param guild  UUID of the Guild
      * @param player UUID of the Player
      */
-    public void inviteToGuild(UUID guild, UUID player) {
+    public void inviteToGuild(UUID guild, UUID player, UUID sender) {
         guildInvite.put(player, guild);
+        OddJob.getInstance().getMessageManager().guildInvitedToGuild(getGuild(guild), player, sender);
     }
 
     /**
@@ -654,10 +678,9 @@ public class GuildManager {
      * @return Set of Guild UUIDs
      */
     public List<String> listGuildsToJoin(UUID player) {
-        Set<UUID> guilds = this.guilds.keySet();
         UUID invited = getGuildInvitation(player);
         List<String> ret = new ArrayList<>();
-        for (UUID guild : guilds) {
+        for (UUID guild : guilds.keySet()) {
             if (isGuildOpen(guild)) {
                 ret.add(getGuildNameByUUID(guild));
             } else if (invited != null) {
@@ -750,16 +773,25 @@ public class GuildManager {
     }
 
     /**
-     * Makes the Player join the Guild
+     * Makes the Pending Player join the Guild
      *
-     * @param guildToJoin   UUID of the Guild
      * @param joiningPlayer UUID of the Player
      */
-    public void accept(UUID guildToJoin, UUID joiningPlayer) {
-        join(guildToJoin, joiningPlayer);
+    public void acceptPending(UUID joiningPlayer, UUID uuid) {
+        UUID guild = getGuildPending(joiningPlayer);
+        join(guild, joiningPlayer);
+        OddJob.getInstance().getMessageManager().guildAcceptPending(getGuild(guild), joiningPlayer, uuid);
+    }
 
-        OddJob.getInstance().getMessageManager().success("Welcome to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guildToJoin) + ChatColor.RESET + " guild!", joiningPlayer, true);
-        OddJob.getInstance().getMessageManager().guild("Please welcome " + ChatColor.GOLD + OddJob.getInstance().getPlayerManager().getName(joiningPlayer) + ChatColor.RESET + " to the guild", guildToJoin);
+    /**
+     * Makes the Invited Player to join the Guild
+     *
+     * @param joiningPlayer UUID of the Player
+     */
+    public void acceptInvite(UUID joiningPlayer) {
+        UUID guild = getGuildInvitation(joiningPlayer);
+        join(guild, joiningPlayer);
+        OddJob.getInstance().getMessageManager().guildAcceptInvite(getGuild(guild), joiningPlayer);
     }
 
     /**
@@ -772,7 +804,7 @@ public class GuildManager {
         guildPending.remove(joiningPlayer);
         guildInvite.remove(joiningPlayer);
 
-        OddJob.getInstance().getMessageManager().guild("Request from " + ChatColor.GOLD + OddJob.getInstance().getPlayerManager().getName(joiningPlayer) + ChatColor.RESET + " to join " + ChatColor.DARK_AQUA + getGuildNameByUUID(guildToJoin) + ChatColor.RESET + " has been declined", guildToJoin);
+        OddJob.getInstance().getMessageManager().guild("Request from " + ChatColor.GOLD + OddJob.getInstance().getPlayerManager().getName(joiningPlayer) + ChatColor.RESET + " to join " + ChatColor.DARK_AQUA + getGuildNameByUUID(guildToJoin) + ChatColor.RESET + " has been declined", guildToJoin, joiningPlayer);
     }
 
     /**
@@ -807,14 +839,256 @@ public class GuildManager {
      * @param guild UUID of the Guild
      */
     public void disband(UUID guild) {
+        List<Chunk> chunks = new ArrayList<>();
+        OddJob.getInstance().getMessageManager().console("disbanding:" + guild);
+        OddJob.getInstance().getMessageManager().console("chunkGuild:" + chunkGuild.size());
         for (Chunk chunk : chunkGuild.keySet()) {
-            if (chunkGuild.get(chunk).equals(guild)) unClaim(chunk, null);
-            chunkGuild.remove(chunk);
+            OddJob.getInstance().getMessageManager().console("chunk:x=" + chunk.getX() + ";z=" + chunk.getZ());
+            if (chunkGuild.get(chunk).equals(guild)) {
+                OddJob.getInstance().getMessageManager().console("unclaiming");
+                unClaim(chunk, null);
+                chunks.add(chunk);
+            }
         }
+        OddJob.getInstance().getMessageManager().console("removing");
+        for (Chunk chunk : chunks) chunkGuild.remove(chunk);
+        chunks.clear();
+        guilds.remove(guild);
         OddJob.getInstance().getMySQLManager().disbandGuild(guild);
     }
 
-    enum Direction {
-        XPLUS, XMINUS, ZPLUS, ZMINUS
+    public void changeGuildMaster(UUID target, UUID uuid) {
+        Guild guild = getGuild(getGuildUUIDByMember(uuid));
+        guild.getMembers().put(target, Role.Master);
+        guild.getMembers().put(uuid, Role.Admins);
+    }
+
+    public void denyRequest(UUID uuid) {
+        guildPending.remove(uuid);
+    }
+
+    public void denyInvite(UUID uuid) {
+        guildInvite.remove(uuid);
+    }
+
+    public void map(Player player) {
+        StringBuilder sb = new StringBuilder();
+        int minX = 0, maxX = 0, minZ = 0, maxZ = 0;
+        BlockFace facing = player.getFacing();
+        String dir = null;
+        Chunk chunk = player.getLocation().getChunk();
+        World world = player.getWorld();
+        switch (facing) {
+            case NORTH:
+            case NORTH_NORTH_EAST:
+            case NORTH_NORTH_WEST:
+            case NORTH_EAST:
+            case NORTH_WEST:
+                dir = "north";
+                minZ = chunk.getZ() - 4;
+                maxZ = chunk.getZ() + 4;
+                minX = chunk.getX() - 9;
+                maxX = chunk.getX() + 9;
+                break;
+            case EAST:
+            case EAST_NORTH_EAST:
+            case EAST_SOUTH_EAST:
+                dir = "east";
+                minZ = chunk.getZ() - 9;
+                maxZ = chunk.getZ() + 9;
+                minX = chunk.getX() - 4;
+                maxX = chunk.getX() + 4;
+                break;
+            case SOUTH_EAST:
+            case SOUTH:
+            case SOUTH_SOUTH_EAST:
+            case SOUTH_SOUTH_WEST:
+            case SOUTH_WEST:
+                dir = "south";
+                minZ = chunk.getZ() - 4;
+                maxZ = chunk.getZ() + 4;
+                minX = chunk.getX() - 9;
+                maxX = chunk.getX() + 9;
+                break;
+            case WEST:
+            case WEST_NORTH_WEST:
+            case WEST_SOUTH_WEST:
+                dir = "west";
+                minZ = chunk.getZ() - 9;
+                maxZ = chunk.getZ() + 9;
+                minX = chunk.getX() - 4;
+                maxX = chunk.getX() + 4;
+                break;
+            default:
+                dir = "";
+        }
+
+        String[] chars = new String[]{"W", "A", "J", "S", "#", "%", "&", "/", "+", "-", ":", "!"};
+        int c = 4;
+        HashMap<UUID, Integer> g = new HashMap<>();
+        switch (dir) {
+            case "north":
+                for (int z = minZ; z <= maxZ; z++) {
+                    //OddJob.getInstance().getMessageManager().console("Z:" + z);
+                    if (z == minX + 3) sb.append("N ");
+                    else if (z == minX + 4) sb.append("^ ");
+                    else if (z == minX + 5) sb.append("|| ");
+                    else sb.append("  ");
+                    for (int x = minX; x <= maxX; x++) {
+                        //OddJob.getInstance().getMessageManager().console("X:" + x);
+                        Chunk test = world.getChunkAt(x, z);
+                        UUID guild = chunkGuild.get(test);
+                        if (chunk.equals(test)) {
+                            sb.append(" ").append(ChatColor.GOLD).append("X");
+                        } else if (guild != null) {
+                            Zone zone = getGuild(guild).getZone();
+
+                            ChatColor color = color(zone);
+                            if (zone != Zone.GUILD) {
+                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
+                            } else {
+                                if (!g.containsKey(guild)) g.put(guild, c);
+                                c++;
+                                sb.append(" ").append(color).append(chars[g.get(guild)]);
+                            }
+                        } else sb.append(" ").append(color(Zone.WILD)).append("O");
+                    }
+                    sb.append("\n");
+                }
+                break;
+            case "south":
+                for (int z = maxZ; z >= minZ; z--) {
+                    //OddJob.getInstance().getMessageManager().console("Z:" + z);
+                    if (z == minZ + 5) sb.append("S ");
+                    else if (z == minZ + 4) sb.append("^ ");
+                    else if (z == minZ + 3) sb.append("|| ");
+                    else sb.append("  ");
+                    for (int x = maxX; x >= minX; x--) {
+                        //OddJob.getInstance().getMessageManager().console("X:" + x);
+                        Chunk test = world.getChunkAt(x, z);
+                        UUID guild = chunkGuild.get(test);
+                        if (chunk.equals(test)) {
+                            sb.append(" ").append(ChatColor.GOLD).append("X");
+                        } else if (guild != null) {
+                            Zone zone = getGuild(guild).getZone();
+
+                            ChatColor color = color(zone);
+                            if (zone != Zone.GUILD) {
+                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
+                            } else {
+                                if (!g.containsKey(guild)) g.put(guild, c);
+                                c++;
+                                sb.append(" ").append(color).append(chars[g.get(guild)]);
+                            }
+                        } else sb.append(" ").append(color(Zone.WILD)).append("O");
+                    }
+                    sb.append("\n");
+                }
+                break;
+            case "east":
+                for (int x = maxX; x >= minX; x--) {
+                    //OddJob.getInstance().getMessageManager().console("X:" + x);
+                    if (x == minX + 5) sb.append("E ");
+                    else if (x == minX + 4) sb.append("^ ");
+                    else if (x == minX + 3) sb.append("|| ");
+                    else sb.append("  ");
+                    for (int z = minZ; z <= maxZ; z++) {
+                        //OddJob.getInstance().getMessageManager().console("Z:" + z);
+                        Chunk test = world.getChunkAt(x, z);
+                        UUID guild = chunkGuild.get(test);
+                        if (chunk.equals(test)) {
+                            sb.append(" ").append(ChatColor.GOLD).append("X");
+                        } else if (guild != null) {
+                            Zone zone = getGuild(guild).getZone();
+                            if (!g.containsKey(guild)) {
+                                g.put(guild, c);
+                                c++;
+                            }
+                            ChatColor color = color(zone);
+                            if (zone != Zone.GUILD) {
+                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
+                            } else {
+                                if (!g.containsKey(guild)) g.put(guild, c);
+                                sb.append(" ").append(color).append(chars[g.get(guild)]);
+                            }
+                        } else sb.append(" ").append(color(Zone.WILD)).append("O");
+                    }
+                    sb.append("\n");
+                }
+                break;
+            case "west":
+                for (int x = minX; x <= maxX; x++) {
+                    //OddJob.getInstance().getMessageManager().console("X:" + x);
+                    if (x == minX + 3) sb.append("W ");
+                    else if (x == minX + 4) sb.append("^ ");
+                    else if (x == minX + 5) sb.append("|| ");
+                    else sb.append("  ");
+                    for (int z = maxZ; z >= minZ; z--) {
+                        //OddJob.getInstance().getMessageManager().console("Z:" + z);
+                        Chunk test = world.getChunkAt(x, z);
+                        UUID guild = chunkGuild.get(test);
+                        if (chunk.equals(test)) {
+                            sb.append(" ").append(ChatColor.GOLD).append("X");
+                        } else if (guild != null) {
+                            Zone zone = getGuild(guild).getZone();
+                            if (!g.containsKey(guild)) {
+                                g.put(guild, c);
+                                c++;
+                            }
+                            ChatColor color = color(zone);
+                            if (zone != Zone.GUILD) {
+                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
+                            } else {
+                                if (!g.containsKey(guild)) g.put(guild, c);
+                                sb.append(" ").append(color).append(chars[g.get(guild)]);
+                            }
+                        } else sb.append(" ").append(color(Zone.WILD)).append("O");
+                    }
+                    sb.append("\n");
+                }
+                break;
+        }
+
+        sb.append("Legend) ");
+        sb.append(ChatColor.GOLD).append("X").append(ChatColor.RESET).append(": You are here; ");
+        for (UUID uuid : g.keySet()) {
+            Zone zone = getGuild(uuid).getZone();
+            ChatColor color = color(zone);
+            sb.append(color).append(chars[g.get(uuid)]).append(ChatColor.RESET).append("=").append(getGuildNameByUUID(uuid)).append("; ");
+        }
+
+        OddJob.getInstance().getMessageManager().guildMap(sb.toString(), player);
+    }
+
+    public ChatColor color(Zone zone) {
+        switch (zone) {
+            case WAR:
+            case ARENA:
+                return ChatColor.RED;
+            case JAIL:
+                return ChatColor.YELLOW;
+            case SAFE:
+                return ChatColor.GREEN;
+            case GUILD:
+                return ChatColor.BLUE;
+            default:
+                return ChatColor.RESET;
+        }
     }
 }

@@ -1,53 +1,48 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Warp;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Set;
 
 public class WarpManager {
 
+    HashMap<String, Warp> warps = new HashMap<>();
+
     private final double cost = OddJob.getInstance().getEconManager().cost("warp_use");
 
-    public List<String> listWarps() {
-        return OddJob.getInstance().getMySQLManager().listWarps();
+    public Set<String> listWarps() {
+        return warps.keySet();
     }
 
-    public void add(CommandSender commandSender, String name, String password) {
-        if (!(commandSender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().danger("Only usable as a player.", commandSender, false);
-        } else {
-            Player player = (Player) commandSender;
-            if (!exists(name, password)) {
-                OddJob.getInstance().getMySQLManager().addWarp(name, player, password);
-                if (exists(name, password)) {
-                    OddJob.getInstance().getMessageManager().success("Successfully created " + ChatColor.AQUA + name, commandSender, true);
-                } else {
-                    OddJob.getInstance().getMessageManager().danger("Something went wrong when adding warp.", commandSender, true);
-                }
-            } else {
-                OddJob.getInstance().getMessageManager().danger("A warp with this name already exists.", commandSender, false);
-            }
+    public void add(Player player, String name, String password) {
+
+        if (has(name)) {
+            OddJob.getInstance().getMessageManager().danger("A warp with this name already exists.", player, false);
         }
+
+        warps.put(name, new Warp(name, player.getLocation(), password,0D));
+        OddJob.getInstance().getMySQLManager().createWarp(name, player, password);
+
+        OddJob.getInstance().getMessageManager().success("Successfully created " + ChatColor.AQUA + name, player, true);
+
     }
 
-    public void add(CommandSender commandSender, String name) {
-        add(commandSender, name, "");
+    public void add(Player player, String name) {
+        add(player, name, "");
     }
 
     public void del(CommandSender commandSender, String name, String password) {
-        if (exists(name, password)) {
+        if (has(name, password)) {
+            warps.remove(name);
             OddJob.getInstance().getMySQLManager().deleteWarp(name, password);
-            if (exists(name, password)) {
-                OddJob.getInstance().getMessageManager().danger("Something went wrong when deleting warp.", commandSender, true);
-            } else {
-                OddJob.getInstance().getMessageManager().success("Successfully deleted " + ChatColor.AQUA + name, commandSender, true);
-            }
-
+            OddJob.getInstance().getMessageManager().success("Successfully deleted " + ChatColor.AQUA + name, commandSender, true);
         } else {
             OddJob.getInstance().getMessageManager().danger("A warp with this name does not exists or you used wrong password.", commandSender, false);
         }
@@ -57,41 +52,46 @@ public class WarpManager {
         del(commandSender, name, "");
     }
 
-    public void pass(CommandSender commandSender, String name, String password) {
-        if (!(commandSender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().danger("Only usable as a player.", commandSender, false);
+    public void pass(Player player, String name, String password) {
+
+        Location location = warps.get(name).get();
+        if (has(name, password)) {
+            OddJob.getInstance().getTeleportManager().teleport(player, location, cost, PlayerTeleportEvent.TeleportCause.COMMAND);
         } else {
-            Player player = (Player) commandSender;
-            Location location = OddJob.getInstance().getMySQLManager().getWarp(name, password);
-            if (exists(name, password)) {
-                //TODO Permission
-                OddJob.getInstance().getTeleportManager().teleport(player, OddJob.getInstance().getMySQLManager().getWarp(name, password), cost, PlayerTeleportEvent.TeleportCause.COMMAND);
-            } else {
-                OddJob.getInstance().getMessageManager().danger("A warp with this name does not exists or you used wrong password.", commandSender, false);
-            }
+            OddJob.getInstance().getMessageManager().danger("A warp with this name does not exists or you used wrong password.", player, false);
         }
+
     }
 
-    public boolean exists(String name, String password) {
-        Location location = OddJob.getInstance().getMySQLManager().getWarp(name, password);
-        return location != null;
+    public boolean has(String name) {
+        return warps.containsKey(name);
     }
 
-    public void pass(CommandSender commandSender, String name) {
-        pass(commandSender, name, "");
-    }
-
-    public void list(CommandSender commandSender) {
-        StringBuilder sb = new StringBuilder();
-        List<String> list = OddJob.getInstance().getMySQLManager().listWarps();
-        int i = 1;
-        for (String s : list) {
-            sb.append(i).append(".) ").append(ChatColor.GOLD).append(s).append(ChatColor.RESET).append("\n");
-            i++;
+    public boolean has(String name, String password) {
+        if (warps.containsKey(name)) {
+            return warps.get(name).pass(password);
         }
-        commandSender.sendMessage(sb.toString());
+        return false;
+    }
+
+    public void list(Player player) {
+        OddJob.getInstance().getMessageManager().infoListWarps("List of Warps",warps,player);
     }
 
     public void help(CommandSender commandSender) {
+    }
+
+    public void pass(Player player, String string) {
+        pass(player,string,"");
+    }
+    public void load() {
+        warps = OddJob.getInstance().getMySQLManager().loadWarps();
+    }
+    public void save() {
+        OddJob.getInstance().getMySQLManager().saveWarps(warps);
+    }
+
+    public Warp get(String name) {
+        return warps.get(name);
     }
 }

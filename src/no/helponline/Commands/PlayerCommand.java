@@ -2,7 +2,7 @@ package no.helponline.Commands;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;
-import no.helponline.Utils.OddPlayer;
+import no.helponline.Utils.Odd.OddPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

@@ -21,7 +21,7 @@ public class DeathManager {
     private final HashMap<UUID, BukkitTask> task = new HashMap<>();
     private final HashMap<UUID, Inventory> inventories = new HashMap<>();
     // Entity : Player
-    private final HashMap<UUID, UUID> owner = new HashMap<>();
+    private HashMap<UUID, UUID> owner = new HashMap<>();
 
     public void add(Entity entity, Player player) {
         // Make the PlayerSkull
@@ -83,6 +83,11 @@ public class DeathManager {
         );
     }
 
+    /**
+     *
+     * @param entity UUID of Entity
+     * @param findingPlayer UUID of Player finding the Spirit
+     */
     public void replace(Entity entity, UUID findingPlayer) {
         // Notify the owner, if the Player is online
         UUID ownerOfArmor = owner.get(entity.getUniqueId());
@@ -97,10 +102,9 @@ public class DeathManager {
             OddJob.getInstance().getMessageManager().success("You got lucky this time", ownerOfArmor, true);
         }
 
-        // Remove from database
+        // Continue to remove()
         entity.remove();
         remove(entity.getUniqueId());
-        //}
 
     }
 
@@ -108,6 +112,11 @@ public class DeathManager {
         return owner.containsKey(uuid);
     }
 
+    /**
+     * Removing Entity from HashMap and Database
+     *
+     * @param uuid UUID of Entity
+     */
     public void remove(UUID uuid) {
         // If task is not cancelled
         if (task.get(uuid) != null) {
@@ -118,10 +127,18 @@ public class DeathManager {
         task.remove(uuid);
 
         // Remove from database
+        OddJob.getInstance().getMySQLManager().deleteSpirit(uuid);
         inventories.remove(uuid);
         owner.remove(uuid);
     }
 
+    /**
+     * Checking existence of World and Entity to remove
+     *
+     * @param worldUUID UUID of World
+     * @param entityUUID UUID of Entity
+     * @param playerUUID UUID of Player
+     */
     public void replace(UUID worldUUID, UUID entityUUID, UUID playerUUID) {
         // Does the World exists
         World world = Bukkit.getWorld(worldUUID);
@@ -140,10 +157,16 @@ public class DeathManager {
         }
         if (i > 0) return;
 
-        // Remove it
+        // Continue to finder and remove
         replace(armorStand, playerUUID);
     }
 
+    /**
+     * Cleaning up the World of Spirits
+     *
+     * @param world World
+     * @return number of cleaned Spirits
+     */
     public int cleanUp(World world) {
         int i = 0;
         for (ArmorStand armor : world.getEntitiesByClass(ArmorStand.class)) {
@@ -161,5 +184,9 @@ public class DeathManager {
 
     public Inventory getInventory(UUID uniqueId) {
         return inventories.get(uniqueId);
+    }
+
+    public void load() {
+        owner = OddJob.getInstance().getMySQLManager().loadSpirits();
     }
 }

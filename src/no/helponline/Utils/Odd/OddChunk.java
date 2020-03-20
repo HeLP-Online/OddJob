@@ -1,4 +1,4 @@
-package no.helponline.Utils;
+package no.helponline.Utils.Odd;
 
 import java.util.UUID;
 

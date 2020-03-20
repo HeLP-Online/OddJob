@@ -63,7 +63,7 @@ public class EconManager {
     public void createAccounts(UUID uuid, double startValue, boolean guild) {
         createBankAccount(uuid,startValue,guild);
         if (!guild) createPocket(uuid,startValue);
-        OddJob.getInstance().getMySQLManager().createAccount(uuid, startValue, guild);
+        OddJob.getInstance().getMySQLManager().createEconAccount(uuid, startValue, guild);
     }
     public void createPocket(UUID uuid, double startValue) {
         setPocketBalance(uuid,startValue);

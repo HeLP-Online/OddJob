@@ -11,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +28,7 @@ public class JailManager {
     //Location jailWarden;
 
     public UUID in(UUID uniqueId) {
-        World world = OddJob.getInstance().getMySQLManager().inPlayerJail(uniqueId);
+        World world = OddJob.getInstance().getMySQLManager().playerInJail(uniqueId);
         if (world != null) {
             return world.getUID();
         }
@@ -70,7 +69,7 @@ public class JailManager {
 
         // Teleport to Jail lobby
         OddJob.getInstance().getMessageManager().console("Jailing "+player.getName()+" has "+player.getInventory().getContents().length);
-        OddJob.getInstance().getMySQLManager().addPlayerJail(uuidPlayer, world);
+        OddJob.getInstance().getMySQLManager().setPlayerInJail(uuidPlayer, world);
         player.getInventory().setContents(new ItemStack[]{});
 
         // Finishing up

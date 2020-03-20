@@ -15,6 +15,10 @@ public class Home {
         homes.put(name, location);
     }
 
+    public Home(UUID owner) {
+        this.owner = owner;
+    }
+
     public Location get(String name) {
         return homes.get(name);
     }

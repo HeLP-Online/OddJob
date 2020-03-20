@@ -1,8 +1,6 @@
 package no.helponline.Managers;
 
-import com.sk89q.worldedit.bukkit.fastutil.Hash;
 import no.helponline.OddJob;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -125,23 +123,23 @@ public class LockManager {
     public void lock(UUID uuid, Entity entity) {
         if (entity.getType().equals(EntityType.ARMOR_STAND)) {
             armor.put(entity.getUniqueId(), uuid);
-            OddJob.getInstance().getMySQLManager().createLock(uuid, entity);
+            OddJob.getInstance().getMySQLManager().createSecuredArmorStand(uuid, entity);
         }
     }
 
     public void lock(UUID uuid, Location location) {
         locked.put(location, uuid);
-        OddJob.getInstance().getMySQLManager().createLock(uuid, location);
+        OddJob.getInstance().getMySQLManager().createSecuredBlock(uuid, location);
     }
 
     public void unlock(Entity entity) {
         armor.remove(entity.getUniqueId());
-        OddJob.getInstance().getMySQLManager().deleteLock(entity);
+        OddJob.getInstance().getMySQLManager().deleteSecuredArmorStand(entity);
     }
 
     public void unlock(Location location) {
         locked.remove(location);
-        OddJob.getInstance().getMySQLManager().deleteLock(location);
+        OddJob.getInstance().getMySQLManager().deleteSecuredBlock(location);
     }
 
     public boolean isLocked(Entity entity) {
@@ -214,9 +212,9 @@ public class LockManager {
         lockAble = OddJob.getInstance().getMySQLManager().getLockableMaterials();
 
         // List of Locked ArmorStands
-        armor = OddJob.getInstance().getMySQLManager().loadArmorStands();
+        armor = OddJob.getInstance().getMySQLManager().loadSecuredArmorStands();
 
         // List of Locked Blocks
-        locked = OddJob.getInstance().getMySQLManager().loadLockedBlocks();
+        locked = OddJob.getInstance().getMySQLManager().loadSecuredBlocks();
     }
 }

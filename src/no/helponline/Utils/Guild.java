@@ -95,4 +95,8 @@ public class Guild {
     public boolean getFriendlyFire() {
         return friendly_fire;
     }
+
+    public void setMaster(UUID member) {
+        members.put(member,Role.Master);
+    }
 }

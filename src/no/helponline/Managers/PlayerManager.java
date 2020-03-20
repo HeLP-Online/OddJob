@@ -3,8 +3,7 @@ package no.helponline.Managers;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
-import no.helponline.Utils.Enum.ScoreBoard;
-import no.helponline.Utils.OddPlayer;
+import no.helponline.Utils.Odd.OddPlayer;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -100,7 +99,6 @@ public class PlayerManager {
     }
 
     public void setGameMode(Player player, GameMode gameMode) {
-        OddJob.getInstance().getMySQLManager().setGameMode(player, gameMode);
         player.setGameMode(gameMode);
         OddJob.getInstance().getMessageManager().success("Your GameMode is set to " + ChatColor.GOLD + gameMode.name() + ChatColor.GREEN + " in " + ChatColor.DARK_AQUA + player.getWorld().getName(), player.getUniqueId(), true);
     }
