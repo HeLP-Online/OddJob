@@ -174,7 +174,7 @@ public class PlayerInteract implements Listener {
                 UUID yourGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
 
 
-                if (!blockGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) && !yourGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
+                if (blockGuild != null && !blockGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) && !yourGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                     // You are in a Guild, and Block is owned by a Guild
                     if (blockGuild.equals(yourGuild)) {
                         // Owned by your Guild

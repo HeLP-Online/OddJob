@@ -33,12 +33,12 @@ public class GuildManager {
     private final HashMap<UUID, UUID> autoClaim = new HashMap<>();      // PlayerUUID   | GuildUUID
 
     /**
-     * List of Guilds
+     * List of Guild UUIDs with Guild
      */
     private HashMap<UUID, Guild> guilds = new HashMap<>();        // GuildUUID    | GUILD
 
     /**
-     * List of Chunks
+     * List of Chunks with Guild UUID
      */
     private HashMap<Chunk, UUID> chunkGuild = new HashMap<>();    // Chunk        | GuildUUID
 
@@ -48,14 +48,9 @@ public class GuildManager {
     private HashMap<UUID, UUID> guildPending = new HashMap<>();   // PlayerUUID   | GuildUUID
 
     /**
-     * List of Players invited to a Guild
+     * List of Players UUID invited to a Guild UUID
      */
     private HashMap<UUID, UUID> guildInvite = new HashMap<>();    // PlayerUUID   | GuildUUID
-
-    /**
-     * List of Players with corresponding Guild
-     */
-    private HashMap<UUID, UUID> members = new HashMap<>();        // PlayerUUID   | GuildUUID
 
     public GuildManager() {
 
@@ -210,7 +205,6 @@ public class GuildManager {
 
         // Add the new Guild
         guilds.put(guild, new Guild(name, Zone.GUILD, guild, false, false, player, Role.Master));
-        members.put(player, guild);
 
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
@@ -223,10 +217,10 @@ public class GuildManager {
     /**
      * Returns a list of the Guilds known
      *
-     * @return A list of Guild UUIDs
+     * @return A list of Guilds UUID and GUILD
      */
-    public Set<UUID> getGuilds() {
-        return guilds.keySet();
+    public HashMap<UUID, Guild> getGuilds() {
+        return guilds;
     }
 
 
@@ -288,15 +282,14 @@ public class GuildManager {
      */
     public void claim(Player player, UUID zone) {
         Chunk inChunk = player.getLocation().getChunk();
-        UUID playerGuild = getGuildUUIDByMember(player.getUniqueId());
         UUID chunkGuild = getGuildUUIDByChunk(inChunk);
 
-        if (!chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
+        if (chunkGuild != null || !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
             // Chunk is already claimed by Guild
             OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk)), player, false);
         } else {
             // Claiming Chunk to Guild
-            claim(playerGuild, inChunk, player);
+            claim(zone, inChunk, player);
         }
     }
 
@@ -344,7 +337,7 @@ public class GuildManager {
      * @return UUID of the Guild who has claimed the Chunk
      */
     public UUID getGuildUUIDByChunk(Chunk chunk) {
-        return chunkGuild.containsKey(chunk) ? chunkGuild.get(chunk) : getGuildUUIDByZone(Zone.WILD);
+        return chunkGuild.get(chunk);
     }
 
     /**
@@ -362,7 +355,6 @@ public class GuildManager {
 
         // Add a Player to Guild as Member
         guilds.get(guild).getMembers().put(player, Role.Members);
-        members.put(player, guild);
 
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
@@ -423,6 +415,7 @@ public class GuildManager {
      * @return String name of the Guild
      */
     public String getGuildNameByUUID(UUID guild) {
+        if (guild == null) guild = getGuildUUIDByZone(Zone.WILD);
         return guilds.get(guild).getName();
     }
 
@@ -554,20 +547,20 @@ public class GuildManager {
         Role role = OddJob.getInstance().getGuildManager().getGuildMemberRole(player);
         Guild guild = getGuild(getGuildUUIDByMember(player));
         UUID next = null;
-        if (role.equals(Role.Master)){
+        if (role.equals(Role.Master)) {
             for (UUID member : guild.getMembers().keySet()) {
                 if (member.equals(player)) continue;
                 if (next == null) {
-                next = member; }
+                    next = member;
+                }
             }
         }
 
         guilds.get(getGuildUUIDByMember(player)).getMembers().remove(player);
-        members.remove(player);
         OddJob.getInstance().getMySQLManager().deleteGuildMember(player);
         if (next != null) {
             guild.setMaster(next);
-            OddJob.getInstance().getMessageManager().guildNewMaster(guild,player,next);
+            OddJob.getInstance().getMessageManager().guildNewMaster(guild, player, next);
         }
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
@@ -602,12 +595,9 @@ public class GuildManager {
      * @param player UUID of the Player
      * @param reason String reason
      */
-    public void kickFromGuild(UUID guild, UUID player, String reason) {
-        if (guild.equals(getGuildUUIDByMember(player))) {
-            leave(player);
-            OddJob.getInstance().log("left");
-            //TODO print reason
-        }
+    public void kickFromGuild(UUID guild, UUID target, UUID player, String reason) {
+        leave(player);
+        OddJob.getInstance().getMessageManager().guildKickPlayer(getGuild(guild), target, player, reason);
     }
 
     /**
@@ -637,6 +627,7 @@ public class GuildManager {
      * @return Zone
      */
     public Zone getZoneByGuild(UUID guild) {
+        if (guild == null) return Zone.WILD;
         return guilds.get(guild).getZone();
     }
 
@@ -738,27 +729,6 @@ public class GuildManager {
     }
 
     /**
-     * Claims the Chunk the Player is standing in to the Zone-Guild
-     *
-     * @param player UUID of the Player
-     * @param zone   Zone the Player is claiming to
-     */
-    public void claim(Player player, Zone zone) {
-        Chunk inChunk = player.getLocation().getChunk();
-        UUID zoneGuild = getGuildUUIDByZone(zone);
-        UUID chunkGuild = getGuildUUIDByChunk(inChunk);
-
-        if (chunkGuild != null && !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
-            // The Chunk is already claimed by a Guild
-            OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk)), player, false);
-        } else {
-            // Claiming to Zone
-            claim(zoneGuild, inChunk, player);
-            OddJob.getInstance().getMessageManager().success("You have claimed " + ChatColor.GOLD + "X:" + inChunk.getX() + " Z:" + inChunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuildNameByUUID(zoneGuild), player, true);
-        }
-    }
-
-    /**
      * Creates a Guild by the name of the Zone
      * No Members of the Guild!
      *
@@ -792,29 +762,6 @@ public class GuildManager {
         UUID guild = getGuildInvitation(joiningPlayer);
         join(guild, joiningPlayer);
         OddJob.getInstance().getMessageManager().guildAcceptInvite(getGuild(guild), joiningPlayer);
-    }
-
-    /**
-     * Denies a Player access to the Guild
-     *
-     * @param guildToJoin   UUID of the Guild
-     * @param joiningPlayer UUID of the Player
-     */
-    public void deny(UUID guildToJoin, UUID joiningPlayer) {
-        guildPending.remove(joiningPlayer);
-        guildInvite.remove(joiningPlayer);
-
-        OddJob.getInstance().getMessageManager().guild("Request from " + ChatColor.GOLD + OddJob.getInstance().getPlayerManager().getName(joiningPlayer) + ChatColor.RESET + " to join " + ChatColor.DARK_AQUA + getGuildNameByUUID(guildToJoin) + ChatColor.RESET + " has been declined", guildToJoin, joiningPlayer);
-    }
-
-    /**
-     * Return the number of Chunks owned by the Guild
-     *
-     * @param guild UUID of the Guild
-     * @return Integer
-     */
-    public int getGuildCountClaims(UUID guild) {
-        return this.guilds.get(guild).getChunks();
     }
 
     /**
@@ -875,7 +822,7 @@ public class GuildManager {
         StringBuilder sb = new StringBuilder();
         int minX = 0, maxX = 0, minZ = 0, maxZ = 0;
         BlockFace facing = player.getFacing();
-        String dir = null;
+        String dir;
         Chunk chunk = player.getLocation().getChunk();
         World world = player.getWorld();
         switch (facing) {
@@ -935,24 +882,27 @@ public class GuildManager {
                     else if (z == minX + 5) sb.append("|| ");
                     else sb.append("  ");
                     for (int x = minX; x <= maxX; x++) {
-                        //OddJob.getInstance().getMessageManager().console("X:" + x);
+                        //OddJob.getInstance().getMessageManager().console("Z:" + z);
                         Chunk test = world.getChunkAt(x, z);
                         UUID guild = chunkGuild.get(test);
                         if (chunk.equals(test)) {
                             sb.append(" ").append(ChatColor.GOLD).append("X");
                         } else if (guild != null) {
                             Zone zone = getGuild(guild).getZone();
-
+                            if (!g.containsKey(guild)) {
+                                g.put(guild, c);
+                                c++;
+                            }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
-                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
-                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
-                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WAR)) g.put(guild, 1);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 2);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 3);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 4);
                                 sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
                             } else {
                                 if (!g.containsKey(guild)) g.put(guild, c);
-                                c++;
                                 sb.append(" ").append(color).append(chars[g.get(guild)]);
                             }
                         } else sb.append(" ").append(color(Zone.WILD)).append("O");
@@ -968,24 +918,27 @@ public class GuildManager {
                     else if (z == minZ + 3) sb.append("|| ");
                     else sb.append("  ");
                     for (int x = maxX; x >= minX; x--) {
-                        //OddJob.getInstance().getMessageManager().console("X:" + x);
+                        //OddJob.getInstance().getMessageManager().console("Z:" + z);
                         Chunk test = world.getChunkAt(x, z);
                         UUID guild = chunkGuild.get(test);
                         if (chunk.equals(test)) {
                             sb.append(" ").append(ChatColor.GOLD).append("X");
                         } else if (guild != null) {
                             Zone zone = getGuild(guild).getZone();
-
+                            if (!g.containsKey(guild)) {
+                                g.put(guild, c);
+                                c++;
+                            }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
-                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
-                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
-                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WAR)) g.put(guild, 1);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 2);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 3);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 4);
                                 sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
                             } else {
                                 if (!g.containsKey(guild)) g.put(guild, c);
-                                c++;
                                 sb.append(" ").append(color).append(chars[g.get(guild)]);
                             }
                         } else sb.append(" ").append(color(Zone.WILD)).append("O");
@@ -1014,10 +967,11 @@ public class GuildManager {
                             }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
-                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
-                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
-                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WAR)) g.put(guild, 1);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 2);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 3);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 4);
                                 sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
                             } else {
                                 if (!g.containsKey(guild)) g.put(guild, c);
@@ -1049,10 +1003,11 @@ public class GuildManager {
                             }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WAR)) g.put(guild, 0);
-                                if (zone.equals(Zone.ARENA)) g.put(guild, 1);
-                                if (zone.equals(Zone.JAIL)) g.put(guild, 2);
-                                if (zone.equals(Zone.SAFE)) g.put(guild, 3);
+                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WAR)) g.put(guild, 1);
+                                if (zone.equals(Zone.ARENA)) g.put(guild, 2);
+                                if (zone.equals(Zone.JAIL)) g.put(guild, 3);
+                                if (zone.equals(Zone.SAFE)) g.put(guild, 4);
                                 sb.append(" ").append(color(zone)).append(chars[g.get(guild)]);
                             } else {
                                 if (!g.containsKey(guild)) g.put(guild, c);
@@ -1089,6 +1044,17 @@ public class GuildManager {
                 return ChatColor.BLUE;
             default:
                 return ChatColor.RESET;
+        }
+    }
+
+    public void listGuilds() {
+        List<String> list = new ArrayList<>();
+        for (UUID guildUUID : getGuilds().keySet()) {
+            ChatColor c = ChatColor.YELLOW;
+            Guild guild = getGuild(guildUUID);
+            if(guild.getInvitedOnly()) c = ChatColor.RED;
+            if (guild.getOpen()) c = ChatColor.GREEN;
+            list.add(c+guild.getName());
         }
     }
 }

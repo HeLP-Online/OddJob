@@ -53,7 +53,7 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                                 OddJob.getInstance().getMessageManager().errorHome(strings[1], player);
                                 return true;
                             }
-                        } catch (Exception ex) {
+                        } catch (Exception ignored) {
                         }
                     }
                     Location location = OddJob.getInstance().getHomesManager().get(player.getUniqueId(), strings[0]);
@@ -115,19 +115,18 @@ public class HomesCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                 }
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
             }
         }
         return list;
     }
 
     enum Args {
-        tp("Teleport you to your home"),
         list("Lists your homes"),
         set("Sets a new home"),
         del("Deletes a home");
 
-        private String s;
+        private final String s;
 
         Args(String s) {
             this.s = s;

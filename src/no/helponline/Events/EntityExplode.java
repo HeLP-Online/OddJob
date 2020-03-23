@@ -34,7 +34,7 @@ public class EntityExplode implements Listener {
             // Every Block in the explosion
             Chunk chunk = block.getChunk();
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
-            if (!guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
+            if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 // The Chunk is inside a Guild
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());

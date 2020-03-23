@@ -455,12 +455,24 @@ public class MessageManager {
         player.sendMessage(string);
     }
 
-    public void guildNewMaster(Guild guild,UUID target, UUID next) {
+    public void guildNewMaster(Guild guild, UUID target, UUID next) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(next))
-                success("You are the Chosen One to be the new GuildMaster since "+cPlayer+OddJob.getInstance().getPlayerManager().getName(target)+cSuccess+" left.",member,true);
+                success("You are the Chosen One to be the new GuildMaster since " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " left.", member, true);
             else
-                warning(cPlayer+OddJob.getInstance().getPlayerManager().getName(next)+cWarning+" is now your new GuildMaster.",member,false);
+                warning(cPlayer + OddJob.getInstance().getPlayerManager().getName(next) + cWarning + " is now your new GuildMaster.", member, false);
         }
+    }
+
+    public void guildKickPlayer(Guild guild, UUID target, UUID player, String reason) {
+        String r = "";
+        if (reason != null) r = " because " + cValue + reason;
+        for (UUID member : guild.getMembers().keySet()) {
+            if (member.equals(player))
+                success("You have successfully kick " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " from the Guild.", member, true);
+            else
+                warning(cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has been kicked from the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cSuccess + r, member, false);
+        }
+        danger("You have been kicked from " + cGuild + guild.getName() + cDanger + " by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cDanger + r, target, false);
     }
 }

@@ -138,6 +138,7 @@ public class ScoreManager {
                 }
                 Chunk playerInChunk = player.getLocation().getChunk();
                 UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(playerInChunk);
+                if (guildUUID == null) guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
                 String guildName = OddJob.getInstance().getGuildManager().getGuildNameByUUID(guildUUID);
                 Zone zone = OddJob.getInstance().getGuildManager().getZoneByGuild(guildUUID);
                 String guildZone = zone.name();

@@ -267,9 +267,16 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                             reason.append(strings[i]).append(" ");
                         }
                     }
-                    OddJob.getInstance().getGuildManager().kickFromGuild(guild, target, reason.toString());
+                    OddJob.getInstance().getGuildManager().kickFromGuild(guild, target, player.getUniqueId(),reason.toString());
                     return true;
                 case "list":
+                    if (strings.length >= 2) {
+                        switch (strings[1]) {
+                            case "guilds":
+                                OddJob.getInstance().getGuildManager().listGuilds();
+                                return true;
+                        }
+                    }
                     break;
                 case "promote":
                     // Command '/guild promote <player>'

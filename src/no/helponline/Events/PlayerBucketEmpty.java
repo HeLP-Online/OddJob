@@ -19,7 +19,7 @@ public class PlayerBucketEmpty implements Listener {
         UUID chunkInGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(event.getBlockClicked().getChunk());
         UUID memberOfGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(event.getPlayer().getUniqueId());
 
-        if (chunkInGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
+        if (chunkInGuild == null || chunkInGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
             // Player is in the Wild
             return;
         }

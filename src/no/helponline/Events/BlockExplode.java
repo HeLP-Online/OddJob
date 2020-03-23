@@ -1,6 +1,7 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Enum.Zone;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,7 +30,7 @@ public class BlockExplode implements Listener {
             // CHECK GUILD
             Chunk chunk = block.getChunk();
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
-            if (guild != null) {
+            if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
             }

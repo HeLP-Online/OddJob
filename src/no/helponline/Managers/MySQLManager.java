@@ -4,9 +4,11 @@ import no.helponline.OddJob;
 import no.helponline.Utils.Enum.Role;
 import no.helponline.Utils.Enum.ScoreBoard;
 import no.helponline.Utils.Enum.Zone;
+import no.helponline.Utils.Guild;
+import no.helponline.Utils.Home;
 import no.helponline.Utils.Odd.OddPlayer;
 import no.helponline.Utils.Utility;
-import no.helponline.Utils.*;
+import no.helponline.Utils.Warp;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -465,6 +467,7 @@ public class MySQLManager {
             Zone zone = guild.getZone();
             boolean invitedOnly = guild.getInvitedOnly();
             boolean friendlyFire = guild.getFriendlyFire();
+            boolean open = guild.getOpen();
             Role permissionInviteRole = guild.getPermissionInvite();
             HashMap<UUID, Role> members = guild.getMembers();
 
@@ -475,23 +478,25 @@ public class MySQLManager {
                 resultSet = preparedStatement.executeQuery();
 
                 if (resultSet.next()) {
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`invite_permission` = ? WHERE `uuid` = ?");
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`invite_permission` = ?,`open` = ? WHERE `uuid` = ?");
                     preparedStatement.setString(1, name);
                     preparedStatement.setString(2, zone.name());
                     preparedStatement.setInt(3, invitedOnly ? 1 : 0);
                     preparedStatement.setInt(4, friendlyFire ? 1 : 0);
                     preparedStatement.setString(5, permissionInviteRole.name());
-                    preparedStatement.setString(6, guildUUID.toString());
+                    preparedStatement.setInt(6, open ? 1 : 0);
+                    preparedStatement.setString(7, guildUUID.toString());
                     preparedStatement.executeUpdate();
                     gu++;
                 } else {
-                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`invite_permission`) VALUES (?,?,?,?,?,?)");
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`invite_permission`,`open`) VALUES (?,?,?,?,?,?,?)");
                     preparedStatement.setString(1, guildUUID.toString());
                     preparedStatement.setString(2, name);
                     preparedStatement.setString(3, zone.name());
                     preparedStatement.setInt(4, invitedOnly ? 1 : 0);
                     preparedStatement.setInt(5, friendlyFire ? 1 : 0);
                     preparedStatement.setString(6, permissionInviteRole.name());
+                    preparedStatement.setInt(7, open ? 1 : 0);
                     preparedStatement.execute();
                     gi++;
                 }
@@ -557,6 +562,7 @@ public class MySQLManager {
                         resultSet.getInt("invited_only") == 1,
                         resultSet.getInt("friendly_fire") == 1,
                         Role.valueOf(resultSet.getString("invite_permission")),
+                        resultSet.getInt("open") == 1,
                         members
                 ));
                 g++;
@@ -628,6 +634,7 @@ public class MySQLManager {
                     int x = resultSet.getInt("x");
                     int z = resultSet.getInt("z");
                     Chunk chunk = world.getChunkAt(x, z);
+                    chunk.load();
                     chunks.put(chunk, guild);
                 }
             }
@@ -648,19 +655,19 @@ public class MySQLManager {
             preparedStatement.execute();
 
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `uuid` = ?");
-            preparedStatement.setString(1,guild.toString());
+            preparedStatement.setString(1, guild.toString());
             preparedStatement.execute();
 
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `uuid` = ?");
-            preparedStatement.setString(1,guild.toString());
+            preparedStatement.setString(1, guild.toString());
             preparedStatement.execute();
 
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_pendings` WHERE `uuid` = ?");
-            preparedStatement.setString(1,guild.toString());
+            preparedStatement.setString(1, guild.toString());
             preparedStatement.execute();
 
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_invites` WHERE `uuid` = ?");
-            preparedStatement.setString(1,guild.toString());
+            preparedStatement.setString(1, guild.toString());
             preparedStatement.execute();
 
             OddJob.getInstance().getMessageManager().console("Guild disbanded");
@@ -889,7 +896,7 @@ public class MySQLManager {
         int u = 0;
         try {
             connect();
-            for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds()) {
+            for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
                 if (OddJob.getInstance().getEconManager().hasBankAccount(uuid, true)) {
                     double amount = OddJob.getInstance().getEconManager().getBankBalance(uuid, true);
                     preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `amount` = ? WHERE `uuid` = ?");
@@ -1112,15 +1119,15 @@ public class MySQLManager {
     }
 
     public HashMap<UUID, UUID> loadSpirits() {
-        HashMap<UUID,UUID> spirits = new HashMap<>();
+        HashMap<UUID, UUID> spirits = new HashMap<>();
 
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_spirits`");
             resultSet = preparedStatement.executeQuery();
 
-            while(resultSet.next()) {
-                spirits.put(UUID.fromString(resultSet.getString("entity")),UUID.fromString(resultSet.getString("uuid")));
+            while (resultSet.next()) {
+                spirits.put(UUID.fromString(resultSet.getString("entity")), UUID.fromString(resultSet.getString("uuid")));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -1128,30 +1135,31 @@ public class MySQLManager {
             close();
         }
 
-        OddJob.getInstance().getMessageManager().load("Spirits",spirits.size());
+        OddJob.getInstance().getMessageManager().load("Spirits", spirits.size());
         return spirits;
     }
 
-    public void setSpirit(UUID entity,UUID player) {
-        try{
+    public void setSpirit(UUID entity, UUID player) {
+        try {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_spirits` (`entity`,`uuid`,`time`) VALUES (?,?,UNIX_TIMESTAMP())");
-            preparedStatement.setString(1,entity.toString());
-            preparedStatement.setString(2,player.toString());
+            preparedStatement.setString(1, entity.toString());
+            preparedStatement.setString(2, player.toString());
             preparedStatement.execute();
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
     }
+
     public void deleteSpirit(UUID entity) {
-        try{
+        try {
             connect();
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_players_spirits` WHERE `entity` = ?");
-            preparedStatement.setString(1,entity.toString());
+            preparedStatement.setString(1, entity.toString());
             preparedStatement.execute();
-        }catch (SQLException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
@@ -1162,11 +1170,11 @@ public class MySQLManager {
         try {
             connect();
             preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `player` = ?");
-            preparedStatement.setString(1,player.toString());
+            preparedStatement.setString(1, player.toString());
             preparedStatement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
-        }finally {
+        } finally {
             close();
         }
     }

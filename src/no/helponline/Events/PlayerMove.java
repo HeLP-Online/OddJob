@@ -50,7 +50,7 @@ public class PlayerMove implements Listener {
 
 
         // Auto claiming
-        if (!movingFromGuild.equals(movingToGuild) && movingToGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
+        if (movingToGuild != null && (movingFromGuild != null && !movingFromGuild.equals(movingToGuild)) && movingToGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
             if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
                 OddJob.getInstance().getGuildManager().autoClaim(player, movingToChunk);
             }
@@ -64,7 +64,7 @@ public class PlayerMove implements Listener {
         }
 
         // Actionbar
-        if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
+        /*if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk));
             print = true;
         } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk))) {
@@ -96,6 +96,6 @@ public class PlayerMove implements Listener {
             }
             PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s.toString() + "\"}"), 40, 20, 20);
             (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
-        }
+        }*/
     }
 }

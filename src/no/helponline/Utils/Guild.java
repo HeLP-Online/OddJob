@@ -14,7 +14,19 @@ public class Guild {
     HashMap<UUID, Role> members = new HashMap<>();
     Role permissionInvite;
     private int chunks;
+    boolean open;
 
+    /**
+     * Creating a new Guild from the command
+     *
+     * @param name String name of the Guild
+     * @param zone Zone the Guild belongs to
+     * @param guildUUID Guilds unique ID
+     * @param invited_only boolean Only invited Players may join
+     * @param friendly_fire boolean Members may damage each other inside the Guild
+     * @param playerUUID UUID of the Player creating the Guild
+     * @param role Role of the Player creating the Guild
+     */
     public Guild(String name, Zone zone, UUID guildUUID, boolean invited_only, boolean friendly_fire, UUID playerUUID, Role role) {
         this.name = name;
         this.zone = zone;
@@ -23,8 +35,18 @@ public class Guild {
         this.friendly_fire = friendly_fire;
         this.permissionInvite = Role.Members;
         this.members.put(playerUUID, role);
+        this.open = false;
     }
 
+    /**
+     * Creating default zones
+     *
+     * @param name
+     * @param zone
+     * @param guildUUID
+     * @param invited_only
+     * @param friendly_fire
+     */
     public Guild(String name, Zone zone, UUID guildUUID, boolean invited_only, boolean friendly_fire) {
         this.name = name;
         this.zone = zone;
@@ -32,9 +54,22 @@ public class Guild {
         this.invited_only = invited_only;
         this.friendly_fire = friendly_fire;
         this.permissionInvite = Role.Members;
+        this.open = false;
     }
 
-    public Guild(UUID guildUUID, String name, Zone zone, boolean invite_only, boolean friendly_fire, Role invite_permission, HashMap<UUID, Role> members) {
+    /**
+     * Loading from Database
+     *
+     * @param guildUUID
+     * @param name
+     * @param zone
+     * @param invite_only
+     * @param friendly_fire
+     * @param invite_permission
+     * @param open
+     * @param members
+     */
+    public Guild(UUID guildUUID, String name, Zone zone, boolean invite_only, boolean friendly_fire, Role invite_permission, boolean open, HashMap<UUID, Role> members) {
         this.guildUUID = guildUUID;
         this.name = name;
         this.zone = zone;
@@ -42,6 +77,7 @@ public class Guild {
         this.friendly_fire = friendly_fire;
         this.permissionInvite = invite_permission;
         this.members = members;
+        this.open = open;
     }
 
     public UUID getGuildUUID() {
@@ -98,5 +134,13 @@ public class Guild {
 
     public void setMaster(UUID member) {
         members.put(member,Role.Master);
+    }
+
+    public void setOpen(boolean open) {
+        this.open = open;
+    }
+
+    public boolean getOpen() {
+        return this.open;
     }
 }
