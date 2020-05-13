@@ -1,27 +1,30 @@
 package no.helponline;
 
+import net.milkbowl.vault.economy.Economy;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
-import no.helponline.Utils.ArenaPlayer;
+import no.helponline.Utils.Arena.*;
 import no.helponline.Utils.Broadcaster;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.io.IOException;
 import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
-    //public static HashMap<UUID, Location> deathChest = new HashMap<>();
-    public HashMap<UUID, ArenaPlayer> arenaPlayer = new HashMap<>();
     private static OddJob instance;
+
     private ArenaManager arenaManager;
     private BanManager banManager;
+    private ChestManager chestManager;
     private ConfigManager configManager;
     private DeathManager deathManager;
     private EconManager econManager;
     private FreezeManager freezeManager;
+    private GameManager gameManager;
     private GuildManager guildManager;
     private HomesManager homesManager;
     private JailManager jailManager;
@@ -31,9 +34,11 @@ public class OddJob extends JavaPlugin {
     private PlayerManager playerManager;
     private ScoreManager scoreManager;
     private ShopManager shopManager;
+    private SignManager signManager;
     private TeleportManager teleportManager;
     private WorldManger worldManager;
     private WarpManager warpManager;
+    private Economy econ;
 
     public static OddJob getInstance() {
         return instance;
@@ -44,10 +49,12 @@ public class OddJob extends JavaPlugin {
 
         arenaManager = new ArenaManager();
         banManager = new BanManager();
+        chestManager = new ChestManager();
         configManager = new ConfigManager();
         deathManager = new DeathManager();
         econManager = new EconManager();
         freezeManager = new FreezeManager();
+        gameManager = new GameManager();
         guildManager = new GuildManager();
         homesManager = new HomesManager();
         jailManager = new JailManager();
@@ -57,6 +64,7 @@ public class OddJob extends JavaPlugin {
         playerManager = new PlayerManager();
         scoreManager = new ScoreManager();
         shopManager = new ShopManager();
+        signManager = new SignManager();
         teleportManager = new TeleportManager();
         warpManager = new WarpManager();
         worldManager = new WorldManger();
@@ -130,11 +138,40 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerPortal(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
 
-        OddJob.getInstance().getArenaManager().loadArenas();
-
         Server server = getServer();
         Broadcaster broadcaster = new Broadcaster(Broadcaster.createSocket(), server.getPort(), server.getMotd(), server.getIp());
         getServer().getScheduler().runTaskAsynchronously(this, broadcaster);
+
+        PermissionHandler.reinitializeDatabase();
+        Game.reinitializeDatabase();
+        if (setupEconomy()) Bukkit.getConsoleSender().sendMessage("Vault found");
+        if (!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+            Bukkit.getConsoleSender().sendMessage("WorldEdit found");
+        }
+        if (!Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+            Bukkit.getConsoleSender().sendMessage("WorldGuard found");
+        }
+        if (!Bukkit.getVersion().toLowerCase().contains("spigot")) {
+            Bukkit.getConsoleSender().sendMessage("Spigot found");
+        }
+        if (!Bukkit.getVersion().toLowerCase().contains("paper")) {
+            Bukkit.getConsoleSender().sendMessage("Paper found");
+        }
+        if (!Bukkit.getVersion().toLowerCase().contains("craftbukkit")) {
+            Bukkit.getConsoleSender().sendMessage("Craftbukkit found");
+        }
+        signManager.updateSigns();
+    }
+
+    private boolean setupEconomy() {
+        if(Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+            RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
+            if (economyProvider != null) {
+                econ = economyProvider.getProvider();
+            }
+        }
+
+        return (econ != null);
     }
 
     public void onDisable() {
@@ -153,13 +190,16 @@ public class OddJob extends JavaPlugin {
         getLogger().log(Level.INFO, ChatColor.YELLOW + message);
     }
 
-
     public ArenaManager getArenaManager() {
         return arenaManager;
     }
 
     public BanManager getBanManager() {
         return banManager;
+    }
+
+    public ChestManager getChestManager() {
+        return chestManager;
     }
 
     public ConfigManager getConfigManager() {
@@ -214,6 +254,10 @@ public class OddJob extends JavaPlugin {
         return shopManager;
     }
 
+    public SignManager getSignManager() {
+        return signManager;
+    }
+
     public TeleportManager getTeleportManager() {
         return teleportManager;
     }
@@ -224,5 +268,9 @@ public class OddJob extends JavaPlugin {
 
     public WorldManger getWorldManager() {
         return worldManager;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 }

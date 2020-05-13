@@ -15,7 +15,7 @@ public class KickCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (command.getName().equalsIgnoreCase("kick")) {
             // COMMAND KICK
-            String message = OddJob.getInstance().getConfigManager().getString("default.kick_message");
+            String message = OddJob.getInstance().getConfig().getString("default.kick_message");
             if (strings.length >= 2) {
                 int length = strings.length;
                 StringBuilder sb = new StringBuilder();

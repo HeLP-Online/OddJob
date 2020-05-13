@@ -475,4 +475,5 @@ public class MessageManager {
         }
         danger("You have been kicked from " + cGuild + guild.getName() + cDanger + " by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cDanger + r, target, false);
     }
+
 }

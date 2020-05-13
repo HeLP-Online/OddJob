@@ -49,9 +49,10 @@ public class JailManager {
         }
 
         // If Player is in an Arena, get the Player out!
-        if (OddJob.getInstance().getArenaManager().isInArena(uuidPlayer)) {
+        //TODO
+        /*if (OddJob.getInstance().getArenaManager().isInArena(uuidPlayer)) {
             OddJob.getInstance().getArenaManager().abort(uuidPlayer);
-        }
+        }*/
 
         Player player = OddJob.getInstance().getPlayerManager().getPlayer(uuidPlayer);
         // Storing Inventory

@@ -16,6 +16,10 @@ public class ShopCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) commandSender;
+        if (strings.length == 0) {
+            OddJob.getInstance().getShopManager().menu(player);
+            return true;
+        }
         if (strings[0].equalsIgnoreCase("sell")) {
             if (strings.length == 1) {
                 ItemStack itemStack = player.getInventory().getItemInMainHand();

@@ -18,11 +18,26 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class DeathManager {
-    private final HashMap<UUID, BukkitTask> task = new HashMap<>();
+    /**
+     * Holds the tasks BukkitTask & Player UUID
+     */
+    private final HashMap<UUID,BukkitTask> task = new HashMap<>();
+
+    /**
+     * Holds the Inventories for Entity (ArmorStands)
+     */
     private final HashMap<UUID, Inventory> inventories = new HashMap<>();
-    // Entity : Player
+
+    /**
+     * Holds the owner information Entity (ArmorStands) & Player UUID
+     */
     private HashMap<UUID, UUID> owner = new HashMap<>();
 
+    /**
+     * Adds the Entity (ArmorStands) and Player
+     * @param entity Entity (ArmorStand)
+     * @param player Player
+     */
     public void add(Entity entity, Player player) {
         // Make the PlayerSkull
         ItemStack playerSkull = new ItemStack(Material.PLAYER_HEAD, 1);
@@ -33,14 +48,18 @@ public class DeathManager {
             playerSkull.setItemMeta(skull);
         }
 
+        // Make the ArmorStand
         ArmorStand armorStand = (ArmorStand) entity;
         armorStand.setCustomName("The spirit of " + OddJob.getInstance().getPlayerManager().getName(player.getUniqueId()));
         armorStand.setCustomNameVisible(true);
 
+        // Sets the inventory of the ArmorStand
         Inventory pInv = player.getInventory();
-        armorStand.getEquipment().setArmorContents(player.getInventory().getArmorContents());
-        armorStand.getEquipment().setItemInMainHand(player.getInventory().getItemInMainHand());
-        armorStand.getEquipment().setItemInOffHand(player.getInventory().getItemInOffHand());
+        if (armorStand.getEquipment() != null) {
+            armorStand.getEquipment().setArmorContents(player.getInventory().getArmorContents());
+            armorStand.getEquipment().setItemInMainHand(player.getInventory().getItemInMainHand());
+            armorStand.getEquipment().setItemInOffHand(player.getInventory().getItemInOffHand());
+        }
 
         Inventory inventory = Bukkit.createInventory(null, 54, "DEATH CHEST");
 
@@ -84,8 +103,9 @@ public class DeathManager {
     }
 
     /**
+     * Removing the ArmorStand
      *
-     * @param entity UUID of Entity
+     * @param entity Entity (ArmorStands)
      * @param findingPlayer UUID of Player finding the Spirit
      */
     public void replace(Entity entity, UUID findingPlayer) {
@@ -94,7 +114,7 @@ public class DeathManager {
         if (ownerOfArmor != findingPlayer) {
             // Finders keepers
             Player player = Bukkit.getPlayer(ownerOfArmor);
-            if (findingPlayer != null && player.isOnline())
+            if (findingPlayer != null && player != null && player.isOnline())
                 OddJob.getInstance().getMessageManager().danger("Somebody found your spirit.", ownerOfArmor, false);
             if (findingPlayer != null)
                 OddJob.getInstance().getMessageManager().console(ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(findingPlayer) + ChatColor.RESET + " found the spirit of " + ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(ownerOfArmor));
@@ -106,10 +126,6 @@ public class DeathManager {
         entity.remove();
         remove(entity.getUniqueId());
 
-    }
-
-    public boolean isDeathChest(UUID uuid) {
-        return owner.containsKey(uuid);
     }
 
     /**

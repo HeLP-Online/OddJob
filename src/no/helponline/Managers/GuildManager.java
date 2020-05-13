@@ -16,17 +16,13 @@ import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 public class GuildManager {
-    private final DynmapAPI dynmapApi;
-    private final MarkerAPI markerApi;
-    private final MarkerSet markerSet;
-    private final Set<MarkerIcon> markerIcon;
-    private HashMap<String, AreaMarker> markers;
-    /*DynmapAPI dapi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-    MarkerAPI mapi = dapi.getMarkerAPI();
-    Set<MarkerIcon> micon = mapi.getMarkerIcons();*/
+    private MarkerSet markerSet = null;
+    private final HashMap<String, AreaMarker> markers;
+
     /**
      * List of Players auto-claiming to a Guild
      */
@@ -40,7 +36,7 @@ public class GuildManager {
     /**
      * List of Chunks with Guild UUID
      */
-    private HashMap<Chunk, UUID> chunkGuild = new HashMap<>();    // Chunk        | GuildUUID
+    private HashMap<Chunk, UUID> chunks = new HashMap<>();    // Chunk        | GuildUUID
 
     /**
      * List of Players with a pending invitation to a Guild
@@ -53,11 +49,15 @@ public class GuildManager {
     private HashMap<UUID, UUID> guildInvite = new HashMap<>();    // PlayerUUID   | GuildUUID
 
     public GuildManager() {
-
-        dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-        markerApi = dynmapApi.getMarkerAPI();
-        markerIcon = markerApi.getMarkerIcons();
-        markerSet = markerApi.createMarkerSet("guilds", "guilds", markerIcon, false);
+        DynmapAPI dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
+        Set<MarkerIcon> markerIcon = null;
+        if (dynmapApi != null) {
+            MarkerAPI markerApi = dynmapApi.getMarkerAPI();
+            if (markerApi != null) {
+                markerIcon = markerApi.getMarkerIcons();
+                markerSet = markerApi.createMarkerSet("guilds", "guilds", markerIcon, false);
+            }
+        }
         markers = new HashMap<>();
     }
 
@@ -69,15 +69,6 @@ public class GuildManager {
      */
     public Guild getGuild(UUID guild) {
         return guilds.get(guild);
-    }
-
-    /**
-     * Getting all the Chunks and what Guild owns it
-     *
-     * @return HashMap with Chunk and UUID of the Guild
-     */
-    private HashMap<Chunk, UUID> getClaims() {
-        return null;//chunkGuild;
     }
 
     /**
@@ -93,13 +84,13 @@ public class GuildManager {
      * Loading the Chunk-list from the Database
      */
     public void loadChunks() {
-        chunkGuild.clear();
-        chunkGuild = OddJob.getInstance().getMySQLManager().loadChunks();
+        chunks.clear();
+        chunks = OddJob.getInstance().getMySQLManager().loadChunks();
         List<Chunk> rChunk = new ArrayList<>();
 
         int i = 0;
-        for (Chunk chunk : chunkGuild.keySet()) {
-            UUID guild = chunkGuild.get(chunk);
+        for (Chunk chunk : chunks.keySet()) {
+            UUID guild = chunks.get(chunk);
             if (getGuild(guild) == null) {
                 unClaim(chunk, null);
                 rChunk.add(chunk);
@@ -107,7 +98,7 @@ public class GuildManager {
             }
         }
 
-        for (Chunk chunk : rChunk) chunkGuild.remove(chunk);
+        for (Chunk chunk : rChunk) chunks.remove(chunk);
         OddJob.getInstance().getMessageManager().console("Removed " + i + " chunks, missing guild");
 
         clearDynmap();
@@ -121,7 +112,7 @@ public class GuildManager {
     }
 
     private void updateDynmap() {
-        for (Chunk chunk : chunkGuild.keySet()) {
+        for (Chunk chunk : chunks.keySet()) {
             updateDynmapChunk(chunk);
         }
     }
@@ -184,7 +175,7 @@ public class GuildManager {
      * Saving the Chunk-list to the Database
      */
     public void saveChunks() {
-        OddJob.getInstance().getMySQLManager().saveChunks(chunkGuild);
+        OddJob.getInstance().getMySQLManager().saveChunks(chunks);
     }
 
     /**
@@ -248,6 +239,7 @@ public class GuildManager {
      * @param player Player who are claiming
      */
     public void claim(UUID guild, Chunk chunk, Player player) {
+        if (guild == null || guild.equals(getGuildUUIDByZone(Zone.WILD))) return;
         //TODO LOCKS REMOVE
         /*
         HashMap<UUID, Location> listLocksInWorld = OddJob.getInstance().getMySQLManager().locksInWorld(world);
@@ -267,10 +259,10 @@ public class GuildManager {
         }*/
 
         // Adds the Chunk to the Guild
-        if (OddJob.getInstance().getMySQLManager().saveGuildsChunks(chunk, guild)) {
-            chunkGuild.put(chunk, guild);
+        if (!chunks.containsKey(chunk)) {
+            chunks.put(chunk, guild);
             updateDynmapChunk(chunk);
-            OddJob.getInstance().getMessageManager().success("Claiming chunk " + ChatColor.GOLD + "X:" + chunk.getX() + " Y:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getZoneByGuild(guild).name(), player, true);
+            OddJob.getInstance().getMessageManager().success("Claiming chunk " + ChatColor.GOLD + "X:" + chunk.getX() + " Y:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuild(guild).getName(), player, true);
         } else OddJob.getInstance().getMessageManager().danger("Already claimed", player, false);
     }
 
@@ -278,18 +270,18 @@ public class GuildManager {
      * Claiming the Players Location Chunk to it's Guild
      *
      * @param player Player to claim the Chunk
-     * @param zone
+     * @param guild  Zone of the Chunk
      */
-    public void claim(Player player, UUID zone) {
+    public void claim(Player player, UUID guild) {
         Chunk inChunk = player.getLocation().getChunk();
         UUID chunkGuild = getGuildUUIDByChunk(inChunk);
 
-        if (chunkGuild != null || !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
+        if (chunkGuild != null && !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
             // Chunk is already claimed by Guild
             OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk)), player, false);
         } else {
             // Claiming Chunk to Guild
-            claim(zone, inChunk, player);
+            claim(guild, inChunk, player);
         }
     }
 
@@ -298,7 +290,7 @@ public class GuildManager {
      *
      * @param player Player to unClaim the Chunk for
      */
-    public void unClaim(Player player) {
+    public void unClaim(@Nonnull Player player) {
         Chunk inChunk = player.getLocation().getChunk();
         UUID playerGuild = getGuildUUIDByMember(player.getUniqueId());
         UUID chunkGuild = getGuildUUIDByChunk(inChunk);
@@ -319,7 +311,7 @@ public class GuildManager {
      * @param chunk  Chunk to unClaim
      * @param player Player to message
      */
-    public void unClaim(Chunk chunk, Player player) {
+    public void unClaim(@Nonnull Chunk chunk, Player player) {
         // UnClaim the Chunk
         if (OddJob.getInstance().getMySQLManager().deleteGuildsChunks(chunk)) {
             removeDynmapChunk(chunk);
@@ -336,8 +328,10 @@ public class GuildManager {
      * @param chunk Chunk to check
      * @return UUID of the Guild who has claimed the Chunk
      */
-    public UUID getGuildUUIDByChunk(Chunk chunk) {
-        return chunkGuild.get(chunk);
+    public UUID getGuildUUIDByChunk(@Nonnull Chunk chunk) {
+        UUID uuid = OddJob.getInstance().getMySQLManager().getGuildUUIDByChunk(chunk);
+        return uuid != null ? uuid : getGuildUUIDByZone(Zone.WILD);
+        //return chunks.getOrDefault(chunk, getGuildUUIDByZone(Zone.WILD));
     }
 
     /**
@@ -346,7 +340,7 @@ public class GuildManager {
      * @param guild  UUID of the Guild to join
      * @param player UUID of the Player joining the Guild
      */
-    public void join(UUID guild, UUID player) {
+    public void join(@Nonnull UUID guild, @Nonnull UUID player) {
         // Delete the Players invitation to the Guild
         guildInvite.remove(player);
 
@@ -369,15 +363,15 @@ public class GuildManager {
      * @param name String name of the Guild
      * @return UUID of the Guild
      */
-    public UUID getGuildUUIDByName(String name) {
-        UUID guildUUID = null;
+    public UUID getGuildUUIDByName(@Nonnull String name) {
+        UUID guild = null;
         for (UUID uuid : guilds.keySet()) {
             // Loop through the Guilds
             if (name.equalsIgnoreCase(ChatColor.stripColor(guilds.get(uuid).getName()))) {
-                guildUUID = uuid;
+                guild = uuid;
             }
         }
-        return guildUUID;
+        return guild;
     }
 
     /**
@@ -386,7 +380,7 @@ public class GuildManager {
      * @param player Player which is toggling the AutoClaim
      * @param guild  Zone the Player is claiming for
      */
-    public void toggleAutoClaim(Player player, UUID guild) {
+    public void toggleAutoClaim(@Nonnull Player player, @Nonnull UUID guild) {
         if (autoClaim.containsKey(player.getUniqueId())) {
             if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
                 // Changing Zone to autoClaim for
@@ -401,9 +395,6 @@ public class GuildManager {
             // Starts autoClaim
             autoClaim.put(player.getUniqueId(), guild);
             OddJob.getInstance().getMessageManager().warning("You are now claiming zones for " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
-
-            // Claiming
-            claim(player, guild);
         }
 
     }
@@ -414,8 +405,7 @@ public class GuildManager {
      * @param guild UUID of the Guild
      * @return String name of the Guild
      */
-    public String getGuildNameByUUID(UUID guild) {
-        if (guild == null) guild = getGuildUUIDByZone(Zone.WILD);
+    public String getGuildNameByUUID(@Nonnull UUID guild) {
         return guilds.get(guild).getName();
     }
 
@@ -425,16 +415,15 @@ public class GuildManager {
      * @param zone Zone
      * @return UUID of the Guild
      */
-    public UUID getGuildUUIDByZone(Zone zone) {
-        if (zone == null) OddJob.getInstance().getMessageManager().console("null zone in getGuildUUIDByZone");
-        UUID guildUUID = null;
+    public UUID getGuildUUIDByZone(@Nonnull Zone zone) {
+        UUID guild = null;
         for (UUID uuid : guilds.keySet()) {
             // Looping through the Guilds
-            if (zone != null && zone.equals(guilds.get(uuid).getZone())) {
-                guildUUID = uuid;
+            if (zone.equals(guilds.get(uuid).getZone())) {
+                guild = uuid;
             }
         }
-        return guildUUID;
+        return guild;
     }
 
     /**
@@ -443,8 +432,8 @@ public class GuildManager {
      * @param player UUID of the Player
      * @return if the AutoClaim is toggled on for this Player
      */
-    public boolean hasAutoClaim(UUID player) {
-        return autoClaim.containsKey(player);
+    public boolean hasAutoClaim(@Nonnull UUID player) {
+        return autoClaim.get(player) != null;
     }
 
     /**
@@ -453,15 +442,15 @@ public class GuildManager {
      * @param player UUID of the Player
      * @return UUID of the Guild
      */
-    public UUID getGuildUUIDByMember(UUID player) {
-        UUID guildUUID = null;
+    public UUID getGuildUUIDByMember(@Nonnull UUID player) {
+        UUID guild = null;
         for (UUID uuid : guilds.keySet()) {
             // Looping through the Guilds
-            if (guilds.get(uuid).getMembers().containsKey(player)) {
-                guildUUID = uuid;
+            if (guilds.get(uuid).getMembers().get(player) != null) {
+                guild = uuid;
             }
         }
-        return guildUUID;
+        return guild;
     }
 
     /**
@@ -481,7 +470,7 @@ public class GuildManager {
      * @param targetUUID UUID of the Player to change the Role of
      * @return Role the new one
      */
-    public Role promoteMember(UUID guildUUID, UUID targetUUID) {
+    public Role promoteMember(@Nonnull UUID guildUUID, @Nonnull UUID targetUUID) {
         Role prevRole = getGuildMemberRole(targetUUID);
         Role newRole = null;
         switch (prevRole.level()) {
@@ -508,7 +497,7 @@ public class GuildManager {
      * @param targetUUID UUID of the Player to change the Role of
      * @return Role the new one
      */
-    public Role demoteMember(UUID guildUUID, UUID targetUUID) {
+    public Role demoteMember(@Nonnull UUID guildUUID, @Nonnull UUID targetUUID) {
         Role prevRole = getGuildMemberRole(targetUUID);
         Role newRole = null;
         switch (prevRole.level()) {
@@ -534,7 +523,7 @@ public class GuildManager {
      * @param guild UUID of the Guild
      * @param name  String new name of the Guild
      */
-    public void changeName(UUID guild, String name) {
+    public void changeName(@Nonnull UUID guild, @Nonnull String name) {
         guilds.get(guild).setName(name);
     }
 
@@ -543,7 +532,7 @@ public class GuildManager {
      *
      * @param player UUID of the Player
      */
-    public void leave(UUID player) {
+    public void leave(@Nonnull UUID player) {
         Role role = OddJob.getInstance().getGuildManager().getGuildMemberRole(player);
         Guild guild = getGuild(getGuildUUIDByMember(player));
         UUID next = null;
@@ -574,7 +563,7 @@ public class GuildManager {
      * @param guildUUIDByMember UUID of the Guild
      * @param bol               Boolean inviteOnly
      */
-    public void changeInvitedOnly(UUID guildUUIDByMember, boolean bol) {
+    public void changeInvitedOnly(@Nonnull UUID guildUUIDByMember, @Nonnull boolean bol) {
         guilds.get(guildUUIDByMember).setInvitedOnly(bol);
     }
 
@@ -626,6 +615,7 @@ public class GuildManager {
      * @param guild UUID of the GUild
      * @return Zone
      */
+    @Nonnull
     public Zone getZoneByGuild(UUID guild) {
         if (guild == null) return Zone.WILD;
         return guilds.get(guild).getZone();
@@ -786,20 +776,20 @@ public class GuildManager {
      * @param guild UUID of the Guild
      */
     public void disband(UUID guild) {
-        List<Chunk> chunks = new ArrayList<>();
+        List<Chunk> chunkList = new ArrayList<>();
         OddJob.getInstance().getMessageManager().console("disbanding:" + guild);
-        OddJob.getInstance().getMessageManager().console("chunkGuild:" + chunkGuild.size());
-        for (Chunk chunk : chunkGuild.keySet()) {
+        OddJob.getInstance().getMessageManager().console("chunkGuild:" + chunks.size());
+        for (Chunk chunk : chunks.keySet()) {
             OddJob.getInstance().getMessageManager().console("chunk:x=" + chunk.getX() + ";z=" + chunk.getZ());
-            if (chunkGuild.get(chunk).equals(guild)) {
+            if (chunks.get(chunk).equals(guild)) {
                 OddJob.getInstance().getMessageManager().console("unclaiming");
                 unClaim(chunk, null);
-                chunks.add(chunk);
+                chunkList.add(chunk);
             }
         }
         OddJob.getInstance().getMessageManager().console("removing");
-        for (Chunk chunk : chunks) chunkGuild.remove(chunk);
-        chunks.clear();
+        for (Chunk chunk : chunkList) chunks.remove(chunk);
+        chunkList.clear();
         guilds.remove(guild);
         OddJob.getInstance().getMySQLManager().disbandGuild(guild);
     }
@@ -884,7 +874,7 @@ public class GuildManager {
                     for (int x = minX; x <= maxX; x++) {
                         //OddJob.getInstance().getMessageManager().console("Z:" + z);
                         Chunk test = world.getChunkAt(x, z);
-                        UUID guild = chunkGuild.get(test);
+                        UUID guild = chunks.get(test);
                         if (chunk.equals(test)) {
                             sb.append(" ").append(ChatColor.GOLD).append("X");
                         } else if (guild != null) {
@@ -895,7 +885,7 @@ public class GuildManager {
                             }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WILD)) g.put(guild, 0);
                                 if (zone.equals(Zone.WAR)) g.put(guild, 1);
                                 if (zone.equals(Zone.ARENA)) g.put(guild, 2);
                                 if (zone.equals(Zone.JAIL)) g.put(guild, 3);
@@ -920,7 +910,7 @@ public class GuildManager {
                     for (int x = maxX; x >= minX; x--) {
                         //OddJob.getInstance().getMessageManager().console("Z:" + z);
                         Chunk test = world.getChunkAt(x, z);
-                        UUID guild = chunkGuild.get(test);
+                        UUID guild = chunks.get(test);
                         if (chunk.equals(test)) {
                             sb.append(" ").append(ChatColor.GOLD).append("X");
                         } else if (guild != null) {
@@ -931,7 +921,7 @@ public class GuildManager {
                             }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WILD)) g.put(guild, 0);
                                 if (zone.equals(Zone.WAR)) g.put(guild, 1);
                                 if (zone.equals(Zone.ARENA)) g.put(guild, 2);
                                 if (zone.equals(Zone.JAIL)) g.put(guild, 3);
@@ -956,7 +946,7 @@ public class GuildManager {
                     for (int z = minZ; z <= maxZ; z++) {
                         //OddJob.getInstance().getMessageManager().console("Z:" + z);
                         Chunk test = world.getChunkAt(x, z);
-                        UUID guild = chunkGuild.get(test);
+                        UUID guild = chunks.get(test);
                         if (chunk.equals(test)) {
                             sb.append(" ").append(ChatColor.GOLD).append("X");
                         } else if (guild != null) {
@@ -967,7 +957,7 @@ public class GuildManager {
                             }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WILD)) g.put(guild, 0);
                                 if (zone.equals(Zone.WAR)) g.put(guild, 1);
                                 if (zone.equals(Zone.ARENA)) g.put(guild, 2);
                                 if (zone.equals(Zone.JAIL)) g.put(guild, 3);
@@ -992,7 +982,7 @@ public class GuildManager {
                     for (int z = maxZ; z >= minZ; z--) {
                         //OddJob.getInstance().getMessageManager().console("Z:" + z);
                         Chunk test = world.getChunkAt(x, z);
-                        UUID guild = chunkGuild.get(test);
+                        UUID guild = chunks.get(test);
                         if (chunk.equals(test)) {
                             sb.append(" ").append(ChatColor.GOLD).append("X");
                         } else if (guild != null) {
@@ -1003,7 +993,7 @@ public class GuildManager {
                             }
                             ChatColor color = color(zone);
                             if (zone != Zone.GUILD) {
-                                if (zone.equals(Zone.WILD)) g.put(guild,0);
+                                if (zone.equals(Zone.WILD)) g.put(guild, 0);
                                 if (zone.equals(Zone.WAR)) g.put(guild, 1);
                                 if (zone.equals(Zone.ARENA)) g.put(guild, 2);
                                 if (zone.equals(Zone.JAIL)) g.put(guild, 3);
@@ -1052,9 +1042,9 @@ public class GuildManager {
         for (UUID guildUUID : getGuilds().keySet()) {
             ChatColor c = ChatColor.YELLOW;
             Guild guild = getGuild(guildUUID);
-            if(guild.getInvitedOnly()) c = ChatColor.RED;
+            if (guild.getInvitedOnly()) c = ChatColor.RED;
             if (guild.getOpen()) c = ChatColor.GREEN;
-            list.add(c+guild.getName());
+            list.add(c + guild.getName());
         }
     }
 }

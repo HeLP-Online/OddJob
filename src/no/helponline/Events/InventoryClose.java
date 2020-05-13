@@ -1,15 +1,10 @@
 package no.helponline.Events;
 
 import no.helponline.OddJob;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -48,7 +43,7 @@ public class InventoryClose implements Listener {
             for (HumanEntity human : event.getViewers()) {
                 for (UUID entityUUID : OddJob.getInstance().getDeathManager().getOwners().keySet()) {
                     if (OddJob.getInstance().getDeathManager().getOwners().get(entityUUID).equals(human.getUniqueId())) {
-                        OddJob.getInstance().getDeathManager().replace(human.getWorld().getUID(),entityUUID,human.getUniqueId());
+                        OddJob.getInstance().getDeathManager().replace(human.getWorld().getUID(), entityUUID, human.getUniqueId());
                     }
                 }
             }

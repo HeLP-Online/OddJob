@@ -21,7 +21,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            String text = OddJob.getInstance().getConfigManager().getString("default.kick_message");
+            String text = OddJob.getInstance().getConfig().getString("default.kick_message");
             if (strings.length >= 2) {
                 int length = strings.length;
                 StringBuilder sb = new StringBuilder();

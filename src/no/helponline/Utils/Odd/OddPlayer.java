@@ -2,6 +2,8 @@ package no.helponline.Utils.Odd;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.UUID;
@@ -90,5 +92,9 @@ public class OddPlayer {
 
     public boolean getDenyTpa() {
         return denyTpa;
+    }
+
+    public Player getPlayer() {
+        return Bukkit.getPlayer(uuid);
     }
 }

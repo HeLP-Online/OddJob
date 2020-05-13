@@ -1,14 +1,10 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Enum.Role;
-import no.helponline.Utils.Enum.ScoreBoard;
-import no.helponline.Utils.Enum.Zone;
-import no.helponline.Utils.Guild;
-import no.helponline.Utils.Home;
-import no.helponline.Utils.Odd.OddPlayer;
+import no.helponline.Utils.*;
+import no.helponline.Utils.Enum.*;
 import no.helponline.Utils.Utility;
-import no.helponline.Utils.Warp;
+import no.helponline.Utils.Odd.OddPlayer;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -1178,4 +1174,27 @@ public class MySQLManager {
             close();
         }
     }
+
+    public UUID getGuildUUIDByChunk(Chunk chunk) {
+        UUID uuid = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
+            preparedStatement.setInt(2, chunk.getX());
+            preparedStatement.setInt(3, chunk.getZ());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                uuid = UUID.fromString(resultSet.getString("uuid"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
+        return uuid;
+    }
+
 }

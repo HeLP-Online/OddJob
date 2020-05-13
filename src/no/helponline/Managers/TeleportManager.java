@@ -76,11 +76,12 @@ public class TeleportManager {
             // Player is in combat
             OddJob.getInstance().getMessageManager().console("aborted combat");
             test = false;
-        } else if (OddJob.getInstance().getArenaManager().isInArena(movingPlayer.getUniqueId())) {
+            // TODO
+        /*} else if (OddJob.getInstance().getArenaManager().isInArena(movingPlayer.getUniqueId())) {
             // Player is in Arena
             OddJob.getInstance().getMessageManager().console("aborted arena");
             test = false;
-        } else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
+        */} else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
             // Player is in Jail
             OddJob.getInstance().getMessageManager().console("aborted in jail");
             test = false;
@@ -138,11 +139,12 @@ public class TeleportManager {
             // Player is in combat
             OddJob.getInstance().getMessageManager().console("aborted combat");
             test = false;
-        } else if (OddJob.getInstance().getArenaManager().isInArena(movingPlayer.getUniqueId())) {
+            // TODO
+        /*} else if (OddJob.getInstance().getArenaManager().isInArena(movingPlayer.getUniqueId())) {
             // Player is in Arena
             OddJob.getInstance().getMessageManager().console("aborted arena");
             test = false;
-        } else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
+        */} else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
             // Player is in Jail
             OddJob.getInstance().getMessageManager().console("aborted in jail");
             test = false;

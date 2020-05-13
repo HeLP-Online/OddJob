@@ -1,8 +1,7 @@
 package no.helponline.Utils;
 
 import no.helponline.OddJob;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -10,10 +9,20 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.Openable;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.material.Colorable;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 public class Utility {
@@ -209,5 +218,143 @@ public class Utility {
         String[] st = string.split(",");
         return new Location(Bukkit.getWorld(st[0]), Integer.parseInt(st[1]), Integer.parseInt(st[2]), Integer.parseInt(st[3]), Float.parseFloat(st[4]), Float.parseFloat(st[5]));
 
+    }
+
+    public static ItemStack parseItemStack(String string) {
+        ItemStack is = null;
+        String[] gSplit = string.split(" ");
+        String[] idsSplit = gSplit[0].split(":");
+        is = new ItemStack(Material.valueOf(idsSplit[0]));
+        if (idsSplit.length > 1 && is.getData() instanceof Colorable) {
+            // TODO
+        }
+        if (gSplit.length > 1) {
+            int metaStart = 2;
+            try {
+                is.setAmount(Integer.parseInt(gSplit[1]));
+            } catch (NumberFormatException ex) {
+                metaStart = 1;
+            }
+            ItemMeta im = is.getItemMeta();
+            for (int meta = metaStart; meta < gSplit.length; meta++) {
+                String rawKey = gSplit[meta];
+                String[] split = rawKey.split(":");
+                String key = split[0];
+
+                switch (key) {
+                    case "name":
+                        if (im != null)
+                            im.setDisplayName(split[1].replace("_", " "));
+                        break;
+                    case "lore":
+                        if (im != null) {
+                            List<String> lore = new ArrayList<>();
+                            for (String line : split[1].split("//")) {
+                                lore.add(line.replace("_", " "));
+                            }
+                            im.setLore(lore);
+                        }
+                        break;
+                    case "color":
+                        if (im instanceof LeatherArmorMeta) {
+                            LeatherArmorMeta lam = (LeatherArmorMeta) im;
+                            String[] csplit = split[1].split(",");
+                            Color color = Color.fromRGB(Integer.parseInt(csplit[0]), Integer.parseInt(csplit[1]), Integer.parseInt(csplit[2]));
+                            lam.setColor(color);
+                        }
+                        break;
+                    case "effect":
+                        PotionMeta pm = (PotionMeta) im;
+                        if (pm != null) {
+                            String[] psplit = split[1].split(",");
+                            pm.addCustomEffect(new PotionEffect(PotionEffectType.getByName(psplit[0]), Integer.parseInt(psplit[1]) * 20, Integer.parseInt(psplit[2])), true);
+                        }
+                        break;
+                    case "player":
+                        if (im instanceof SkullMeta) {
+                            ((SkullMeta) im).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(split[1])));
+                        }
+                        break;
+                    case "enchant":
+                        if (im != null) {
+                            String[] esplit = split[1].split(",");
+                            im.addEnchant(getEnchantment(esplit[0]), Integer.parseInt(esplit[1]), true);
+                        }
+                        break;
+                }
+            }
+
+            is.setItemMeta(im);
+        }
+return is;
+    }
+
+    public static Enchantment getEnchantment(String enc) {
+        enc = enc.toUpperCase();
+        Enchantment en = Enchantment.getByKey(NamespacedKey.minecraft(enc));
+
+        if(en == null) {
+            switch (enc) {
+                case "PROTECTION":
+                    en = Enchantment.PROTECTION_ENVIRONMENTAL;
+                    break;
+                case "FIRE_PROTECTION":
+                    en = Enchantment.PROTECTION_FIRE;
+                    break;
+                case "FEATHER_FALLING":
+                    en = Enchantment.PROTECTION_FALL;
+                    break;
+                case "BLAST_PROTECTION":
+                    en = Enchantment.PROTECTION_EXPLOSIONS;
+                    break;
+                case "PROJECTILE_PROTCETION":
+                    en = Enchantment.PROTECTION_PROJECTILE;
+                    break;
+                case "RESPIRATION":
+                    en = Enchantment.OXYGEN;
+                    break;
+                case "AQUA_AFFINITY":
+                    en = Enchantment.WATER_WORKER;
+                    break;
+                case "SHARPNESS":
+                    en = Enchantment.DAMAGE_ALL;
+                    break;
+                case "SMITE":
+                    en = Enchantment.DAMAGE_UNDEAD;
+                    break;
+                case "BANE_OF_ARTHROPODS":
+                    en = Enchantment.DAMAGE_ARTHROPODS;
+                    break;
+                case "LOOTING":
+                    en = Enchantment.LOOT_BONUS_MOBS;
+                    break;
+                case "EFFICIENCY":
+                    en = Enchantment.DIG_SPEED;
+                    break;
+                case "UNBREAKING":
+                    en = Enchantment.DURABILITY;
+                    break;
+                case "FORTUNE":
+                    en = Enchantment.LOOT_BONUS_BLOCKS;
+                    break;
+                case "POWER":
+                    en = Enchantment.ARROW_DAMAGE;
+                    break;
+                case "PUNCH":
+                    en = Enchantment.ARROW_KNOCKBACK;
+                    break;
+                case "FLAME":
+                    en = Enchantment.ARROW_FIRE;
+                    break;
+                case "INFINITY":
+                    en = Enchantment.ARROW_INFINITE;
+                    break;
+                case "LUCK_OF_THE_SEA":
+                    en = Enchantment.LUCK;
+                    break;
+            }
+        }
+
+        return en;
     }
 }

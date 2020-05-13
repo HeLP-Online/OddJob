@@ -367,18 +367,18 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                     if (strings.length >= 2) {
-                        zone = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.valueOf(strings[1].toUpperCase()));
-                        if (zone != null) {
+                        guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.valueOf(strings[1].toUpperCase()));
+                        if (guild != null) {
                             if (strings.length == 3 && strings[2].equalsIgnoreCase("auto")) {
-                                OddJob.getInstance().getGuildManager().toggleAutoClaim(player, zone);
+                                OddJob.getInstance().getGuildManager().toggleAutoClaim(player, guild);
                             }
                             if (strings.length == 2 && !strings[1].equalsIgnoreCase("auto")) {
-                                OddJob.getInstance().getGuildManager().claim(player, zone);
+                                OddJob.getInstance().getGuildManager().claim(player, guild);
                             }
                         }
                     }
-
-                    OddJob.getInstance().getGuildManager().claim(player, zone);
+                    if (guild == null) guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid);
+                    OddJob.getInstance().getGuildManager().claim(player, guild);
                     return true;
                 case "set":
                     // Command '/guild set <attr> <value>'
