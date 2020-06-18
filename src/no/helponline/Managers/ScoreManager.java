@@ -1,8 +1,6 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Arena.GameState;
-import no.helponline.Utils.Arena.ScoreboardPhase;
 import no.helponline.Utils.Enum.ScoreBoard;
 import no.helponline.Utils.Enum.Zone;
 import org.bukkit.Bukkit;
@@ -26,7 +24,6 @@ public class ScoreManager {
     public final HashMap<Integer,BukkitTask> arenaScores = new HashMap<>();
     public final HashMap<UUID, Scoreboard> boards = new HashMap<>();
     public final HashMap<Integer, Scoreboard> arenas = new HashMap<>();
-    public HashMap<GameState,ScoreboardPhase> phases = new HashMap<>();
 
     public ScoreManager() {
         scoreboardManager = OddJob.getInstance().getServer().getScoreboardManager();
@@ -165,10 +162,5 @@ public class ScoreManager {
 
     public void none(Player player) {
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-    }
-
-    public ScoreboardPhase getNewScoreboardPhase(GameState gameState) {
-        if (phases.containsKey(gameState)) return phases.get(gameState).clone();
-        return null;
     }
 }

@@ -30,7 +30,6 @@ public class Utility {
     public static void doorToggle(Block block) {
         Door door = (Door) block.getBlockData();
         boolean open = door.isOpen();
-        BlockFace doorFace = door.getFacing();
         Bisected.Half doorHalf = door.getHalf();
         Door.Hinge doorHinge = door.getHinge();
 
@@ -106,7 +105,6 @@ public class Utility {
 
     public static Location getLowerRightDoor(Block block) {
         Door door = (Door) block.getBlockData();
-        boolean open = door.isOpen();
         BlockFace doorFace = door.getFacing();
         Bisected.Half doorHalf = door.getHalf();
         Door.Hinge doorHinge = door.getHinge();
@@ -122,21 +120,13 @@ public class Utility {
         }
         if (!right) {
             //OddJob.getInstance().log("is left");
-            Block test = null;
-            switch (doorFace) {
-                case NORTH:
-                    test = block.getRelative(BlockFace.EAST);
-                    break;
-                case WEST:
-                    test = block.getRelative(BlockFace.NORTH);
-                    break;
-                case SOUTH:
-                    test = block.getRelative(BlockFace.WEST);
-                    break;
-                case EAST:
-                    test = block.getRelative(BlockFace.SOUTH);
-                    break;
-            }
+            Block test = switch (doorFace) {
+                case NORTH -> block.getRelative(BlockFace.EAST);
+                case WEST -> block.getRelative(BlockFace.NORTH);
+                case SOUTH -> block.getRelative(BlockFace.WEST);
+                case EAST -> block.getRelative(BlockFace.SOUTH);
+                default -> null;
+            };
             if (test != null && OddJob.getInstance().getLockManager().getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.LEFT)) {
                 //OddJob.getInstance().log("has right");
                 block = test;
@@ -150,7 +140,6 @@ public class Utility {
 
     public static Location getLowerLeftDoor(Block block) {
         Door door = (Door) block.getBlockData();
-        boolean open = door.isOpen();
         BlockFace doorFace = door.getFacing();
         Bisected.Half doorHalf = door.getHalf();
         Door.Hinge doorHinge = door.getHinge();
@@ -166,21 +155,13 @@ public class Utility {
         }
         if (!left) {
             //OddJob.getInstance().log("is right");
-            Block test = null;
-            switch (doorFace) {
-                case NORTH:
-                    test = block.getRelative(BlockFace.WEST);
-                    break;
-                case WEST:
-                    test = block.getRelative(BlockFace.SOUTH);
-                    break;
-                case SOUTH:
-                    test = block.getRelative(BlockFace.EAST);
-                    break;
-                case EAST:
-                    test = block.getRelative(BlockFace.NORTH);
-                    break;
-            }
+            Block test = switch (doorFace) {
+                case NORTH -> block.getRelative(BlockFace.WEST);
+                case WEST -> block.getRelative(BlockFace.SOUTH);
+                case SOUTH -> block.getRelative(BlockFace.EAST);
+                case EAST -> block.getRelative(BlockFace.NORTH);
+                default -> null;
+            };
             if (test != null && OddJob.getInstance().getLockManager().getDoors().contains(test.getType()) && !((Door) test.getBlockData()).getHinge().equals(Door.Hinge.RIGHT)) {
                 //OddJob.getInstance().log("has left");
                 block = test;
@@ -221,7 +202,7 @@ public class Utility {
     }
 
     public static ItemStack parseItemStack(String string) {
-        ItemStack is = null;
+        ItemStack is;
         String[] gSplit = string.split(" ");
         String[] idsSplit = gSplit[0].split(":");
         is = new ItemStack(Material.valueOf(idsSplit[0]));
@@ -267,7 +248,11 @@ public class Utility {
                         PotionMeta pm = (PotionMeta) im;
                         if (pm != null) {
                             String[] psplit = split[1].split(",");
-                            pm.addCustomEffect(new PotionEffect(PotionEffectType.getByName(psplit[0]), Integer.parseInt(psplit[1]) * 20, Integer.parseInt(psplit[2])), true);
+                            if (psplit.length == 3) {
+                                PotionEffectType potionEffectType = PotionEffectType.getByName(psplit[0]);
+                                if (potionEffectType != null)
+                                    pm.addCustomEffect(new PotionEffect(potionEffectType, Integer.parseInt(psplit[1]) * 20, Integer.parseInt(psplit[2])), true);
+                            }
                         }
                         break;
                     case "player":
@@ -286,73 +271,36 @@ public class Utility {
 
             is.setItemMeta(im);
         }
-return is;
+        return is;
     }
 
     public static Enchantment getEnchantment(String enc) {
         enc = enc.toUpperCase();
         Enchantment en = Enchantment.getByKey(NamespacedKey.minecraft(enc));
 
-        if(en == null) {
-            switch (enc) {
-                case "PROTECTION":
-                    en = Enchantment.PROTECTION_ENVIRONMENTAL;
-                    break;
-                case "FIRE_PROTECTION":
-                    en = Enchantment.PROTECTION_FIRE;
-                    break;
-                case "FEATHER_FALLING":
-                    en = Enchantment.PROTECTION_FALL;
-                    break;
-                case "BLAST_PROTECTION":
-                    en = Enchantment.PROTECTION_EXPLOSIONS;
-                    break;
-                case "PROJECTILE_PROTCETION":
-                    en = Enchantment.PROTECTION_PROJECTILE;
-                    break;
-                case "RESPIRATION":
-                    en = Enchantment.OXYGEN;
-                    break;
-                case "AQUA_AFFINITY":
-                    en = Enchantment.WATER_WORKER;
-                    break;
-                case "SHARPNESS":
-                    en = Enchantment.DAMAGE_ALL;
-                    break;
-                case "SMITE":
-                    en = Enchantment.DAMAGE_UNDEAD;
-                    break;
-                case "BANE_OF_ARTHROPODS":
-                    en = Enchantment.DAMAGE_ARTHROPODS;
-                    break;
-                case "LOOTING":
-                    en = Enchantment.LOOT_BONUS_MOBS;
-                    break;
-                case "EFFICIENCY":
-                    en = Enchantment.DIG_SPEED;
-                    break;
-                case "UNBREAKING":
-                    en = Enchantment.DURABILITY;
-                    break;
-                case "FORTUNE":
-                    en = Enchantment.LOOT_BONUS_BLOCKS;
-                    break;
-                case "POWER":
-                    en = Enchantment.ARROW_DAMAGE;
-                    break;
-                case "PUNCH":
-                    en = Enchantment.ARROW_KNOCKBACK;
-                    break;
-                case "FLAME":
-                    en = Enchantment.ARROW_FIRE;
-                    break;
-                case "INFINITY":
-                    en = Enchantment.ARROW_INFINITE;
-                    break;
-                case "LUCK_OF_THE_SEA":
-                    en = Enchantment.LUCK;
-                    break;
-            }
+        if (en == null) {
+            en = switch (enc) {
+                case "PROTECTION" -> Enchantment.PROTECTION_ENVIRONMENTAL;
+                case "FIRE_PROTECTION" -> Enchantment.PROTECTION_FIRE;
+                case "FEATHER_FALLING" -> Enchantment.PROTECTION_FALL;
+                case "BLAST_PROTECTION" -> Enchantment.PROTECTION_EXPLOSIONS;
+                case "PROJECTILE_PROTCETION" -> Enchantment.PROTECTION_PROJECTILE;
+                case "RESPIRATION" -> Enchantment.OXYGEN;
+                case "AQUA_AFFINITY" -> Enchantment.WATER_WORKER;
+                case "SHARPNESS" -> Enchantment.DAMAGE_ALL;
+                case "SMITE" -> Enchantment.DAMAGE_UNDEAD;
+                case "BANE_OF_ARTHROPODS" -> Enchantment.DAMAGE_ARTHROPODS;
+                case "LOOTING" -> Enchantment.LOOT_BONUS_MOBS;
+                case "EFFICIENCY" -> Enchantment.DIG_SPEED;
+                case "UNBREAKING" -> Enchantment.DURABILITY;
+                case "FORTUNE" -> Enchantment.LOOT_BONUS_BLOCKS;
+                case "POWER" -> Enchantment.ARROW_DAMAGE;
+                case "PUNCH" -> Enchantment.ARROW_KNOCKBACK;
+                case "FLAME" -> Enchantment.ARROW_FIRE;
+                case "INFINITY" -> Enchantment.ARROW_INFINITE;
+                case "LUCK_OF_THE_SEA" -> Enchantment.LUCK;
+                default -> null;
+            };
         }
 
         return en;

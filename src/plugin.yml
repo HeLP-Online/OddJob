@@ -1,6 +1,6 @@
 main: no.helponline.OddJob
 name: OddJob
-version: "0.6"
+version: "0.7"
 api-version: "1.15"
 softdepend:
   - dynmap
@@ -14,6 +14,7 @@ commands:
     description: EconomyCommand
     usage: /econ <set|add|remove> <player> <amount>
   arena:
+    aliases: ['a']
     description: Arena Menu
   guild:
     description: Guild Menu

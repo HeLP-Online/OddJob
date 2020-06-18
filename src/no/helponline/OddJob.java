@@ -6,12 +6,11 @@ import no.helponline.Events.*;
 import no.helponline.Managers.*;
 import no.helponline.Utils.Arena.*;
 import no.helponline.Utils.Broadcaster;
+import no.helponline.Utils.SignManager;
 import org.bukkit.*;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
 import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
@@ -24,7 +23,6 @@ public class OddJob extends JavaPlugin {
     private DeathManager deathManager;
     private EconManager econManager;
     private FreezeManager freezeManager;
-    private GameManager gameManager;
     private GuildManager guildManager;
     private HomesManager homesManager;
     private JailManager jailManager;
@@ -54,7 +52,6 @@ public class OddJob extends JavaPlugin {
         deathManager = new DeathManager();
         econManager = new EconManager();
         freezeManager = new FreezeManager();
-        gameManager = new GameManager();
         guildManager = new GuildManager();
         homesManager = new HomesManager();
         jailManager = new JailManager();
@@ -114,7 +111,7 @@ public class OddJob extends JavaPlugin {
         warpManager.load();
         worldManager.load();
         deathManager.load();
-
+        arenaManager.load();
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
         Bukkit.getPluginManager().registerEvents(new BlockExplode(), this);
@@ -142,8 +139,6 @@ public class OddJob extends JavaPlugin {
         Broadcaster broadcaster = new Broadcaster(Broadcaster.createSocket(), server.getPort(), server.getMotd(), server.getIp());
         getServer().getScheduler().runTaskAsynchronously(this, broadcaster);
 
-        PermissionHandler.reinitializeDatabase();
-        Game.reinitializeDatabase();
         if (setupEconomy()) Bukkit.getConsoleSender().sendMessage("Vault found");
         if (!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
             Bukkit.getConsoleSender().sendMessage("WorldEdit found");
@@ -164,7 +159,7 @@ public class OddJob extends JavaPlugin {
     }
 
     private boolean setupEconomy() {
-        if(Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
             RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
             if (economyProvider != null) {
                 econ = economyProvider.getProvider();
@@ -270,7 +265,4 @@ public class OddJob extends JavaPlugin {
         return worldManager;
     }
 
-    public GameManager getGameManager() {
-        return gameManager;
-    }
 }

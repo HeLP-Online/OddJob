@@ -128,6 +128,9 @@ public class MessageManager {
     public void errorGuild(String name, UUID player) {
         danger("Sorry, we can't find the guild " + ChatColor.GOLD + name, player, false);
     }
+    public void errorArena(String name, UUID player) {
+        danger("Sorry, we can't find the arena " + ChatColor.GOLD + name, player, false);
+    }
 
     public void insufficientItems(Player player) {
         player.sendMessage(ChatColor.YELLOW + "Insufficient number of items.");
