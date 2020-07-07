@@ -49,16 +49,20 @@ public class GuildManager {
     private HashMap<UUID, UUID> guildInvite = new HashMap<>();    // PlayerUUID   | GuildUUID
 
     public GuildManager() {
-        DynmapAPI dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-        Set<MarkerIcon> markerIcon = null;
-        if (dynmapApi != null) {
-            MarkerAPI markerApi = dynmapApi.getMarkerAPI();
-            if (markerApi != null) {
-                markerIcon = markerApi.getMarkerIcons();
-                markerSet = markerApi.createMarkerSet("guilds", "guilds", markerIcon, false);
-            }
-        }
         markers = new HashMap<>();
+        try {
+            DynmapAPI dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
+            Set<MarkerIcon> markerIcon = null;
+            if (dynmapApi != null) {
+                MarkerAPI markerApi = dynmapApi.getMarkerAPI();
+                if (markerApi != null) {
+                    markerIcon = markerApi.getMarkerIcons();
+                    markerSet = markerApi.createMarkerSet("guilds", "guilds", markerIcon, false);
+                }
+            }
+        } catch (Exception e) {
+            OddJob.getInstance().getMessageManager().console("Map Marker disabled");
+        }
     }
 
     /**
@@ -144,22 +148,25 @@ public class GuildManager {
         areaMarker.setCornerLocations(x, z);
         areaMarker.setLabel(OddJob.getInstance().getGuildManager().getGuildNameByUUID(guildUUID));
         switch (OddJob.getInstance().getGuildManager().getZoneByGuild(guildUUID)) {
-            case SAFE:
+            case SAFE: {
                 areaMarker.setFillStyle(0.5, Integer.parseInt("00FF00", 16));
                 areaMarker.setLineStyle(1, 1.0, Integer.parseInt("00FF00", 16));
-                break;
-            case ARENA:
+            }
+            break;
+            case ARENA: {
                 areaMarker.setFillStyle(0.5, Integer.parseInt("FFFF00", 16));
                 areaMarker.setLineStyle(1, 1.0, Integer.parseInt("FF0000", 16));
-                break;
+            }
+            break;
             case JAIL:
-            case WAR:
+            case WAR: {
                 areaMarker.setFillStyle(0.5, Integer.parseInt("FF0000", 16));
                 areaMarker.setLineStyle(1, 1.0, Integer.parseInt("FF0000", 16));
-                break;
-            default:
-                areaMarker.setFillStyle(0.5, Integer.parseInt("0000FF", 16));
-                areaMarker.setLineStyle(1, 1.0, Integer.parseInt("0000FF", 16));
+            }
+            default: {
+                areaMarker.setFillStyle(0.5, Integer.parseInt("FF00FF", 16));
+                areaMarker.setLineStyle(1, 1.0, Integer.parseInt("FF00FF", 16));
+            }
         }
         markers.put(markerId, areaMarker);
     }

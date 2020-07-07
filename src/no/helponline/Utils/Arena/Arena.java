@@ -52,10 +52,10 @@ public class Arena {
         this.prefix = "[Arena " + this.id + "] ";
         this.gameType = gameType;
 
-        game = switch(gameType) {
-            case SURVIVAL -> new HungerGames();
-            case TNT ->new TNTTag();
-        };
+        switch(gameType) {
+            case SURVIVAL : game = new HungerGames(); break;
+            case TNT : game = new TNTTag(); break;
+        }
         this.countdown = new Countdown(this);
         this.disabled = disabled;
     }

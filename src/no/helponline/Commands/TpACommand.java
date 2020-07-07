@@ -1,8 +1,8 @@
 package no.helponline.Commands;
 
-import net.minecraft.server.v1_15_R1.IChatBaseComponent;
-import net.minecraft.server.v1_15_R1.PacketPlayOutChat;
-import net.minecraft.server.v1_15_R1.PlayerConnection;
+import net.minecraft.server.v1_16_R1.IChatBaseComponent;
+import net.minecraft.server.v1_16_R1.PacketPlayOutChat;
+import net.minecraft.server.v1_16_R1.PlayerConnection;
 import no.helponline.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -10,7 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -47,11 +47,10 @@ public class TpACommand implements CommandExecutor, TabCompleter {
             if (OddJob.getInstance().getTeleportManager().request(movingPlayer.getUniqueId(), destinationPlayer.getUniqueId())) { // player (sends request) // target (teleport to)
                 OddJob.getInstance().getMessageManager().success("You have requested to be teleported to " + ChatColor.DARK_AQUA+destinationPlayer.getName(), movingPlayer.getUniqueId(),false);
                 OddJob.getInstance().getMessageManager().warning(ChatColor.DARK_AQUA+movingPlayer.getName() + ChatColor.YELLOW+" want to be teleported to you. To accept this, you can click on 'ACCEPT'", destinationPlayer.getUniqueId(),false);
-                PlayerConnection connection = ((CraftPlayer) destinationPlayer).getHandle().playerConnection;
-                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"ACCEPT\",\"color\":\"dark_green\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpaccept " + movingPlayer.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Accepting the teleport request\",\"color\":\"gold\"}]}}}"));
-                connection.sendPacket(packet);
-                packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"DENY\",\"color\":\"dark_red\",\"bold\":true,\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/tpdeny " + movingPlayer.getUniqueId().toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Declines the teleport request\",\"color\":\"gold\"}]}}}"));
-                connection.sendPacket(packet);
+                String message = "'/tpaccept " + movingPlayer.getName();
+                message += "' or '/tpdeny " + movingPlayer.getName();
+                message += "'";
+                destinationPlayer.sendMessage(message);
             }
         }
         return true;

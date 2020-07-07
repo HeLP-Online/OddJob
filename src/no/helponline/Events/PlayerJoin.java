@@ -1,11 +1,11 @@
 package no.helponline.Events;
 
-import net.minecraft.server.v1_15_R1.IChatBaseComponent;
-import net.minecraft.server.v1_15_R1.PacketPlayOutTitle;
+import net.minecraft.server.v1_16_R1.IChatBaseComponent;
+import net.minecraft.server.v1_16_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;
 import no.helponline.Utils.Enum.Zone;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,7 +23,7 @@ public class PlayerJoin implements Listener {
 
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid);
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid); // nullable
 
         // Making an OddPlayer
         OddJob.getInstance().getPlayerManager().updatePlayer(uuid, player.getName());

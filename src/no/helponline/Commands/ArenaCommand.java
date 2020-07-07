@@ -17,7 +17,7 @@ public class ArenaCommand implements CommandExecutor, TabCompleter {
         int id = 0;
         if (strings.length >= 1) {
             switch (strings[0]) {
-                case "leave" -> {
+                case "leave" : {
                     if (!(commandSender instanceof Player)) {
                         OddJob.getInstance().getMessageManager().errorConsole();
                         return true;
@@ -26,7 +26,8 @@ public class ArenaCommand implements CommandExecutor, TabCompleter {
 
                     OddJob.getInstance().getArenaManager().removePlayer(player);
                 }
-                case "join" -> {
+                break;
+                case "join" : {
                     if (!(commandSender instanceof Player)) {
                         OddJob.getInstance().getMessageManager().errorConsole();
                         return true;
@@ -47,7 +48,8 @@ public class ArenaCommand implements CommandExecutor, TabCompleter {
                         OddJob.getInstance().getArenaManager().addPlayer(player,id);
                     }
                 }
-                default -> {
+                break;
+                default : {
                     StringBuilder sb = new StringBuilder();
                     for (int i : OddJob.getInstance().getArenaManager().getList().keySet()) {
                         Arena a = OddJob.getInstance().getArenaManager().getList().get(i);

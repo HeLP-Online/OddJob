@@ -1,7 +1,7 @@
 main: no.helponline.OddJob
 name: OddJob
-version: "0.7"
-api-version: "1.15"
+version: "0.8"
+api-version: "1.16"
 softdepend:
   - dynmap
 
