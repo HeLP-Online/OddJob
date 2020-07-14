@@ -21,7 +21,7 @@ import java.util.*;
 
 public class GuildManager {
     private MarkerSet markerSet = null;
-    private final HashMap<String, AreaMarker> markers;
+    private HashMap<String, AreaMarker> markers;
 
     /**
      * List of Players auto-claiming to a Guild
@@ -49,10 +49,14 @@ public class GuildManager {
     private HashMap<UUID, UUID> guildInvite = new HashMap<>();    // PlayerUUID   | GuildUUID
 
     public GuildManager() {
+        dynmapInit();
+    }
+
+    private void dynmapInit() {
         markers = new HashMap<>();
         try {
             DynmapAPI dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-            Set<MarkerIcon> markerIcon = null;
+            Set<MarkerIcon> markerIcon;
             if (dynmapApi != null) {
                 MarkerAPI markerApi = dynmapApi.getMarkerAPI();
                 if (markerApi != null) {
