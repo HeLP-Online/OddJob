@@ -1,7 +1,6 @@
 package no.helponline.Utils.Arena;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.Arena.Arena.GameState;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -70,8 +69,6 @@ public class ArenaManager {
 
         player.getInventory().setArmorContents(null);
         player.getInventory().clear();
-
-        arena.getGameSpawns(player);
 
         player.teleport(arena.getLobbySpawn());
         player.setFoodLevel(20);

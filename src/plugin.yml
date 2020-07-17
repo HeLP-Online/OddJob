@@ -18,6 +18,7 @@ commands:
     description: Arena Menu
   guild:
     description: Guild Menu
+    aliases: ['g']
   homes:
     description: Homes Menu
     usage: /homes <set|del|list|tp>
@@ -117,7 +118,12 @@ commands:
     usage: /<command>
   shop:
     usage: /<command>
+  spawnmob:
+    usage: /<command>
+    permission: essentials.spawnmob
 permissions:
+  essentials.spawnmob:
+    default: op
   essentials.death:
     default: op
   essentials.tpall:

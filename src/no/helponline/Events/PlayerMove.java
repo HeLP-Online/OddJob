@@ -1,13 +1,9 @@
 package no.helponline.Events;
 
-import net.minecraft.server.v1_16_R1.IChatBaseComponent;
-import net.minecraft.server.v1_16_R1.PacketPlayOutTitle;
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.Zone;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,8 +12,10 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import java.util.UUID;
 
 public class PlayerMove implements Listener {
+
     @EventHandler
     public void freeze(PlayerMoveEvent event) {
+
         Player player = event.getPlayer();
         // If Player is frozen
         if (OddJob.getInstance().getFreezeManager().get(player.getUniqueId()) != null) {

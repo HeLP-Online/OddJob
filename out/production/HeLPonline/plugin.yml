@@ -1,7 +1,9 @@
 main: no.helponline.OddJob
 name: OddJob
-version: "0.6"
-api-version: "1.15"
+version: "0.8"
+api-version: "1.16"
+softdepend:
+  - dynmap
 
 commands:
   locks:
@@ -12,9 +14,11 @@ commands:
     description: EconomyCommand
     usage: /econ <set|add|remove> <player> <amount>
   arena:
+    aliases: ['a']
     description: Arena Menu
   guild:
     description: Guild Menu
+    aliases: ['g']
   homes:
     description: Homes Menu
     usage: /homes <set|del|list|tp>
@@ -26,10 +30,10 @@ commands:
   suicide:
     description: Take suicide
     usage: /<command>
-  kill:
-    description: Kill a given player
-    usage: /<command> <Player>
-    permission: essentials.kill
+  #kill:
+  #  description: Kill a given player
+  #  usage: /<command> <Player>
+  #  permission: essentials.kill
   tp:
     description: Teleports a player to another player
     usage: /<command> <Player> [OtherPlayer]
@@ -110,7 +114,16 @@ commands:
     usage: /<command>
   jail:
     usage: /<command>
+  trade:
+    usage: /<command>
+  shop:
+    usage: /<command>
+  spawnmob:
+    usage: /<command>
+    permission: essentials.spawnmob
 permissions:
+  essentials.spawnmob:
+    default: op
   essentials.death:
     default: op
   essentials.tpall:

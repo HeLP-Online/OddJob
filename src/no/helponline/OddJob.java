@@ -1,14 +1,13 @@
 package no.helponline;
 
-import net.milkbowl.vault.economy.Economy;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
-import no.helponline.Utils.Arena.*;
+import no.helponline.Utils.Arena.ArenaManager;
+import no.helponline.Utils.Arena.ChestManager;
 import no.helponline.Utils.Broadcaster;
 import no.helponline.Utils.SignManager;
 import org.bukkit.*;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
@@ -36,7 +35,6 @@ public class OddJob extends JavaPlugin {
     private TeleportManager teleportManager;
     private WorldManger worldManager;
     private WarpManager warpManager;
-    private Economy econ;
 
     public static OddJob getInstance() {
         return instance;
@@ -100,6 +98,7 @@ public class OddJob extends JavaPlugin {
         getCommand("jail").setExecutor(new JailCommand());
         getCommand("trade").setExecutor(new TradeCommand());
         getCommand("shop").setExecutor(new ShopCommand());
+        getCommand("spawnmob").setExecutor(new SpawnMobCommand());
 
         configManager.load();
         econManager.load();
@@ -139,7 +138,7 @@ public class OddJob extends JavaPlugin {
         Broadcaster broadcaster = new Broadcaster(Broadcaster.createSocket(), server.getPort(), server.getMotd(), server.getIp());
         getServer().getScheduler().runTaskAsynchronously(this, broadcaster);
 
-        if (setupEconomy()) Bukkit.getConsoleSender().sendMessage("Vault found");
+
         if (!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
             Bukkit.getConsoleSender().sendMessage("WorldEdit found");
         }
@@ -158,16 +157,6 @@ public class OddJob extends JavaPlugin {
         signManager.updateSigns();
     }
 
-    private boolean setupEconomy() {
-        if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
-            RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
-            if (economyProvider != null) {
-                econ = economyProvider.getProvider();
-            }
-        }
-
-        return (econ != null);
-    }
 
     public void onDisable() {
         getGuildManager().saveChunks();
