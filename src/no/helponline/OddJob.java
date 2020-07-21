@@ -1,5 +1,6 @@
 package no.helponline;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
@@ -254,4 +255,7 @@ public class OddJob extends JavaPlugin {
         return worldManager;
     }
 
+    public static WorldEditPlugin getWorldEdit() {
+        return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+    }
 }

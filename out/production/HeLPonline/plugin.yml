@@ -118,6 +118,10 @@ commands:
     usage: /<command>
   shop:
     usage: /<command>
+  trade:
+    usage: /<command>
+  shop:
+    usage: /<command>
   spawnmob:
     usage: /<command>
     permission: essentials.spawnmob

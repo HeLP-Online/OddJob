@@ -17,39 +17,72 @@ public class ArenaCommand implements CommandExecutor, TabCompleter {
         int id = 0;
         if (strings.length >= 1) {
             switch (strings[0]) {
-                case "leave" : {
+                case "area": {
+                    // Console cannot execute this command
                     if (!(commandSender instanceof Player)) {
                         OddJob.getInstance().getMessageManager().errorConsole();
                         return true;
                     }
+
+                    Player player = (Player) commandSender;
+
+                    int arena = OddJob.getInstance().getArenaManager().getEditor(player.getUniqueId());
+                    if (arena != 0) {
+
+                    }
+                }
+                case "create": {
+                    // Console cannot execute this command
+                    if (!(commandSender instanceof Player)) {
+                        OddJob.getInstance().getMessageManager().errorConsole();
+                        return true;
+                    }
+
+                    Player player = (Player) commandSender;
+
+                    OddJob.getInstance().getArenaManager().createArena(player.getUniqueId());
+                }
+                break;
+                case "leave": {
+                    // Console cannot execute this command
+                    if (!(commandSender instanceof Player)) {
+                        OddJob.getInstance().getMessageManager().errorConsole();
+                        return true;
+                    }
+
                     Player player = (Player) commandSender;
 
                     OddJob.getInstance().getArenaManager().removePlayer(player);
                 }
                 break;
-                case "join" : {
+                case "join": {
+                    // Console cannot execute this command
                     if (!(commandSender instanceof Player)) {
                         OddJob.getInstance().getMessageManager().errorConsole();
                         return true;
                     }
+
                     Player player = (Player) commandSender;
+
+                    // Player must specify an arena to join
                     if (strings.length == 2) {
+                        // Check for a valid number
                         try {
                             id = Integer.parseInt(strings[1]);
                         } catch (Exception ex) {
-
                             ex.printStackTrace();
                         }
 
                         if (id == 0) {
-                            OddJob.getInstance().getMessageManager().errorArena(strings[1],player.getUniqueId());
+                            OddJob.getInstance().getMessageManager().errorArena(strings[1], player.getUniqueId());
                             return true;
                         }
-                        OddJob.getInstance().getArenaManager().addPlayer(player,id);
+                        OddJob.getInstance().getArenaManager().addPlayer(player, id);
                     }
                 }
                 break;
-                default : {
+                default: {
+                    // Command sender did not apply any arena to join, returns a list.
                     StringBuilder sb = new StringBuilder();
                     for (int i : OddJob.getInstance().getArenaManager().getList().keySet()) {
                         Arena a = OddJob.getInstance().getArenaManager().getList().get(i);
