@@ -8,10 +8,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
 
-import javax.management.openmbean.TabularDataSupport;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
@@ -20,7 +19,7 @@ public class ScoreManager {
     private ScoreboardManager scoreboardManager;
     private Scoreboard scoreboard;
     private boolean enabled = false;
-    private HashMap<UUID,BukkitRunnable> scores = new HashMap<>();
+    private HashMap<UUID, BukkitTask> scores = new HashMap<>();
 
     public ScoreManager() {
         scoreboardManager = OddJob.getInstance().getServer().getScoreboardManager();
@@ -41,42 +40,46 @@ public class ScoreManager {
 
     public void guild(Player player) {
         final UUID playerUUID = player.getUniqueId();
-        final String unique = playerUUID.toString().substring(0, 8);
-
+        final String pUnique = playerUUID.toString().substring(0, 8);
         final UUID playerGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(playerUUID);
+        final String gUnique = playerGuild.toString().substring(0,8);
+
         Team zone, guild, playerPocket, playerBank, guildBank, rank, members;
         Objective objective = null;
 
         // Make or Get Scoreboard
-        objective = scoreboard.getObjective("guild-" + unique);
+        objective = scoreboard.getObjective("guild-" + pUnique);
         if (objective == null) {
-            objective = scoreboard.registerNewObjective("guild-" + unique, "dummy", OddJob.getInstance().getGuildManager().getGuildNameByUUID(playerGuild), RenderType.INTEGER);
+            objective = scoreboard.registerNewObjective("guild-" + pUnique, "dummy", OddJob.getInstance().getGuildManager().getGuildNameByUUID(playerGuild), RenderType.INTEGER);
         }
 
-        zone = scoreboard.getTeam("zone-" + unique);
-        if (zone == null) zone = scoreboard.registerNewTeam("zone-" + unique);
+        zone = scoreboard.getTeam("zone-" + pUnique);
+        if (zone == null) zone = scoreboard.registerNewTeam("zone-" + pUnique);
         zone.addEntry(ChatColor.GOLD + "Zone: ");
         zone.setSuffix(OddJob.getInstance().getGuildManager().getZoneByGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())).name());
 
-        guild = scoreboard.getTeam("guild-" + unique);
-        if (guild == null) guild = scoreboard.registerNewTeam("guild-" + unique);
+        guild = scoreboard.getTeam("guild-" + gUnique);
+        if (guild == null) guild = scoreboard.registerNewTeam("guild-" + gUnique);
         guild.addEntry(ChatColor.GOLD + "Guild: ");
         guild.setSuffix(OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())));
 
-        playerPocket = scoreboard.getTeam("pPocket-" + unique);
-        if (playerPocket == null)playerPocket = scoreboard.registerNewTeam("pPocket-" + unique);
+        playerPocket = scoreboard.getTeam("pPocket-" + pUnique);
+        if (playerPocket == null) playerPocket = scoreboard.registerNewTeam("pPocket-" + pUnique);
         playerPocket.addEntry(ChatColor.GOLD + "Player-Pocket: ");
         playerPocket.setSuffix(String.valueOf(OddJob.getInstance().getEconManager().getPocketBalance(player.getUniqueId())));
 
-        playerBank = scoreboard.registerNewTeam("pBank-" + unique);
+        playerBank = scoreboard.getTeam("pBank-" + pUnique);
+        if (playerBank == null) playerBank = scoreboard.registerNewTeam("pBank-" + pUnique);
         playerBank.addEntry(ChatColor.GOLD + "Player-Bank: ");
         playerBank.setSuffix(String.valueOf(OddJob.getInstance().getEconManager().getBankBalance(player.getUniqueId(), false)));
 
-        guildBank = scoreboard.registerNewTeam("gBank-" + unique);
+        guildBank = scoreboard.getTeam("gBank-" + gUnique);
+        if (guildBank == null) guildBank = scoreboard.registerNewTeam("gBank-" + gUnique);
         guildBank.addEntry(ChatColor.GOLD + "Guild-Bank: ");
         guildBank.setSuffix(String.valueOf(OddJob.getInstance().getEconManager().getBankBalance(playerGuild, true)));
 
-        rank = scoreboard.registerNewTeam("role-" + unique);
+        rank = scoreboard.getTeam("role-" + pUnique);
+        if (rank == null) rank = scoreboard.registerNewTeam("role-" + pUnique);
         rank.addEntry(ChatColor.GOLD + "Role: ");
         rank.setSuffix(OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()).name());
 
@@ -88,7 +91,9 @@ public class ScoreManager {
             }
         }
 
-        members = scoreboard.registerNewTeam("members-" + unique);
+        members = scoreboard.getTeam("members-" + gUnique);
+        OddJob.getInstance().log("Members "+members);
+        if (members == null) members = scoreboard.registerNewTeam("members-" + gUnique);
         members.addEntry(ChatColor.GOLD + "Members: ");
         members.setSuffix(i + "/" + mem.size());
 
@@ -112,7 +117,9 @@ public class ScoreManager {
 
         Team finalGuild = guild;
         Team finalZone = zone;
-        scores.put(player.getUniqueId(), (BukkitRunnable) new BukkitRunnable() {
+        Team finalRank = rank;
+        Team finalMembers = members;
+        scores.put(player.getUniqueId(), new BukkitRunnable() {
             @Override
             public void run() {
                 if (!player.isOnline()) cancel();
@@ -138,8 +145,8 @@ public class ScoreManager {
 
                 finalGuild.setSuffix(ChatColor.WHITE + guildName);
                 finalZone.setSuffix(ChatColor.WHITE + guildZone);
-                rank.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildMemberRole(playerUUID).name());
-                members.setSuffix(ChatColor.WHITE + "" + i + "/" + mem.size());
+                finalRank.setSuffix(ChatColor.WHITE + OddJob.getInstance().getGuildManager().getGuildMemberRole(playerUUID).name());
+                finalMembers.setSuffix(ChatColor.WHITE + "" + i + "/" + mem.size());
 
             }
         }.runTaskTimer(OddJob.getInstance(), 0, 10));
