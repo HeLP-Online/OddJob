@@ -1,5 +1,6 @@
 package no.helponline;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
@@ -43,10 +44,11 @@ public class OddJob extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        configManager = new ConfigManager();
+        messageManager = new MessageManager();
         arenaManager = new ArenaManager();
         banManager = new BanManager();
         chestManager = new ChestManager();
-        configManager = new ConfigManager();
         deathManager = new DeathManager();
         econManager = new EconManager();
         freezeManager = new FreezeManager();
@@ -99,6 +101,7 @@ public class OddJob extends JavaPlugin {
         getCommand("trade").setExecutor(new TradeCommand());
         getCommand("shop").setExecutor(new ShopCommand());
         getCommand("spawnmob").setExecutor(new SpawnMobCommand());
+        getCommand("map").setExecutor(new MapCommand());
 
         configManager.load();
         econManager.load();
@@ -254,4 +257,7 @@ public class OddJob extends JavaPlugin {
         return worldManager;
     }
 
+    public static WorldEditPlugin getWorldEdit() {
+        return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+    }
 }

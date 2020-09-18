@@ -121,6 +121,8 @@ commands:
   spawnmob:
     usage: /<command>
     permission: essentials.spawnmob
+  map:
+    usage: /<command>
 permissions:
   essentials.spawnmob:
     default: op

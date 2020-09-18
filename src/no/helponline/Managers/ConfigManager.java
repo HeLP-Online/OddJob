@@ -5,6 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +21,14 @@ public class ConfigManager {
         OddJob.getInstance().reloadConfig();
         FileConfiguration config = OddJob.getInstance().getConfig();
 
-        config.addDefault("use-permission", true);
-        config.addDefault("broadcast-win", true);
+        try {
+            config.addDefault("Map.Address","http://"+ InetAddress.getLocalHost().getHostAddress() +":8123");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        config.addDefault("Arena.Use-permission", true);
+        config.addDefault("Arena.Broadcast-win", true);
 
         config.addDefault("SQL.Type", "MYSQL");
         config.addDefault("SQL.TablePrefix", "mine_");
@@ -30,25 +38,25 @@ public class ConfigManager {
         config.addDefault("SQL.Username", "root");
         config.addDefault("SQL.Password", "");
 
-        ArrayList<Material> allowedBlocks = new ArrayList<>();
+        ArrayList<String> allowedBlocks = new ArrayList<>();
 
-        allowedBlocks.add(Material.OAK_LEAVES); // 18
-        allowedBlocks.add(Material.SPRUCE_LEAVES); // 18
-        allowedBlocks.add(Material.BIRCH_LEAVES);  // 18
-        allowedBlocks.add(Material.JUNGLE_LEAVES); // 18
-        allowedBlocks.add(Material.DEAD_BUSH);   // 32
-        allowedBlocks.add(Material.GRASS);  // 31:1
-        allowedBlocks.add(Material.FERN);  // 31:2
-        allowedBlocks.add(Material.CAKE);  // 92
-        allowedBlocks.add(Material.MELON); // 103
-        allowedBlocks.add(Material.BROWN_MUSHROOM); // 39
-        allowedBlocks.add(Material.RED_MUSHROOM); // 40
-        allowedBlocks.add(Material.PUMPKIN); // 86
-        allowedBlocks.add(Material.TNT);  // 46
-        allowedBlocks.add(Material.FIRE); // 51
-        allowedBlocks.add(Material.COBWEB); // 30
+        allowedBlocks.add(Material.OAK_LEAVES.name()); // 18
+        allowedBlocks.add(Material.SPRUCE_LEAVES.name()); // 18
+        allowedBlocks.add(Material.BIRCH_LEAVES.name());  // 18
+        allowedBlocks.add(Material.JUNGLE_LEAVES.name()); // 18
+        allowedBlocks.add(Material.DEAD_BUSH.name());   // 32
+        allowedBlocks.add(Material.GRASS.name());  // 31:1
+        allowedBlocks.add(Material.FERN.name());  // 31:2
+        allowedBlocks.add(Material.CAKE.name());  // 92
+        allowedBlocks.add(Material.MELON.name()); // 103
+        allowedBlocks.add(Material.BROWN_MUSHROOM.name()); // 39
+        allowedBlocks.add(Material.RED_MUSHROOM.name()); // 40
+        allowedBlocks.add(Material.PUMPKIN.name()); // 86
+        allowedBlocks.add(Material.TNT.name());  // 46
+        allowedBlocks.add(Material.FIRE.name()); // 51
+        allowedBlocks.add(Material.COBWEB.name()); // 30
 
-        config.addDefault("Survival.Arena.Allowed-Blocks", allowedBlocks);
+        config.addDefault("Arena.Survival.Allowed-Blocks", allowedBlocks);
 
         config.options().copyDefaults(true);
         OddJob.getInstance().saveConfig();

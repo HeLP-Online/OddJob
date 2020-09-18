@@ -21,6 +21,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -357,5 +358,19 @@ public class Utility {
         }
 
         return en;
+    }
+
+    public HashMap<String, Integer> chunks(Location a, Location b) {
+        HashMap<String, Integer> chunks = new HashMap<>();
+        if (a != null && b != null) {
+            Chunk aC = a.getChunk();
+            Chunk bC = b.getChunk();
+
+            chunks.put("minX", Math.min(aC.getX(), bC.getX()));
+            chunks.put("maxX", Math.max(aC.getX(), bC.getX()));
+            chunks.put("minZ", Math.min(aC.getZ(), bC.getZ()));
+            chunks.put("maxZ", Math.max(aC.getZ(), bC.getZ()));
+        }
+        return chunks;
     }
 }

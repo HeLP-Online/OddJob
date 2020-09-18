@@ -17,7 +17,6 @@ import java.util.*;
 
 public class Arena {
     private final int id;
-    private final Location lobbySpawn;
     private final List<Location> gameSpawns = new ArrayList<>();
     private List<UUID> players = new ArrayList<>();
     private final HashMap<UUID, Kit> kits = new HashMap<>();
@@ -38,17 +37,15 @@ public class Arena {
 
     private boolean disabled = true;
 
-    public Arena(Location location, int id) {
+    public Arena(int id) {
         OddJob.getInstance().getMessageManager().console("Arena constructor -> new");
-        this.lobbySpawn = location;
         this.id = id;
         this.requiredPlayers = 2;
         this.prefix = "[Arena " + this.id + "] ";
     }
 
-    public Arena(Location location, int id, GameType gameType, boolean disabled) {
+    public Arena(int id, GameType gameType, boolean disabled) {
         OddJob.getInstance().getMessageManager().console("Arena constructor -> load");
-        this.lobbySpawn = location;
         this.id = id;
         this.requiredPlayers = 2;
         this.prefix = "[Arena " + this.id + "] ";
@@ -129,10 +126,6 @@ public class Arena {
 
     public List<UUID> getPlayers() {
         return this.players;
-    }
-
-    public Location getLobbySpawn() {
-        return this.lobbySpawn;
     }
 
     public void getGameSpawns(Player player) {

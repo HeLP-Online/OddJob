@@ -19,18 +19,19 @@ public class ArenaManager {
      * A list of created Arenas
      */
     private final HashMap<Integer, Arena> arenas = new HashMap<>();
+    private final HashMap<UUID, Integer> editor = new HashMap<>();
 
     private final HashMap<UUID, ItemStack[]> inventories = new HashMap<>();
     private final HashMap<UUID, ItemStack[]> armor = new HashMap<>();
     private final HashMap<UUID, Double> health = new HashMap<>();
     private final HashMap<UUID, Integer> food = new HashMap<>();
-    private final HashMap<UUID,Location> from = new HashMap<>();
+    private final HashMap<UUID, Location> from = new HashMap<>();
 
     /**
      * Constructor
      */
     public ArenaManager() {
-//        OddJob.getInstance().getMessageManager().console("ArenaManager constructor");
+        OddJob.getInstance().getMessageManager().console("ArenaManager constructor");
         num = OddJob.getInstance().getConfig().getInt("Arenas.Num", 1);
         size = OddJob.getInstance().getConfig().getInt("Arenas.Default.Size", 10);
     }
@@ -38,13 +39,19 @@ public class ArenaManager {
     /**
      * Creating a new Arena
      */
-    public void createArena(Location lobbySpawn) {
+    public void createArena(UUID uuid) {
         OddJob.getInstance().getMessageManager().console("ArenaManager createArena");
-        Arena arena = new Arena(lobbySpawn, num);
+        // Creating
+        Arena arena = new Arena(num);
+        // Storing
         arenas.put(num, arena);
+        // Selecting editor
+        editor.put(uuid, num);
 
-
+        // Increment number of arenas
         num++;
+        OddJob.getInstance().getConfig().set("Arenas.Num", num);
+        OddJob.getInstance().getMessageManager().success("Arena created", uuid, true);
     }
 
     public Arena getArena(int id) {
@@ -70,11 +77,11 @@ public class ArenaManager {
         player.getInventory().setArmorContents(null);
         player.getInventory().clear();
 
-        player.teleport(arena.getLobbySpawn());
         player.setFoodLevel(20);
         player.setHealth(20D);
         player.setFireTicks(0);
     }
+
     public void removePlayer(Player player) {
         UUID uuid = player.getUniqueId();
         for (Arena a : arenas.values()) {
@@ -99,18 +106,21 @@ public class ArenaManager {
         OddJob.getInstance().getMessageManager().console("ArenaManager load");
         int id = 1;
         World world = (Bukkit.getWorld("flat") != null) ? Bukkit.getWorld("flat") : Bukkit.createWorld(new WorldCreator("flat").type(WorldType.FLAT));
-        Location location = new Location(world,0,10,0);
+        Location location = new Location(world, 0, 10, 0);
         GameType gameType = GameType.SURVIVAL;
-        arenas.put(id,new Arena(location,id,gameType, false));
+        arenas.put(id, new Arena(id, gameType, false));
     }
 
     public HashMap<Integer, Arena> getList() {
         return arenas;
     }
 
+    public int getEditor(UUID uuid) {
+        return editor.get(uuid);
+    }
 
 
     enum GameType {
-        SURVIVAL,TNT
+        SURVIVAL, TNT
     }
 }
