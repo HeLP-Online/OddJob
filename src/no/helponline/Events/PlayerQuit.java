@@ -12,11 +12,7 @@ public class PlayerQuit implements Listener {
     public void leave(PlayerQuitEvent event) {
         //ArenaMechanics.cancel(event.getPlayer());
         UUID uuid = event.getPlayer().getUniqueId();
-        /*if (OddJob.getInstance().getScoreManager().scores.containsKey(uuid)) {
-            OddJob.getInstance().getScoreManager().scores.get(uuid).cancel();
-            OddJob.getInstance().getScoreManager().scores.remove(uuid);
+        OddJob.getInstance().getScoreManager().clear(event.getPlayer());
 
-        }
-         */
     }
 }

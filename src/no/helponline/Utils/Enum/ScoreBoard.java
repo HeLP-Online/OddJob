@@ -1,5 +1,5 @@
 package no.helponline.Utils.Enum;
 
 public enum ScoreBoard {
-    ArenaMaker,Guild, None
+    ArenaMaker, Guild, None, Player
 }

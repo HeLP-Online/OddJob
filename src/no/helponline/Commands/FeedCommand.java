@@ -18,7 +18,7 @@ public class FeedCommand implements CommandExecutor, TabCompleter {
         if (strings.length == 1) {
             target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
             if (target == null || !target.isOnline()) {
-                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender,false);
+                OddJob.getInstance().getMessageManager().warning("Sorry, we can't find " + strings[0], commandSender, false);
                 return true;
             }
         }
@@ -30,9 +30,9 @@ public class FeedCommand implements CommandExecutor, TabCompleter {
         if (target != null) {
             target.setFoodLevel(20);
             if (commandSender instanceof Player && !commandSender.equals(target)) {
-                OddJob.getInstance().getMessageManager().success(target.getName() + " has been feed.", commandSender,true);
+                OddJob.getInstance().getMessageManager().success(target.getName() + " has been feed.", commandSender, true);
             }
-            OddJob.getInstance().getMessageManager().success("You have been feed", target.getUniqueId(),false);
+            OddJob.getInstance().getMessageManager().success("You have been feed", target.getUniqueId(), false);
         }
         return true;
     }
@@ -40,15 +40,13 @@ public class FeedCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         List<String> list = new ArrayList<>();
-        if (strings.length <= 1) {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (strings.length == 1) {
-                    if (player.getName().startsWith(strings[0])) {
-                        list.add(player.getName());
-                    }
-                } else {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (strings.length == 1) {
+                if (player.getName().startsWith(strings[0])) {
                     list.add(player.getName());
                 }
+            } else if (strings.length == 0) {
+                list.add(player.getName());
             }
         }
         return list;

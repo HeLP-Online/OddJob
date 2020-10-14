@@ -105,7 +105,9 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                         OddJob.getInstance().getMessageManager().success("SET " + strings[1] + " to " + deny, player, true);
                     } else if (strings[1].equalsIgnoreCase("scoreboard")) {
                         ScoreBoard score = ScoreBoard.valueOf(strings[2]);
-                        oddPlayer.setScoreBoard(score);
+                        if (score == ScoreBoard.None) OddJob.getInstance().getScoreManager().clear(player);
+                        else OddJob.getInstance().getScoreManager().create(player,score);
+                        oddPlayer.setScoreboard(score);
                         OddJob.getInstance().getMessageManager().success("SET " + strings[1] + " to " + score.name(), player, true);
                     }
                 }

@@ -102,6 +102,7 @@ public class OddJob extends JavaPlugin {
         getCommand("shop").setExecutor(new ShopCommand());
         getCommand("spawnmob").setExecutor(new SpawnMobCommand());
         getCommand("map").setExecutor(new MapCommand());
+        getCommand("sudo").setExecutor(new SudoCommand());
 
         configManager.load();
         econManager.load();
@@ -136,6 +137,7 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerMove(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerPortal(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
+        Bukkit.getPluginManager().registerEvents(new ChunkLoad(),this);
 
         Server server = getServer();
         Broadcaster broadcaster = new Broadcaster(Broadcaster.createSocket(), server.getPort(), server.getMotd(), server.getIp());

@@ -123,6 +123,8 @@ commands:
     permission: essentials.spawnmob
   map:
     usage: /<command>
+  sudo:
+    usage: /<command> <player> <command_to_execute>
 permissions:
   essentials.spawnmob:
     default: op

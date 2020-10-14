@@ -211,7 +211,7 @@ public class GuildManager {
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
             // Gives the Player the Guild Scoreboard
-            OddJob.getInstance().getScoreManager().guild(p);
+            //TODO OddJob.getInstance().getScoreManager().guild(p);
         }
         return true;
     }
@@ -272,6 +272,7 @@ public class GuildManager {
         // Adds the Chunk to the Guild
         if (!chunks.containsKey(chunk)) {
             chunks.put(chunk, guild);
+            OddJob.getInstance().getMySQLManager().createGuildClaim(chunk,guild);
             updateDynmapChunk(chunk);
             OddJob.getInstance().getMessageManager().success("Claiming chunk " + ChatColor.GOLD + "X:" + chunk.getX() + " Y:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuild(guild).getName(), player, true);
         } else OddJob.getInstance().getMessageManager().danger("Already claimed", player, false);
@@ -325,6 +326,7 @@ public class GuildManager {
     public void unClaim(@Nonnull Chunk chunk, Player player) {
         // UnClaim the Chunk
         if (OddJob.getInstance().getMySQLManager().deleteGuildsChunks(chunk)) {
+            OddJob.getInstance().getGuildManager().chunks.remove(chunk);
             removeDynmapChunk(chunk);
             if (player != null)
                 OddJob.getInstance().getMessageManager().success("You have unclaimed " + ChatColor.GOLD + "X:" + chunk.getX() + " Z:" + chunk.getZ() + " World:" + chunk.getWorld().getName(), player, true);
@@ -364,7 +366,7 @@ public class GuildManager {
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
             // Give the Player the Guild Scoreboard
-            OddJob.getInstance().getScoreManager().guild(p);
+            //TODO OddJob.getInstance().getScoreManager().guild(p);
         }
     }
 
@@ -1057,5 +1059,13 @@ public class GuildManager {
             if (guild.getOpen()) c = ChatColor.GREEN;
             list.add(c + guild.getName());
         }
+    }
+
+    public int getOnline(UUID guild) {
+        int i = 0;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) == guild) i++;
+        }
+        return i;
     }
 }

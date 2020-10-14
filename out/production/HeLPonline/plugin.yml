@@ -1,6 +1,6 @@
 main: no.helponline.OddJob
 name: OddJob
-version: "0.8"
+version: "0.9"
 api-version: "1.16"
 softdepend:
   - dynmap
@@ -118,13 +118,13 @@ commands:
     usage: /<command>
   shop:
     usage: /<command>
-  trade:
-    usage: /<command>
-  shop:
-    usage: /<command>
   spawnmob:
     usage: /<command>
     permission: essentials.spawnmob
+  map:
+    usage: /<command>
+  sudo:
+    usage: /<command> <player> <command_to_execute>
 permissions:
   essentials.spawnmob:
     default: op

@@ -1,10 +1,14 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
-import no.helponline.Utils.*;
-import no.helponline.Utils.Enum.*;
-import no.helponline.Utils.Utility;
+import no.helponline.Utils.Enum.Role;
+import no.helponline.Utils.Enum.ScoreBoard;
+import no.helponline.Utils.Enum.Zone;
+import no.helponline.Utils.Guild;
+import no.helponline.Utils.Home;
 import no.helponline.Utils.Odd.OddPlayer;
+import no.helponline.Utils.Utility;
+import no.helponline.Utils.Warp;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -700,6 +704,7 @@ public class MySQLManager {
                 preparedStatement.executeUpdate();
                 u++;
             } catch (SQLException ex) {
+                ex.printStackTrace();
             } finally {
                 close();
             }
@@ -715,14 +720,15 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
+                OddJob.getInstance().log("Loaded: "+resultSet.getString("name"));
                 List<UUID> whitelist = new ArrayList<>();
-                if (resultSet.getString("whitelist") != null) {
+                if (!resultSet.getString("whitelist").equals("")) {
                     for (String uid : resultSet.getString("whitelist").split(",")) {
                         whitelist.add(UUID.fromString(uid));
                     }
                 }
                 List<UUID> blacklist = new ArrayList<>();
-                if (resultSet.getString("blacklist") != null) {
+                if (!resultSet.getString("blacklist").equals("")) {
                     for (String uid : resultSet.getString("blacklist").split(",")) {
                         blacklist.add(UUID.fromString(uid));
                     }
@@ -732,6 +738,7 @@ public class MySQLManager {
                 try {
                     scoreBoard = ScoreBoard.valueOf(resultSet.getString("scoreboard"));
                 } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 OddPlayer data = new OddPlayer(
                         uuid,
@@ -1197,4 +1204,33 @@ public class MySQLManager {
         return uuid;
     }
 
+    public void createGuildClaim(Chunk chunk, UUID guild) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`x`,`z`,`world`,`uuid`) VALUES (?,?,?,?)");
+            preparedStatement.setInt(1, chunk.getX());
+            preparedStatement.setInt(2, chunk.getZ());
+            preparedStatement.setString(3, chunk.getWorld().getUID().toString());
+            preparedStatement.setString(4, guild.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public void setScoreboard(UUID uuid, ScoreBoard score) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `scoreboard` = ? WHERE `uuid` = ?");
+            preparedStatement.setString(1, score.name());
+            preparedStatement.setString(2, uuid.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
 }

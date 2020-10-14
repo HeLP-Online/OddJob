@@ -45,11 +45,8 @@ public class PlayerJoin implements Listener {
                     OddJob.getInstance().getEconManager().createAccounts(guild, 200.0D, true);
                     OddJob.getInstance().getMessageManager().console("Initializing account for the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                 }
-                if (OddJob.getInstance().getPlayerManager().getOddPlayer(uuid).getScoreboard() == ScoreBoard.Guild) {
-                    OddJob.getInstance().getScoreManager().guild(player);
-                }
-            } else OddJob.getInstance().getScoreManager().clear(player);
-
+            }
+            OddJob.getInstance().getScoreManager().create(player,OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId()).getScoreboard());
             // Welcome message
             PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to HeLP\"}"), 40, 20, 20);
             (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);

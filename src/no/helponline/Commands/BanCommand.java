@@ -32,7 +32,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             }
 
             OddJob.getInstance().getBanManager().ban(target, text);
-            OddJob.getInstance().getMessageManager().success("Banned "+ ChatColor.AQUA+OddJob.getInstance().getPlayerManager().getName(target) +ChatColor.GREEN+ " banned with message: "+ChatColor.RESET + text,commandSender,true);
+            OddJob.getInstance().getMessageManager().success("Banned " + ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(target) + ChatColor.GREEN + " banned with message: " + ChatColor.RESET + text, commandSender, true);
         }
         return true;
     }
@@ -46,6 +46,9 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 if (!bans.contains(player)) list.add(OddJob.getInstance().getPlayerManager().getName(player));
             }
         }
+
+
         return list;
     }
 }
+

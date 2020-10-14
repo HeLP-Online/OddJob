@@ -38,6 +38,7 @@ public class DeathManager {
      * @param entity Entity (ArmorStand)
      * @param player Player
      */
+
     public void add(Entity entity, Player player) {
         // Make the PlayerSkull
         ItemStack playerSkull = new ItemStack(Material.PLAYER_HEAD, 1);
@@ -144,6 +145,8 @@ public class DeathManager {
 
         // Remove from database
         OddJob.getInstance().getMySQLManager().deleteSpirit(uuid);
+        Entity entity = Bukkit.getEntity(uuid);
+        if (entity != null) entity.remove();
         inventories.remove(uuid);
         owner.remove(uuid);
     }

@@ -1,5 +1,6 @@
 package no.helponline.Utils.Odd;
 
+import no.helponline.Managers.MySQLManager;
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;
 import org.bukkit.Bukkit;
@@ -27,11 +28,6 @@ public class OddPlayer {
         this.banned = banned;
         this.scoreBoard = scoreBoard;
         this.denyTrade = denyTrade;
-    }
-
-    public void setScoreBoard(ScoreBoard scoreBoard) {
-        this.scoreBoard = scoreBoard;
-        OddJob.getInstance().getScoreManager().set(getUuid(),scoreBoard);
     }
 
     public UUID getUuid() {
@@ -96,5 +92,10 @@ public class OddPlayer {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(uuid);
+    }
+
+    public void setScoreboard(ScoreBoard score) {
+        scoreBoard = score;
+        OddJob.getInstance().getMySQLManager().setScoreboard(uuid,score);
     }
 }

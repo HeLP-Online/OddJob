@@ -1,7 +1,10 @@
 package no.helponline.Utils.Arena;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Enum.ScoreBoard;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -39,19 +42,32 @@ public class ArenaManager {
     /**
      * Creating a new Arena
      */
-    public void createArena(UUID uuid) {
+    public void createArena(Player player) {
         OddJob.getInstance().getMessageManager().console("ArenaManager createArena");
+        UUID uuid = player.getUniqueId();
+
         // Creating
         Arena arena = new Arena(num);
         // Storing
         arenas.put(num, arena);
-        // Selecting editor
+        // Assigning editor
         editor.put(uuid, num);
 
         // Increment number of arenas
         num++;
         OddJob.getInstance().getConfig().set("Arenas.Num", num);
+
         OddJob.getInstance().getMessageManager().success("Arena created", uuid, true);
+        if (arena.getGameSpawns().size() > 0) {
+            int i = 0;
+            for (Location location : arena.getGameSpawns()) {
+                Block block = location.getBlock().getRelative(BlockFace.DOWN);
+                arena.blMat.put(i, block.getType());
+                arena.blPos.put(i, block.getLocation());
+                i++;
+            }
+        }
+        OddJob.getInstance().getScoreManager().create(player, ScoreBoard.ArenaMaker);
     }
 
     public Arena getArena(int id) {
@@ -120,7 +136,7 @@ public class ArenaManager {
     }
 
 
-    enum GameType {
+    public enum GameType {
         SURVIVAL, TNT
     }
 }

@@ -1,11 +1,15 @@
 package no.helponline.Utils.Arena;
 
+import com.sk89q.worldedit.bukkit.fastutil.Hash;
 import no.helponline.OddJob;
 import no.helponline.Utils.Arena.ArenaManager.GameType;
 import no.helponline.Utils.Arena.Games.HungerGames;
 import no.helponline.Utils.Arena.Games.TNTTag;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -18,6 +22,8 @@ import java.util.*;
 public class Arena {
     private final int id;
     private final List<Location> gameSpawns = new ArrayList<>();
+    public Location lobbySpawn;
+    public Location signLocation;
     private List<UUID> players = new ArrayList<>();
     private final HashMap<UUID, Kit> kits = new HashMap<>();
     private GameState gameState;
@@ -26,6 +32,9 @@ public class Arena {
     private GameType gameType;
     private final int requiredPlayers;
     private final String prefix;
+    private int blocks = 0;
+    public HashMap<Integer,Location> blPos = new HashMap<>();
+    public HashMap<Integer,Material> blMat = new HashMap<>();
 
     public boolean isDisabled() {
         return disabled;
@@ -128,8 +137,8 @@ public class Arena {
         return this.players;
     }
 
-    public void getGameSpawns(Player player) {
-
+    public List<Location> getGameSpawns() {
+        return gameSpawns;
     }
 
     public void setGameState(GameState gameState) {
@@ -164,6 +173,39 @@ public class Arena {
 
     public void setGameType(GameType gameType) {
         this.gameType = gameType;
+    }
+
+    public Location getLobbySpawn() {
+        return lobbySpawn;
+    }
+
+    public Location getSignLocation() {
+        return signLocation;
+    }
+
+    public void setLobbySpawn(Location location) {
+        lobbySpawn = location;
+    }
+
+    public void removeLobbySpawn() {
+        lobbySpawn = null;
+    }
+
+    public void setGameSpawn(Location location) {
+        Block position = location.getBlock();
+        Block block = position.getRelative(BlockFace.DOWN);
+        blPos.put(blocks,block.getLocation());
+        blMat.put(blocks,block.getType());
+        block.setType(Material.GOLD_BLOCK);
+        blocks++;
+    }
+
+    public void removeGameSpawn(int i) {
+        Location location = blPos.get(i);
+        Block block = location.getBlock();
+        block.setType(blMat.get(i));
+        blMat.remove(i);
+        blPos.remove(i);
     }
 
     enum GameState {
