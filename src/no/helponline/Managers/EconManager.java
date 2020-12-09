@@ -81,9 +81,11 @@ public class EconManager {
 
     public void load() {
         HashMap<String,HashMap<UUID,Double>> values = OddJob.getInstance().getMySQLManager().loadEcon();
-        pocket.putAll(values.get("pocket"));
-        guildBank.putAll(values.get("guild"));
-        playerBank.putAll(values.get("bank"));
+        if (values.size() > 0) {
+            pocket.putAll(values.get("pocket"));
+            guildBank.putAll(values.get("guild"));
+            playerBank.putAll(values.get("bank"));
+        }
     }
 
     public void save() {

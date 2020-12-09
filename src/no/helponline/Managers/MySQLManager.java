@@ -30,8 +30,148 @@ public class MySQLManager {
     private ResultSet resultSetsec = null;
 
     private void connect() throws SQLException {
-        if (connection == null)
+        if (connection == null) {
             connection = DriverManager.getConnection("jdbc:mysql://10.0.4.9/odderik", "odderik", "503504");
+            statement = connection.createStatement();
+            String sting = "CREATE TABLE IF NOT EXISTS mine_secured_armorstands (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "`player` VARCHAR(64) NOT NULL," +
+                    "`entity` VARCHAR(64) NOT NULL)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_players (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`name` VARCHAR(64) NOT NULL," +
+                    "`whitelist` TEXT DEFAULT NULL," +
+                    "`blacklist` TEXT DEFAULT NULL," +
+                    "`banned` TEXT DEFAULT NULL," +
+                    "`denytpa` TINYINT(1) DEFAULT 0," +
+                    "`denytrade` TINYINT(1) DEFAULT 0," +
+                    "`scoreboard` VARCHAR(16) DEFAULT 'player')";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_secured_blocks (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "`uuid` VARCHAR (64) NOT NULL," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`x` INTEGER NOT NULL ," +
+                    "`y` INTEGER NOT NULL ," +
+                    "`z` INTEGER NOT NULL)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_guilds_chunks (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "`uuid` VARCHAR (64) NOT NULL," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`x` INTEGER NOT NULL ," +
+                    "`z` INTEGER NOT NULL)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_lockable_blocks (" +
+                    "`name` VARCHAR (32) NOT NULL PRIMARY KEY ," +
+                    "`value` TINYINT(1) DEFAULT 1)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_lockable_materials (" +
+                    "`name` VARCHAR (32) NOT NULL PRIMARY KEY ," +
+                    "`value` TINYINT(1) DEFAULT 1)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_players_gamemodes (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`gamemode` VARCHAR (16) NOT NULL)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_players_teleport (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY ," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`x` INTEGER NOT NULL ," +
+                    "`y` INTEGER NOT NULL ," +
+                    "`z` INTEGER NOT NULL," +
+                    "`yaw` FLOAT NOT NULL ," +
+                    "`pitch` FLOAT NOT NULL )";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_warps (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "`name` VARCHAR (16) NOT NULL," +
+                    "`password` VARCHAR (32) DEFAULT NULL," +
+                    "`cost` INTEGER NOT NULL DEFAULT 0," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`x` INTEGER NOT NULL ," +
+                    "`y` INTEGER NOT NULL ," +
+                    "`z` INTEGER NOT NULL," +
+                    "`yaw` FLOAT NOT NULL ," +
+                    "`pitch` FLOAT NOT NULL )";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_player_jailed (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY ," +
+                    "`world` VARCHAR (64) NOT NULL)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_worlds (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`name` VARCHAR (16) NOT NULL)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_log_DE (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "`uuid` VARCHAR (64) NOT NULL," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`x` INTEGER NOT NULL ," +
+                    "`y` INTEGER NOT NULL ," +
+                    "`z` INTEGER NOT NULL," +
+                    "`action` VARCHAR (32)," +
+                    "`item` VARCHAR (32)," +
+                    "`count` INTEGER DEFAULT 1," +
+                    "`time` INTEGER NOT NULL)";
+
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_guilds (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`name` VARCHAR (32) NOT NULL ," +
+                    "`zone` VARCHAR (16) NOT NULL," +
+                    "`invited_only` TINYINT(1) DEFAULT 0," +
+                    "`friendly_fire` TINYINT(1) DEFAULT 0," +
+                    "`invite_permission` VARCHAR (16)," +
+                    "`open` TINYINT(1) DEFAULT 0)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_guilds_members (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "`uuid` VARCHAR (64) NOT NULL," +
+                    "`player` VARCHAR (64) NOT NULL," +
+                    "`role` VARCHAR (16) NOT NULL)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_guilds_chunks (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`x` INTEGER NOT NULL ," +
+                    "`z` INTEGER NOT NULL )";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_homes (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +
+                    "`uuid` VARCHAR (64) NOT NULL," +
+                    "`name` VARCHAR (16) NOT NULL," +
+                    "`world` VARCHAR (64) NOT NULL," +
+                    "`x` INTEGER NOT NULL ," +
+                    "`y` INTEGER NOT NULL ," +
+                    "`z` INTEGER NOT NULL," +
+                    "`yaw` FLOAT NOT NULL ," +
+                    "`pitch` FLOAT NOT NULL )";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_balances (" +
+                    "`uuid` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`pocket` INTEGER DEFAULT 0," +
+                    "`bank` INTEGER DEFAULT 0," +
+                    "`guild` TINYINT(1) DEFAULT 0)";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_players_spirits (" +
+                    "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,"+
+                    "`uuid` VARCHAR (64) NOT NULL ," +
+                    "`entity` VARCHAR (64) NOT NULL," +
+                    "`time` INTEGER  NOT NULL )";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_guilds_pendings (" +
+                    "`player` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`uuid` VARCHAR (64) NOT NULL )";
+            statement.execute(sting);
+            sting = "CREATE TABLE IF NOT EXISTS mine_guilds_invites (" +
+                    "`player` VARCHAR (64) NOT NULL PRIMARY KEY," +
+                    "`uuid` VARCHAR (64) NOT NULL  )";
+            statement.execute(sting);
+            OddJob.getInstance().log("YEH!!!!");
+        }
     }
 
     private void close() {
@@ -720,7 +860,7 @@ public class MySQLManager {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                OddJob.getInstance().log("Loaded: "+resultSet.getString("name"));
+                OddJob.getInstance().log("Loaded: " + resultSet.getString("name"));
                 List<UUID> whitelist = new ArrayList<>();
                 if (!resultSet.getString("whitelist").equals("")) {
                     for (String uid : resultSet.getString("whitelist").split(",")) {
