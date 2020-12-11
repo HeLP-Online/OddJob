@@ -26,7 +26,7 @@ public class EconManager {
 
     public double getBankBalance(UUID uuid, boolean guild) {
         if (guild) {
-            if (!hasBankAccount(uuid,true)) createAccounts(uuid,200D,true);
+            if (!hasBankAccount(uuid, true)) createAccounts(uuid, 200D, true);
             return guildBank.get(uuid);
         } else {
             return playerBank.get(uuid);
@@ -52,6 +52,7 @@ public class EconManager {
     public void subtractBankBalance(UUID uuid, double cost, boolean guild) {
         setBankBalance(uuid, getBankBalance(uuid, guild) - cost, guild);
     }
+
     public void subtractPocketBalance(UUID uuid, double cost) {
         setPocketBalance(uuid, getPocketBalance(uuid) - cost);
     }
@@ -61,13 +62,15 @@ public class EconManager {
     }
 
     public void createAccounts(UUID uuid, double startValue, boolean guild) {
-        createBankAccount(uuid,startValue,guild);
-        if (!guild) createPocket(uuid,startValue);
+        createBankAccount(uuid, startValue, guild);
+        if (!guild) createPocket(uuid, startValue);
         OddJob.getInstance().getMySQLManager().createEconAccount(uuid, startValue, guild);
     }
+
     public void createPocket(UUID uuid, double startValue) {
-        setPocketBalance(uuid,startValue);
+        setPocketBalance(uuid, startValue);
     }
+
     public void createBankAccount(UUID uuid, double startValue, boolean guild) {
         setBankBalance(uuid, startValue, guild);
     }
@@ -75,15 +78,20 @@ public class EconManager {
     public void addBankBalance(UUID uuid, Double cost, boolean guild) {
         setBankBalance(uuid, getBankBalance(uuid, guild) + cost, guild);
     }
+
     public void addPocketBalance(UUID player, double cost) {
-        setPocketBalance(player,getPocketBalance(player)+cost);
+        setPocketBalance(player, getPocketBalance(player) + cost);
     }
 
     public void load() {
-        HashMap<String,HashMap<UUID,Double>> values = OddJob.getInstance().getMySQLManager().loadEcon();
-        if (values.size() > 0) {
+        HashMap<String, HashMap<UUID, Double>> values = OddJob.getInstance().getMySQLManager().loadEcon();
+        if (values.containsKey("pocket") && values.get("pocket").size() > 0) {
             pocket.putAll(values.get("pocket"));
+        }
+        if (values.containsKey("guild") && values.get("guild").size() > 0) {
             guildBank.putAll(values.get("guild"));
+        }
+        if (values.containsKey("bank") && values.get("bank").size() > 0) {
             playerBank.putAll(values.get("bank"));
         }
     }

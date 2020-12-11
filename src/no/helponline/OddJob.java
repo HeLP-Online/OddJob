@@ -11,6 +11,7 @@ import no.helponline.Utils.SignManager;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.SQLException;
 import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
@@ -65,6 +66,12 @@ public class OddJob extends JavaPlugin {
         teleportManager = new TeleportManager();
         warpManager = new WarpManager();
         worldManager = new WorldManger();
+
+        try {
+            mySQLManager.init();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         getCommand("econ").setExecutor(new EconCommand());
         getCommand("guild").setExecutor(new GuildCommand());

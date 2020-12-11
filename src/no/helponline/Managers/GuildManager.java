@@ -84,6 +84,15 @@ public class GuildManager {
      */
     public void loadGuilds() {
         guilds = OddJob.getInstance().getMySQLManager().loadGuilds();
+        if (guilds.size() == 0) {
+            create("WildZone",Zone.WILD,false,false);
+            create("SafeZone",Zone.SAFE,false,false);
+            create("JailZone",Zone.JAIL,false,false);
+            create("WarZone",Zone.WAR,false,false);
+            create("ArenaZone",Zone.ARENA,false,false);
+            saveGuilds();
+            loadGuilds();
+        }
         guildPending = OddJob.getInstance().getMySQLManager().loadGuildsPendings();
         guildInvite = OddJob.getInstance().getMySQLManager().loadGuildsInvites();
     }
@@ -418,7 +427,8 @@ public class GuildManager {
      * @param guild UUID of the Guild
      * @return String name of the Guild
      */
-    public String getGuildNameByUUID(@Nonnull UUID guild) {
+    public String getGuildNameByUUID(UUID guild) {
+        if (guild == null) OddJob.getInstance().log("Guild = null");
         return guilds.get(guild).getName();
     }
 
