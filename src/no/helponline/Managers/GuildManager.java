@@ -307,7 +307,7 @@ public class GuildManager {
     }
 
     /**
-     * UnCLaiming the Players Location Chunk from the Guild
+     * UnClaiming the Players Location Chunk from the Guild
      *
      * @param player Player to unClaim the Chunk for
      */
@@ -586,7 +586,7 @@ public class GuildManager {
      * @param guildUUIDByMember UUID of the Guild
      * @param bol               Boolean inviteOnly
      */
-    public void changeInvitedOnly(@Nonnull UUID guildUUIDByMember, @Nonnull boolean bol) {
+    public void changeInvitedOnly(@Nonnull UUID guildUUIDByMember, boolean bol) {
         guilds.get(guildUUIDByMember).setInvitedOnly(bol);
     }
 
@@ -635,7 +635,7 @@ public class GuildManager {
     /**
      * Return the Zone a Guild is associated with
      *
-     * @param guild UUID of the GUild
+     * @param guild UUID of the Guild
      * @return Zone
      */
     @Nonnull
@@ -805,7 +805,7 @@ public class GuildManager {
         for (Chunk chunk : chunks.keySet()) {
             OddJob.getInstance().getMessageManager().console("chunk:x=" + chunk.getX() + ";z=" + chunk.getZ());
             if (chunks.get(chunk).equals(guild)) {
-                OddJob.getInstance().getMessageManager().console("unclaiming");
+                OddJob.getInstance().getMessageManager().console("unClaiming");
                 unClaim(chunk, null);
                 chunkList.add(chunk);
             }
