@@ -6,6 +6,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -29,6 +30,8 @@ public class ArenaManager {
     private final HashMap<UUID, Double> health = new HashMap<>();
     private final HashMap<UUID, Integer> food = new HashMap<>();
     private final HashMap<UUID, Location> from = new HashMap<>();
+    private static Material spawns = Material.GOLD_BLOCK;
+    private Material corners = Material.EMERALD_BLOCK;
 
     /**
      * Constructor
@@ -41,16 +44,17 @@ public class ArenaManager {
 
     /**
      * Creating a new Arena
+     * @return
      */
-    public void createArena(Player player) {
+    public int createArena(Player player) {
         OddJob.getInstance().getMessageManager().console("ArenaManager createArena");
         UUID uuid = player.getUniqueId();
 
         // Creating
         Arena arena = new Arena(num);
-        // Storing
+        // Storing in hash
         arenas.put(num, arena);
-        // Assigning editor
+        // Assigning editor player
         editor.put(uuid, num);
 
         // Increment number of arenas
@@ -58,16 +62,29 @@ public class ArenaManager {
         OddJob.getInstance().getConfig().set("Arenas.Num", num);
 
         OddJob.getInstance().getMessageManager().success("Arena created", uuid, true);
+        OddJob.getInstance().getScoreManager().create(player, ScoreBoard.ArenaMaker);
+        return arena.getId();
+    }
+
+    public void editArena(Player player, int id) {
+        // Assigning editor player
+        editor.put(player.getUniqueId(), id);
+        // Getting the Arena
+        Arena arena = getArena(id);
+        // Marking spawns
         if (arena.getGameSpawns().size() > 0) {
             int i = 0;
             for (Location location : arena.getGameSpawns()) {
                 Block block = location.getBlock().getRelative(BlockFace.DOWN);
                 arena.blMat.put(i, block.getType());
                 arena.blPos.put(i, block.getLocation());
+                block.setType(ArenaManager.spawns);
                 i++;
             }
         }
+        // Marking edges
         OddJob.getInstance().getScoreManager().create(player, ScoreBoard.ArenaMaker);
+        OddJob.getInstance().getTeleportManager().teleport(player,arena.lobbySpawn,0, PlayerTeleportEvent.TeleportCause.COMMAND);
     }
 
     public Arena getArena(int id) {

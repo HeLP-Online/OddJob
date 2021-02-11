@@ -52,7 +52,7 @@ public class MySQLManager {
                 "`banned` TEXT DEFAULT ''," +
                 "`denytpa` TINYINT(1) DEFAULT 0," +
                 "`denytrade` TINYINT(1) DEFAULT 0," +
-                "`scoreboard` VARCHAR(16) DEFAULT 'player')";
+                "`scoreboard` VARCHAR(16) DEFAULT 'Player')";
         statement.execute(sting);
         sting = "CREATE TABLE IF NOT EXISTS mine_secured_blocks (" +
                 "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +

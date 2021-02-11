@@ -21,7 +21,7 @@ public class DeathManager {
     /**
      * Holds the tasks BukkitTask & Player UUID
      */
-    private final HashMap<UUID,BukkitTask> task = new HashMap<>();
+    private final HashMap<UUID, BukkitTask> task = new HashMap<>();
 
     /**
      * Holds the Inventories for Entity (ArmorStands)
@@ -35,6 +35,7 @@ public class DeathManager {
 
     /**
      * Adds the Entity (ArmorStands) and Player
+     *
      * @param entity Entity (ArmorStand)
      * @param player Player
      */
@@ -106,7 +107,7 @@ public class DeathManager {
     /**
      * Removing the ArmorStand
      *
-     * @param entity Entity (ArmorStands)
+     * @param entity        Entity (ArmorStands)
      * @param findingPlayer UUID of Player finding the Spirit
      */
     public void replace(Entity entity, UUID findingPlayer) {
@@ -154,7 +155,7 @@ public class DeathManager {
     /**
      * Checking existence of World and Entity to remove
      *
-     * @param worldUUID UUID of World
+     * @param worldUUID  UUID of World
      * @param entityUUID UUID of Entity
      * @param playerUUID UUID of Player
      */

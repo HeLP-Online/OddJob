@@ -479,4 +479,9 @@ public class MessageManager {
         danger("You have been kicked from " + cGuild + guild.getName() + cDanger + " by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cDanger + r, target, false);
     }
 
+    public void arenaSetSpawnTeleport(String s, UUID uniqueId) {
+    }
+
+    public void arenaSetSpawnRemove(String s, UUID uniqueId) {
+    }
 }

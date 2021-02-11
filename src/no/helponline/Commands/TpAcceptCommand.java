@@ -1,6 +1,7 @@
 package no.helponline.Commands;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Odd.OddPlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,7 +16,7 @@ public class TpAcceptCommand implements CommandExecutor {
             if (!(commandSender instanceof Player)) return true;
             UUID uuid;
             try {
-                uuid = UUID.fromString(strings[0]);
+                uuid = OddJob.getInstance().getPlayerManager().getUUID(strings[0]);
             } catch (Exception ex) {
                 OddJob.getInstance().getMessageManager().danger("Wrong accept ID",commandSender,false);
                 return true;

@@ -350,7 +350,7 @@ public class GuildManager {
      * @param chunk Chunk to check
      * @return UUID of the Guild who has claimed the Chunk
      */
-    public UUID getGuildUUIDByChunk(@Nonnull Chunk chunk) {
+    public UUID getGuildUUIDByChunk(Chunk chunk) {
         UUID uuid = OddJob.getInstance().getMySQLManager().getGuildUUIDByChunk(chunk);
         return uuid != null ? uuid : getGuildUUIDByZone(Zone.WILD);
         //return chunks.getOrDefault(chunk, getGuildUUIDByZone(Zone.WILD));
@@ -362,7 +362,7 @@ public class GuildManager {
      * @param guild  UUID of the Guild to join
      * @param player UUID of the Player joining the Guild
      */
-    public void join(@Nonnull UUID guild, @Nonnull UUID player) {
+    public void join(UUID guild, UUID player) {
         // Delete the Players invitation to the Guild
         guildInvite.remove(player);
 
@@ -438,7 +438,7 @@ public class GuildManager {
      * @param zone Zone
      * @return UUID of the Guild
      */
-    public UUID getGuildUUIDByZone(@Nonnull Zone zone) {
+    public UUID getGuildUUIDByZone(Zone zone) {
         UUID guild = null;
         for (UUID uuid : guilds.keySet()) {
             // Looping through the Guilds

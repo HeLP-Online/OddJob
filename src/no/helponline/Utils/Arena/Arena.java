@@ -1,6 +1,5 @@
 package no.helponline.Utils.Arena;
 
-import com.sk89q.worldedit.bukkit.fastutil.Hash;
 import no.helponline.OddJob;
 import no.helponline.Utils.Arena.ArenaManager.GameType;
 import no.helponline.Utils.Arena.Games.HungerGames;
@@ -208,7 +207,18 @@ public class Arena {
         blPos.remove(i);
     }
 
+    public Location tpGameSpawn(int i) {
+        return blPos.get(i).add(0,1,0);
+    }
+
     enum GameState {
-        STARTED, COUNTDOWN, PREPARING, WAITING
+        STARTED(false), COUNTDOWN(true), PREPARING(false), WAITING(true);
+
+        GameState(boolean canJoin) {
+        }
+
+        public boolean canJoin() {
+            return canJoin();
+        }
     }
 }

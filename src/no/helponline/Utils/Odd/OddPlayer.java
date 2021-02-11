@@ -1,6 +1,5 @@
 package no.helponline.Utils.Odd;
 
-import no.helponline.Managers.MySQLManager;
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;
 import org.bukkit.Bukkit;

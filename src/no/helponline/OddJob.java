@@ -1,6 +1,5 @@
 package no.helponline;
 
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import no.helponline.Commands.*;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
@@ -194,14 +193,6 @@ public class OddJob extends JavaPlugin {
         return banManager;
     }
 
-    public ChestManager getChestManager() {
-        return chestManager;
-    }
-
-    public ConfigManager getConfigManager() {
-        return configManager;
-    }
-
     public DeathManager getDeathManager() {
         return deathManager;
     }
@@ -250,9 +241,6 @@ public class OddJob extends JavaPlugin {
         return shopManager;
     }
 
-    public SignManager getSignManager() {
-        return signManager;
-    }
 
     public TeleportManager getTeleportManager() {
         return teleportManager;
@@ -266,7 +254,4 @@ public class OddJob extends JavaPlugin {
         return worldManager;
     }
 
-    public static WorldEditPlugin getWorldEdit() {
-        return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
-    }
 }
