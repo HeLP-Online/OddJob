@@ -27,6 +27,7 @@ public class PlayerInteract implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteractEvent(PlayerInteractEvent event) {
+        OddJob.getInstance().log("Triggered");
         Player player = event.getPlayer();
         boolean door = false;
         UUID uuid = null;
@@ -51,19 +52,23 @@ public class PlayerInteract implements Listener {
             Material t = block.getType();
 
             if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
+                OddJob.getInstance().log("Lockable");
                 // Lockable Block
                 try {
                     if (OddJob.getInstance().getLockManager().getDoors().contains(t)) {
+                        OddJob.getInstance().log("Door");
                         // Door
                         door = true;
                         block = Utility.getLowerLeftDoor(block).getBlock();
                         uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
                     } else if (t.equals(Material.CHEST)) {
+                        OddJob.getInstance().log("Chest");
                         // Chest
                         block = Utility.getChestPosition(block).getBlock();
                         uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
                     } else {
                         // Whatever right-clicked or stepped on
+                        OddJob.getInstance().log("Else");
                         uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
                     }
                 } catch (Exception e) {

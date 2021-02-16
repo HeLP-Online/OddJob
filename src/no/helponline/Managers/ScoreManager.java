@@ -33,7 +33,7 @@ public class ScoreManager {
     }
 
     public void clear(Player player) {
-        player.setScoreboard(scoreboard);
+        player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
     }
 
     public void create(Player player, no.helponline.Utils.Enum.ScoreBoard type) {

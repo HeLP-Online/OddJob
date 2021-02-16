@@ -76,6 +76,10 @@ public class LockCommand implements CommandExecutor, TabCompleter {
                             }
                         }
                     }
+                } else if(args[0].equalsIgnoreCase("save")) {
+                    OddJob.getInstance().getLockManager().save();
+                } else if (args[0].equalsIgnoreCase("load")) {
+                    OddJob.getInstance().getLockManager().load();
                 }
             } else if (args.length == 2 &&
                     args[0].equalsIgnoreCase("make") &&

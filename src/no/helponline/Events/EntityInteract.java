@@ -31,8 +31,10 @@ public class EntityInteract implements Listener {
             Material material = block.getType();
             if (OddJob.getInstance().getLockManager().getLockable().contains(material)) {
                 // Lockable Block
+                OddJob.getInstance().log("Lockable");
                 try {
                     if (OddJob.getInstance().getLockManager().getDoors().contains(material)) {
+                        OddJob.getInstance().log("Door");
                         // Door
                         block = Utility.getLowerLeftDoor(block).getBlock();
                     }

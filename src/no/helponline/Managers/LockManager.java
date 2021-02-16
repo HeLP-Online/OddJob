@@ -197,7 +197,7 @@ public class LockManager {
         return locked.get(location);
     }
     public UUID getLockOwner(Entity entity) {
-        return armor.get(entity);
+        return armor.get(entity.getUniqueId());
     }
     public void load() {
         doors.add(Material.IRON_DOOR);
@@ -216,5 +216,8 @@ public class LockManager {
 
         // List of Locked Blocks
         locked = OddJob.getInstance().getMySQLManager().loadSecuredBlocks();
+        // BUTTON TRAPDOOR PRESSURE_PLATE FENCE_GATE
+        // CRIMSON WARPED
+        // -DOOR -BUTTON -TRAPDOOR
     }
 }
