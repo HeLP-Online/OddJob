@@ -220,4 +220,8 @@ public class LockManager {
         // CRIMSON WARPED
         // -DOOR -BUTTON -TRAPDOOR
     }
+
+    public void save() {
+
+    }
 }

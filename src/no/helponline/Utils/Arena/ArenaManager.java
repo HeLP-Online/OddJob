@@ -2,158 +2,157 @@ package no.helponline.Utils.Arena;
 
 import no.helponline.OddJob;
 import no.helponline.Utils.Enum.ScoreBoard;
-import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class ArenaManager {
     /**
      * Makes an unique id for each arena
      */
-    private int num;
-    private int size;
-
+    private int num = 0;
     /**
      * A list of created Arenas
      */
-    private final HashMap<Integer, Arena> arenas = new HashMap<>();
-    private final HashMap<UUID, Integer> editor = new HashMap<>();
-
+    private HashMap<Integer, Arena> arenas = new HashMap<>();
+    private HashMap<UUID, Integer> editors = new HashMap<>();
     private final HashMap<UUID, ItemStack[]> inventories = new HashMap<>();
     private final HashMap<UUID, ItemStack[]> armor = new HashMap<>();
     private final HashMap<UUID, Double> health = new HashMap<>();
     private final HashMap<UUID, Integer> food = new HashMap<>();
     private final HashMap<UUID, Location> from = new HashMap<>();
-    private static Material spawns = Material.GOLD_BLOCK;
-    private Material corners = Material.EMERALD_BLOCK;
+    public File fileConfig;
+    public FileConfiguration config;
+    public Countdown countdown;
 
     /**
      * Constructor
      */
     public ArenaManager() {
-        OddJob.getInstance().getMessageManager().console("ArenaManager constructor");
-        num = OddJob.getInstance().getConfig().getInt("Arenas.Num", 1);
-        size = OddJob.getInstance().getConfig().getInt("Arenas.Default.Size", 10);
     }
 
-    /**
-     * Creating a new Arena
-     * @return
-     */
-    public int createArena(Player player) {
-        OddJob.getInstance().getMessageManager().console("ArenaManager createArena");
-        UUID uuid = player.getUniqueId();
-
-        // Creating
-        Arena arena = new Arena(num);
-        // Storing in hash
-        arenas.put(num, arena);
-        // Assigning editor player
-        editor.put(uuid, num);
-
-        // Increment number of arenas
-        num++;
-        OddJob.getInstance().getConfig().set("Arenas.Num", num);
-
-        OddJob.getInstance().getMessageManager().success("Arena created", uuid, true);
-        OddJob.getInstance().getScoreManager().create(player, ScoreBoard.ArenaMaker);
-        return arena.getId();
+    public Arena getArena(int arena) {
+        return arenas.get(arena);
     }
 
     public void editArena(Player player, int id) {
-        // Assigning editor player
-        editor.put(player.getUniqueId(), id);
-        // Getting the Arena
-        Arena arena = getArena(id);
-        // Marking spawns
-        if (arena.getGameSpawns().size() > 0) {
-            int i = 0;
-            for (Location location : arena.getGameSpawns()) {
-                Block block = location.getBlock().getRelative(BlockFace.DOWN);
-                arena.blMat.put(i, block.getType());
-                arena.blPos.put(i, block.getLocation());
-                block.setType(ArenaManager.spawns);
-                i++;
-            }
-        }
-        // Marking edges
+        editors.put(player.getUniqueId(), id);
         OddJob.getInstance().getScoreManager().create(player, ScoreBoard.ArenaMaker);
-        OddJob.getInstance().getTeleportManager().teleport(player,arena.lobbySpawn,0, PlayerTeleportEvent.TeleportCause.COMMAND);
     }
 
-    public Arena getArena(int id) {
-        return arenas.getOrDefault(id, null);
+    public int getEditor(UUID uniqueId) {
+        return editors.get(uniqueId);
     }
 
-    public void addPlayer(Player player, int id) {
-        OddJob.getInstance().getMessageManager().console("ArenaManager addPlayer");
-        Arena arena = getArena(id);
-        if (arena == null) {
-            OddJob.getInstance().getMessageManager().danger("Arena not found", player, false);
-            return;
+    public int createArena(Player player, GameType gameType) {
+        Arena arena = new Arena(++num, gameType);
+        arena.setRequiredPlayers(2);
+        arena.setGameType(gameType);
+        if (gameType.equals(GameType.SKYWARS)) {
+            arena.setLobbySpawn(OddJob.getInstance().getTeleportManager().getSpawn());
+            arena.setWorld(player.getWorld().getUID());
         }
-        UUID uuid = player.getUniqueId();
-        from.put(uuid, player.getLocation());
-        arena.addPlayer(uuid);
-
-        inventories.put(uuid, player.getInventory().getContents());
-        armor.put(uuid, player.getInventory().getArmorContents());
-        health.put(uuid, player.getHealth());
-        food.put(uuid, player.getFoodLevel());
-
-        player.getInventory().setArmorContents(null);
-        player.getInventory().clear();
-
-        player.setFoodLevel(20);
-        player.setHealth(20D);
-        player.setFireTicks(0);
-    }
-
-    public void removePlayer(Player player) {
-        UUID uuid = player.getUniqueId();
-        for (Arena a : arenas.values()) {
-            if (a.getPlayers().contains(uuid)) {
-                a.removePlayer(uuid);
-                break;
-            }
-        }
-
-        player.getInventory().setArmorContents(null);
-        player.getInventory().clear();
-
-        player.getInventory().setArmorContents(armor.get(uuid));
-        player.getInventory().setContents(inventories.get(uuid));
-        player.setFireTicks(0);
-        player.setHealth(health.get(uuid));
-        player.setFoodLevel(food.get(uuid));
-        player.teleport(from.get(uuid));
-    }
-
-    public void load() {
-        OddJob.getInstance().getMessageManager().console("ArenaManager load");
-        int id = 1;
-        World world = (Bukkit.getWorld("flat") != null) ? Bukkit.getWorld("flat") : Bukkit.createWorld(new WorldCreator("flat").type(WorldType.FLAT));
-        Location location = new Location(world, 0, 10, 0);
-        GameType gameType = GameType.SURVIVAL;
-        arenas.put(id, new Arena(id, gameType, false));
+        arenas.put(arena.getId(), arena);
+        editors.put(player.getUniqueId(), arena.getId());
+        OddJob.getInstance().getScoreManager().create(player, ScoreBoard.ArenaMaker);
+        return arena.getId();
     }
 
     public HashMap<Integer, Arena> getList() {
         return arenas;
     }
 
-    public int getEditor(UUID uuid) {
-        return editor.get(uuid);
+    public void addPlayer(Player player, int id) {
+        Arena arena = OddJob.getInstance().getArenaManager().getArena(id);
+        arena.queue(player);
+        if (arena.getQueue() >= arena.getPlayersLimit()) {
+            arena.start();
+        } else if (arena.getQueue() >= arena.getRequiredPlayers()) {
+            arena.movePlayers();
+        }
     }
 
+    public void removePlayer(Player player) {
+        for (int id : arenas.keySet()) {
+            arenas.get(id).remove(player);
+        }
+
+        player.sendMessage("removed!");
+    }
+
+    public void save() {
+        if (fileConfig == null) {
+            fileConfig = new File(OddJob.getInstance().getDataFolder(), "arenas.yml");
+        }
+        config = YamlConfiguration.loadConfiguration(fileConfig);
+
+        for (int id : arenas.keySet()) {
+            OddJob.getInstance().log("save " + id);
+            Arena arena = arenas.get(id);
+            config.set("arena." + id + ".disabled", arena.isDisabled());
+            config.set("arena." + id + ".limit", arena.getPlayersLimit());
+            config.set("arena." + id + ".required", arena.getRequiredPlayers());
+            config.set("arena." + id + ".type", arena.getGameType().toString());
+            config.set("arena." + id + ".world", arena.getWorld().toString());
+            config.set("arena." + id + ".lobby", arena.getLobbySpawn());
+            config.set("arena." + id + ".spawnnum", arena.getSpawnNum());
+            config.createSection("arena." + id + ".spawns", arena.getGameSpawn());
+            try {
+                config.save(fileConfig);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public void load() {
+        int i = 0;
+        if (fileConfig == null) {
+            fileConfig = new File(OddJob.getInstance().getDataFolder(), "arenas.yml");
+        }
+        config = YamlConfiguration.loadConfiguration(fileConfig);
+
+        Set<String> arenas = config.getConfigurationSection("arena").getKeys(false);
+        int id = 0, playersRequired = 0, playersLimited = 0, spawnNum = 0;
+        boolean disabled = true;
+        GameType gameType = null;
+        UUID world = null;
+        Location lobby = null;
+        Map<String, Object> sp;
+        HashMap<String, Location> spawns = new HashMap<>();
+        for (String a : arenas) {
+            id = Integer.parseInt(a);
+            disabled = config.getBoolean("arena." + id + ".disabled");
+            playersLimited = config.getInt("arena." + id + ".limit");
+            playersRequired = config.getInt("arena." + id + ".required");
+            gameType = GameType.valueOf(config.getString("arena." + id + ".type"));
+            world = UUID.fromString(config.getString("arena." + id + ".world"));
+            lobby = config.getLocation("arena." + id + ".lobby");
+            spawnNum = config.getInt("arena." + id + ".spawnnum");
+            sp = config.getConfigurationSection("arena." + id + ".spawns").getValues(true);
+
+            for (String s : sp.keySet()) {
+                spawns.put(s, (Location) sp.get(s));
+            }
+            Arena arena = new Arena(id, disabled, playersLimited, playersRequired, gameType, world, lobby, spawnNum, spawns);
+            this.arenas.put(id, arena);
+            i++;
+        }
+        OddJob.getInstance().log("loaded " + i);
+
+    }
 
     public enum GameType {
-        SURVIVAL, TNT
+        SURVIVAL, TNT, SKYWARS
     }
 }

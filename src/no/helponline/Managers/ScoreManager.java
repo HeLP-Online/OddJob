@@ -99,9 +99,9 @@ public class ScoreManager {
                     public void run() {
                         if (!scoreBoard.hasID()) scoreBoard.setID(taskID);
                         finalArenaName.setSuffix("" + arenaId);
-                        finalArenaType.setSuffix("" + arena.getGameType());
+                        finalArenaType.setSuffix("" + arena.getGameType().name());
                         finalArenaLobbySpawn.setSuffix(arena.getLobbySpawn() != null ? ChatColor.GREEN + "Set!" : ChatColor.DARK_RED + "None");
-                        finalArenaGameSpawn.setSuffix("" + arena.blMat.size());
+                        finalArenaGameSpawn.setSuffix("" + arena.getGameSpawns());
                         finalArenaSigns.setSuffix(arena.getSignLocation() != null ? ChatColor.GREEN + "Set!" : ChatColor.DARK_RED + "None");
                     }
                 }, 0, 10);

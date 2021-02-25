@@ -81,7 +81,8 @@ public class TeleportManager {
             // Player is in Arena
             OddJob.getInstance().getMessageManager().console("aborted arena");
             test = false;
-        */} else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
+        */
+        } else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
             // Player is in Jail
             OddJob.getInstance().getMessageManager().console("aborted in jail");
             test = false;
@@ -144,7 +145,8 @@ public class TeleportManager {
             // Player is in Arena
             OddJob.getInstance().getMessageManager().console("aborted arena");
             test = false;
-        */} else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
+        */
+        } else if (OddJob.getInstance().getJailManager().in(movingPlayer.getUniqueId()) != null) {
             // Player is in Jail
             OddJob.getInstance().getMessageManager().console("aborted in jail");
             test = false;
@@ -310,5 +312,9 @@ public class TeleportManager {
 
     public void jail(Player player, Location lobby) {
         player.teleport(lobby, PlayerTeleportEvent.TeleportCause.PLUGIN);
+    }
+
+    public Location getSpawn() {
+        return Bukkit.getWorld("world").getSpawnLocation();
     }
 }

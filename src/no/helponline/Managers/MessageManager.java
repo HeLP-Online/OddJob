@@ -484,4 +484,8 @@ public class MessageManager {
 
     public void arenaSetSpawnRemove(String s, UUID uniqueId) {
     }
+
+    public void arenaAreaSet(Player player) {
+        success("Area for Arena set!",player.getUniqueId(),false);
+    }
 }
