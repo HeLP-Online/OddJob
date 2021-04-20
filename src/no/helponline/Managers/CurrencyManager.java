@@ -1,11 +1,12 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.SQL.CurrencySQL;
 
 import java.util.HashMap;
 import java.util.UUID;
 
-public class EconManager {
+public class CurrencyManager {
     private final HashMap<UUID, Double> playerBank = new HashMap<>();
     private final HashMap<UUID, Double> guildBank = new HashMap<>();
     private final HashMap<UUID, Double> pocket = new HashMap<>();
@@ -84,7 +85,7 @@ public class EconManager {
     }
 
     public void load() {
-        HashMap<String, HashMap<UUID, Double>> values = OddJob.getInstance().getMySQLManager().loadEcon();
+        HashMap<String, HashMap<UUID, Double>> values = CurrencySQL.load();
         if (values.containsKey("pocket") && values.get("pocket").size() > 0) {
             pocket.putAll(values.get("pocket"));
         }
@@ -97,6 +98,6 @@ public class EconManager {
     }
 
     public void save() {
-        OddJob.getInstance().getMySQLManager().saveEcon();
+        CurrencySQL.save();
     }
 }

@@ -22,17 +22,16 @@ import java.util.List;
 import java.util.UUID;
 
 public class MySQLManager {
-    private PreparedStatement preparedStatement = null;
-    private PreparedStatement preparedStatementsec = null;
-    private Connection connection = null;
-    private Statement statement = null;
-    private ResultSet resultSet = null;
-    private ResultSet resultSetsec = null;
+    protected static PreparedStatement preparedStatement = null;
+    protected static PreparedStatement preparedStatementsec = null;
+    protected static Connection connection = null;
+    protected static Statement statement = null;
+    protected static ResultSet resultSet = null;
+    protected static ResultSet resultSetsec = null;
 
-    private void connect() throws SQLException {
+    protected static void connect() throws SQLException {
         if (connection == null) {
             connection = DriverManager.getConnection("jdbc:mysql://10.0.4.9/odderik", "odderik", "503504");
-
         }
     }
 
@@ -179,7 +178,7 @@ public class MySQLManager {
         OddJob.getInstance().log("YEH!!!!");
     }
 
-    private void close() {
+    protected static void close() {
         try {
             if (resultSetsec != null) {
                 resultSetsec.close();
@@ -906,88 +905,7 @@ public class MySQLManager {
         return map;
     }
 
-    public HashMap<UUID, Home> loadHomes() {
-        HashMap<UUID, Home> homes = new HashMap<>();
-        int i = 0;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes`");
-            resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                if (world != null) {
-                    i++;
-                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                    Home home = homes.get(uuid);
-                    String name = resultSet.getString("name");
-                    Location location = new Location(world, resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"), resultSet.getFloat("yaw"), resultSet.getFloat("pitch"));
-                    if (homes.containsKey(uuid)) {
-                        home.add(name, location);
-                    } else {
-                        home = new Home(uuid, location, name);
-                        homes.put(uuid, home);
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        OddJob.getInstance().getMessageManager().load("Homes", i);
-        return homes;
-    }
-
-    public void saveHomes(HashMap<UUID, Home> homes) {
-        int i = 0, u = 0;
-        for (UUID uuid : homes.keySet()) {
-            Home home = homes.get(uuid);
-            for (String name : home.list()) {
-                Location location = home.get(name);
-
-                try {
-                    connect();
-                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes` WHERE `uuid` = ? AND `name` = ?");
-                    preparedStatement.setString(1, uuid.toString());
-                    preparedStatement.setString(2, name);
-                    resultSet = preparedStatement.executeQuery();
-
-                    if (resultSet.next()) {
-                        preparedStatement = connection.prepareStatement("UPDATE `mine_homes` SET `world` = ?, `x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ? WHERE `uuid` = ? AND `name` = ?");
-                        preparedStatement.setString(1, location.getWorld().getUID().toString());
-                        preparedStatement.setInt(2, location.getBlockX());
-                        preparedStatement.setInt(3, location.getBlockY());
-                        preparedStatement.setInt(4, location.getBlockZ());
-                        preparedStatement.setFloat(5, location.getYaw());
-                        preparedStatement.setFloat(6, location.getPitch());
-                        preparedStatement.setString(7, uuid.toString());
-                        preparedStatement.setString(8, name);
-                        preparedStatement.executeUpdate();
-                        u++;
-                    } else {
-                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_homes` (`world`, `x`,`y`,`z`,`yaw`,`pitch`,`uuid` ,`name`) VALUES (?,?,?,?,?,?,?,?)");
-                        preparedStatement.setString(1, location.getWorld().getUID().toString());
-                        preparedStatement.setInt(2, location.getBlockX());
-                        preparedStatement.setInt(3, location.getBlockY());
-                        preparedStatement.setInt(4, location.getBlockZ());
-                        preparedStatement.setFloat(5, location.getYaw());
-                        preparedStatement.setFloat(6, location.getPitch());
-                        preparedStatement.setString(7, uuid.toString());
-                        preparedStatement.setString(8, name);
-                        preparedStatement.execute();
-                        i++;
-                    }
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                } finally {
-                    close();
-                }
-
-            }
-        }
-        OddJob.getInstance().getMessageManager().save("Homes", i, u);
-    }
 
     public void createEconAccount(UUID uuid, double startValue, boolean guild) {
         try {
@@ -1004,77 +922,6 @@ public class MySQLManager {
             close();
         }
         OddJob.getInstance().getMessageManager().console("Created Account");
-    }
-
-    public HashMap<String, HashMap<UUID, Double>> loadEcon() {
-        HashMap<String, HashMap<UUID, Double>> values = new HashMap<>();
-        int l = 0;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances`");
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                l++;
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                double bank = resultSet.getDouble("bank");
-                double pocket = resultSet.getDouble("pocket");
-                boolean guild = resultSet.getInt("guild") == 1;
-                if (guild) {
-                    if (!values.containsKey("guild")) values.put("guild", new HashMap<>());
-                    values.get("guild").put(uuid, bank);
-                } else {
-                    if (!values.containsKey("bank")) values.put("bank", new HashMap<>());
-                    values.get("bank").put(uuid, bank);
-                    if (!values.containsKey("pocket")) values.put("pocket", new HashMap<>());
-                    values.get("pocket").put(uuid, bank);
-                }
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        OddJob.getInstance().getMessageManager().load("Econ", l);
-        return values;
-    }
-
-    public void saveEcon() {
-        int u = 0;
-        try {
-            connect();
-            for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
-                if (OddJob.getInstance().getEconManager().hasBankAccount(uuid, true)) {
-                    double amount = OddJob.getInstance().getEconManager().getBankBalance(uuid, true);
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `amount` = ? WHERE `uuid` = ?");
-                    preparedStatement.setDouble(1, amount);
-                    preparedStatement.setString(2, uuid.toString());
-                    preparedStatement.executeUpdate();
-                    u++;
-                }
-            }
-            for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
-                double pocket = 0.0, bank = 0.0;
-                if (OddJob.getInstance().getEconManager().hasBankAccount(uuid, false)) {
-                    bank = OddJob.getInstance().getEconManager().getBankBalance(uuid, false);
-                }
-                if (OddJob.getInstance().getEconManager().hasPocket(uuid)) {
-                    pocket = OddJob.getInstance().getEconManager().getPocketBalance(uuid);
-                }
-                preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ?, `pocket` = ? WHERE `uuid` = ?");
-                preparedStatement.setDouble(1, bank);
-                preparedStatement.setDouble(2, pocket);
-                preparedStatement.setString(3, uuid.toString());
-                preparedStatement.executeUpdate();
-                u++;
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        OddJob.getInstance().getMessageManager().update("Econ", u);
     }
 
     public HashMap<UUID, UUID> loadSecuredArmorStands() {
@@ -1118,19 +965,6 @@ public class MySQLManager {
         }
         OddJob.getInstance().getMessageManager().load("Secured Blocks", blocks.size());
         return blocks;
-    }
-
-    public void deleteHome(UUID uuid, String name) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_homes` WHERE `uuid` = ? AND `name` = ?");
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setString(2, name);
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-        } finally {
-            close();
-        }
     }
 
     public boolean saveGuildsChunks(Chunk chunk, UUID guild) {

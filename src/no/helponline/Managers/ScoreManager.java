@@ -116,7 +116,7 @@ public class ScoreManager {
                 playerBank = scoreboard.getTeam("pb" + unique);
                 if (playerBank == null) playerBank = scoreboard.registerNewTeam("pb" + unique);
                 playerBank.addEntry(ChatColor.GOLD + "Bank: " + ChatColor.WHITE);
-                playerBank.setSuffix("" + OddJob.getInstance().getEconManager().getBankBalance(player.getUniqueId(), false));
+                playerBank.setSuffix("" + OddJob.getInstance().getCurrencyManager().getBankBalance(player.getUniqueId(), false));
                 objective.getScore(ChatColor.GOLD + "Bank: " + ChatColor.WHITE).setScore(14);
 
                 // Content - Player Wallet
@@ -124,7 +124,7 @@ public class ScoreManager {
                 playerWallet = scoreboard.getTeam("pw" + unique);
                 if (playerWallet == null) playerWallet = scoreboard.registerNewTeam("pw" + unique);
                 playerWallet.addEntry(ChatColor.GOLD + "Wallet: " + ChatColor.WHITE);
-                playerWallet.setSuffix("" + OddJob.getInstance().getEconManager().getPocketBalance(player.getUniqueId()));
+                playerWallet.setSuffix("" + OddJob.getInstance().getCurrencyManager().getPocketBalance(player.getUniqueId()));
                 objective.getScore(ChatColor.GOLD + "Wallet: " + ChatColor.WHITE).setScore(13);
 
                 // Break
@@ -167,8 +167,8 @@ public class ScoreManager {
                     @Override
                     public void run() {
                         if (!scoreBoard.hasID()) scoreBoard.setID(taskID);
-                        finalPlayerBank.setSuffix("" + OddJob.getInstance().getEconManager().getBankBalance(player.getUniqueId(), false));
-                        finalPlayerWallet.setSuffix("" + OddJob.getInstance().getEconManager().getPocketBalance(player.getUniqueId()));
+                        finalPlayerBank.setSuffix("" + OddJob.getInstance().getCurrencyManager().getBankBalance(player.getUniqueId(), false));
+                        finalPlayerWallet.setSuffix("" + OddJob.getInstance().getCurrencyManager().getPocketBalance(player.getUniqueId()));
                         finalCoords.setSuffix("X=" + player.getLocation().getChunk().getX() + " Z=" + player.getLocation().getChunk().getZ());
                         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk());
                         ChatColor color = OddJob.getInstance().getGuildManager().color(OddJob.getInstance().getGuildManager().getZoneByGuild(guild));
@@ -200,7 +200,7 @@ public class ScoreManager {
                 guildBank = scoreboard.getTeam("gb" + unique);
                 if (guildBank == null) guildBank = scoreboard.registerNewTeam("gb" + unique);
                 guildBank.addEntry(ChatColor.GOLD + "Bank: " + ChatColor.WHITE);
-                guildBank.setSuffix("" + OddJob.getInstance().getEconManager().getBankBalance(guild.getGuildUUID(), true));
+                guildBank.setSuffix("" + OddJob.getInstance().getCurrencyManager().getBankBalance(guild.getGuildUUID(), true));
                 objective.getScore(ChatColor.GOLD + "Bank: " + ChatColor.WHITE).setScore(14);
 
                 // Break
@@ -238,7 +238,7 @@ public class ScoreManager {
                         if (!scoreBoard.hasID()) scoreBoard.setID(taskID);
                         finalGuildRole.setSuffix("" + OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()).name());
                         finalGuildOnline.setSuffix("" + OddJob.getInstance().getGuildManager().getOnline(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId())) + "/" + OddJob.getInstance().getGuildManager().getGuildMembers(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId())).size());
-                        finalGuildBank.setSuffix("" + OddJob.getInstance().getEconManager().getBankBalance(guild.getGuildUUID(), true));
+                        finalGuildBank.setSuffix("" + OddJob.getInstance().getCurrencyManager().getBankBalance(guild.getGuildUUID(), true));
                         finalCoords.setSuffix("X=" + player.getLocation().getChunk().getX() + " Z=" + player.getLocation().getChunk().getZ());
                         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk());
                         ChatColor color = OddJob.getInstance().getGuildManager().color(OddJob.getInstance().getGuildManager().getZoneByGuild(guild));

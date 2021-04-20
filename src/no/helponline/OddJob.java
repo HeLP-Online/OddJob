@@ -1,6 +1,10 @@
 package no.helponline;
 
 import no.helponline.Commands.*;
+import no.helponline.Commands.Ban.BanCommand;
+import no.helponline.Commands.Currency.CurrencyCommand;
+import no.helponline.Commands.Guild.GuildCommand;
+import no.helponline.Commands.Homes.HomesCommand;
 import no.helponline.Events.*;
 import no.helponline.Managers.*;
 import no.helponline.Utils.Arena.ArenaManager;
@@ -21,7 +25,7 @@ public class OddJob extends JavaPlugin {
     private ChestManager chestManager;
     private ConfigManager configManager;
     private DeathManager deathManager;
-    private EconManager econManager;
+    private CurrencyManager currencyManager;
     private FreezeManager freezeManager;
     private GuildManager guildManager;
     private HomesManager homesManager;
@@ -36,6 +40,7 @@ public class OddJob extends JavaPlugin {
     private TeleportManager teleportManager;
     private WorldManger worldManager;
     private WarpManager warpManager;
+    private int saver;
 
     public static OddJob getInstance() {
         return instance;
@@ -50,7 +55,7 @@ public class OddJob extends JavaPlugin {
         banManager = new BanManager();
         chestManager = new ChestManager();
         deathManager = new DeathManager();
-        econManager = new EconManager();
+        currencyManager = new CurrencyManager();
         freezeManager = new FreezeManager();
         guildManager = new GuildManager();
         homesManager = new HomesManager();
@@ -72,9 +77,9 @@ public class OddJob extends JavaPlugin {
             e.printStackTrace();
         }
 
-        getCommand("econ").setExecutor(new EconCommand());
+        getCommand("currency").setExecutor(new CurrencyCommand()); // SubCommand
         getCommand("guild").setExecutor(new GuildCommand());
-        getCommand("homes").setExecutor(new HomesCommand());
+        getCommand("homes").setExecutor(new HomesCommand()); // SubCommand
         getCommand("invsee").setExecutor(new InvseeCommand());
         getCommand("locks").setExecutor(new LockCommand());
         getCommand("suicide").setExecutor(new SuicideCommand());
@@ -85,8 +90,7 @@ public class OddJob extends JavaPlugin {
         getCommand("tpa").setExecutor(new TpACommand());
         getCommand("tpaccept").setExecutor(new TpAcceptCommand());
         getCommand("tpdeny").setExecutor(new TpDenyCommand());
-        getCommand("ban").setExecutor(new BanCommand());
-        getCommand("unban").setExecutor(new UnbanCommand());
+        getCommand("ban").setExecutor(new BanCommand()); // SubCommand
         getCommand("feed").setExecutor(new FeedCommand());
         getCommand("heal").setExecutor(new HealCommand());
         getCommand("give").setExecutor(new GiveCommand());
@@ -111,7 +115,7 @@ public class OddJob extends JavaPlugin {
         getCommand("sudo").setExecutor(new SudoCommand());
 
         configManager.load();
-        econManager.load();
+        currencyManager.load();
         lockManager.load();
         homesManager.load();
         playerManager.load();
@@ -143,7 +147,7 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerMove(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerPortal(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
-        Bukkit.getPluginManager().registerEvents(new ChunkLoad(),this);
+        Bukkit.getPluginManager().registerEvents(new ChunkLoad(), this);
 
         Server server = getServer();
         Broadcaster broadcaster = new Broadcaster(Broadcaster.createSocket(), server.getPort(), server.getMotd(), server.getIp());
@@ -165,7 +169,18 @@ public class OddJob extends JavaPlugin {
         if (!Bukkit.getVersion().toLowerCase().contains("craftbukkit")) {
             Bukkit.getConsoleSender().sendMessage("Craftbukkit found");
         }
+
+        saver = Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), () -> {
+            OddJob.getInstance().save();
+        }, 7200, 7200);
+
         signManager.updateSigns();
+    }
+
+    private void save() {
+        currencyManager.save();
+        homesManager.save();
+        playerManager.save();
     }
 
 
@@ -197,8 +212,8 @@ public class OddJob extends JavaPlugin {
         return deathManager;
     }
 
-    public EconManager getEconManager() {
-        return econManager;
+    public CurrencyManager getCurrencyManager() {
+        return currencyManager;
     }
 
     public FreezeManager getFreezeManager() {

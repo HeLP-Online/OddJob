@@ -34,15 +34,15 @@ public class PlayerJoin implements Listener {
         } else {
 
             // Economy
-            if (!OddJob.getInstance().getEconManager().hasPocket(uuid)) {
-                OddJob.getInstance().getEconManager().createAccounts(uuid, 200.0D, false);
+            if (!OddJob.getInstance().getCurrencyManager().hasPocket(uuid)) {
+                OddJob.getInstance().getCurrencyManager().createAccounts(uuid, 200.0D, false);
                 OddJob.getInstance().log("Initializing account for " + player.getName());
             }
 
             // Scoreboard
             if (guild != null) {
-                if (!OddJob.getInstance().getEconManager().hasBankAccount(guild, true)) {
-                    OddJob.getInstance().getEconManager().createAccounts(guild, 200.0D, true);
+                if (!OddJob.getInstance().getCurrencyManager().hasBankAccount(guild, true)) {
+                    OddJob.getInstance().getCurrencyManager().createAccounts(guild, 200.0D, true);
                     OddJob.getInstance().getMessageManager().console("Initializing account for the guild " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                 }
             }

@@ -15,10 +15,10 @@ public class TeleportManager {
     private final HashMap<UUID, UUID> teleportAccept = new HashMap<>();
     private final HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
     private final HashMap<UUID, BukkitTask> teleportTimer;
-    private final double cost_player_to_player = OddJob.getInstance().getEconManager().cost("teleport_player_to_player");
-    private final double cost_player_to_location = OddJob.getInstance().getEconManager().cost("teleport_player_to_location");
-    private final double cost_back = OddJob.getInstance().getEconManager().cost("teleport_back");
-    private final double cost_spawn = OddJob.getInstance().getEconManager().cost("teleport_spawn");
+    private final double cost_player_to_player = OddJob.getInstance().getCurrencyManager().cost("teleport_player_to_player");
+    private final double cost_player_to_location = OddJob.getInstance().getCurrencyManager().cost("teleport_player_to_location");
+    private final double cost_back = OddJob.getInstance().getCurrencyManager().cost("teleport_back");
+    private final double cost_spawn = OddJob.getInstance().getCurrencyManager().cost("teleport_spawn");
 
     public TeleportManager() {
         teleportTimer = new HashMap<>();

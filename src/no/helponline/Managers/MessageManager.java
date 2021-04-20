@@ -1,10 +1,13 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.Utils.Enum.Account;
 import no.helponline.Utils.Guild;
+import no.helponline.Utils.Odd.OddPlayer;
 import no.helponline.Utils.Warp;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -19,6 +22,8 @@ public class MessageManager {
     ChatColor cGuild = ChatColor.DARK_AQUA;
     ChatColor cPlayer = ChatColor.GOLD;
     ChatColor cValue = ChatColor.GRAY;
+    ChatColor cHome = ChatColor.GOLD;
+    ChatColor cReset = ChatColor.RESET;
 
     public void success(String message, CommandSender sender, boolean console) {
         sender.sendMessage(ChatColor.GREEN + message);
@@ -97,11 +102,35 @@ public class MessageManager {
     }
 
     public void errorPlayer(String string, CommandSender commandSender) {
-        warning("Sorry we can't find the player: " + string, commandSender, false);
+        danger("Sorry we can't find the player: " + cValue + string, commandSender, false);
     }
 
     public void errorWorld(String string, CommandSender commandSender) {
-        warning("Sorry we can't find the world: " + string, commandSender, false);
+        danger("Sorry we can't find the world: " + cValue + string, commandSender, false);
+    }
+
+    public void errorGuild(String string, UUID player) {
+        danger("Sorry, we can't find the guild: " + cValue + string, player, false);
+    }
+
+    public void errorArena(String string, UUID player) {
+        danger("Sorry, we can't find the arena: " + cValue + string, player, false);
+    }
+
+    public void errorConsole() {
+        Bukkit.getConsoleSender().sendMessage(cDanger + "Only usable as a player");
+    }
+
+    public void errorMaterial(String string, Player player) {
+        danger("Unknown material " + cValue + string, player, false);
+    }
+
+    public void errorNumber(String string, Player player) {
+        danger("Invalid number " + cValue + string, player, false);
+    }
+
+    public void errorHome(String name, CommandSender player) {
+        player.sendMessage(ChatColor.RED + "Unknown home '" + ChatColor.YELLOW + name + ChatColor.RED + "'");
     }
 
     public void broadcastAchievement(String string) {
@@ -116,21 +145,20 @@ public class MessageManager {
         }
     }
 
-    public void guild(String s, UUID guild, UUID sender) {
-        for (UUID uuid : OddJob.getInstance().getGuildManager().getGuildMembers(guild)) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline() && player.getUniqueId() != sender) {
-                player.sendMessage(s);
+    public void broadcastGuild(String message, String guildName, List<UUID> players, CommandSender sender) {
+        for (UUID uuid : players) {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(uuid);
+            if (target.isOnline()) {
+                Player player = (Player) target;
+                guildBroadcast(message, guildName, player);
             }
         }
     }
 
-    public void errorGuild(String name, UUID player) {
-        danger("Sorry, we can't find the guild " + ChatColor.GOLD + name, player, false);
+    private void guildBroadcast(String message, String name, Player target) {
+        target.sendMessage(cInfo + "[Guild - " + cGuild + name + cInfo + "] " + cReset + message);
     }
-    public void errorArena(String name, UUID player) {
-        danger("Sorry, we can't find the arena " + ChatColor.GOLD + name, player, false);
-    }
+
 
     public void insufficientItems(Player player) {
         player.sendMessage(ChatColor.YELLOW + "Insufficient number of items.");
@@ -140,21 +168,6 @@ public class MessageManager {
         player.sendMessage(ChatColor.YELLOW + "Insufficient funds.");
     }
 
-    public void errorConsole() {
-        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Only usable as a player");
-    }
-
-    public void errorMaterial(String string, Player player) {
-        player.sendMessage(ChatColor.RED + "Unknown material '" + ChatColor.YELLOW + string + ChatColor.RED + "'");
-    }
-
-    public void errorNumber(String string, Player player) {
-        player.sendMessage(ChatColor.RED + "Invalid number '" + ChatColor.YELLOW + string + ChatColor.RED + "'");
-    }
-
-    public void errorHome(String name, CommandSender player) {
-        player.sendMessage(ChatColor.RED + "Unknown home '" + ChatColor.YELLOW + name + ChatColor.RED + "'");
-    }
 
     public void infoListPlayers(String string, Collection<UUID> list, CommandSender commandSender) {
         StringBuilder builder = new StringBuilder();
@@ -230,34 +243,27 @@ public class MessageManager {
         success("Teleport to " + ChatColor.GOLD + name + ChatColor.GREEN + " successful", uuid, true);
     }
 
-    /******/
-    public void guildTooFewArguments(UUID uuid) {
-        danger("Too few arguments supplied.", uuid, false);
+    public void guildNameAlreadyExsits(String string, CommandSender sender) {
+        danger("A Guild with the name " + cGuild + string + cDanger + " already exists.", sender, false);
     }
 
-    public void guildTooManyArguments(UUID uuid) {
-        danger("Too many arguments supplied.", uuid, false);
+    public void guildAlreadyAssociated(String string, CommandSender sender) {
+        danger("You are already associated with the Guild " + cGuild + string, sender, false);
     }
 
-    public void guildNameAlreadyExsits(String string, UUID uuid) {
-        danger("A Guild with the name " + cGuild + string + cDanger + " already exists.", uuid, false);
-    }
 
-    public void guildAlreadyAssociated(String string, UUID uuid) {
-        danger("You are already associated with the Guild " + cGuild + string, uuid, false);
-    }
-
-    public void guildCreateSuccessful(String string, UUID uuid) {
+    public void guildCreateSuccessful(String string, CommandSender sender) {
+        Player p = (Player) sender;
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getUniqueId().equals(uuid))
-                success("You have successfully created the Guild " + cGuild + string, uuid, true);
+            if (player.getUniqueId().equals(p.getUniqueId()))
+                success("You have successfully created the Guild " + cGuild + string, sender, true);
             else
-                warning("A new Guild name " + cGuild + string + cWarning + " has been created by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), player, false);
+                warning("A new Guild name " + cGuild + string + cWarning + " has been created by " + cPlayer + sender.getName(), player, false);
         }
     }
 
-    public void guildCreateError(String string, UUID uuid) {
-        danger("Something went wrong when trying to create a Guild with the name " + cValue + string, uuid, true);
+    public void guildCreateError(String string, CommandSender sender) {
+        danger("Something went wrong when trying to create a Guild with the name " + cValue + string, sender, true);
     }
 
     public void guildNotAssociated(UUID uuid) {
@@ -402,37 +408,38 @@ public class MessageManager {
         }
     }
 
-    public void guildAcceptInvite(Guild guild, UUID uuid) {
+    public void guildAcceptInvite(Guild guild, CommandSender sender) {
+        Player p = (Player) sender;
         for (UUID member : guild.getMembers().keySet()) {
-            if (member.equals(uuid))
-                success("You have accepted the invitation to join the Guild " + cGuild + guild.getName(), member, true);
+            if (member.equals(p.getUniqueId()))
+                success("You have accepted the invitation to join the " + cGuild + guild.getName(), member, true);
             else
-                warning(cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + " has accepted the invitation to join the Guild", member, false);
+                warning(cPlayer + sender.getName() + cWarning + " has accepted the invitation to join the " + cGuild + guild.getName(), member, false);
         }
     }
 
-    public void guildJoining(Guild guild, UUID uuid) {
+    public void guildJoining(Guild guild, CommandSender sender) {
+        Player p = (Player) sender;
         for (UUID member : guild.getMembers().keySet()) {
-            if (member.equals(uuid))
+            if (member.equals(p.getUniqueId()))
                 success("Welcome to the Guild " + cGuild + guild.getName(), member, true);
             else
-                success("Please welcome " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cSuccess + " to the Guild", member, false);
+                success("Please welcome " + cPlayer + sender.getName() + cSuccess + " to the " + cGuild + guild.getName(), member, false);
         }
     }
 
-    public void guildPending(Guild guild, UUID uuid) {
+    public void guildPending(Guild guild, CommandSender sender) {
         for (UUID member : guild.getMembers().keySet()) {
-
-            warning(cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + " has requested to join the Guild", member, false);
+            warning(cPlayer + sender.getName() + cWarning + " has requested to join the " + cGuild + guild.getName(), member, false);
         }
-        success("You have sent a request to join the Guild " + cGuild + guild.getName(), uuid, true);
+        success("You have sent a request to join the " + cGuild + guild.getName(), sender, true);
     }
 
     public void guildDenyInvite(Guild guild, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
-            warning(cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + "'s invitation to join the Guild has been declined.", member, false);
+            warning(cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + "'s invitation to join the " + cGuild + guild.getName() + cWarning + " has been declined.", member, false);
         }
-        success("You have declined the invitation to join the Guild " + cGuild + guild.getName(), uuid, true);
+        success("You have declined the invitation to join the " + cGuild + guild.getName(), uuid, true);
     }
 
     public void guildDenyRequest(Guild guild, UUID target, UUID uuid) {
@@ -486,6 +493,85 @@ public class MessageManager {
     }
 
     public void arenaAreaSet(Player player) {
-        success("Area for Arena set!",player.getUniqueId(),false);
+        success("Area for Arena set!", player.getUniqueId(), false);
+    }
+
+    public void errorHomeMaximal(Player player) {
+        danger("You have reached th maximal amout of homes.", player, false);
+    }
+
+    public void errorMissingArgs(CommandSender sender) {
+        danger("Missing arguments", sender, false);
+    }
+
+    public void errorTooManyArgs(CommandSender sender) {
+        danger("Too many args", sender, false);
+    }
+
+    public void infoCurrencyBalance(UUID uuid, double pocket, double bank) {
+        info("You are holding " + cValue + pocket + cInfo + " in your " + cValue + "pocket" + cInfo + ", and have " + cValue + bank + cInfo + " in your " + cValue + "bank" + cInfo + " account.", uuid, false);
+    }
+
+    public void invalidNumber(String arg, CommandSender sender) {
+        danger("'" + cWarning + arg + cDanger + "' is not a number", sender, false);
+    }
+
+    public void sendSyntax(String syntax, CommandSender sender) {
+        warning("syntax: " + syntax, sender, false);
+    }
+
+    public void currencySuccessSet(String target, String amount, CommandSender sender, Account account) {
+        success("You have sucessfully set " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + " to " + cValue + amount, sender, true);
+    }
+
+    public void currencySuccessAdded(String target, String amount, double balance, CommandSender sender, Account account) {
+        success("You have successfully added " + cValue + amount + cSuccess + " to " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender, true);
+    }
+
+    public void currencySuccessSubtracted(String target, String amount, double balance, CommandSender sender, Account account) {
+        success("You have successfully subtracted " + cValue + amount + cSuccess + " from " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender, true);
+    }
+
+    public void banRemoveSuccess(String name, CommandSender sender) {
+        success("Ban removed from " + cValue + name, sender, true);
+    }
+
+    public void banRemoveError(String name, CommandSender sender) {
+        danger("Player " + cValue + name + cDanger + " was never banned", sender, true);
+    }
+
+    public void banAddedSuccess(String name, String text, CommandSender sender) {
+        success("Player " + cPlayer + name + cSuccess + " was successfully banned with the text '" + cValue + text + cSuccess + "'", sender, true);
+    }
+
+    public void banList(HashMap<OddPlayer, String> bans, CommandSender sender) {
+        // There are ** players banned
+        // ---------------------------
+        // 1. <player> : <reason>
+        info("There are " + cValue + bans.size() + cInfo + " players banned", sender, false);
+        info("----------------------------------", sender, false);
+        int i = 0;
+        for (OddPlayer name : bans.keySet()) {
+            i++;
+            String reason = bans.get(name);
+            info(cValue + "" + i + cInfo + ". " + cPlayer + name.getName() + cInfo + " : " + cValue + reason, sender, false);
+        }
+    }
+
+
+    public void infoGuildCreated(String name, CommandSender sender) {
+        success("Guild " + cGuild + name + cSuccess + " successfully created", sender, true);
+    }
+
+    public void infoGuildExists(String name, CommandSender sender) {
+        success("Guild " + cGuild + name + cSuccess + " already exists", sender, false);
+    }
+
+    public void errorWrongArgs(CommandSender sender) {
+        danger("Error wrong arguments", sender, false);
+    }
+
+    public void infoArgs(String args, CommandSender sender) {
+        warning("Valid arguments are: " + cValue + args, sender, false);
     }
 }

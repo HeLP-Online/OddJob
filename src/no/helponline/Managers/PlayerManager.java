@@ -18,7 +18,6 @@ import java.util.*;
 
 public class PlayerManager {
     private HashMap<UUID, OddPlayer> players = new HashMap<>();
-    //private final HashMap<UUID, String> names = new HashMap<>();
     private final HashMap<UUID, UUID> requestTrade;
     private final HashMap<UUID, UUID> tradingPlayers;
     private final HashMap<UUID, Long> inCombat = new HashMap<>();

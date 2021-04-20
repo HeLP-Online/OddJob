@@ -116,6 +116,7 @@ public class ArenaManager {
     }
 
     public void load() {
+        /*
         int i = 0;
         if (fileConfig == null) {
             fileConfig = new File(OddJob.getInstance().getDataFolder(), "arenas.yml");
@@ -149,6 +150,8 @@ public class ArenaManager {
             i++;
         }
         OddJob.getInstance().log("loaded " + i);
+        
+         */
 
     }
 

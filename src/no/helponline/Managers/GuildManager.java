@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.AreaMarker;
@@ -766,15 +767,12 @@ public class GuildManager {
         OddJob.getInstance().getMessageManager().guildAcceptPending(getGuild(guild), joiningPlayer, uuid);
     }
 
-    /**
-     * Makes the Invited Player to join the Guild
-     *
-     * @param joiningPlayer UUID of the Player
-     */
-    public void acceptInvite(UUID joiningPlayer) {
-        UUID guild = getGuildInvitation(joiningPlayer);
-        join(guild, joiningPlayer);
-        OddJob.getInstance().getMessageManager().guildAcceptInvite(getGuild(guild), joiningPlayer);
+
+    public void acceptInvite(CommandSender sender) {
+        Player p = (Player) sender;
+        UUID guild = getGuildInvitation(p.getUniqueId());
+        join(guild, p.getUniqueId());
+        OddJob.getInstance().getMessageManager().guildAcceptInvite(getGuild(guild), sender);
     }
 
     /**
@@ -1077,5 +1075,15 @@ public class GuildManager {
             if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) == guild) i++;
         }
         return i;
+    }
+
+    public void save() {
+        saveChunks();
+        saveGuilds();
+    }
+
+    public void load() {
+        loadChunks();
+        loadGuilds();
     }
 }

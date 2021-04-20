@@ -1,6 +1,7 @@
 package no.helponline.Managers;
 
 import no.helponline.OddJob;
+import no.helponline.SQL.HomeSQL;
 import no.helponline.Utils.Enum.Zone;
 import no.helponline.Utils.Home;
 import org.bukkit.Bukkit;
@@ -8,14 +9,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.HashMap;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class HomesManager {
-    /**
-     * HashMap containing the UUID of the Player and their Homes
-     */
     private HashMap<UUID, Home> homes = new HashMap<>();
 
     /**
@@ -34,12 +30,18 @@ public class HomesManager {
             OddJob.getInstance().getMessageManager().homesInsideGuild(uuid);
             return true;
         }
+
         if (homes.containsKey(uuid)) {
             homes.get(uuid).add(name, location);
         } else {
-            homes.put(uuid, new Home(uuid, location, name));
+            Home home = new Home(uuid, location, name);
+            homes.put(uuid, home);
         }
-        OddJob.getInstance().getMessageManager().homesSetSuccess(name,uuid);
+
+
+        HomeSQL.save(homes);
+
+        OddJob.getInstance().getMessageManager().homesSetSuccess(name, uuid);
         return true;
     }
 
@@ -50,12 +52,10 @@ public class HomesManager {
      * @param name String name of the Home
      */
     public void del(UUID uuid, String name) {
-        if (homes.containsKey(uuid)) {
-            Home home = homes.get(uuid);
-            home.remove(name);
-        }
-        OddJob.getInstance().getMySQLManager().deleteHome(uuid, name);
-        OddJob.getInstance().getMessageManager().homesDelSuccess(name,uuid);
+        homes.get(uuid).remove(name);
+
+        HomeSQL.delete(uuid, name);
+        OddJob.getInstance().getMessageManager().homesDelSuccess(name, uuid);
     }
 
     /**
@@ -66,7 +66,6 @@ public class HomesManager {
      * @return Location of the Home
      */
     public Location get(UUID uuid, String name) {
-        if (!homes.containsKey(uuid)) homes.put(uuid, new Home(uuid));
         return homes.get(uuid).get(name);
     }
 
@@ -86,9 +85,9 @@ public class HomesManager {
      * Returns a String List of the Home names of a Player
      *
      * @param uuid UUID of the Player
+     * @return
      */
     public Set<String> getList(UUID uuid) {
-        if (!homes.containsKey(uuid)) homes.put(uuid, new Home(uuid));
         return homes.get(uuid).list();
     }
 
@@ -96,30 +95,32 @@ public class HomesManager {
      * Returns a List of the Homes of a Player
      *
      * @param uuid UUID of the Player
+     * @return
      */
-    public void list(UUID uuid) {
+    public List<String> list(UUID uuid) {
         OddJob.getInstance().getMessageManager().listHomes("List of Homes", getList(uuid), Bukkit.getPlayer(uuid));
+        return null;
     }
 
     /**
      * Loading Homes from the Database
      */
     public void load() {
-        homes = OddJob.getInstance().getMySQLManager().loadHomes();
+        homes = HomeSQL.load();
     }
 
     /**
      * Saves Homes to the Database
      */
     public void save() {
-        OddJob.getInstance().getMySQLManager().saveHomes(homes);
+        HomeSQL.save(homes);
     }
 
-    public void teleport(Player player,UUID uuid, String string) {
+    public void teleport(Player player, UUID uuid, String string) {
         for (String name : getList(uuid)) {
             if (name.equalsIgnoreCase(string)) {
-                OddJob.getInstance().getMessageManager().homesTeleportSuccess(player.getUniqueId(),name);
-                OddJob.getInstance().getTeleportManager().teleport(player,get(uuid,name),0, PlayerTeleportEvent.TeleportCause.COMMAND);
+                OddJob.getInstance().getMessageManager().homesTeleportSuccess(player.getUniqueId(), name);
+                OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), 0, PlayerTeleportEvent.TeleportCause.COMMAND);
             }
         }
     }

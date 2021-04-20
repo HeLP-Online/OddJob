@@ -12,7 +12,7 @@ public class BanManager {
     public void ban(UUID playerUUID, String text) {
         OddJob.getInstance().getPlayerManager().getOddPlayer(playerUUID).setBanned(text);
         Player player = OddJob.getInstance().getPlayerManager().getPlayer(playerUUID);
-        if (player.isOnline()) kick(player, text);
+        if (player != null && player.isOnline()) kick(player, text);
     }
 
     public void unban(UUID player) {
@@ -22,7 +22,9 @@ public class BanManager {
     public List<UUID> getBans() {
         List<UUID> bans = new ArrayList<>();
         for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
-            if (getBan(uuid) != null) bans.add(uuid);
+            if (getBan(uuid) != null) {
+                bans.add(uuid);
+            }
         }
         return bans;
     }

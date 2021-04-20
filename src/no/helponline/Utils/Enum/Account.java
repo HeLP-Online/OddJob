@@ -1,5 +1,5 @@
 package no.helponline.Utils.Enum;
 
-public enum Econ {
+public enum Account {
     POCKET, BANK
 }

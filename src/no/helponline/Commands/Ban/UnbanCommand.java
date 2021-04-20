@@ -1,4 +1,4 @@
-package no.helponline.Commands;
+package no.helponline.Commands.Ban;
 
 import no.helponline.OddJob;
 import org.bukkit.ChatColor;

@@ -9,9 +9,13 @@ import org.bukkit.entity.Player;
 public class BackCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (command.getName().equalsIgnoreCase("back") && commandSender instanceof Player && commandSender.hasPermission("essentials.back")) {
-            Player player = (Player) commandSender;
-            OddJob.getInstance().getTeleportManager().back(player);
+        if (command.getName().equalsIgnoreCase("back")) {
+            if (commandSender instanceof Player) {
+                if (commandSender.hasPermission("back")) {
+                    Player player = (Player) commandSender;
+                    OddJob.getInstance().getTeleportManager().back(player);
+                }
+            }
         }
         return true;
     }

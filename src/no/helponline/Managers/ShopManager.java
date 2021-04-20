@@ -54,7 +54,7 @@ public class ShopManager {
 
     public void buy(Material material, int amount, Player player) {
         double cost = priceBuy.getOrDefault(material,2.5) * amount;
-        double wallet = OddJob.getInstance().getEconManager().getPocketBalance(player.getUniqueId());
+        double wallet = OddJob.getInstance().getCurrencyManager().getPocketBalance(player.getUniqueId());
 
         if (wallet < cost) {
             OddJob.getInstance().getMessageManager().insufficientFunds(player);
@@ -64,7 +64,7 @@ public class ShopManager {
         itemsBought.put(material,itemsBought.getOrDefault(material,0)+amount);
 
         ItemStack itemStack = new ItemStack(material, amount);
-        OddJob.getInstance().getEconManager().subtractPocketBalance(player.getUniqueId(), cost);
+        OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId(), cost);
         OddJob.getInstance().getMessageManager().success("You bought " + amount + " of " + material.name() + " for " + cost, player, false);
         player.getInventory().addItem(itemStack);
     }
@@ -87,7 +87,7 @@ public class ShopManager {
         itemsSold.put(material,itemsSold.getOrDefault(material,0) + amount);
 
         OddJob.getInstance().getMessageManager().console("giving money");
-        OddJob.getInstance().getEconManager().addPocketBalance(player.getUniqueId(), cost);
+        OddJob.getInstance().getCurrencyManager().addPocketBalance(player.getUniqueId(), cost);
         OddJob.getInstance().getMessageManager().success("You sold " + amount + " of " + material.name() + " for " + cost, player, false);
     }
 

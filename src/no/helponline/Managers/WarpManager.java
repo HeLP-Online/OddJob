@@ -15,7 +15,7 @@ public class WarpManager {
 
     HashMap<String, Warp> warps = new HashMap<>();
 
-    private final double cost = OddJob.getInstance().getEconManager().cost("warp_use");
+    private final double cost = OddJob.getInstance().getCurrencyManager().cost("warp_use");
 
     public Set<String> listWarps() {
         return warps.keySet();

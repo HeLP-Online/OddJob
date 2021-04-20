@@ -10,9 +10,9 @@ commands:
     description: Locks Menu
     usage: /locks ...
     aliases: [ 'l' ]
-  econ:
+  currency:
     description: EconomyCommand
-    usage: /econ <set|add|remove> <player> <amount>
+    usage: /currency <set|add|remove> <player> <amount>
   arena:
     aliases: ['a']
     description: Arena Menu

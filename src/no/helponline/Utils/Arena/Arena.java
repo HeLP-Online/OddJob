@@ -1,24 +1,18 @@
 package no.helponline.Utils.Arena;
 
-import io.netty.util.collection.ByteCollections;
+import no.helponline.Managers.TeleportManager;
 import no.helponline.OddJob;
 import no.helponline.Utils.Arena.ArenaManager.GameType;
-import no.helponline.Utils.Arena.Games.HungerGames;
-import no.helponline.Utils.Arena.Games.Skywars;
-import no.helponline.Utils.Arena.Games.TNTTag;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 public class Arena {
@@ -36,6 +30,7 @@ public class Arena {
     private int requiredPlayers;
     private int limitPlayers;
     private GameState gameState = GameState.WAITING;
+    private int timer = 0;
 
     public Arena(int id, GameType gameType) {
         this.id = id;
@@ -54,15 +49,75 @@ public class Arena {
         this.gameSpawns = spawns;
     }
 
+    public Arena arena = this;
+
     public void setWorld(UUID world) {
         this.world = world;
     }
 
     public void start() {
+        cancelTimer();
+        if (queue.size() < limitPlayers) {
+            alive = queue;
+            queue.removeAll(alive);
+        } else {
+
+            for (int i = 0; i < limitPlayers; i++) {
+                Player player = queue.get(0);
+                alive.add(player);
+                queue.remove(player);
+                OddJob.getInstance().getTeleportManager().teleport(player,gameSpawns.get(gameSpawns.keySet().toArray()[i]),0, PlayerTeleportEvent.TeleportCause.PLUGIN);
+            }
+        }
+        gameState = GameState.PREPARING;
+        timer = countdownToRelease();
     }
 
-    public void setGameType(GameType valueOf) {
-        gameType = valueOf;
+    private void open() {
+        cancelTimer();
+        gameState = GameState.STARTED;
+        removeWall();
+        timer = finnishTimer();
+    }
+
+    private void removeWall() {
+    }
+
+    private int finnishTimer() {
+        return Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), new Runnable() {
+            final double timer = 36000.0;
+            double value = 36000.0;
+
+            @Override
+            public void run() {
+                if (alive.size() <= 1) {
+                    winner(alive.get(0));
+                }
+            }
+        },0,20);
+    }
+
+    private void winner(Player player) {
+    }
+
+    private int countdownToRelease() {
+        return Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), new Runnable() {
+            final double timer = 30.0;
+            double value = 30.0;
+
+            @Override
+            public void run() {
+                broadcast("Game starts in "+value+" secs");
+                value--;
+                if (value == 0.0) {
+                    open();
+                }
+            }
+        },0,20);
+    }
+
+    public void setGameType(GameType gameType) {
+        this.gameType = gameType;
     }
 
     public void setLobbySpawn(Location location) {
@@ -97,7 +152,42 @@ public class Arena {
     public void queue(Player player) {
         queue.add(player);
         player.sendMessage("added to queue");
-        //todo Start Timer
+        if (queue.size() >= requiredPlayers) {
+            if (gameState == GameState.WAITING) {
+                this.timer = countdownToStart();
+            }
+        } else {
+            player.sendMessage("we are still too few players to start.");
+        }
+    }
+
+    public Arena getArena() {
+        return this;
+    }
+
+    private int countdownToStart() {
+        gameState = GameState.COUNTDOWN;
+        return Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), new Runnable() {
+            final double timer = 300.0;
+            double value = 300.0;
+
+            @Override
+            public void run() {
+                if (value % 60 == 1) {
+                    broadcast("Game will start in "+value+" seconds");
+                }
+                value--;
+                if (queue.size() < requiredPlayers) {
+                    cancelTimer();
+                } else if (value == 0.0) {
+                    start();
+                }
+            }
+        }, 0, 20);
+    }
+
+    private void cancelTimer() {
+        Bukkit.getScheduler().cancelTask(timer);
     }
 
     public void remove(Player player) {
