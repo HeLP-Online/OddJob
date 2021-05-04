@@ -59,7 +59,7 @@ public class Arena {
                 Player player = queue.get(0);
                 alive.add(player);
                 queue.remove(player);
-                OddJob.getInstance().getTeleportManager().teleport(player,gameSpawns.get(gameSpawns.keySet().toArray()[i]), PlayerTeleportEvent.TeleportCause.PLUGIN);
+                //OddJob.getInstance().getTeleportManager().teleport(player,gameSpawns.get(gameSpawns.keySet().toArray()[i]), PlayerTeleportEvent.TeleportCause.PLUGIN);
             }
         }
         gameState = GameState.PREPARING;

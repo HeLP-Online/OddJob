@@ -291,8 +291,10 @@ public class GuildManager {
             chunks.put(chunk, guild);
             OddJob.getInstance().getMySQLManager().createGuildClaim(chunk,guild);
             updateDynmapChunk(chunk);
-            OddJob.getInstance().getMessageManager().success("Claiming chunk " + ChatColor.GOLD + "X:" + chunk.getX() + " Y:" + chunk.getZ() + " World:" + player.getWorld().getName() + ChatColor.RESET + " to " + ChatColor.DARK_AQUA + getGuild(guild).getName(), player, true);
-        } else OddJob.getInstance().getMessageManager().danger("Already claimed", player, false);
+            OddJob.getInstance().getMessageManager().guildClaiming(chunk.getX(), chunk.getZ(), player,getGuildNameByUUID(guild));
+        } else {
+            OddJob.getInstance().getMessageManager().guildClaimed(player);
+        }
     }
 
     /**
@@ -307,7 +309,7 @@ public class GuildManager {
 
         if (chunkGuild != null && !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
             // Chunk is already claimed by Guild
-            OddJob.getInstance().getMessageManager().danger("This chunk is owned by " + ChatColor.DARK_AQUA + getGuildNameByUUID(getGuildUUIDByChunk(inChunk)), player, false);
+            OddJob.getInstance().getMessageManager().guildOwnedBy(getGuildNameByUUID(getGuildUUIDByChunk(inChunk)),player);
         } else {
             // Claiming Chunk to Guild
             claim(guild, inChunk, player);
@@ -326,7 +328,7 @@ public class GuildManager {
 
         if (!chunkGuild.equals(playerGuild)) {
             // Chunk is not by the Players Guild
-            OddJob.getInstance().getMessageManager().danger("Sorry, you are not associated with the guild who claimed this chunk", player, false);
+            OddJob.getInstance().getMessageManager().guildNotAssociatedGuild(player);
         } else {
             // UnClaim the Chunk from Guild
             unClaim(inChunk, player);
@@ -346,9 +348,9 @@ public class GuildManager {
             OddJob.getInstance().getGuildManager().chunks.remove(chunk);
             removeDynmapChunk(chunk);
             if (player != null)
-                OddJob.getInstance().getMessageManager().success("You have unclaimed " + ChatColor.GOLD + "X:" + chunk.getX() + " Z:" + chunk.getZ() + " World:" + chunk.getWorld().getName(), player, true);
+                OddJob.getInstance().getMessageManager().guildUnclaimed(chunk.getX(), chunk.getZ(), player);
         } else
-            OddJob.getInstance().getMessageManager().warning("Not claimed", player, false);
+            OddJob.getInstance().getMessageManager().guildNotClaimed(player);
     }
 
 
@@ -415,16 +417,16 @@ public class GuildManager {
             if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
                 // Changing Zone to autoClaim for
                 autoClaim.put(player.getUniqueId(), guild);
-                OddJob.getInstance().getMessageManager().warning("Changing Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
+                OddJob.getInstance().getMessageManager().guildChangingZone(getGuildNameByUUID(guild),player);
             } else {
                 // Stops autoClaim
                 autoClaim.remove(player.getUniqueId());
-                OddJob.getInstance().getMessageManager().warning("Turning off Zone auto claim to " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
+                OddJob.getInstance().getMessageManager().guildAutoOff(getGuildNameByUUID(guild),player);
             }
         } else {
             // Starts autoClaim
             autoClaim.put(player.getUniqueId(), guild);
-            OddJob.getInstance().getMessageManager().warning("You are now claiming zones for " + ChatColor.DARK_AQUA + getGuildNameByUUID(guild), player, true);
+            OddJob.getInstance().getMessageManager().guildAutoOn(getGuildNameByUUID(guild),player);
         }
 
     }

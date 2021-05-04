@@ -120,7 +120,7 @@ public class HomesManager {
         for (String name : getList(uuid)) {
             if (name.equalsIgnoreCase(string)) {
                 OddJob.getInstance().getMessageManager().homesTeleportSuccess(player.getUniqueId(), name);
-                OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), PlayerTeleportEvent.TeleportCause.COMMAND);
+                OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), PlayerTeleportEvent.TeleportCause.COMMAND,true);
             }
         }
     }

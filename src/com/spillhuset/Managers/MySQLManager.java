@@ -40,7 +40,7 @@ public class MySQLManager {
     }
 
     public void init() throws SQLException {
-        this.connect();
+        connect();
         statement = connection.createStatement();
         String sting = "CREATE TABLE IF NOT EXISTS mine_secured_armorstands (" +
                 "`id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT," +

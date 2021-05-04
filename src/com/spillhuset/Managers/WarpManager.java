@@ -75,7 +75,7 @@ public class WarpManager {
             }
         }
 
-        OddJob.getInstance().getTeleportManager().teleport(player, location, PlayerTeleportEvent.TeleportCause.COMMAND);
+        OddJob.getInstance().getTeleportManager().teleport(player, location, PlayerTeleportEvent.TeleportCause.COMMAND,true);
     }
 
     /**

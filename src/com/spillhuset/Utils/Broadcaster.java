@@ -68,9 +68,9 @@ public class Broadcaster implements Runnable {
             ex.printStackTrace();
         }
         if (failcount < 5) {
-            OddJob.getInstance().getMessageManager().warning("Failed to broadcast, trying again in 10 seconds...", OddJob.getInstance().getServer().getConsoleSender(), false);
+            //OddJob.getInstance().getMessageManager().warning("Failed to broadcast, trying again in 10 seconds...", OddJob.getInstance().getServer().getConsoleSender(), false);
         } else if (failcount == 5) {
-            OddJob.getInstance().getMessageManager().danger("Broadcasting will not work until the network is fixed. Warnings disabled.", OddJob.getInstance().getServer().getConsoleSender(), false);
+            //OddJob.getInstance().getMessageManager().danger("Broadcasting will not work until the network is fixed. Warnings disabled.", OddJob.getInstance().getServer().getConsoleSender(), false);
         }
         Thread.sleep(8500);
     }
@@ -98,12 +98,12 @@ public class Broadcaster implements Runnable {
             throw new Exception("No usable IPv4 non-loopback address found");
         } catch (Exception e) {
             e.printStackTrace();
-            OddJob.getInstance().getMessageManager().danger("Could not automatically detect LAN IP, please set server-ip in server.properties.", OddJob.getInstance().getServer().getConsoleSender(), false);
+            //OddJob.getInstance().getMessageManager().danger("Could not automatically detect LAN IP, please set server-ip in server.properties.", OddJob.getInstance().getServer().getConsoleSender(), false);
             try {
                 return InetAddress.getLocalHost().getHostAddress();
             } catch (UnknownHostException ex) {
                 ex.printStackTrace();
-                OddJob.getInstance().getMessageManager().danger("No network interfaces found!", OddJob.getInstance().getServer().getConsoleSender(), false);
+                //OddJob.getInstance().getMessageManager().danger("No network interfaces found!", OddJob.getInstance().getServer().getConsoleSender(), false);
                 return "End of the world";
             }
         }

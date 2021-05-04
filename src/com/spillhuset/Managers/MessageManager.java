@@ -154,7 +154,7 @@ public class MessageManager {
     }
 
     public void errorConsole(Plugin type) {
-        console(type(type) + cDanger + "Only usable as a player");
+        console(type(type)+cDanger + "Only usable as a player");
     }
 
     public void errorMaterial(Plugin type, String string, Player player) {
@@ -303,9 +303,10 @@ public class MessageManager {
         danger(type(Plugin.guild), "Something went wrong when trying to create a Guild with the name " + cValue + string, sender, true);
     }
 
-    public void guildNotAssociated(UUID uuid) {
+    public void guildNotAssociated(Player uuid) {
         warning(type(Plugin.guild), "You are not associated with any Guild yet.", uuid, false);
     }
+
 
     public void guildLeaveSuccessful(Guild guild, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
@@ -885,10 +886,159 @@ public class MessageManager {
     }
 
     public void tradeNotOnline(Player player) {
-        warning(type(Plugin.trade),"Unfortunately your trade partner is not online",player,false);
+        warning(type(Plugin.trade), "Unfortunately your trade partner is not online", player, false);
     }
 
     public void tradeNone(Player player) {
-        danger(type(Plugin.trade),"No players wanna trade with you",player,false);
+        danger(type(Plugin.trade), "No players wanna trade with you", player, false);
+    }
+
+    public void guildClaiming(int x, int z, Player player, String guild) {
+        success(type(Plugin.guild), "Claiming chunk X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName() + cSuccess + " to " + cGuild + guild, player, true);
+    }
+
+    public void guildClaimed(Player player) {
+        danger(type(Plugin.guild), "Already claimed", player, false);
+    }
+
+    public void guildOwnedBy(String guildNameByUUID, Player player) {
+        danger(type(Plugin.guild), "This chunk is owned by " + cGuild + guildNameByUUID, player, false);
+    }
+
+    public void guildNotAssociatedGuild(Player player) {
+        danger(type(Plugin.guild), "Sorry, you are not associated with the guild who claimed this chunk", player, false);
+    }
+
+    public void guildUnclaimed(int x, int z, Player player) {
+        success(type(Plugin.guild), "You have unclaimed X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld(), player, true);
+    }
+
+    public void guildNotClaimed(Player player) {
+        warning(type(Plugin.guild), "Not claimed", player, false);
+    }
+
+
+    public void guildChangingZone(String guildNameByUUID, Player player) {
+        warning(type(Plugin.guild), "Changing Zone auto claim to " + cGuild + guildNameByUUID, player, true);
+    }
+
+    public void guildAutoOff(String guildNameByUUID, Player player) {
+        warning(type(Plugin.guild), "Turning off Zone auto claim to " + cGuild + guildNameByUUID, player, true);
+    }
+
+    public void guildAutoOn(String guildNameByUUID, Player player) {
+        warning(type(Plugin.guild), "You are now claiming zones for " + cGuild + guildNameByUUID, player, true);
+    }
+
+    public void lockEntityDamage(String name, Player damager) {
+        warning(type(Plugin.lock), "Entity locked by " + cPlayer + name, damager, false);
+    }
+
+    public void lockEntityUnlock(Player damager) {
+        warning(type(Plugin.lock), "Entity unlocked.", damager, true);
+    }
+
+    public void lockEntityLock(Player damager) {
+        success(type(Plugin.lock), "Entity secure!", damager, true);
+    }
+
+    public void tradeAborted(String name, UUID player) {
+        danger(type(Plugin.trade), "Trading aborted by " + cPlayer + name, player, false);
+    }
+
+    public void lockBlockOwned(String block, String name, Player player) {
+        info(type(Plugin.lock), "The " + cValue + block + cInfo + " is owned by " + cPlayer + name, player, false);
+    }
+
+    public void lockSomeoneElse(Player player) {
+        danger(type(Plugin.lock), "A lock is set by someone else.", player, false);
+    }
+
+    public void lockUnlocked(String block, Player player) {
+        warning(type(Plugin.lock), "Unlocked " + cValue + block, player, true);
+    }
+
+    public void lockSkeletonOpen(Player player) {
+        danger(type(Plugin.lock), "! Lock opened by the SkeletonKey", player, true);
+    }
+
+    public void lockOwned(Player player) {
+        danger(type(Plugin.lock), "This block is locked by someone else.", player, false);
+    }
+
+    public void lockAlreadyBlock(Player player) {
+        warning(type(Plugin.lock), "You have already locked this.", player, false);
+    }
+
+    public void lockAlreadyEntity(Player player) {
+        danger(type(Plugin.lock), "A lock is already set on this.", player, false);
+    }
+
+    public void lockBlockLocked(String name, Player player) {
+        success(type(Plugin.lock), "Locked " + cValue + name, player, true);
+    }
+
+    public void lockGuild(String guildNameByUUID, Player player) {
+        warning(type(Plugin.lock), "Block is locked by the guild " + cGuild + guildNameByUUID, player, false);
+    }
+
+    public void spiritFoundSomeone(UUID player) {
+        danger(type(Plugin.spirit), "Somebody found your spirit.", player, false);
+    }
+
+    public void spiritFound(String finder, String owner) {
+        console(type(Plugin.spirit) + cPlayer + finder + cReset + " found the spirit of " + cPlayer + owner);
+    }
+
+    public void spiritFoundSelf(UUID findingPlayer) {
+        success(type(Plugin.spirit), "You got lucky this time", findingPlayer, true);
+    }
+
+    public void death1200(Player player) {
+        info(type(Plugin.spirit), "Sorry to hear about your death. Your spirit will disappear in " + cValue + "20" + cInfo + " min, if you don't get it!", player, true);
+    }
+
+    public void death600(Player player) {
+        info(type(Plugin.spirit), "Spirit disappearing in " + cValue + "10" + cInfo + " min.", player, false);
+    }
+
+    public void death60(Player player) {
+        info(type(Plugin.spirit), "Spirit disappearing in " + cValue + "1" + cInfo + " min.", player, false);
+    }
+
+    public void death10(int i, Player player) {
+        danger(type(Plugin.spirit), "Spirit disappearing in " + cValue + i + cInfo + " sec.", player, false);
+    }
+
+    public void death0(Player player) {
+        danger(type(Plugin.spirit), "All your items is gone, sorry.", player, true);
+    }
+
+    public void lockToolInfo(UUID uniqueId) {
+        info(type(Plugin.lock), "Right click with the tool to show it's owner.", uniqueId);
+    }
+
+    public void lockToolLock(UUID uniqueId) {
+        info(type(Plugin.lock), "Right click with the tool to lock it.", uniqueId);
+    }
+
+    public void lockToolUnlock(UUID uniqueId) {
+        info(type(Plugin.lock), "Right click with the tool unlock it.", uniqueId);
+    }
+
+    public void playerDenying(String name, UUID player) {
+        warning(type(Plugin.player),name + " is denying all request!", player, false);
+    }
+
+    public void lockNotCorrectPlayer(Player player) {
+        warning(type(Plugin.lock),"You don't have the correct Player-Key", player, false);
+    }
+
+    public void lockNotCorrectGuild(Player player) {
+        warning(type(Plugin.lock),"You don't have the correct Guild-Key", player, false);
+    }
+
+    public void lockOpened(String displayName, Player player) {
+        success(type(Plugin.lock),"Lock opened with key: " + displayName, player, true);
     }
 }

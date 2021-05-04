@@ -80,7 +80,7 @@ public class LockManager {
         }
         remove(uniqueId);
         OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(infoWand);
-        OddJob.getInstance().getMessageManager().info("Right click with the tool to show it's owner.", uniqueId, false);
+        OddJob.getInstance().getMessageManager().lockToolInfo(uniqueId);
     }
 
     public void lockLocking(UUID uniqueId) {
@@ -90,7 +90,7 @@ public class LockManager {
         }
         remove(uniqueId);
         OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(lockWand);
-        OddJob.getInstance().getMessageManager().info("Right click with the tool to lock it.", uniqueId, false);
+        OddJob.getInstance().getMessageManager().lockToolLock(uniqueId);
     }
 
     public void lockUnlocking(UUID uniqueId) {
@@ -100,7 +100,7 @@ public class LockManager {
         }
         remove(uniqueId);
         OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(unlockWand);
-        OddJob.getInstance().getMessageManager().info("Right click with the tool unlock it.", uniqueId, false);
+        OddJob.getInstance().getMessageManager().lockToolUnlock(uniqueId);
     }
 
     public void remove(UUID uniqueId) {

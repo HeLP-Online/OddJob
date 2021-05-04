@@ -22,18 +22,18 @@ public class Lore {
                     UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk());
                     if (!guild && !one.equalsIgnoreCase(uuid.toString())) {
                         // Wrong Player Key
-                        OddJob.getInstance().getMessageManager().warning("You don't have the correct Player-Key", player, false);
+                        OddJob.getInstance().getMessageManager().lockNotCorrectPlayer(player);
                         event.setCancelled(true);
                         return true;
                     } else if (guild && guildUUID != null && !one.equalsIgnoreCase(guildUUID.toString())) {
                         // Wrong Guild Key
-                        OddJob.getInstance().getMessageManager().warning("You don't have the correct Guild-Key", player, false);
+                        OddJob.getInstance().getMessageManager().lockNotCorrectGuild(player);
                         event.setCancelled(true);
                         return true;
                     }
 
                     // Opened with the correct Key
-                    OddJob.getInstance().getMessageManager().success("Lock opened by " + meta.getDisplayName(), player, true);
+                    OddJob.getInstance().getMessageManager().lockOpened(meta.getDisplayName(),player);
                     if (door) {
                         // Door
                         Utility.doorToggle(block);

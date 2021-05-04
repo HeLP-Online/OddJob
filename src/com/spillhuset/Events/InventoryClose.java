@@ -24,7 +24,7 @@ public class InventoryClose implements Listener {
                 // Closing inventory
                 OddJob.getInstance().getPlayerManager().getPlayer(uuid).closeInventory();
 
-                OddJob.getInstance().getMessageManager().danger("Trading aborted by " + OddJob.getInstance().getPlayerManager().getName(closing), uuid, false);
+                OddJob.getInstance().getMessageManager().tradeAborted(OddJob.getInstance().getPlayerManager().getName(closing),uuid);
             } else if (OddJob.getInstance().getPlayerManager().getTradingPlayers().containsValue(closing)) {
                 // Looping through the list
                 for (UUID uuid : OddJob.getInstance().getPlayerManager().getTradingPlayers().keySet()) {
@@ -35,7 +35,7 @@ public class InventoryClose implements Listener {
                         // Closing inventory
                         OddJob.getInstance().getPlayerManager().getPlayer(uuid).closeInventory();
 
-                        OddJob.getInstance().getMessageManager().danger("Trading aborted by " + OddJob.getInstance().getPlayerManager().getName(closing), uuid, false);
+                        OddJob.getInstance().getMessageManager().tradeAborted(OddJob.getInstance().getPlayerManager().getName(closing),uuid);
                     }
                 }
             }

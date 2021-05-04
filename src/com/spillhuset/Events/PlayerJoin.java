@@ -22,6 +22,8 @@ public class PlayerJoin implements Listener {
         UUID uuid = player.getUniqueId();
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid); // nullable
 
+        OddJob.getInstance().getPlayerManager().loadPlayer(player.getUniqueId());
+
         // If banned Player
         if (OddJob.getInstance().getBanManager().getBan(uuid) != null) {
             OddJob.getInstance().getBanManager().kick(player);

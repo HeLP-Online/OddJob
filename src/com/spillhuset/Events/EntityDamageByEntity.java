@@ -54,12 +54,12 @@ public class EntityDamageByEntity implements Listener {
                 UUID locked = OddJob.getInstance().getLockManager().getLockOwner(entity);
                 if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
                     // Using InfoWand
-                    OddJob.getInstance().getMessageManager().warning("Entity locked by " + ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(locked), damager.getUniqueId(), false);
+                    OddJob.getInstance().getMessageManager().lockEntityDamage(OddJob.getInstance().getPlayerManager().getName(locked),damager);
                     event.setCancelled(true);
                 } else if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().unlockWand)) {
                     // Using UnLockWand
                     OddJob.getInstance().getLockManager().unlock(entity);
-                    OddJob.getInstance().getMessageManager().warning("Entity unlocked.", damager.getUniqueId(), true);
+                    OddJob.getInstance().getMessageManager().lockEntityUnlock(damager);
                     OddJob.getInstance().getLockManager().remove(damager.getUniqueId());
                     event.setCancelled(true);
                 } else {
@@ -72,7 +72,7 @@ public class EntityDamageByEntity implements Listener {
                 if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
                     // Using LockWand
                     OddJob.getInstance().getLockManager().lock(damager.getUniqueId(), entity);
-                    OddJob.getInstance().getMessageManager().success("Entity secure!", damager.getUniqueId(), true);
+                    OddJob.getInstance().getMessageManager().lockEntityLock(damager);
                     OddJob.getInstance().getLockManager().remove(damager.getUniqueId());
                     event.setCancelled(true);
                 }

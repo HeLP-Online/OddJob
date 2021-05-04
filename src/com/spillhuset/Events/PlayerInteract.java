@@ -81,7 +81,8 @@ public class PlayerInteract implements Listener {
                         // InfoWand in hand
                         if (OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
                             if (OddJob.getInstance().getPlayerManager().getName(uuid) != null)
-                                OddJob.getInstance().getMessageManager().info("The " + block.getType().name() + " is owned by " + OddJob.getInstance().getPlayerManager().getName(uuid), player, false);
+
+                                OddJob.getInstance().getMessageManager().lockBlockOwned(block.getType().name(),OddJob.getInstance().getPlayerManager().getName(uuid), player);
                             event.setCancelled(true);
                             return;
                         }
@@ -90,7 +91,7 @@ public class PlayerInteract implements Listener {
                         // UnlockWand in hand
                         if (OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().unlockWand)) {
                             if (!uuid.equals(player.getUniqueId())) {
-                                OddJob.getInstance().getMessageManager().danger("A lock is set by someone else.", player, false);
+                                OddJob.getInstance().getMessageManager().lockSomeoneElse(player);
                                 event.setCancelled(true);
                                 return;
                             }
@@ -98,7 +99,7 @@ public class PlayerInteract implements Listener {
                             // Unlocking
                             OddJob.getInstance().getLockManager().unlock(block.getLocation());
                             OddJob.getInstance().getLockManager().remove(player.getUniqueId());
-                            OddJob.getInstance().getMessageManager().warning("Unlocked " + ChatColor.GOLD + block.getType().name(), player, true);
+                            OddJob.getInstance().getMessageManager().lockUnlocked(block.getType().name(),player);
                             event.setCancelled(true);
                             return;
                         }
@@ -121,7 +122,7 @@ public class PlayerInteract implements Listener {
                             player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
                             event.setCancelled(true);
                         }
-                        OddJob.getInstance().getMessageManager().danger("! " + ChatColor.RESET + "Lock opened by the SkeletonKey", player, true);
+                        OddJob.getInstance().getMessageManager().lockSkeletonOpen(player);
                         return;
                     }
 
@@ -141,7 +142,7 @@ public class PlayerInteract implements Listener {
                         }
                     }
 
-                    OddJob.getInstance().getMessageManager().danger("This block is locked by someone else.", player, false);
+                    OddJob.getInstance().getMessageManager().lockOwned(player);
                     event.setCancelled(true);
 
                 }
@@ -152,12 +153,12 @@ public class PlayerInteract implements Listener {
                     if (OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
                         OddJob.getInstance().getMessageManager().console("Locking");
                         if (uuid == player.getUniqueId()) {
-                            OddJob.getInstance().getMessageManager().warning("You have already locked this.", player, false);
+                            OddJob.getInstance().getMessageManager().lockAlreadyBlock(player);
                             event.setCancelled(true);
                             return;
                         }
                         if (uuid != null) {
-                            OddJob.getInstance().getMessageManager().danger("A lock is already set on this.", player, false);
+                            OddJob.getInstance().getMessageManager().lockAlreadyEntity(player);
                             event.setCancelled(true);
                             return;
                         }
@@ -165,7 +166,7 @@ public class PlayerInteract implements Listener {
                         // Locking
                         OddJob.getInstance().getLockManager().lock(player.getUniqueId(), block.getLocation());
                         OddJob.getInstance().getLockManager().remove(player.getUniqueId());
-                        OddJob.getInstance().getMessageManager().success("Locked " + ChatColor.GOLD + block.getType().name(), player, true);
+                        OddJob.getInstance().getMessageManager().lockBlockLocked(block.getType().name(),player);
                         event.setCancelled(true);
                         return;
                     }
@@ -201,7 +202,7 @@ public class PlayerInteract implements Listener {
                                 player.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
                                 event.setCancelled(true);
                             }
-                            OddJob.getInstance().getMessageManager().danger("! " + ChatColor.RESET + "Lock opened by the SkeletonKey", player, true);
+                            OddJob.getInstance().getMessageManager().lockSkeletonOpen(player);
                             return;
                         } else if (player.getInventory().getItemInOffHand().getType().equals(Material.TRIPWIRE_HOOK)) {
                             // Has a key in offhand
@@ -211,7 +212,7 @@ public class PlayerInteract implements Listener {
                                 return;
                             }
                         }
-                        OddJob.getInstance().getMessageManager().warning("Block is locked by the guild " + ChatColor.GOLD + OddJob.getInstance().getGuildManager().getGuildNameByUUID(blockGuild), player, false);
+                        OddJob.getInstance().getMessageManager().lockGuild(OddJob.getInstance().getGuildManager().getGuildNameByUUID(blockGuild), player);
                         event.setCancelled(true);
                     }
                 }

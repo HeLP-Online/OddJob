@@ -81,20 +81,20 @@ public class DeathManager {
                     public void run() {
                         if (i == 1200) {
                             if (player.isOnline())
-                                OddJob.getInstance().getMessageManager().info("Sorry to hear about your death. Your spirit will disappear in " + ChatColor.WHITE + "20" + ChatColor.RESET + " min, if you don't get it!", player, true);
+                                OddJob.getInstance().getMessageManager().death1200(player);
                         } else if (i == 600) {
                             if (player.isOnline())
-                                OddJob.getInstance().getMessageManager().info("Spirit disappearing in " + ChatColor.WHITE + "10" + ChatColor.RESET + " min.", player, false);
+                                OddJob.getInstance().getMessageManager().death600(player);
                         } else if (i == 60) {
                             if (player.isOnline())
-                                OddJob.getInstance().getMessageManager().info("Spirit disappearing in " + ChatColor.WHITE + "1" + ChatColor.RESET + " min.", player, false);
+                                OddJob.getInstance().getMessageManager().death60(player);
                         } else if (i < 10 && i > 0) {
                             if (player.isOnline())
-                                OddJob.getInstance().getMessageManager().danger("Spirit disappearing in " + ChatColor.WHITE + i + ChatColor.RESET + " sec.", player, false);
+                                OddJob.getInstance().getMessageManager().death10(i,player);
                         } else if (i < 1) {
                             OddJob.getInstance().getDeathManager().replace(entity, null);
                             if (player.isOnline())
-                                OddJob.getInstance().getMessageManager().danger("All your items is gone, sorry.", player, true);
+                                OddJob.getInstance().getMessageManager().death0(player);
                             cancel();
                         }
                         i--;
@@ -117,11 +117,11 @@ public class DeathManager {
             // Finders keepers
             Player player = Bukkit.getPlayer(ownerOfArmor);
             if (findingPlayer != null && player != null && player.isOnline())
-                OddJob.getInstance().getMessageManager().danger("Somebody found your spirit.", ownerOfArmor, false);
+                OddJob.getInstance().getMessageManager().spiritFoundSomeone(ownerOfArmor);
             if (findingPlayer != null)
-                OddJob.getInstance().getMessageManager().console(ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(findingPlayer) + ChatColor.RESET + " found the spirit of " + ChatColor.AQUA + OddJob.getInstance().getPlayerManager().getName(ownerOfArmor));
+                OddJob.getInstance().getMessageManager().spiritFound(OddJob.getInstance().getPlayerManager().getName(findingPlayer),OddJob.getInstance().getPlayerManager().getName(ownerOfArmor));
         } else {
-            OddJob.getInstance().getMessageManager().success("You got lucky this time", ownerOfArmor, true);
+            OddJob.getInstance().getMessageManager().spiritFoundSelf(findingPlayer);
         }
 
         // Continue to remove()

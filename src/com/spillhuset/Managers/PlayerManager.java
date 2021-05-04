@@ -1,6 +1,7 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
+import com.spillhuset.SQL.PlayerSQL;
 import com.spillhuset.Utils.Odd.OddPlayer;
 import net.minecraft.server.v1_16_R3.IChatBaseComponent;
 import net.minecraft.server.v1_16_R3.PacketPlayOutTitle;
@@ -70,7 +71,7 @@ public class PlayerManager {
         if (oddDestination.getBlacklist().contains(moving)) {
             request = false;
         } else if (oddDestination.getDenyTpa()) {
-            OddJob.getInstance().getMessageManager().warning(getName(destination) + " is denying all request!", moving, false);
+            OddJob.getInstance().getMessageManager().playerDenying(getName(destination), moving);
             request = false;
         }
         return !request;
@@ -229,5 +230,12 @@ public class PlayerManager {
         trade.setItem(17, button);
 
         return trade;
+    }
+
+    public void loadPlayer(UUID uuid) {
+        OddPlayer oddPlayer = PlayerSQL.load(uuid);
+        if (oddPlayer != null) {
+            players.put(uuid, oddPlayer);
+        }
     }
 }
