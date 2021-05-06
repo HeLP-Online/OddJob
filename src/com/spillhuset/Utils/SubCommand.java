@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import java.util.List;
 
 public abstract class SubCommand {
+    public abstract Plugin getPlugin();
 
     public abstract String getName();
 
@@ -32,12 +33,12 @@ public abstract class SubCommand {
         if (max != 0 && args.length > max) {
             OddJob.getInstance().getMessageManager().errorTooManyArgs(type, sender);
             OddJob.getInstance().getMessageManager().sendSyntax(type, getSyntax(), sender);
-            return false;
+            return true;
         } else if (args.length < min) {
             OddJob.getInstance().getMessageManager().errorMissingArgs(type, sender);
             OddJob.getInstance().getMessageManager().sendSyntax(type, getSyntax(), sender);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 }

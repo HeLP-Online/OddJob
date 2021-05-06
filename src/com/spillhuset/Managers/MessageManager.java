@@ -1,7 +1,6 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Account;
 import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Guild;
@@ -201,7 +200,7 @@ public class MessageManager {
         warning(type(Plugin.shop), cWarning + "Insufficient number of items.", player, false);
     }
 
-    public void insufficientFunds(Player player) {
+    public void insufficientFunds(CommandSender player) {
         player.sendMessage(tCurrency + cWarning + " Insufficient funds.");
     }
 
@@ -558,15 +557,15 @@ public class MessageManager {
         warning(type(type), "syntax: " + syntax, sender, false);
     }
 
-    public void currencySuccessSet(String target, String amount, CommandSender sender, Account account) {
+    public void currencySuccessSet(String target, String amount, CommandSender sender, Currency account) {
         success(type(Plugin.currency), "You have sucessfully set " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + " to " + cValue + amount, sender, true);
     }
 
-    public void currencySuccessAdded(String target, String amount, double balance, CommandSender sender, Account account) {
-        success(type(Plugin.currency), "You have successfully added " + cValue + amount + cSuccess + " to " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender, true);
+    public void currencySuccessAdded(String target, String amount, double balance, CommandSender sender, Currency account) {
+        success(type(Plugin.currency), "You have successfully added " + cValue + amount + cSuccess + " to " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender,false);
     }
 
-    public void currencySuccessSubtracted(String target, String amount, double balance, CommandSender sender, Account account) {
+    public void currencySuccessSubtracted(String target, String amount, double balance, CommandSender sender, Currency account) {
         success(type(Plugin.currency), "You have successfully subtracted " + cValue + amount + cSuccess + " from " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender, true);
     }
 
@@ -587,12 +586,14 @@ public class MessageManager {
         // ---------------------------
         // 1. <player> : <reason>
         info(type(Plugin.ban), "There are " + cValue + bans.size() + cInfo + " players banned", sender, false);
-        info(null, "----------------------------------", sender, false);
-        int i = 0;
-        for (OddPlayer name : bans.keySet()) {
-            i++;
-            String reason = bans.get(name);
-            info(null, cValue + "" + i + cInfo + ". " + cPlayer + name.getName() + cInfo + " : " + cValue + reason, sender, false);
+        if (bans.size() > 0) {
+            info(type(Plugin.ban), "----------------------------------", sender, false);
+            int i = 0;
+            for (OddPlayer name : bans.keySet()) {
+                i++;
+                String reason = bans.get(name);
+                info(type(Plugin.ban), cValue + "" + i + cInfo + ". " + cPlayer + name.getName() + cInfo + " : " + cValue + reason, sender, false);
+            }
         }
     }
 
@@ -658,8 +659,12 @@ public class MessageManager {
         success(type(Plugin.warp), "Successfully changed warp name from " + cWarp + oldName + cSuccess + " to " + cWarp + newName, sender, true);
     }
 
-    public void currencyChanged(Currency type, double pocketBalance, UUID uuid) {
-        info(type(Plugin.currency), " changed value of " + cCurrency + type.name() + cInfo + " to " + cValue + pocketBalance, uuid);
+    public void currencyChanged(Currency type, double cost, double pocketBalance, UUID uuid, CommandSender sender) {
+        if (sender == null) {
+            info(type(Plugin.currency), "Subtracted " + cCurrency + cost + cInfo + " from your " + cValue + type.name() + cInfo + ", new balance is " + cValue + pocketBalance, uuid);
+        }else {
+            info(type(Plugin.currency), "Subtracted " + cCurrency + cost + cInfo + " from "+cPlayer+Bukkit.getPlayer(uuid).getName()+cInfo+"`s " + cValue + type.name() + cInfo + ", new balance is " + cValue + pocketBalance, uuid);
+        }
     }
 
 
@@ -757,7 +762,7 @@ public class MessageManager {
     }
 
     public void feedPlayer(String name, CommandSender commandSender) {
-        success(type(Plugin.feed), name + " has been feed.", commandSender, true);
+        success(type(Plugin.feed), name + " has been feed.", commandSender, false);
     }
 
     public void feedTarget(UUID uniqueId) {
@@ -1040,5 +1045,13 @@ public class MessageManager {
 
     public void lockOpened(String displayName, Player player) {
         success(type(Plugin.lock),"Lock opened with key: " + displayName, player, true);
+    }
+
+    public void errorScoreboard(CommandSender sender) {
+        danger(type(Plugin.player),"Something went wrong!",sender,false);
+    }
+
+    public void cannotIdentify(String name, String account, Plugin type, CommandSender sender) {
+        warning(type(type),"We can't find "+cValue+name+cWarning+" as "+cValue+account,sender,false);
     }
 }

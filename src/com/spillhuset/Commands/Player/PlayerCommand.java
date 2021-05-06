@@ -1,39 +1,40 @@
-package com.spillhuset.Commands.Ban;
+package com.spillhuset.Commands.Player;
 
+import com.spillhuset.Commands.CommandCompleter;
+import com.spillhuset.Commands.Player.Set.PlayerSetCommand;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
-import com.spillhuset.Utils.SubCommandInterface;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BanCommand implements CommandExecutor, TabCompleter, SubCommandInterface {
+public class PlayerCommand extends CommandCompleter implements CommandExecutor, TabCompleter {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public BanCommand() {
-        subCommands.add(new BanAddCommand());
-        subCommands.add(new BanListCommand());
-        subCommands.add(new BanRemoveCommand());
+    public PlayerCommand() {
+        subCommands.add(new PlayerSetCommand());
+        //subCommands.add(new PlayerWhitelistCommand());
+        //subCommands.add(new PlayerBlacklistCommand());
     }
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         StringBuilder nameBuilder = new StringBuilder();
-        for (SubCommand subCommand : subCommands) {
-            String name = subCommand.getName();
-            if (name.equalsIgnoreCase(args[0])) {
-                subCommand.perform(sender, args);
+        for (SubCommand subcommand : subCommands) {
+            String name = subcommand.getName();
+            if (args.length >= 1 && name.equalsIgnoreCase(args[0])) {
+                subcommand.perform(sender, args);
                 return true;
             }
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.ban, nameBuilder.toString(), sender);
+        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player,nameBuilder.toString(), sender);
         return true;
     }
 
@@ -44,7 +45,7 @@ public class BanCommand implements CommandExecutor, TabCompleter, SubCommandInte
             String name = subCommand.getName();
             if (args[0].isEmpty()) {
                 list.add(name);
-            } else if (name.equalsIgnoreCase(args[0]) && args.length > 11) {
+            } else if (name.equalsIgnoreCase(args[0]) && args.length > 1) {
                 return subCommand.getTab(sender, args);
             } else if (name.startsWith(args[0])) {
                 list.add(name);
@@ -52,5 +53,9 @@ public class BanCommand implements CommandExecutor, TabCompleter, SubCommandInte
         }
         return list;
     }
-}
 
+    @Override
+    public String getSyntax() {
+        return null;
+    }
+}

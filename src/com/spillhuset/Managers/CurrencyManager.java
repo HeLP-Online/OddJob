@@ -3,7 +3,7 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.CurrencySQL;
 import com.spillhuset.Utils.Enum.Currency;
-import com.spillhuset.Utils.Enum.Message;
+import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -13,13 +13,13 @@ public class CurrencyManager {
     private final HashMap<UUID, Double> guildBank = new HashMap<>();
     private final HashMap<UUID, Double> pocket = new HashMap<>();
 
-    public void setBankBalance(UUID uuid, double amount, boolean guild) {
-        if (guild) {
+    public void setBankBalance(UUID uuid, double amount, Currency account) {
+        if (account.equals(Currency.bank_guild)) {
             guildBank.put(uuid, amount);
         } else {
             playerBank.put(uuid, amount);
         }
-        //OddJob.getInstance().getMySQLManager().econSet(uuid,amount, Econ.BANK);
+        CurrencySQL.setBalance(uuid, amount, account);
     }
 
     public void setPocketBalance(UUID uuid, double amount) {
@@ -27,9 +27,10 @@ public class CurrencyManager {
         //OddJob.getInstance().getMySQLManager().econSet(uuid,amount, Econ.POCKET);
     }
 
-    public double getBankBalance(UUID uuid, boolean guild) {
-        if (guild) {
-            if (!hasBankAccount(uuid, true)) createAccounts(uuid, 200D, true);
+    public double getBankBalance(UUID uuid, Currency account) {
+        if (account.equals(Currency.bank_guild)) {
+            if (!hasBankAccount(uuid, Currency.bank_guild))
+                createAccounts(uuid, ConfigManager.getCurrencyInitialGuild(), account);
             return guildBank.get(uuid);
         } else {
             return playerBank.get(uuid);
@@ -40,8 +41,8 @@ public class CurrencyManager {
         return pocket.get(player);
     }
 
-    public boolean hasBankAccount(UUID uuid, boolean guild) {
-        if (guild) {
+    public boolean hasBankAccount(UUID uuid, Currency account) {
+        if (account.equals(Currency.bank_guild)) {
             return guildBank.containsKey(uuid);
         } else {
             return playerBank.containsKey(uuid);
@@ -52,35 +53,46 @@ public class CurrencyManager {
         return pocket.containsKey(player);
     }
 
-    public void subtractBankBalance(UUID uuid, double cost, boolean guild) {
-        setBankBalance(uuid, getBankBalance(uuid, guild) - cost, guild);
+    public boolean subtractBankBalance(UUID uuid, double cost, boolean negative, Currency account) {
+        if (!negative || getBankBalance(uuid, account) > cost) {
+            setBankBalance(uuid, getBankBalance(uuid, account) - cost, account);
+            return true;
+        }
+        return false;
     }
 
-    public void subtractPocketBalance(UUID uuid, double cost) {
-        setPocketBalance(uuid, getPocketBalance(uuid) - cost);
-        OddJob.getInstance().getMessageManager().currencyChanged(Currency.pocket,getPocketBalance(uuid), uuid);
+    public boolean subtractPocketBalance(UUID uuid, double cost, boolean negative, CommandSender sender) {
+        if (!negative || getPocketBalance(uuid) > cost) {
+            setPocketBalance(uuid, getPocketBalance(uuid) - cost);
+            return true;
+        }
+        return false;
     }
 
     public Double cost(String name) {
         return OddJob.getInstance().getConfig().getDouble("econ.cost." + name, 0.0);
     }
 
-    public void createAccounts(UUID uuid, double startValue, boolean guild) {
-        createBankAccount(uuid, startValue, guild);
-        if (!guild) createPocket(uuid, startValue);
-        OddJob.getInstance().getMySQLManager().createEconAccount(uuid, startValue, guild);
+    public void createAccounts(UUID uuid, double startValue, Currency account) {
+        createBankAccount(uuid, startValue, account);
+        if (!account.equals(Currency.bank_guild)) createPocket(uuid, startValue);
+        CurrencySQL.createAccount(uuid, startValue, account);
     }
 
     public void createPocket(UUID uuid, double startValue) {
         setPocketBalance(uuid, startValue);
     }
 
-    public void createBankAccount(UUID uuid, double startValue, boolean guild) {
+    public void createBankAccount(UUID uuid, double startValue, Currency guild) {
         setBankBalance(uuid, startValue, guild);
     }
 
-    public void addBankBalance(UUID uuid, Double cost, boolean guild) {
-        setBankBalance(uuid, getBankBalance(uuid, guild) + cost, guild);
+    public void addBankBalance(UUID uuid, Double cost, CommandSender sender, Currency account) {
+        double bankBalance = getBankBalance(uuid, account);
+        setBankBalance(uuid, bankBalance + cost, account);
+        String name = (account.equals(Currency.bank_guild)) ? OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid) : OddJob.getInstance().getPlayerManager().getName(uuid);
+        OddJob.getInstance().getMessageManager().currencySuccessAdded(name, String.valueOf(cost), bankBalance, sender, account);
+
     }
 
     public void addPocketBalance(UUID player, double cost) {

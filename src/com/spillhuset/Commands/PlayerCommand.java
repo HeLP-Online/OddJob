@@ -114,8 +114,6 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                 }
             } else if (args[0].equalsIgnoreCase("save")) {
                 OddJob.getInstance().getPlayerManager().save();
-            } else if (args[0].equalsIgnoreCase("load")) {
-                OddJob.getInstance().getPlayerManager().load();
             }
         }
         return true;

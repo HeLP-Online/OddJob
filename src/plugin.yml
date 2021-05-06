@@ -125,7 +125,15 @@ commands:
     usage: /<command>
   sudo:
     usage: /<command> <player> <command_to_execute>
+  op:
+    usage: /<command> <player>
+  deop:
+    usage: /<command> <player>
 permissions:
+  essentials.op:
+    default: false
+  essentials.deop:
+    default: true
   essentials.spawnmob:
     default: op
   essentials.death:
@@ -193,12 +201,12 @@ permissions:
     default: op
   locks.show:
     default: true
-  essentials.warp:
+  warp:
     default: true
     children:
-      essentials.warp.set:
+      warp.set:
         default: op
-      essentials.warp.del:
+      warp.del:
         default: op
-      essentials.warp.tp:
+      warp.tp:
         default: true

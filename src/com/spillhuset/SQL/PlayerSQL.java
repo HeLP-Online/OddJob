@@ -1,10 +1,8 @@
 package com.spillhuset.SQL;
 
 import com.spillhuset.Managers.MySQLManager;
-import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Odd.OddPlayer;
-import org.bukkit.scoreboard.Scoreboard;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,25 +13,27 @@ public class PlayerSQL extends MySQLManager {
     public static OddPlayer load(UUID uuid) {
         List<UUID> blacklist = new ArrayList<>();
         List<UUID> whitelist = new ArrayList<>();
-        boolean denyTpa,denyTrade;
-        String name,banned;
+        boolean denyTpa, denyTrade;
+        String name, banned;
         ScoreBoard scoreboard;
         OddPlayer oddPlayer = null;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `"+prefix+"_players` WHERE `uuid` = ?");
-            preparedStatement.setString(1,uuid.toString());
+            preparedStatement = connection.prepareStatement("SELECT * FROM `" + prefix + "players` WHERE `uuid` = ?");
+            preparedStatement.setString(1, uuid.toString());
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                for (String string:resultSet.getString("blacklist").split(";")) {
-                    blacklist.add(UUID.fromString(string));
+                if (!resultSet.getString("blacklist").equals("")) {
+                    for (String string : resultSet.getString("blacklist").split(";")) {
+                        blacklist.add(UUID.fromString(string));
+                    }
                 }
-
-                for (String string:resultSet.getString("whitelist").split(";")) {
-                    whitelist.add(UUID.fromString(string));
+                if (!resultSet.getString("whitelist").equals("")) {
+                    for (String string : resultSet.getString("whitelist").split(";")) {
+                        whitelist.add(UUID.fromString(string));
+                    }
                 }
-
                 denyTpa = resultSet.getBoolean("denytpa");
                 denyTrade = resultSet.getBoolean("denytrade");
 
@@ -42,11 +42,11 @@ public class PlayerSQL extends MySQLManager {
 
                 scoreboard = ScoreBoard.valueOf(resultSet.getString("scoreboard"));
 
-                oddPlayer = new OddPlayer(uuid,blacklist,whitelist,denyTpa,name,banned,scoreboard,denyTrade);
+                oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             close();
         }
         return oddPlayer;

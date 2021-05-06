@@ -97,7 +97,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
         OddJob.getInstance().getMessageManager().infoArgs(Plugin.guild,nameBuilder.toString(), sender);
-        return false;
+        return true;
     }
 
     @Override

@@ -10,10 +10,11 @@ import java.util.ArrayList;
 
 public class ConfigManager {
     public FileConfiguration scoreboard, messages, signs;
+    public static FileConfiguration config;
 
     public static void load() {
         OddJob.getInstance().reloadConfig();
-        FileConfiguration config = OddJob.getInstance().getConfig();
+        config = OddJob.getInstance().getConfig();
 
         try {
             config.addDefault("Map.Address", "http://" + InetAddress.getLocalHost().getHostAddress() + ":8123");
@@ -55,5 +56,9 @@ public class ConfigManager {
         config.options().copyDefaults(true);
         OddJob.getInstance().saveConfig();
 
+    }
+
+    public static double getCurrencyInitialGuild() {
+        return config.getDouble("currency.initial.guild",200D);
     }
 }

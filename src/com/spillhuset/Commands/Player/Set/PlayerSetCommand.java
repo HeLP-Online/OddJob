@@ -1,58 +1,52 @@
-package com.spillhuset.Commands.Currency.Bank;
-import com.spillhuset.Commands.Currency.Pocket.PocketAddCommand;
-import com.spillhuset.Commands.Currency.Pocket.PocketSetCommand;
-import com.spillhuset.Commands.Currency.Pocket.PocketSubCommand;
+package com.spillhuset.Commands.Player.Set;
+import com.spillhuset.OddJob;
+import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BankCommand extends SubCommand {
+public class PlayerSetCommand extends SubCommand {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public BankCommand() {
-        subCommands.add(new BankAddCommand());
-        subCommands.add(new BankDelCommand());
-        subCommands.add(new BankSetCommand());
-        subCommands.add(new BankInvestCommand());
-        subCommands.add(new BankDepositCommand());
-        subCommands.add(new BankWithdrawCommand());
+    public PlayerSetCommand(){
+        subCommands.add(new PlayerSetScoreboardCommand());
     }
     @Override
     public String getName() {
-        return "bank";
+        return "set";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Players 'set' menu";
     }
 
     @Override
     public String getSyntax() {
-        return null;
+        return "/player set ...";
     }
 
     @Override
     public String getPermission() {
-        return null;
+        return "";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        // SubCommands
         StringBuilder nameBuilder = new StringBuilder();
-        for (SubCommand subCommand : subCommands) {
-            String name = subCommand.getName();
-            if (args.length >= 2) {
-                if (name.equalsIgnoreCase(args[1])) {
-                    subCommand.perform(sender, args);
-                    return;
-                }
+        for (SubCommand subcommand : subCommands) {
+            String name = subcommand.getName();
+            if (args.length >= 2 && name.equalsIgnoreCase(args[1])) {
+                subcommand.perform(sender, args);
+                return ;
             }
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
+        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player,nameBuilder.toString(), sender);
     }
 
     @Override

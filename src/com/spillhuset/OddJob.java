@@ -1,10 +1,12 @@
 package com.spillhuset;
 
+
 import com.spillhuset.Commands.*;
 import com.spillhuset.Commands.Ban.BanCommand;
 import com.spillhuset.Commands.Currency.CurrencyCommand;
 import com.spillhuset.Commands.Guild.GuildCommand;
 import com.spillhuset.Commands.Homes.HomesCommand;
+import com.spillhuset.Commands.Player.PlayerCommand;
 import com.spillhuset.Commands.Trade.TradeCommand;
 import com.spillhuset.Commands.Warp.WarpCommand;
 import com.spillhuset.Events.*;
@@ -109,7 +111,6 @@ public class OddJob extends JavaPlugin {
         currencyManager.load();
         lockManager.load();
         homesManager.load();
-        playerManager.load();
         guildManager.load();
         warpManager.load();
         worldManager.load();

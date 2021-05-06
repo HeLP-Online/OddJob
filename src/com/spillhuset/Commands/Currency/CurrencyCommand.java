@@ -3,6 +3,7 @@ package com.spillhuset.Commands.Currency;
 import com.spillhuset.Commands.Currency.Bank.BankCommand;
 import com.spillhuset.Commands.Currency.Pocket.PocketCommand;
 import com.spillhuset.OddJob;
+import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import com.spillhuset.Utils.SubCommandInterface;
@@ -29,7 +30,7 @@ public class CurrencyCommand implements CommandExecutor, TabCompleter, SubComman
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (!(sender instanceof Player)) {
             if (args.length == 0) {
-                OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.currency,sender);
+                OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.currency, sender);
                 return true;
             } else if (args[0].equalsIgnoreCase("save")) {
                 OddJob.getInstance().getCurrencyManager().save();
@@ -44,7 +45,7 @@ public class CurrencyCommand implements CommandExecutor, TabCompleter, SubComman
         if (args.length == 0) {
             uuid = ((Player) sender).getUniqueId();
             pocket = OddJob.getInstance().getCurrencyManager().getPocketBalance(uuid);
-            bank = OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, false);
+            bank = OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.bank_player);
             OddJob.getInstance().getMessageManager().infoCurrencyBalance(uuid, pocket, bank);
             return true;
         }

@@ -33,6 +33,10 @@ public class BanRemoveCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        if (checkArgs(2,2,args,sender,Plugin.ban)) {
+            return;
+        }
+
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
         if (target == null) {
             OddJob.getInstance().getMessageManager().errorPlayer(Plugin.ban, args[1], sender);

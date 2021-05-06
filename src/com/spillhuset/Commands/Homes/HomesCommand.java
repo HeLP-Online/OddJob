@@ -103,11 +103,11 @@ public class HomesCommand implements CommandExecutor, TabCompleter, SubCommandIn
 
         // Listing SubCommands
         if (args.length >= 1) {
-            for (int i = 0; i < subCommands.size(); i++) {
-                if (subCommands.get(i).getName().equalsIgnoreCase(args[0])) {
-                    return list = subCommands.get(i).getTab(sender, args);
+            for (SubCommand subCommand : subCommands) {
+                if (subCommand.getName().equalsIgnoreCase(args[0])) {
+                    return list = subCommand.getTab(sender, args);
                 }
-                list.add(subCommands.get(i).getName());
+                list.add(subCommand.getName());
             }
         }
 

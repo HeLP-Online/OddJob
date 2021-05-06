@@ -38,7 +38,7 @@ public class BanAddCommand extends SubCommand {
             OddJob.getInstance().getMessageManager().errorPlayer(Plugin.ban, args[1], sender);
             return;
         }
-        if (!checkArgs(2, 0, args, sender, Plugin.ban)) {
+        if (checkArgs(2, 0, args, sender, Plugin.ban)) {
             return;
         }
         String ban = OddJob.getInstance().getBanManager().getBan(target);

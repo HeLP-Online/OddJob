@@ -7,7 +7,7 @@ import java.util.List;
 public class BankWithdrawCommand extends com.spillhuset.Utils.SubCommand {
     @Override
     public String getName() {
-        return null;
+        return "withdraw";
     }
 
     @Override

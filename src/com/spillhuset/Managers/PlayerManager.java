@@ -35,11 +35,7 @@ public class PlayerManager {
     }
 
     public void save() {
-        OddJob.getInstance().getMySQLManager().savePlayers(players);
-    }
-
-    public void load() {
-        players = OddJob.getInstance().getMySQLManager().loadPlayers();
+        //TODO PlayerSQL.save();
     }
 
     public String getName(UUID uuid) {

@@ -55,10 +55,6 @@ public class PocketCommand extends SubCommand {
 
         // /currency pocket
 
-        OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.currency,sender);
-        OddJob.getInstance().getMessageManager().sendSyntax(Plugin.warp, getSyntax(), sender);
-
-
         sender.sendMessage(ChatColor.GOLD + "args: " + ChatColor.RESET + nameBuilder.toString());
     }
 

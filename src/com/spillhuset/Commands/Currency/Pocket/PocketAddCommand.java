@@ -1,7 +1,7 @@
 package com.spillhuset.Commands.Currency.Pocket;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Account;
+import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
@@ -51,7 +51,7 @@ public class PocketAddCommand extends SubCommand {
         }
         OddJob.getInstance().getCurrencyManager().addPocketBalance(target, amount);
         double balance = OddJob.getInstance().getCurrencyManager().getPocketBalance(target);
-        OddJob.getInstance().getMessageManager().currencySuccessAdded(args[2], args[3], balance, sender, Account.POCKET);
+        OddJob.getInstance().getMessageManager().currencySuccessAdded(args[2], args[3], balance, sender, Currency.pocket);
     }
 
     @Override

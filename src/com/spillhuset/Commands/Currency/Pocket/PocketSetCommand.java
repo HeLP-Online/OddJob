@@ -1,7 +1,7 @@
 package com.spillhuset.Commands.Currency.Pocket;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Account;
+import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.ChatColor;
@@ -54,7 +54,7 @@ public class PocketSetCommand extends SubCommand {
         }
 
         OddJob.getInstance().getCurrencyManager().setPocketBalance(target, amount);
-        OddJob.getInstance().getMessageManager().currencySuccessSet(args[2], args[3], sender, Account.POCKET);
+        OddJob.getInstance().getMessageManager().currencySuccessSet(args[2], args[3], sender, Currency.pocket);
     }
 
     @Override
