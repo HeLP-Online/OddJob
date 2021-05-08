@@ -12,13 +12,33 @@ import org.bukkit.command.TabCompleter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BanCommand implements CommandExecutor, TabCompleter, SubCommandInterface {
+public class BanCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
     public BanCommand() {
         subCommands.add(new BanAddCommand());
         subCommands.add(new BanListCommand());
         subCommands.add(new BanRemoveCommand());
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.ban;
+    }
+
+    @Override
+    public String getPermission() {
+        return null;
     }
 
     @Override
@@ -33,7 +53,7 @@ public class BanCommand implements CommandExecutor, TabCompleter, SubCommandInte
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.ban, nameBuilder.toString(), sender);
+        OddJob.getInstance().getMessageManager().infoArgs(getPlugin(), nameBuilder.toString(), sender);
         return true;
     }
 

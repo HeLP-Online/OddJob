@@ -60,7 +60,7 @@ public class ShopCommand implements CommandExecutor {
                 Material material;
                 try {
                     material = Material.valueOf(strings[1]);
-                    OddJob.getInstance().getShopManager().buy(material, 1, player);
+                    OddJob.getInstance().getShopManager().buy(material, 1, player,commandSender);
                 } catch (Exception ex) {
                     OddJob.getInstance().getMessageManager().errorMaterial(Plugin.shop, strings[1], player);
                     return true;
@@ -72,7 +72,7 @@ public class ShopCommand implements CommandExecutor {
                 try {
                     amount = Integer.parseInt(strings[2]);
                     material = Material.valueOf(strings[1]);
-                    OddJob.getInstance().getShopManager().buy(material, amount, player);
+                    OddJob.getInstance().getShopManager().buy(material, amount, player,commandSender);
                 } catch (NumberFormatException e) {
                     OddJob.getInstance().getMessageManager().errorNumber(Plugin.shop,strings[2], player);
                     return true;

@@ -13,6 +13,21 @@ import java.util.UUID;
 
 public class PocketSetCommand extends SubCommand {
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.currency;
+    }
+
+    @Override
     public String getName() {
         return "set";
     }

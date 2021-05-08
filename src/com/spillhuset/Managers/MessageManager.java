@@ -3,6 +3,7 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Guild;
 import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.Warp;
@@ -97,8 +98,8 @@ public class MessageManager {
     }
 
     public void success(String type, String text, CommandSender sender, boolean console) {
-        sender.sendMessage(type + cSuccess + text);
         if (sender instanceof Player) {
+            sender.sendMessage(type + cSuccess + text);
             Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cSuccess + text);
         } else {
@@ -107,8 +108,8 @@ public class MessageManager {
     }
 
     public void warning(String type, String text, CommandSender sender, boolean console) {
-        sender.sendMessage(type + cWarning + text);
         if (sender instanceof Player) {
+            sender.sendMessage(type + cWarning + text);
             Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cWarning + text);
         } else {
@@ -117,8 +118,8 @@ public class MessageManager {
     }
 
     public void info(String type, String text, CommandSender sender, boolean console) {
-        sender.sendMessage(type + cInfo + text);
         if (sender instanceof Player) {
+            sender.sendMessage(type + cInfo + text);
             Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cInfo + text);
         } else {
@@ -127,8 +128,8 @@ public class MessageManager {
     }
 
     public void danger(String type, String text, CommandSender sender, boolean console) {
-        sender.sendMessage(type + cDanger + text);
         if (sender instanceof Player) {
+            sender.sendMessage(type + cDanger + text);
             Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cDanger + text);
         } else {
@@ -153,7 +154,7 @@ public class MessageManager {
     }
 
     public void errorConsole(Plugin type) {
-        console(type(type)+cDanger + "Only usable as a player");
+        console(type(type) + cDanger + "Only usable as a player");
     }
 
     public void errorMaterial(Plugin type, String string, Player player) {
@@ -303,7 +304,7 @@ public class MessageManager {
     }
 
     public void guildNotAssociated(Player uuid) {
-        warning(type(Plugin.guild), "You are not associated with any Guild yet.", uuid, false);
+        info(type(Plugin.guild), "You are not associated with any Guild yet.", uuid, false);
     }
 
 
@@ -533,7 +534,7 @@ public class MessageManager {
         success(type(Plugin.arena), "Area for Arena set!", player.getUniqueId(), false);
     }
 
-    public void errorHomeMaximal(Player player) {
+    public void errorHomeMaximal(CommandSender player) {
         danger(type(Plugin.home), "You have reached th maximal amout of homes.", player, false);
     }
 
@@ -562,7 +563,7 @@ public class MessageManager {
     }
 
     public void currencySuccessAdded(String target, String amount, double balance, CommandSender sender, Currency account) {
-        success(type(Plugin.currency), "You have successfully added " + cValue + amount + cSuccess + " to " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender,false);
+        success(type(Plugin.currency), "You have successfully added " + cValue + amount + cSuccess + " to " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender, false);
     }
 
     public void currencySuccessSubtracted(String target, String amount, double balance, CommandSender sender, Currency account) {
@@ -577,8 +578,8 @@ public class MessageManager {
         danger(type(Plugin.ban), "Player " + cValue + name + cDanger + " was never banned", sender, true);
     }
 
-    public void banAddedSuccess(String name, String text, CommandSender sender) {
-        success(type(Plugin.ban), "Player " + cPlayer + name + cSuccess + " was successfully banned with the text '" + cValue + text + cSuccess + "'", sender, true);
+    public void banAddedSuccess(String name, String text, String send, CommandSender sender) {
+        success(type(Plugin.ban), "Player " + cPlayer + name + cSuccess + " was successfully banned with the text '" + cValue + text + cSuccess + "' by " + cPlayer + send, sender, true);
     }
 
     public void banList(HashMap<OddPlayer, String> bans, CommandSender sender) {
@@ -611,7 +612,8 @@ public class MessageManager {
     }
 
     public void infoArgs(Plugin type, String args, CommandSender sender) {
-        warning(type(type), "Valid arguments are: " + cValue + args, sender, false);
+
+        warning(type(type), "Valid syntax are: " + cValue + args.replace(",",cWarning+","+cValue), sender, false);
     }
 
     public void saved(Plugin type, CommandSender sender) {
@@ -662,8 +664,8 @@ public class MessageManager {
     public void currencyChanged(Currency type, double cost, double pocketBalance, UUID uuid, CommandSender sender) {
         if (sender == null) {
             info(type(Plugin.currency), "Subtracted " + cCurrency + cost + cInfo + " from your " + cValue + type.name() + cInfo + ", new balance is " + cValue + pocketBalance, uuid);
-        }else {
-            info(type(Plugin.currency), "Subtracted " + cCurrency + cost + cInfo + " from "+cPlayer+Bukkit.getPlayer(uuid).getName()+cInfo+"`s " + cValue + type.name() + cInfo + ", new balance is " + cValue + pocketBalance, uuid);
+        } else {
+            info(type(Plugin.currency), "Subtracted " + cCurrency + cost + cInfo + " from " + cPlayer + Bukkit.getPlayer(uuid).getName() + cInfo + "`s " + cValue + type.name() + cInfo + ", new balance is " + cValue + pocketBalance, uuid);
         }
     }
 
@@ -915,7 +917,7 @@ public class MessageManager {
     }
 
     public void guildUnclaimed(int x, int z, Player player) {
-        success(type(Plugin.guild), "You have unclaimed X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld(), player, true);
+        success(type(Plugin.guild), "You have unclaimed X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName(), player, true);
     }
 
     public void guildNotClaimed(Player player) {
@@ -1032,26 +1034,57 @@ public class MessageManager {
     }
 
     public void playerDenying(String name, UUID player) {
-        warning(type(Plugin.player),name + " is denying all request!", player, false);
+        warning(type(Plugin.player), name + " is denying all request!", player, false);
     }
 
     public void lockNotCorrectPlayer(Player player) {
-        warning(type(Plugin.lock),"You don't have the correct Player-Key", player, false);
+        warning(type(Plugin.lock), "You don't have the correct Player-Key", player, false);
     }
 
     public void lockNotCorrectGuild(Player player) {
-        warning(type(Plugin.lock),"You don't have the correct Guild-Key", player, false);
+        warning(type(Plugin.lock), "You don't have the correct Guild-Key", player, false);
     }
 
     public void lockOpened(String displayName, Player player) {
-        success(type(Plugin.lock),"Lock opened with key: " + displayName, player, true);
+        success(type(Plugin.lock), "Lock opened with key: " + displayName, player, true);
     }
 
     public void errorScoreboard(CommandSender sender) {
-        danger(type(Plugin.player),"Something went wrong!",sender,false);
+        danger(type(Plugin.player), "Something went wrong!", sender, false);
     }
 
     public void cannotIdentify(String name, String account, Plugin type, CommandSender sender) {
-        warning(type(type),"We can't find "+cValue+name+cWarning+" as "+cValue+account,sender,false);
+        warning(type(type), "We can't find " + cValue + name + cWarning + " as " + cValue + account, sender, false);
+    }
+
+    public void guildMenu(String toString, String guildNameByUUID, Role guildMemberRole, CommandSender sender) {
+        info(type(Plugin.guild), "You are a " + cValue + guildMemberRole.name() + cInfo + " of " + cGuild + guildNameByUUID, sender, false);
+
+    }
+
+    public void homesCount(Set<String> list, int max, CommandSender sender) {
+        if(list == null) {
+            homesNotSet(sender);
+            return;
+        }
+        info(type(Plugin.home),"You have assigned "+cValue+list.size()+cInfo+" of "+cValue+max,sender,false);
+        info(type(Plugin.home),"------------------------------------",sender,false);
+        int i = 1;
+        for (String name : list) {
+            info(type(Plugin.home),i+") "+cValue+name,sender,false);
+            i++;
+        }
+    }
+
+    public void homesNotSet(CommandSender sender) {
+        warning(type(Plugin.home),"No home is set yet!",sender,false);
+    }
+
+    public void permissionDenied(Plugin type,CommandSender sender) {
+        danger(type(type),"Permission denied!",sender,false);
+    }
+
+    public void guildZoneError(String arg,Player player) {
+        danger(type(Plugin.guild),"Unknown zone "+cValue+arg,player,false);
     }
 }

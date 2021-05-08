@@ -1,6 +1,7 @@
 package com.spillhuset.Commands.Ban;
 
 import com.spillhuset.OddJob;
+import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
@@ -10,6 +11,21 @@ import java.util.List;
 import java.util.UUID;
 
 public class BanListCommand extends SubCommand {
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.ban;
+    }
+
     @Override
     public String getName() {
         return "list";

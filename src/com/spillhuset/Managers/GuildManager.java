@@ -87,11 +87,11 @@ public class GuildManager {
     public void loadGuilds() {
         guilds = GuildSQL.loadGuilds();
         if (guilds.size() == 0) {
-            create("WildZone",Zone.WILD,false,false);
-            create("SafeZone",Zone.SAFE,false,false);
-            create("JailZone",Zone.JAIL,false,false);
-            create("WarZone",Zone.WAR,false,false);
-            create("ArenaZone",Zone.ARENA,false,false);
+            create("WildZone", Zone.WILD, false, false);
+            create("SafeZone", Zone.SAFE, false, false);
+            create("JailZone", Zone.JAIL, false, false);
+            create("WarZone", Zone.WAR, false, false);
+            create("ArenaZone", Zone.ARENA, false, false);
             saveGuilds();
             loadGuilds();
         }
@@ -104,7 +104,7 @@ public class GuildManager {
      */
     public void loadChunks() {
         chunks.clear();
-        chunks = OddJob.getInstance().getMySQLManager().loadChunks();
+        chunks = GuildSQL.loadChunks();
         List<Chunk> rChunk = new ArrayList<>();
 
         int i = 0;
@@ -289,9 +289,9 @@ public class GuildManager {
         // Adds the Chunk to the Guild
         if (!chunks.containsKey(chunk)) {
             chunks.put(chunk, guild);
-            OddJob.getInstance().getMySQLManager().createGuildClaim(chunk,guild);
+            GuildSQL.createGuildClaim(chunk, guild);
             updateDynmapChunk(chunk);
-            OddJob.getInstance().getMessageManager().guildClaiming(chunk.getX(), chunk.getZ(), player,getGuildNameByUUID(guild));
+            OddJob.getInstance().getMessageManager().guildClaiming(chunk.getX(), chunk.getZ(), player, getGuildNameByUUID(guild));
         } else {
             OddJob.getInstance().getMessageManager().guildClaimed(player);
         }
@@ -309,7 +309,7 @@ public class GuildManager {
 
         if (chunkGuild != null && !chunkGuild.equals(getGuildUUIDByZone(Zone.WILD))) {
             // Chunk is already claimed by Guild
-            OddJob.getInstance().getMessageManager().guildOwnedBy(getGuildNameByUUID(getGuildUUIDByChunk(inChunk)),player);
+            OddJob.getInstance().getMessageManager().guildOwnedBy(getGuildNameByUUID(getGuildUUIDByChunk(inChunk)), player);
         } else {
             // Claiming Chunk to Guild
             claim(guild, inChunk, player);
@@ -344,7 +344,7 @@ public class GuildManager {
      */
     public void unClaim(@Nonnull Chunk chunk, Player player) {
         // UnClaim the Chunk
-        if (OddJob.getInstance().getMySQLManager().deleteGuildsChunks(chunk)) {
+        if (GuildSQL.deleteGuildsChunks(chunk)) {
             OddJob.getInstance().getGuildManager().chunks.remove(chunk);
             removeDynmapChunk(chunk);
             if (player != null)
@@ -417,16 +417,16 @@ public class GuildManager {
             if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
                 // Changing Zone to autoClaim for
                 autoClaim.put(player.getUniqueId(), guild);
-                OddJob.getInstance().getMessageManager().guildChangingZone(getGuildNameByUUID(guild),player);
+                OddJob.getInstance().getMessageManager().guildChangingZone(getGuildNameByUUID(guild), player);
             } else {
                 // Stops autoClaim
                 autoClaim.remove(player.getUniqueId());
-                OddJob.getInstance().getMessageManager().guildAutoOff(getGuildNameByUUID(guild),player);
+                OddJob.getInstance().getMessageManager().guildAutoOff(getGuildNameByUUID(guild), player);
             }
         } else {
             // Starts autoClaim
             autoClaim.put(player.getUniqueId(), guild);
-            OddJob.getInstance().getMessageManager().guildAutoOn(getGuildNameByUUID(guild),player);
+            OddJob.getInstance().getMessageManager().guildAutoOn(getGuildNameByUUID(guild), player);
         }
 
     }
@@ -821,7 +821,7 @@ public class GuildManager {
         for (Chunk chunk : chunkList) chunks.remove(chunk);
         chunkList.clear();
         guilds.remove(guild);
-        OddJob.getInstance().getMySQLManager().disbandGuild(guild);
+        GuildSQL.disbandGuild(guild);
     }
 
     public void changeGuildMaster(UUID target, UUID uuid) {
@@ -1094,5 +1094,14 @@ public class GuildManager {
     public void load() {
         loadChunks();
         loadGuilds();
+    }
+
+    public int getSumChunks(UUID guild) {
+
+        int i = 0;
+        for (UUID uuid : chunks.values()) {
+            if (uuid == guild) i++;
+        }
+        return i;
     }
 }

@@ -12,6 +12,21 @@ import java.util.UUID;
 
 public class GuildCreateCommand extends SubCommand {
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.guild;
+    }
+
+    @Override
     public String getName() {
         return "create";
     }
@@ -36,18 +51,12 @@ public class GuildCreateCommand extends SubCommand {
         // guild create <name>
         if (!(sender instanceof Player)) {
             // Sender is console
-            OddJob.getInstance().getMessageManager().errorConsole(Plugin.guild);
+            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
 
         UUID uuid = ((Player) sender).getUniqueId();
-        if (args.length < 2) {
-            // To few arguments
-            OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.guild, sender);
-            return;
-        } else if (args.length > 2) {
-            // To many arguments
-            OddJob.getInstance().getMessageManager().errorTooManyArgs(Plugin.guild, sender);
+        if (checkArgs(2,2,args,sender,getPlugin())) {
             return;
         }
 

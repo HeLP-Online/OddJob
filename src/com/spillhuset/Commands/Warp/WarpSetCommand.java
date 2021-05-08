@@ -4,6 +4,7 @@ import com.spillhuset.Commands.Warp.Set.WarpSetCost;
 import com.spillhuset.Commands.Warp.Set.WarpSetLocation;
 import com.spillhuset.Commands.Warp.Set.WarpSetName;
 import com.spillhuset.Commands.Warp.Set.WarpSetPasswd;
+import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -19,6 +20,21 @@ public class WarpSetCommand extends SubCommand {
         subCommands.add(new WarpSetCost());
         subCommands.add(new WarpSetPasswd());
         subCommands.add(new WarpSetName());
+    }
+
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.warp;
     }
 
     @Override

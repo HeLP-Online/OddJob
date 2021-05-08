@@ -17,8 +17,9 @@ public class OddPlayer {
     private String banned;
     private ScoreBoard scoreBoard;
     private boolean denyTrade;
+    private int maxHomes;
 
-    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean denyTpa, String name, String banned, ScoreBoard scoreBoard,boolean denyTrade) {
+    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean denyTpa, String name, String banned, ScoreBoard scoreBoard,boolean denyTrade,int maxHomes) {
         this.uuid = uuid;
         this.blacklist = blacklist;
         this.whitelist = whitelist;
@@ -27,6 +28,7 @@ public class OddPlayer {
         this.banned = banned;
         this.scoreBoard = scoreBoard;
         this.denyTrade = denyTrade;
+        this.maxHomes = maxHomes;
     }
 
     public UUID getUuid() {
@@ -91,6 +93,12 @@ public class OddPlayer {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(uuid);
+    }
+    public int getMaxHomes() {
+        return maxHomes;
+    }
+    public void setMaxHomes(int i){
+        maxHomes = i;
     }
 
     public void setScoreboard(ScoreBoard score) {

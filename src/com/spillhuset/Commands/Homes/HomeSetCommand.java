@@ -7,8 +7,25 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class HomeSetCommand extends SubCommand {
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.home;
+    }
+
     @Override
     public String getName() {
         return "set";
@@ -31,22 +48,39 @@ public class HomeSetCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        // homes set
+        // homes set <home>
         if (!(sender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(Plugin.home);
+            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
 
-        if (!(checkArgs(1,2,args,sender,Plugin.home))) {
+        if (checkArgs(1, 2, args, sender, getPlugin())) {
             return;
         }
 
-        Player player = (Player) sender;
+        String name = "home";
+        UUID target;
 
-        if (OddJob.getInstance().getHomesManager().getList(player.getUniqueId()).size() >= 5 && !player.hasPermission("homes.plenty")) {
-            OddJob.getInstance().getMessageManager().errorHomeMaximal(player);
-        } else if (args.length == 2 && player.hasPermission("homes")) {
-            OddJob.getInstance().getHomesManager().add(player.getUniqueId(), args[1], player.getLocation());
+        if (args.length == 2) {
+            target = ((Player) sender).getUniqueId();
+            name = args[1];
+        } else {
+            target = ((Player) sender).getUniqueId();
         }
+        OddJob.getInstance().log("Max: " + getMax(target));
+        Set<String> list = OddJob.getInstance().getHomesManager().getList(target);
+        if (list != null && list.size() >= getMax(target)) {
+            OddJob.getInstance().getMessageManager().errorHomeMaximal(sender);
+        }
+        OddJob.getInstance().getHomesManager().add(target, name, ((Player) sender).getLocation());
+
+    }
+
+    private int getMax(UUID target) {
+        int config = OddJob.getInstance().getConfig().getInt("homes.max", 5);
+        int player = OddJob.getInstance().getPlayerManager().getMaxHomes(target);
+        return config + player;
     }
 
     @Override

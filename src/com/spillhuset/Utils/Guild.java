@@ -16,6 +16,7 @@ public class Guild {
     Role permissionKick;
     private int chunks;
     boolean open;
+    private int maxClaims;
 
     /**
      * Creating a new Guild from the command
@@ -45,6 +46,7 @@ public class Guild {
         this.permissionKick = Role.Mods;
         this.members.put(playerUUID, role);
         this.open = false;
+        this.maxClaims = 0;
     }
 
     public Guild(
@@ -84,7 +86,8 @@ public class Guild {
             boolean open,
             Role permission_invite,
             Role permission_kick,
-            HashMap<UUID, Role> members) {
+            HashMap<UUID, Role> members,
+            int maxClaims) {
         this.guildUUID = guildUUID;
         this.name = name;
         this.zone = zone;
@@ -94,6 +97,7 @@ public class Guild {
         this.permissionInvite = permission_invite;
         this.members = members;
         this.open = open;
+        this.maxClaims = maxClaims;
     }
 
 
@@ -164,5 +168,9 @@ public class Guild {
 
     public Role getPermissionKick() {
         return permissionKick;
+    }
+
+    public int getMaxClaims() {
+        return maxClaims;
     }
 }

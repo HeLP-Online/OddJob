@@ -7,6 +7,7 @@ import net.minecraft.server.v1_16_R3.IChatBaseComponent;
 import net.minecraft.server.v1_16_R3.PacketPlayOutTitle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -233,5 +234,22 @@ public class PlayerManager {
         if (oddPlayer != null) {
             players.put(uuid, oddPlayer);
         }
+    }
+
+    public int getMaxHomes(UUID target) {
+        return players.get(target).getMaxHomes();
+    }
+
+    public void setMaxHomes(UUID target,int i) {
+        players.get(target).setMaxHomes(i);
+        save(target);
+    }
+
+    private void save(UUID target) {
+        PlayerSQL.save(players.get(target));
+    }
+
+    public void setGameMode(Player target, GameMode gm) {
+        target.setGameMode(gm);
     }
 }

@@ -3,10 +3,15 @@ package com.spillhuset.Utils;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public abstract class SubCommand {
+    public abstract boolean allowConsole();
+
+    public abstract boolean allowOp();
+
     public abstract Plugin getPlugin();
 
     public abstract String getName();
@@ -40,5 +45,19 @@ public abstract class SubCommand {
             return true;
         }
         return false;
+    }
+
+    public boolean can(CommandSender sender, boolean others) {
+        if (!(sender instanceof Player)) {
+            return allowConsole();
+        } else if (sender.isOp()) {
+            return allowOp();
+        } else {
+            if (others) {
+                return sender.hasPermission(getPermission() + ".others");
+            } else {
+                return sender.hasPermission(getPermission());
+            }
+        }
     }
 }

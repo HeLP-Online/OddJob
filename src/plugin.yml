@@ -140,8 +140,11 @@ permissions:
     default: op
   essentials.tpall:
     default: op
+  homes:
+    default: true
   homes.*:
     children:
+      homes: true
       homes.tp: true
       homes.tp.others: true
       homes.set: true

@@ -11,6 +11,21 @@ import java.util.List;
 
 public class TradeRequestCommand extends SubCommand {
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.tp;
+    }
+
+    @Override
     public String getName() {
         return "request";
     }

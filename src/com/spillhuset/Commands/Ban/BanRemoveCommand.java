@@ -12,6 +12,21 @@ import java.util.UUID;
 public class BanRemoveCommand extends SubCommand {
 
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.ban;
+    }
+
+    @Override
     public String getName() {
         return "remove";
     }
@@ -33,13 +48,15 @@ public class BanRemoveCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (checkArgs(2,2,args,sender,Plugin.ban)) {
+        // Check args
+        if (checkArgs(2,2,args,sender,getPlugin())) {
             return;
         }
 
+        // Check Player
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.ban, args[1], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[1], sender);
             return;
         }
 

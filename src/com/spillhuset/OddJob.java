@@ -106,6 +106,7 @@ public class OddJob extends JavaPlugin {
         getCommand("spawnmob").setExecutor(new SpawnMobCommand());
         getCommand("map").setExecutor(new MapCommand());
         getCommand("sudo").setExecutor(new SudoCommand());
+        getCommand("op").setExecutor(new OpCommand());
 
         ConfigManager.load(); // Checked
         currencyManager.load();

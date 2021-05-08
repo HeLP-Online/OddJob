@@ -4,14 +4,48 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public interface SubCommandInterface {
+public abstract class SubCommandInterface {
+    public abstract boolean allowOp();
+
+    public abstract boolean allowConsole();
+
+    public abstract Plugin getPlugin();
+
+    public abstract String getPermission();
+
     ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    boolean onCommand(CommandSender sender, Command command, String label, String[] args);
+    public abstract boolean onCommand(CommandSender sender, Command command, String label, String[] args);
 
-    List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args);
+    public abstract List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args);
+
+    public boolean can(CommandSender sender, boolean others) {
+        if (!(sender instanceof Player)) {
+            return allowConsole();
+        } else if (sender.isOp()) {
+            return allowOp();
+        } else {
+            if (others) {
+                return sender.hasPermission(getPermission() + ".others");
+            } else {
+                return sender.hasPermission(getPermission());
+            }
+        }
+    }
+
+    public boolean checkArgs(int min, int max, String[] args, CommandSender sender, Plugin type) {
+        if (max != 0 && args.length > max) {
+            OddJob.getInstance().getMessageManager().errorTooManyArgs(type, sender);
+            return true;
+        } else if (args.length < min) {
+            OddJob.getInstance().getMessageManager().errorMissingArgs(type, sender);
+            return true;
+        }
+        return false;
+    }
 }

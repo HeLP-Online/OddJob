@@ -11,6 +11,21 @@ import java.util.UUID;
 
 public class GuildJoinCommand extends SubCommand {
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return true;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.guild;
+    }
+
+    @Override
     public String getName() {
         return "join";
     }
@@ -40,13 +55,7 @@ public class GuildJoinCommand extends SubCommand {
         }
 
         UUID uuid = ((Player) sender).getUniqueId();
-        if (args.length < 2) {
-            // To few arguments
-            OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.guild, sender);
-            return;
-        } else if (args.length > 2) {
-            // To many arguments
-            OddJob.getInstance().getMessageManager().errorTooManyArgs(Plugin.guild, sender);
+        if (checkArgs(2,2,args,sender,getPlugin())) {
             return;
         }
 

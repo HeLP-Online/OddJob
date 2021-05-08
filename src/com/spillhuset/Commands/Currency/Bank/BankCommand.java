@@ -2,6 +2,7 @@ package com.spillhuset.Commands.Currency.Bank;
 import com.spillhuset.Commands.Currency.Pocket.PocketAddCommand;
 import com.spillhuset.Commands.Currency.Pocket.PocketSetCommand;
 import com.spillhuset.Commands.Currency.Pocket.PocketSubCommand;
+import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 
@@ -19,6 +20,22 @@ public class BankCommand extends SubCommand {
         subCommands.add(new BankDepositCommand());
         subCommands.add(new BankWithdrawCommand());
     }
+
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.currency;
+    }
+
     @Override
     public String getName() {
         return "bank";

@@ -1,11 +1,27 @@
 package com.spillhuset.Commands.Guild;
 
+import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
 public class GuildAcceptCommand extends SubCommand {
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.guild;
+    }
+
     @Override
     public String getName() {
         return "accept";

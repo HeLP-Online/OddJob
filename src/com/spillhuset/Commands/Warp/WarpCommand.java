@@ -16,13 +16,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class WarpCommand implements CommandExecutor, TabCompleter, SubCommandInterface {
+public class WarpCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
     public WarpCommand() {
         subCommands.add(new WarpAddCommand());
         subCommands.add(new WarpDelCommand());
         subCommands.add(new WarpSetCommand());
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.warp;
+    }
+
+    @Override
+    public String getPermission() {
+        return null;
     }
 
     @Override

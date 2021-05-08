@@ -13,6 +13,21 @@ import java.util.UUID;
 
 public class TradeAcceptCommand extends SubCommand {
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.trade;
+    }
+
+    @Override
     public String getName() {
         return "accept";
     }

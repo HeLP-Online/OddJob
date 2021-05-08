@@ -303,23 +303,7 @@ public class MySQLManager {
         }
     }
 
-    public boolean deleteGuildsChunks(Chunk chunk) {
-        boolean ret = false;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
-            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
-            preparedStatement.setInt(2, chunk.getX());
-            preparedStatement.setInt(3, chunk.getZ());
-            preparedStatement.execute();
-            ret = true;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return ret;
-    }
+
 
     public List<Material> getLockableMaterials() {
         List<Material> materials = new ArrayList<>();
@@ -618,62 +602,7 @@ public class MySQLManager {
         OddJob.getInstance().getMessageManager().save("Chunks", i, u);
     }
 
-    public HashMap<Chunk, UUID> loadChunks() {
-        HashMap<Chunk, UUID> chunks = new HashMap<>();
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks`");
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                if (world != null) {
-                    UUID guild = UUID.fromString(resultSet.getString("uuid"));
-                    int x = resultSet.getInt("x");
-                    int z = resultSet.getInt("z");
-                    Chunk chunk = world.getChunkAt(x, z);
-                    chunk.load();
-                    chunks.put(chunk, guild);
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        OddJob.getInstance().getMessageManager().load("Chunks", chunks.size());
-        return chunks;
-    }
 
-    public void disbandGuild(UUID guild) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.execute();
-
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.execute();
-
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.execute();
-
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_pendings` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.execute();
-
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_invites` WHERE `uuid` = ?");
-            preparedStatement.setString(1, guild.toString());
-            preparedStatement.execute();
-
-            OddJob.getInstance().getMessageManager().console("Guild disbanded");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-    }
 
     public HashMap<UUID, UUID> loadSecuredArmorStands() {
         HashMap<UUID, UUID> stands = new HashMap<>();
@@ -864,7 +793,7 @@ public class MySQLManager {
         return uuid;
     }
 
-    public void createGuildClaim(Chunk chunk, UUID guild) {
+    public static void createGuildClaim(Chunk chunk, UUID guild) {
         try {
             connect();
             preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`x`,`z`,`world`,`uuid`) VALUES (?,?,?,?)");

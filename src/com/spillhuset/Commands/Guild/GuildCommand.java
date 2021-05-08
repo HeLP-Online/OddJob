@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class GuildCommand implements CommandExecutor, TabCompleter {
+public class GuildCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
     public GuildCommand() {
@@ -23,19 +23,41 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         subCommands.add(new GuildAcceptCommand());
         subCommands.add(new GuildDenyCommand());
         subCommands.add(new GuildJoinCommand());
+        subCommands.add(new GuildClaimCommand());
+        subCommands.add(new GuildUnclaimCommand());
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.guild;
+    }
+
+    @Override
+    public String getPermission() {
+        return null;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (!(sender instanceof Player)) {
             if (args.length == 0) {
-                OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.guild,sender);
+                OddJob.getInstance().getMessageManager().errorMissingArgs(getPlugin(), sender);
             } else if (args[0].equalsIgnoreCase("save")) {
                 OddJob.getInstance().getGuildManager().save();
-                OddJob.getInstance().getMessageManager().saved(Plugin.guild, sender);
+                OddJob.getInstance().getMessageManager().saved(getPlugin(), sender);
             } else if (args[0].equalsIgnoreCase("load")) {
                 OddJob.getInstance().getGuildManager().load();
-                OddJob.getInstance().getMessageManager().loaded(Plugin.guild, sender);
+                OddJob.getInstance().getMessageManager().loaded(getPlugin(), sender);
             } else if (args[0].equalsIgnoreCase("create")) {
                 UUID safe = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.SAFE);
                 String nameSafe = "SafeZone";
@@ -79,7 +101,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                     OddJob.getInstance().getMessageManager().infoGuildExists(nameWild, sender);
                 }
             } else {
-                OddJob.getInstance().getMessageManager().errorWrongArgs(Plugin.guild,sender);
+                OddJob.getInstance().getMessageManager().errorWrongArgs(getPlugin(), sender);
             }
             return true;
 
@@ -96,7 +118,17 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.guild,nameBuilder.toString(), sender);
+        Player player = (Player) sender;
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+        if (args.length == 0) {
+            if (guild != null) {
+                OddJob.getInstance().getMessageManager().guildMenu(nameBuilder.toString(), OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()), sender);
+            } else {
+                OddJob.getInstance().getMessageManager().guildNotAssociated(player);
+            }
+        }
+
+        OddJob.getInstance().getMessageManager().infoArgs(getPlugin(), nameBuilder.toString(), sender);
         return true;
     }
 

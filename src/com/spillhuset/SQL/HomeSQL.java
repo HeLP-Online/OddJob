@@ -15,9 +15,10 @@ public class HomeSQL extends MySQLManager {
     public static void delete(UUID uuid, String name) {
         try {
             connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_homes` WHERE `uuid` = ? AND `name` = ?");
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_homes` WHERE `uuid` = ? AND `name` = ? AND `server` = ?");
             preparedStatement.setString(1, uuid.toString());
             preparedStatement.setString(2, name);
+            preparedStatement.setString(3,OddJob.getInstance().getConfig().get("server_unique_id").toString());
             preparedStatement.execute();
         } catch (SQLException ignore) {
         } finally {
@@ -30,7 +31,8 @@ public class HomeSQL extends MySQLManager {
         int i = 0;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes`");
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes` WHERE `server` = ?");
+            preparedStatement.setString(1,OddJob.getInstance().getConfig().get("server_unique_id").toString());
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -58,7 +60,6 @@ public class HomeSQL extends MySQLManager {
     }
 
     public static void save(HashMap<UUID, Home> homes) {
-        int i = 0, u = 0;
         for (UUID uuid : homes.keySet()) {
             Home home = homes.get(uuid);
             for (String name : home.list()) {
@@ -66,9 +67,10 @@ public class HomeSQL extends MySQLManager {
 
                 try {
                     connect();
-                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes` WHERE `uuid` = ? AND `name` = ?");
+                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_homes` WHERE `uuid` = ? AND `name` = ? AND `server` = ?");
                     preparedStatement.setString(1, uuid.toString());
                     preparedStatement.setString(2, name);
+                    preparedStatement.setString(3,OddJob.getInstance().getConfig().get("server_unique_id").toString());
                     resultSet = preparedStatement.executeQuery();
 
                     if (resultSet.next()) {
@@ -82,9 +84,8 @@ public class HomeSQL extends MySQLManager {
                         preparedStatement.setString(7, uuid.toString());
                         preparedStatement.setString(8, name);
                         preparedStatement.executeUpdate();
-                        u++;
                     } else {
-                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_homes` (`world`, `x`,`y`,`z`,`yaw`,`pitch`,`uuid` ,`name`) VALUES (?,?,?,?,?,?,?,?)");
+                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_homes` (`world`, `x`,`y`,`z`,`yaw`,`pitch`,`uuid` ,`name`,`server`) VALUES (?,?,?,?,?,?,?,?,?)");
                         preparedStatement.setString(1, location.getWorld().getUID().toString());
                         preparedStatement.setInt(2, location.getBlockX());
                         preparedStatement.setInt(3, location.getBlockY());
@@ -93,8 +94,8 @@ public class HomeSQL extends MySQLManager {
                         preparedStatement.setFloat(6, location.getPitch());
                         preparedStatement.setString(7, uuid.toString());
                         preparedStatement.setString(8, name);
+                        preparedStatement.setString(9,OddJob.getInstance().getConfig().get("server_unique_id").toString());
                         preparedStatement.execute();
-                        i++;
                     }
                 } catch (SQLException ignore) {
                 } finally {
@@ -103,6 +104,5 @@ public class HomeSQL extends MySQLManager {
 
             }
         }
-        OddJob.getInstance().getMessageManager().save("Homes", i, u);
     }
 }

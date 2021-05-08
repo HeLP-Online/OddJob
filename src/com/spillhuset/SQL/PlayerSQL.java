@@ -17,9 +17,10 @@ public class PlayerSQL extends MySQLManager {
         String name, banned;
         ScoreBoard scoreboard;
         OddPlayer oddPlayer = null;
+        int maxHomes;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `" + prefix + "players` WHERE `uuid` = ?");
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players` WHERE `uuid` = ?");
             preparedStatement.setString(1, uuid.toString());
             resultSet = preparedStatement.executeQuery();
 
@@ -41,8 +42,9 @@ public class PlayerSQL extends MySQLManager {
                 banned = resultSet.getString("banned");
 
                 scoreboard = ScoreBoard.valueOf(resultSet.getString("scoreboard"));
+                maxHomes = resultSet.getInt("maxhomes");
 
-                oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade);
+                oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade,maxHomes);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -50,5 +52,33 @@ public class PlayerSQL extends MySQLManager {
             close();
         }
         return oddPlayer;
+    }
+
+    public static void save(OddPlayer oddPlayer) {
+        try {
+            StringBuilder whitelist = new StringBuilder();
+            for (UUID uuid:oddPlayer.getWhitelist()) {
+                whitelist.append(uuid.toString()).append(",");
+            }
+            whitelist.deleteCharAt(whitelist.lastIndexOf(","));
+            StringBuilder blacklist = new StringBuilder();
+            for (UUID uuid:oddPlayer.getBlacklist()) {
+                blacklist.append(uuid.toString()).append(",");
+            }
+            blacklist.deleteCharAt(blacklist.lastIndexOf(","));
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?,`whitelist` = ?,`scoreboard` = ?,`maxhomes` = ?,`denytpa` = ?,`denytrade` = ? WHERE `uuid` =?");
+            preparedStatement.setString(1,blacklist.toString());
+            preparedStatement.setString(2,whitelist.toString());
+            preparedStatement.setString(3,oddPlayer.getScoreboard().name());
+            preparedStatement.setInt(4,oddPlayer.getMaxHomes());
+            preparedStatement.setBoolean(5, oddPlayer.getDenyTpa());
+            preparedStatement.setBoolean(6, oddPlayer.getDenyTrade());
+            preparedStatement.setString(7,oddPlayer.getUuid().toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
     }
 }

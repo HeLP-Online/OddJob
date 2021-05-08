@@ -6,6 +6,7 @@ import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Home;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
@@ -88,6 +89,7 @@ public class HomesManager {
      * @return
      */
     public Set<String> getList(UUID uuid) {
+        if (homes.isEmpty()) return null;
         return homes.get(uuid).list();
     }
 
@@ -95,11 +97,11 @@ public class HomesManager {
      * Returns a List of the Homes of a Player
      *
      * @param uuid UUID of the Player
+     * @param sender
      * @return
      */
-    public List<String> list(UUID uuid) {
-        OddJob.getInstance().getMessageManager().listHomes("List of Homes", getList(uuid), Bukkit.getPlayer(uuid));
-        return null;
+    public void list(UUID uuid, CommandSender sender) {
+        OddJob.getInstance().getMessageManager().homesCount(getList(uuid),OddJob.getInstance().getConfig().getInt("homes.max",5),sender);
     }
 
     /**
@@ -120,8 +122,35 @@ public class HomesManager {
         for (String name : getList(uuid)) {
             if (name.equalsIgnoreCase(string)) {
                 OddJob.getInstance().getMessageManager().homesTeleportSuccess(player.getUniqueId(), name);
-                OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), PlayerTeleportEvent.TeleportCause.COMMAND,true);
+                OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), PlayerTeleportEvent.TeleportCause.COMMAND,!player.hasPermission("teleport.now"));
             }
         }
     }
 }
+/**
+ * Permissions:
+ * homes.plenty
+ * homes.others
+ *
+ * Config:
+ * homes.max
+ * homes.cost
+ *
+ * SQL:
+ * homes.name
+ * homes.x
+ * homes.y
+ * homes.z
+ * homes.world
+ * homes.yaw
+ * homes.pitch
+ *
+ * Commands:
+ * /homes
+ * /homes set <name>
+ * /homes del <name>
+ * /homes list
+ * /homes buy
+ *
+ * player -> max + number of homes
+ * */

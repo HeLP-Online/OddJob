@@ -11,6 +11,21 @@ import java.util.UUID;
 
 public class BanAddCommand extends SubCommand {
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.ban;
+    }
+
+    @Override
     public String getName() {
         return "add";
     }
@@ -32,15 +47,18 @@ public class BanAddCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        // Check args
+        if (checkArgs(2, 0, args, sender, getPlugin())) {
+            return;
+        }
 
+        // Check Player
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.ban, args[1], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[1], sender);
             return;
         }
-        if (checkArgs(2, 0, args, sender, Plugin.ban)) {
-            return;
-        }
+
         String ban = OddJob.getInstance().getBanManager().getBan(target);
         if (ban == null) {
             StringBuilder sb = new StringBuilder();
@@ -51,10 +69,8 @@ public class BanAddCommand extends SubCommand {
             } else {
                 sb.append("punishment");
             }
-            OddJob.getInstance().log(target.toString());
-            OddJob.getInstance().log(sb.toString());
             OddJob.getInstance().getBanManager().ban(target, sb.toString());
-            OddJob.getInstance().getMessageManager().banAddedSuccess(args[1], sb.toString(), sender);
+            OddJob.getInstance().getMessageManager().banAddedSuccess(args[1], sb.toString(), sender.getName(), sender);
             return;
         }
 

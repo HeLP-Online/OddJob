@@ -5,6 +5,9 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Guild;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.World;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -39,7 +42,8 @@ public class GuildSQL extends MySQLManager {
                         resultSet.getInt("open") == 1,
                         Role.valueOf(resultSet.getString("permission_invite")),
                         Role.valueOf(resultSet.getString("permission_kick")),
-                        members
+                        members,
+                        resultSet.getInt("maxclaims")
                 ));
 
             }
@@ -62,6 +66,7 @@ public class GuildSQL extends MySQLManager {
             Role permissionInviteRole = guild.getPermissionInvite();
             Role permissionKickRole = guild.getPermissionKick();
             HashMap<UUID, Role> members = guild.getMembers();
+            int maxClaims = guild.getMaxClaims();
 
             try {
                 connect();
@@ -71,7 +76,7 @@ public class GuildSQL extends MySQLManager {
                 resultSet = preparedStatement.executeQuery();
 
                 if (resultSet.next()) {
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? WHERE `uuid` = ?");
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? ,`maxclaims` = ? WHERE `uuid` = ?");
                     preparedStatement.setString(1, name);
                     preparedStatement.setString(2, zone.name());
                     preparedStatement.setInt(3, invitedOnly ? 1 : 0);
@@ -80,9 +85,10 @@ public class GuildSQL extends MySQLManager {
                     preparedStatement.setString(6, permissionKickRole.name());
                     preparedStatement.setInt(7, open ? 1 : 0);
                     preparedStatement.setString(8, guildUUID.toString());
+                    preparedStatement.setInt(9,maxClaims);
                     preparedStatement.executeUpdate();
                 } else {
-                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`) VALUES (?,?,?,?,?,?,?,?,?)");
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`) VALUES (?,?,?,?,?,?,?,?,?,?)");
                     preparedStatement.setString(1, guildUUID.toString());
                     preparedStatement.setString(2, name);
                     preparedStatement.setString(3, zone.name());
@@ -92,6 +98,7 @@ public class GuildSQL extends MySQLManager {
                     preparedStatement.setString(7, permissionKickRole.name());
                     preparedStatement.setInt(8, open ? 1 : 0);
                     preparedStatement.setString(9, OddJob.getInstance().getServerId().toString());
+                    preparedStatement.setInt(10,maxClaims);
                     preparedStatement.execute();
                 }
 
@@ -123,4 +130,79 @@ public class GuildSQL extends MySQLManager {
             }
         }
     }
+    public static boolean deleteGuildsChunks(Chunk chunk) {
+        boolean ret = false;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
+            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
+            preparedStatement.setInt(2, chunk.getX());
+            preparedStatement.setInt(3, chunk.getZ());
+            preparedStatement.setString(4,OddJob.getInstance().getConfig().get("server_unique_id").toString());
+            preparedStatement.execute();
+            ret = true;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return ret;
+    }
+    public static HashMap<Chunk, UUID> loadChunks() {
+        HashMap<Chunk, UUID> chunks = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks`");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                if (world != null) {
+                    UUID guild = UUID.fromString(resultSet.getString("uuid"));
+                    int x = resultSet.getInt("x");
+                    int z = resultSet.getInt("z");
+                    Chunk chunk = world.getChunkAt(x, z);
+                    chunk.load();
+                    chunks.put(chunk, guild);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        OddJob.getInstance().getMessageManager().load("Chunks", chunks.size());
+        return chunks;
+    }
+
+    public static void disbandGuild(UUID guild) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.execute();
+
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.execute();
+
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.execute();
+
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_pendings` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.execute();
+
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_invites` WHERE `uuid` = ?");
+            preparedStatement.setString(1, guild.toString());
+            preparedStatement.execute();
+
+            OddJob.getInstance().getMessageManager().console("Guild disbanded");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
 }

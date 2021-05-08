@@ -1,4 +1,5 @@
 package com.spillhuset.Commands.Player.Set;
+
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
@@ -10,9 +11,25 @@ import java.util.List;
 public class PlayerSetCommand extends SubCommand {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public PlayerSetCommand(){
+    public PlayerSetCommand() {
         subCommands.add(new PlayerSetScoreboardCommand());
     }
+
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.player;
+    }
+
     @Override
     public String getName() {
         return "set";
@@ -41,12 +58,12 @@ public class PlayerSetCommand extends SubCommand {
             String name = subcommand.getName();
             if (args.length >= 2 && name.equalsIgnoreCase(args[1])) {
                 subcommand.perform(sender, args);
-                return ;
+                return;
             }
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player,nameBuilder.toString(), sender);
+        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player, nameBuilder.toString(), sender);
     }
 
     @Override

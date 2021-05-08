@@ -18,12 +18,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class CurrencyCommand implements CommandExecutor, TabCompleter, SubCommandInterface {
+public class CurrencyCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
     public CurrencyCommand() {
         subCommands.add(new PocketCommand());
         subCommands.add(new BankCommand());
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.currency;
+    }
+
+    @Override
+    public String getPermission() {
+        return null;
     }
 
     @Override

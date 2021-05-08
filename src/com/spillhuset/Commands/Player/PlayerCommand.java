@@ -9,7 +9,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,7 @@ public class PlayerCommand extends CommandCompleter implements CommandExecutor, 
         //subCommands.add(new PlayerWhitelistCommand());
         //subCommands.add(new PlayerBlacklistCommand());
     }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         StringBuilder nameBuilder = new StringBuilder();
@@ -34,7 +34,7 @@ public class PlayerCommand extends CommandCompleter implements CommandExecutor, 
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player,nameBuilder.toString(), sender);
+        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player, nameBuilder.toString(), sender);
         return true;
     }
 

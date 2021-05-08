@@ -12,6 +12,21 @@ import java.util.List;
 
 public class PlayerSetScoreboardCommand extends SubCommand {
     @Override
+    public boolean allowConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean allowOp() {
+        return false;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.player;
+    }
+
+    @Override
     public String getName() {
         return "scoreboard";
     }
@@ -33,11 +48,14 @@ public class PlayerSetScoreboardCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(Plugin.player);
+        // Check Args
+        if (checkArgs(3, 3, args, sender, getPlugin())) {
             return;
         }
-        if (checkArgs(3, 3, args, sender, Plugin.player)) {
+
+        // Check Player
+        if (!(sender instanceof Player)) {
+            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
         Player player = (Player) sender;
