@@ -42,6 +42,8 @@ public class GuildManager {
 
     /**
      * List of Players with a pending invitation to a Guild
+     *
+     * HashMap<UUID,UUID> Player , Guild
      */
     private HashMap<UUID, UUID> guildPending = new HashMap<>();   // PlayerUUID   | GuildUUID
 
@@ -95,8 +97,8 @@ public class GuildManager {
             saveGuilds();
             loadGuilds();
         }
-        guildPending = OddJob.getInstance().getMySQLManager().loadGuildsPendings();
-        guildInvite = OddJob.getInstance().getMySQLManager().loadGuildsInvites();
+        guildPending = GuildSQL.loadGuildsPending();
+        guildInvite = GuildSQL.loadGuildsInvites();
     }
 
     /**
@@ -107,13 +109,11 @@ public class GuildManager {
         chunks = GuildSQL.loadChunks();
         List<Chunk> rChunk = new ArrayList<>();
 
-        int i = 0;
         for (Chunk chunk : chunks.keySet()) {
             UUID guild = chunks.get(chunk);
             if (getGuild(guild) == null) {
                 unClaim(chunk, null);
                 rChunk.add(chunk);
-                i++;
             }
         }
 
@@ -196,7 +196,7 @@ public class GuildManager {
      * Saving the Chunk-list to the Database
      */
     public void saveChunks() {
-        OddJob.getInstance().getMySQLManager().saveChunks(chunks);
+        GuildSQL.saveChunks(chunks);
     }
 
     /**
@@ -361,7 +361,7 @@ public class GuildManager {
      * @return UUID of the Guild who has claimed the Chunk
      */
     public UUID getGuildUUIDByChunk(Chunk chunk) {
-        UUID uuid = OddJob.getInstance().getMySQLManager().getGuildUUIDByChunk(chunk);
+        UUID uuid = GuildSQL.getGuildUUIDByChunk(chunk);
         return uuid != null ? uuid : getGuildUUIDByZone(Zone.WILD);
         //return chunks.getOrDefault(chunk, getGuildUUIDByZone(Zone.WILD));
     }
@@ -501,24 +501,29 @@ public class GuildManager {
      *
      * @param guildUUID  UUID of the Guild
      * @param targetUUID UUID of the Player to change the Role of
+     * @param master
      * @return Role the new one
      */
-    public Role promoteMember(@Nonnull UUID guildUUID, @Nonnull UUID targetUUID) {
+    public Role promoteMember(@Nonnull UUID guildUUID, @Nonnull UUID targetUUID, Role master) {
         Role prevRole = getGuildMemberRole(targetUUID);
         Role newRole = null;
-        switch (prevRole.level()) {
-            case 11:
-                newRole = Role.Mods;
-                break;
-            case 22:
-                newRole = Role.Admins;
-                break;
-            case 33:
-                newRole = Role.Master;
-                break;
-        }
-        if (newRole != null) {
-            guilds.get(guildUUID).getMembers().put(targetUUID, newRole);
+        if (master == null) {
+            switch (prevRole.level()) {
+                case 11:
+                    newRole = Role.Mods;
+                    break;
+                case 22:
+                    newRole = Role.Admins;
+                    break;
+                case 33:
+                    newRole = Role.Master;
+                    break;
+            }
+            if (newRole != null) {
+                guilds.get(guildUUID).getMembers().put(targetUUID, newRole);
+            }
+        } else {
+            guilds.get(guildUUID).getMembers().put(targetUUID, Role.Master);
         }
         return newRole;
     }
@@ -579,7 +584,7 @@ public class GuildManager {
         }
 
         guilds.get(getGuildUUIDByMember(player)).getMembers().remove(player);
-        OddJob.getInstance().getMySQLManager().deleteGuildMember(player);
+        GuildSQL.deleteGuildMember(player);
         if (next != null) {
             guild.setMaster(next);
             OddJob.getInstance().getMessageManager().guildNewMaster(guild, player, next);
@@ -807,17 +812,12 @@ public class GuildManager {
      */
     public void disband(UUID guild) {
         List<Chunk> chunkList = new ArrayList<>();
-        OddJob.getInstance().getMessageManager().console("disbanding:" + guild);
-        OddJob.getInstance().getMessageManager().console("chunkGuild:" + chunks.size());
         for (Chunk chunk : chunks.keySet()) {
-            OddJob.getInstance().getMessageManager().console("chunk:x=" + chunk.getX() + ";z=" + chunk.getZ());
             if (chunks.get(chunk).equals(guild)) {
-                OddJob.getInstance().getMessageManager().console("unClaiming");
                 unClaim(chunk, null);
                 chunkList.add(chunk);
             }
         }
-        OddJob.getInstance().getMessageManager().console("removing");
         for (Chunk chunk : chunkList) chunks.remove(chunk);
         chunkList.clear();
         guilds.remove(guild);

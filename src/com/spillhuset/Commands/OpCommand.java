@@ -36,18 +36,24 @@ public class OpCommand extends SubCommandInterface implements CommandExecutor, T
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (checkArgs(1,1,args,sender,getPlugin())) {
+        if (checkArgs(1, 1, args, sender, getPlugin())) {
             return true;
         }
 
+        boolean self = false;
         Player player = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(args[0]));
         if (player == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player,args[0],sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[0], sender);
             return true;
         }
-
-        if (can(sender,false)) {
+        if (sender.getName().equals(player.getName())) {
+            self = true;
+        }
+        if (can(sender, false)) {
             player.setOp(true);
+            OddJob.getInstance().getMessageManager().opSet(player, sender, self);
+        } else {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
         }
         return true;
     }

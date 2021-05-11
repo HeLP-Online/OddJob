@@ -1,6 +1,8 @@
 package com.spillhuset.Commands;
 
 import com.spillhuset.OddJob;
+import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.SubCommandInterface;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -10,51 +12,87 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class GiveCommand implements CommandExecutor, TabCompleter {
+public class GiveCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (strings[0] != null) {
-            Player target = Bukkit.getPlayer(strings[0]);
-            if (target == null) {
-                OddJob.getInstance().log("Error player");
-                return true;
-            }
-            if (strings.length >= 2 && strings[1] != null) {
-                Material material = Material.valueOf(strings[1]);
-                if (material == null) {
-                    OddJob.getInstance().log("Error material");
-                    return true;
-                }
-                int count = 1;
-                if (strings.length == 3 && strings[2] != null) count = Integer.parseInt(strings[2]);
-
-                OddJob.getInstance().log("start " + count);
-                for (int i = count; i >= material.getMaxStackSize(); i -= material.getMaxStackSize()) {
-                    if (target.getInventory().firstEmpty() >= 1) {
-
-                        count -= material.getMaxStackSize();
-                        OddJob.getInstance().log("new value " + count);
-                        target.getInventory().setItem(target.getInventory().firstEmpty(), new ItemStack(material, material.getMaxStackSize()));
-                        break;
-                    }
-                }
-                OddJob.getInstance().log("rest " + count);
-                target.getInventory().addItem(new ItemStack(material, count));
-
-            } else {
-                OddJob.getInstance().log("Error material nil");
-            }
-        } else {
-            OddJob.getInstance().log("Error player nil");
-        }
+    public boolean allowOp() {
         return true;
-
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        return null;
+    public boolean allowConsole() {
+        return true;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.give;
+    }
+
+    @Override
+    public String getPermission() {
+        return "give";
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+        // give <player> <material> [amount]
+        if (checkArgs(2, 3, args, sender, getPlugin())) {
+            return true;
+        }
+
+        UUID targetUUID = OddJob.getInstance().getPlayerManager().getUUID(args[0]);
+        if (targetUUID == null) {
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[0], sender);
+            return true;
+        }
+        int amount = 1;
+        Material material = Material.getMaterial(args[1]);
+        if (material == null) {
+            OddJob.getInstance().getMessageManager().errorMaterial(getPlugin(), args[1], sender);
+            return true;
+        }
+        if (args.length == 3) {
+            try {
+                amount = Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {
+                OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(), args[2], sender);
+            }
+
+            Player target = OddJob.getInstance().getPlayerManager().getPlayer(targetUUID);
+            for (int i = amount; i >= material.getMaxStackSize(); i -= material.getMaxStackSize()) {
+                if (target.getInventory().firstEmpty() >= 1) {
+
+                    amount -= material.getMaxStackSize();
+                    target.getInventory().setItem(target.getInventory().firstEmpty(), new ItemStack(material, material.getMaxStackSize()));
+                    break;
+                }
+            }
+            target.getInventory().addItem(new ItemStack(material, amount));
+
+        }
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args) {
+        List<String> list = new ArrayList<>();
+        if (args.length == 1) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (args[0].isEmpty()) list.add(player.getName());
+                if (player.getName().startsWith(args[0])) list.add(player.getName());
+            }
+        }else if (args.length == 2) {
+            for (Material material : Material.values()) {
+                if (args[1].isEmpty()) list.add(material.name());
+                if (material.name().startsWith(args[1])) list.add(material.name());
+            }
+        } else if (args.length == 3){
+            list.add("Amount");
+        }
+        return list;
     }
 }

@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class GuildCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
-    private final ArrayList<SubCommand> subCommands = new ArrayList<>();
-
     public GuildCommand() {
         subCommands.add(new GuildCreateCommand());
         subCommands.add(new GuildAcceptCommand());
@@ -25,6 +23,8 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
         subCommands.add(new GuildJoinCommand());
         subCommands.add(new GuildClaimCommand());
         subCommands.add(new GuildUnclaimCommand());
+        subCommands.add(new GuildDisbandCommand());
+        subCommands.add(new GuildLeaveCommand());
     }
 
     @Override
@@ -100,8 +100,6 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
                 } else {
                     OddJob.getInstance().getMessageManager().infoGuildExists(nameWild, sender);
                 }
-            } else {
-                OddJob.getInstance().getMessageManager().errorWrongArgs(getPlugin(), sender);
             }
             return true;
 
@@ -124,7 +122,7 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
             if (guild != null) {
                 OddJob.getInstance().getMessageManager().guildMenu(nameBuilder.toString(), OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()), sender);
             } else {
-                OddJob.getInstance().getMessageManager().guildNotAssociated(player);
+                OddJob.getInstance().getMessageManager().guildNotAssociated(player.getUniqueId());
             }
         }
 

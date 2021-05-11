@@ -1,15 +1,9 @@
 package com.spillhuset.Commands.Currency.Bank;
 
-import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class BankAddCommand extends com.spillhuset.Utils.SubCommand {
     @Override
@@ -49,8 +43,6 @@ public class BankAddCommand extends com.spillhuset.Utils.SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-
-
 
 
     }

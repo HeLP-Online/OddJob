@@ -2,6 +2,7 @@ package com.spillhuset.Commands;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.SubCommandInterface;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,10 +13,30 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeedCommand extends CommandCompleter implements CommandExecutor, TabCompleter {
+public class FeedCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
+    @Override
+    public boolean allowOp() {
+        return true;
+    }
+
+    @Override
+    public boolean allowConsole() {
+        return true;
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return Plugin.feed;
+    }
+
+    @Override
+    public String getPermission() {
+        return "feed";
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        if (checkArgs(0, 1, args, sender, Plugin.feed)) {
+        if (checkArgs(0, 1, args, sender, getPlugin())) {
             return true;
         }
         Player target;
@@ -23,17 +44,21 @@ public class FeedCommand extends CommandCompleter implements CommandExecutor, Ta
             target = Bukkit.getPlayer(args[0]);
         } else {
             if (!(sender instanceof Player)) {
-                OddJob.getInstance().getMessageManager().errorConsole(Plugin.feed);
+                OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
                 return true;
             }
             target = (Player) sender;
         }
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.feed, args[0], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[0], sender);
             return true;
         }
 
-        target.setFoodLevel(20);
+        if (can(sender,false)){
+            target.setFoodLevel(20);
+        }else {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+        }
         if (!sender.equals(target)) {
             OddJob.getInstance().getMessageManager().feedPlayer(target.getName(), sender);
         }
@@ -46,17 +71,14 @@ public class FeedCommand extends CommandCompleter implements CommandExecutor, Ta
         List<String> list = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (args.length == 1) {
-                if (player.getName().startsWith(args[0])) {
+                if (args[0].isEmpty() || player.getName().startsWith(args[0])) {
                     list.add(player.getName());
                 }
-            } else if (args.length == 0) {
-                list.add(player.getName());
             }
         }
         return list;
     }
 
-    @Override
     public String getSyntax() {
         return "/feed [name]";
     }

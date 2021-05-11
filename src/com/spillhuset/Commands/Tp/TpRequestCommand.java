@@ -56,7 +56,7 @@ public class TpRequestCommand extends SubCommand {
         Player destinationPlayer = destinationOddPlayer.getPlayer();
 
         if (destinationPlayer == null || !destinationPlayer.isOnline()) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.tp,args[1],sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(),args[1],sender);
             return;
         } else if((destinationOddPlayer.getBlacklist().contains(player.getUniqueId()) || destinationOddPlayer.getDenyTpa()) && !destinationOddPlayer.getWhitelist().contains(player.getUniqueId())){
             OddJob.getInstance().getMessageManager().tpDenied(args[1],sender);

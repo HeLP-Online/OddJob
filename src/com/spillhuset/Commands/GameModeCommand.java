@@ -22,7 +22,7 @@ public class GameModeCommand extends SubCommandInterface implements CommandExecu
 
     @Override
     public boolean allowConsole() {
-        return false;
+        return true;
     }
 
     @Override
@@ -43,6 +43,7 @@ public class GameModeCommand extends SubCommandInterface implements CommandExecu
 
         GameMode gm = GameMode.SURVIVAL;
         Player target = null;
+        boolean self = false;
 
         String str = args[0];
 
@@ -65,12 +66,13 @@ public class GameModeCommand extends SubCommandInterface implements CommandExecu
                 return true;
             }
         } else if (args.length == 1 && sender instanceof Player) {
+            self = true;
             target = (Player) sender;
         }
 
         if (target != null && can(sender,false)) {
             OddJob.getInstance().getPlayerManager().setGameMode(target, gm);
-            OddJob.getInstance().getMessageManager().gamemmodeChanged(target.getName(), sender);
+            OddJob.getInstance().getMessageManager().gamemmodeChanged(target,gm,sender,self);
         }
         return true;
     }

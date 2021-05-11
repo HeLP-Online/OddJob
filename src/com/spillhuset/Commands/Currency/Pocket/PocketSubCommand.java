@@ -66,7 +66,7 @@ public class PocketSubCommand extends SubCommand {
             OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency, args[3], sender);
             return;
         }
-        if (OddJob.getInstance().getCurrencyManager().subtractPocketBalance(target, amount, sender.hasPermission("currency.negative"), sender)) {
+        if (OddJob.getInstance().getCurrencyManager().subtractPocketBalance(target, amount, sender.hasPermission("currency.negative"))) {
             OddJob.getInstance().getMessageManager().currencyChanged(Currency.pocket, amount, OddJob.getInstance().getCurrencyManager().getPocketBalance(target), target,sender);
         } else {
             OddJob.getInstance().getMessageManager().insufficientFunds(sender);

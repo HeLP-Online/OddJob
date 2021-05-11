@@ -1,12 +1,14 @@
 package com.spillhuset.Commands.Guild;
 
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Role;
+import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-public class GuildDenyCommand extends SubCommand {
+public class GuildDenyCommand extends SubCommand implements GuildRole {
     @Override
     public boolean allowConsole() {
         return false;
@@ -50,5 +52,10 @@ public class GuildDenyCommand extends SubCommand {
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         return null;
+    }
+
+    @Override
+    public Role getRole() {
+        return Role.all;
     }
 }

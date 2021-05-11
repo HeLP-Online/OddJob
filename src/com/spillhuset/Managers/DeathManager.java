@@ -145,7 +145,6 @@ public class DeathManager {
         task.remove(uuid);
 
         // Remove from database
-        OddJob.getInstance().getMySQLManager().deleteSpirit(uuid);
         Entity entity = Bukkit.getEntity(uuid);
         if (entity != null) entity.remove();
         inventories.remove(uuid);
@@ -204,9 +203,5 @@ public class DeathManager {
 
     public Inventory getInventory(UUID uniqueId) {
         return inventories.get(uniqueId);
-    }
-
-    public void load() {
-        owner = OddJob.getInstance().getMySQLManager().loadSpirits();
     }
 }

@@ -49,13 +49,17 @@ public abstract class SubCommand {
 
     public boolean can(CommandSender sender, boolean others) {
         if (!(sender instanceof Player)) {
+            OddJob.getInstance().log("console = "+allowConsole());
             return allowConsole();
         } else if (sender.isOp()) {
+            OddJob.getInstance().log("op = "+allowOp());
             return allowOp();
         } else {
             if (others) {
+                OddJob.getInstance().log("others = "+sender.hasPermission(getPermission()+".others"));
                 return sender.hasPermission(getPermission() + ".others");
             } else {
+                OddJob.getInstance().log("permission = "+sender.hasPermission(getPermission()));
                 return sender.hasPermission(getPermission());
             }
         }

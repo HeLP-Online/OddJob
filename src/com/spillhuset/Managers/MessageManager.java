@@ -7,10 +7,7 @@ import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Guild;
 import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.Warp;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -157,7 +154,7 @@ public class MessageManager {
         console(type(type) + cDanger + "Only usable as a player");
     }
 
-    public void errorMaterial(Plugin type, String string, Player player) {
+    public void errorMaterial(Plugin type, String string, CommandSender player) {
         danger(type(type), "Unknown material " + cValue + string, player, false);
     }
 
@@ -303,8 +300,8 @@ public class MessageManager {
         danger(type(Plugin.guild), "Something went wrong when trying to create a Guild with the name " + cValue + string, sender, true);
     }
 
-    public void guildNotAssociated(Player uuid) {
-        info(type(Plugin.guild), "You are not associated with any Guild yet.", uuid, false);
+    public void guildNotAssociated(UUID uuid) {
+        info(type(Plugin.guild), "You are not associated with any Guild yet.", uuid);
     }
 
 
@@ -317,14 +314,18 @@ public class MessageManager {
         }
     }
 
-    public void guildDisband(String string) {
+    public void guildDisband(UUID guild, CommandSender sender) {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            warning(type(Plugin.guild), "Noone left in the Guilld " + cGuild + string + cWarning + ", disbanding", player.getUniqueId(), false);
+            if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) == guild) {
+                danger(type(Plugin.guild), cPlayer + sender.getName() + cDanger + " has disbanded the guild", player, false);
+            } else {
+                warning(type(Plugin.guild), "Guild " + cGuild + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild) + cWarning + " disbanded!", player, false);
+            }
         }
     }
 
-    public void guildNoInvitation(UUID uuid) {
-        warning(type(Plugin.guild), "You have no pending Guild invites.", uuid, false);
+    public void guildNoInvitation(UUID player) {
+        warning(type(Plugin.guild), "You have no pending Guild invites.", player, false);
     }
 
     public void guildListPending(String string, List<UUID> list, UUID uuid) {
@@ -337,8 +338,8 @@ public class MessageManager {
         OddJob.getInstance().getPlayerManager().getPlayer(uuid).sendMessage(builder.toString());
     }
 
-    public void guildNoPending(UUID uuid) {
-        warning(type(Plugin.guild), "There is no pending requests to join the Guild.", uuid, false);
+    public void guildNoPending(UUID player) {
+        warning(type(Plugin.guild), "There is no pending requests to join the Guild.", player, false);
     }
 
     public void guildAlreadyInvited(String string, UUID uuid) {
@@ -613,7 +614,7 @@ public class MessageManager {
 
     public void infoArgs(Plugin type, String args, CommandSender sender) {
 
-        warning(type(type), "Valid syntax are: " + cValue + args.replace(",",cWarning+","+cValue), sender, false);
+        warning(type(type), "Valid syntax are: " + cValue + args.replace(",", cWarning + "," + cValue), sender, false);
     }
 
     public void saved(Plugin type, CommandSender sender) {
@@ -787,8 +788,11 @@ public class MessageManager {
         warning(type(Plugin.freeze), "You feel a bonefreezing cold, that freezes your body, stuck at this location.", uniqueId, false);
     }
 
-    public void gamemmodeChanged(String name, CommandSender commandSender) {
-        success(type(Plugin.gamemode), "Gamemode changed to " + name, commandSender, true);
+    public void gamemmodeChanged(Player target, GameMode gameMode, CommandSender sender, boolean self) {
+        if (!self) {
+            success(type(Plugin.gamemode), "Gamemode of " + cPlayer + target.getName() + cSuccess + " changed to " + cValue + gameMode.name(), sender, false);
+        }
+        success(type(Plugin.gamemode), "Gamemode changed to " + cValue + gameMode.name(), sender, false);
     }
 
     public void healPlayer(String name, CommandSender commandSender) {
@@ -1022,15 +1026,18 @@ public class MessageManager {
     }
 
     public void lockToolInfo(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the tool to show it's owner.", uniqueId);
+        info(type(Plugin.lock), "Right click with the " + cValue + "Information tool" + cInfo + " to show the objects owner.", uniqueId);
+        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
     }
 
     public void lockToolLock(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the tool to lock it.", uniqueId);
+        info(type(Plugin.lock), "Right click with the " + cValue + "Locking tool" + cInfo + " to lock the object.", uniqueId);
+        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
     }
 
     public void lockToolUnlock(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the tool unlock it.", uniqueId);
+        info(type(Plugin.lock), "Right click with the " + cValue + "Unlocking tool" + cInfo + " to unlock the object.", uniqueId);
+        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
     }
 
     public void playerDenying(String name, UUID player) {
@@ -1063,28 +1070,88 @@ public class MessageManager {
     }
 
     public void homesCount(Set<String> list, int max, CommandSender sender) {
-        if(list == null) {
+        if (list == null) {
             homesNotSet(sender);
             return;
         }
-        info(type(Plugin.home),"You have assigned "+cValue+list.size()+cInfo+" of "+cValue+max,sender,false);
-        info(type(Plugin.home),"------------------------------------",sender,false);
+        info(type(Plugin.home), "You have assigned " + cValue + list.size() + cInfo + " of " + cValue + max, sender, false);
+        info(type(Plugin.home), "------------------------------------", sender, false);
         int i = 1;
         for (String name : list) {
-            info(type(Plugin.home),i+") "+cValue+name,sender,false);
+            info(type(Plugin.home), i + ".) " + cValue + name, sender, false);
             i++;
         }
     }
 
     public void homesNotSet(CommandSender sender) {
-        warning(type(Plugin.home),"No home is set yet!",sender,false);
+        warning(type(Plugin.home), "No home is set yet!", sender, false);
     }
 
-    public void permissionDenied(Plugin type,CommandSender sender) {
-        danger(type(type),"Permission denied!",sender,false);
+    public void permissionDenied(Plugin type, CommandSender sender) {
+        danger(type(type), "Permission denied!", sender, false);
     }
 
-    public void guildZoneError(String arg,Player player) {
-        danger(type(Plugin.guild),"Unknown zone "+cValue+arg,player,false);
+    public void guildZoneError(String arg, Player player) {
+        danger(type(Plugin.guild), "Unknown zone " + cValue + arg, player, false);
+    }
+
+    public void guildLastOne(CommandSender sender) {
+        warning(type(Plugin.guild), "You are the last one, use " + cValue + "/guild disband" + cWarning + " instead.", sender, false);
+    }
+
+    public void changeRole(Role role, UUID target, CommandSender sender) {
+        success(type(Plugin.guild), "Your role in the guild has changed to " + cValue + role.name() + cSuccess + " by " + cPlayer + sender.getName(), target, false);
+        success(type(Plugin.guild), "You have changed the role of " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " to " + cValue + role.name(), sender, false);
+    }
+
+    public void guildWelcome(Guild guild, OfflinePlayer player) {
+        for (UUID uuid : guild.getMembers().keySet()) {
+            info(type(Plugin.guild), "Please welcome " + player.getName() + " to the guild", uuid);
+        }
+    }
+
+    public void pendingList(List<UUID> pending, CommandSender sender) {
+        info(type(Plugin.guild), "There are " + pending.size() + " players requesting to join your guild.", sender, false);
+        space(Plugin.guild, sender);
+        int i = 1;
+        for (UUID uuid : pending) {
+            info(type(Plugin.guild), i + ".) " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), sender, false);
+        }
+    }
+
+    public void opSet(Player player, CommandSender sender,boolean self) {
+        success(type(Plugin.op), "Successfully op'ed " + cPlayer + player, sender, false);
+    }
+
+    public void deopSet(Player player, CommandSender sender,boolean self) {
+        success(type(Plugin.deop), "Successfully deop'ed " + cPlayer + player, sender, false);
+    }
+
+    public void areOp(CommandSender sender) {
+        danger(type(Plugin.player), "You are an " + ChatColor.GRAY + "OP", sender, false);
+    }
+
+    public void notOp(CommandSender sender) {
+        success(type(Plugin.player), "You are " + cDanger + "NOT" + cSuccess + " an " + ChatColor.GRAY + "OP", sender, false);
+    }
+
+    public void lockList(List<String> list, CommandSender sender) {
+        info(type(Plugin.lock), "You have " + cValue + list.size() + cInfo + " locked objects", sender, false);
+        space(Plugin.lock, sender);
+        for (int i = 1; i <= list.size(); i++) {
+            info(type(Plugin.lock), i + "). " + list.get(i - 1), sender, false);
+        }
+    }
+
+    public void space(Plugin type, CommandSender sender) {
+        info(type(type), "------------------------------------", sender, false);
+    }
+
+    public void lockSkeleton(CommandSender sender) {
+        danger(type(Plugin.lock), ChatColor.YELLOW + "!!!" + cDanger + " Danger " + ChatColor.YELLOW + "!!! " + cDanger + "Unlocks all objects for you!", sender, false);
+    }
+
+    public void locksKey(CommandSender sender) {
+        success(type(Plugin.lock),"Here is your key to your locked objects, keep it safe!",sender,false);
     }
 }

@@ -26,7 +26,7 @@ commands:
   invsee:
     description: See another players inventory
     usage: /<command> <Player>
-    permission: essentials.invsee
+    permission: invsee
   suicide:
     description: Take suicide
     usage: /<command>
@@ -37,19 +37,19 @@ commands:
   tp:
     description: Teleports a player to another player
     usage: /<command> <Player> [OtherPlayer]
-    permission: essentials.tp
+    permission: tp
   tpall:
     description: Teleports all online players to your location
     usage: /<command>
-    permission: essentials.tpall
+    permission: tpall
   tppos:
     description: Teleport you to a given coordinate
     usage: /<command> <player> <X> <Y> <Z> [World]
-    permission: essentials.tppos
+    permission: tppos
   kick:
     description: Kicks a given player from the server
     usage: /<command> <Player> [message]
-    permission: essentials.kick
+    permission: kick
   tpa:
     description: Sends a teleport request to a given player
     usage: /<command> <Player>
@@ -62,47 +62,37 @@ commands:
   ban:
     description: Ban a given player
     usage: /<command> <Player> [message]
-    permission: essentials.ban
-  unban:
-    description: Unban a given player
-    usage: /<command> [Player]
-    permission: essentials.unban
+    permission: ban
   feed:
     description: Feeds a given player
     usage: /<command> [Player]
-    permission: essentials.feed
+    permission: feed
   heal:
     description: Heals a given player
     usage: /<command> [Player]
-    permission: essentials.heal
+    permission: heal
   give:
     description: Gives an item to a player
   gamemode:
     description: Changes gamemode of given player
     usage: /<command> <GameMode> [Player]
     aliases: [ 'gm' ]
-    permission: essentials.gamemode
+    permission: gamemode
   player:
     description: Access Player settings
+    aliases: ['p']
   warp:
     usage: /<command> <name> [password]
     description: Warp you to a specified location
-  addwarp:
-    usage: /<command> <name> [password]
-    description: Sets a specified warppoint
-    permission: essentials.warp.set
-  delwarp:
-    usage: /<command> <name> [password]
-    description: Deletes a specified warppoint
-    permission: essentials.warp.del
+    aliases: ['w']
   back:
     usage:  /<command>
     description: Teleports back to origin
-    permission: essentials.back
+    permission: back
   freeze:
     usage: /<command>
     description: Toogle freeze a player
-    permission: essentials.freeze
+    permission: freeze
   death:
     usage: /<command>
     description: Cleans up chests
@@ -120,7 +110,7 @@ commands:
     usage: /<command>
   spawnmob:
     usage: /<command>
-    permission: essentials.spawnmob
+    permission: spawnmob
   map:
     usage: /<command>
   sudo:
@@ -130,15 +120,13 @@ commands:
   deop:
     usage: /<command> <player>
 permissions:
-  essentials.op:
+  op:
     default: false
-  essentials.deop:
+  deop:
     default: true
-  essentials.spawnmob:
+  spawnmob:
     default: op
-  essentials.death:
-    default: op
-  essentials.tpall:
+  tpall:
     default: op
   homes:
     default: true

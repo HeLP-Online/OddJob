@@ -61,7 +61,7 @@ public class CurrencyManager {
         return false;
     }
 
-    public boolean subtractPocketBalance(UUID uuid, double cost, boolean negative, CommandSender sender) {
+    public boolean subtractPocketBalance(UUID uuid, double cost, boolean negative) {
         if (!negative || getPocketBalance(uuid) > cost) {
             setPocketBalance(uuid, getPocketBalance(uuid) - cost);
             return true;

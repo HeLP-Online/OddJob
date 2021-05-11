@@ -81,4 +81,17 @@ public class PlayerSQL extends MySQLManager {
             close();
         }
     }
+    public static void setScoreboard(UUID uuid, ScoreBoard score) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `scoreboard` = ? WHERE `uuid` = ?");
+            preparedStatement.setString(1, score.name());
+            preparedStatement.setString(2, uuid.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
 }

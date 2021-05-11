@@ -67,7 +67,7 @@ public class WarpManager {
         if (OddJob.getInstance().getConfig().getBoolean("enabled.currency.pocket", true)) {
             if (warp.getCost() > 0d) {
                 if (OddJob.getInstance().getCurrencyManager().getPocketBalance(player.getUniqueId()) >= cost) {
-                    OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId(), cost,player.hasPermission("currency.negative"),player);
+                    OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId(), cost,player.hasPermission("currency.negative"));
                 } else {
                     OddJob.getInstance().getMessageManager().insufficientFunds(player);
                     return;

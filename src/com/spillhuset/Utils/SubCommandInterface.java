@@ -18,7 +18,7 @@ public abstract class SubCommandInterface {
 
     public abstract String getPermission();
 
-    ArrayList<SubCommand> subCommands = new ArrayList<>();
+    public ArrayList<SubCommand> subCommands = new ArrayList<>();
 
     public abstract boolean onCommand(CommandSender sender, Command command, String label, String[] args);
 
@@ -26,13 +26,17 @@ public abstract class SubCommandInterface {
 
     public boolean can(CommandSender sender, boolean others) {
         if (!(sender instanceof Player)) {
+            OddJob.getInstance().log("console = "+allowConsole());
             return allowConsole();
         } else if (sender.isOp()) {
+            OddJob.getInstance().log("op = "+allowOp());
             return allowOp();
         } else {
             if (others) {
+                OddJob.getInstance().log("others = "+sender.hasPermission(getPermission()+".others"));
                 return sender.hasPermission(getPermission() + ".others");
             } else {
+                OddJob.getInstance().log("permission = "+sender.hasPermission(getPermission()));
                 return sender.hasPermission(getPermission());
             }
         }

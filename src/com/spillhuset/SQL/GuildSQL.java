@@ -3,12 +3,14 @@ package com.spillhuset.SQL;
 import com.spillhuset.Managers.MySQLManager;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Role;
+import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
@@ -84,8 +86,8 @@ public class GuildSQL extends MySQLManager {
                     preparedStatement.setString(5, permissionInviteRole.name());
                     preparedStatement.setString(6, permissionKickRole.name());
                     preparedStatement.setInt(7, open ? 1 : 0);
-                    preparedStatement.setString(8, guildUUID.toString());
-                    preparedStatement.setInt(9,maxClaims);
+                    preparedStatement.setInt(8,maxClaims);
+                    preparedStatement.setString(9, guildUUID.toString());
                     preparedStatement.executeUpdate();
                 } else {
                     preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`) VALUES (?,?,?,?,?,?,?,?,?,?)");
@@ -134,11 +136,10 @@ public class GuildSQL extends MySQLManager {
         boolean ret = false;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? ");
             preparedStatement.setString(1, chunk.getWorld().getUID().toString());
             preparedStatement.setInt(2, chunk.getX());
             preparedStatement.setInt(3, chunk.getZ());
-            preparedStatement.setString(4,OddJob.getInstance().getConfig().get("server_unique_id").toString());
             preparedStatement.execute();
             ret = true;
         } catch (SQLException ex) {
@@ -198,6 +199,136 @@ public class GuildSQL extends MySQLManager {
             preparedStatement.execute();
 
             OddJob.getInstance().getMessageManager().console("Guild disbanded");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public static void saveChunks(HashMap<Chunk, UUID> chunks) {
+        for (Chunk chunk : chunks.keySet()) {
+
+            World world = chunk.getWorld();
+            int x = chunk.getX();
+            int z = chunk.getZ();
+            UUID guild = chunks.get(chunk);
+
+            try {
+                connect();
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+                preparedStatement.setString(1, world.getUID().toString());
+                preparedStatement.setInt(2, x);
+                preparedStatement.setInt(3, z);
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ?");
+                    preparedStatement.setString(1, guild.toString());
+                    preparedStatement.setString(2, world.getUID().toString());
+                    preparedStatement.setInt(3, x);
+                    preparedStatement.setInt(4, z);
+                    preparedStatement.executeUpdate();
+                } else {
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
+                    preparedStatement.setString(1, guild.toString());
+                    preparedStatement.setString(2, world.getUID().toString());
+                    preparedStatement.setInt(3, x);
+                    preparedStatement.setInt(4, z);
+                    preparedStatement.execute();
+                }
+
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            } finally {
+                close();
+            }
+        }
+    }
+    /**
+     * @return HashMap UUID of Player and UUID of Guild
+     */
+    public static HashMap<UUID, UUID> loadGuildsPending() {
+        HashMap<UUID, UUID> pending = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_pendings`");
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                pending.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return pending;
+    }
+
+    /**
+     * @return HashMap UUID of Player and UUID of Guild
+     */
+    public static HashMap<UUID, UUID> loadGuildsInvites() {
+        HashMap<UUID, UUID> invites = new HashMap<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_invites`");
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                invites.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return invites;
+    }
+
+    public static void deleteGuildMember(UUID player) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_members` WHERE `player` = ?");
+            preparedStatement.setString(1, player.toString());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+    public static UUID getGuildUUIDByChunk(Chunk chunk) {
+        UUID uuid = null;
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
+            preparedStatement.setInt(2, chunk.getX());
+            preparedStatement.setInt(3, chunk.getZ());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                uuid = UUID.fromString(resultSet.getString("uuid"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
+        return uuid;
+    }
+
+    public static void createGuildClaim(@Nonnull Chunk chunk, @Nonnull UUID guild) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`x`,`z`,`world`,`uuid`) VALUES (?,?,?,?)");
+            preparedStatement.setInt(1, chunk.getX());
+            preparedStatement.setInt(2, chunk.getZ());
+            preparedStatement.setString(3, chunk.getWorld().getUID().toString());
+            preparedStatement.setString(4, guild.toString());
+            preparedStatement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {

@@ -89,7 +89,7 @@ public class BankDepositCommand extends com.spillhuset.Utils.SubCommand {
                 break;
         }
 
-        OddJob.getInstance().getCurrencyManager().subtractPocketBalance(target,value,sender.hasPermission("currency.negative"),sender);
+        OddJob.getInstance().getCurrencyManager().subtractPocketBalance(target,value,sender.hasPermission("currency.negative"));
         OddJob.getInstance().getCurrencyManager().addBankBalance(target,value,sender,account);
     }
 

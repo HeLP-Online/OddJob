@@ -1,5 +1,7 @@
 package com.spillhuset.Utils.Odd;
 
+import com.spillhuset.SQL.PlayerSQL;
+import com.spillhuset.Utils.Arena.Game;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.OddJob;
 import org.bukkit.Bukkit;
@@ -103,6 +105,6 @@ public class OddPlayer {
 
     public void setScoreboard(ScoreBoard score) {
         scoreBoard = score;
-        OddJob.getInstance().getMySQLManager().setScoreboard(uuid,score);
+        PlayerSQL.setScoreboard(uuid,score);
     }
 }

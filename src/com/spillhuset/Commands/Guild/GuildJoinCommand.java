@@ -2,6 +2,8 @@ package com.spillhuset.Commands.Guild;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Role;
+import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -9,7 +11,7 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.UUID;
 
-public class GuildJoinCommand extends SubCommand {
+public class GuildJoinCommand extends SubCommand implements GuildRole {
     @Override
     public boolean allowConsole() {
         return false;
@@ -55,7 +57,7 @@ public class GuildJoinCommand extends SubCommand {
         }
 
         UUID uuid = ((Player) sender).getUniqueId();
-        if (checkArgs(2,2,args,sender,getPlugin())) {
+        if (checkArgs(2, 2, args, sender, getPlugin())) {
             return;
         }
 
@@ -85,5 +87,10 @@ public class GuildJoinCommand extends SubCommand {
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         return null;
+    }
+
+    @Override
+    public Role getRole() {
+        return Role.all;
     }
 }

@@ -2,8 +2,10 @@ package com.spillhuset.Commands.Guild;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Guild;
+import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class GuildClaimCommand extends SubCommand {
+public class GuildClaimCommand extends SubCommand implements GuildRole {
     @Override
     public boolean allowConsole() {
         return false;
@@ -75,7 +77,7 @@ public class GuildClaimCommand extends SubCommand {
         } else {
             guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
             if (guild == null) {
-                OddJob.getInstance().getMessageManager().guildNotAssociated(player);
+                OddJob.getInstance().getMessageManager().guildNotAssociated(player.getUniqueId());
                 return;
             }
         }
@@ -92,5 +94,10 @@ public class GuildClaimCommand extends SubCommand {
         List<String> list = new ArrayList<>();
 
         return list;
+    }
+
+    @Override
+    public Role getRole() {
+        return Role.Admins;
     }
 }

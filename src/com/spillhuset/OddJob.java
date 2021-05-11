@@ -6,6 +6,7 @@ import com.spillhuset.Commands.Ban.BanCommand;
 import com.spillhuset.Commands.Currency.CurrencyCommand;
 import com.spillhuset.Commands.Guild.GuildCommand;
 import com.spillhuset.Commands.Homes.HomesCommand;
+import com.spillhuset.Commands.Lock.LockCommand;
 import com.spillhuset.Commands.Player.PlayerCommand;
 import com.spillhuset.Commands.Trade.TradeCommand;
 import com.spillhuset.Commands.Warp.WarpCommand;
@@ -97,7 +98,6 @@ public class OddJob extends JavaPlugin {
         getCommand("warp").setExecutor(new WarpCommand()); // SubCommand
         getCommand("arena").setExecutor(new ArenaCommand());
         getCommand("freeze").setExecutor(new FreezeCommand()); // Cleaned
-        getCommand("death").setExecutor(new DeathCommand());
         getCommand("backup").setExecutor(new RollbackCommand());
         getCommand("rollback").setExecutor(new RollbackCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
@@ -107,6 +107,7 @@ public class OddJob extends JavaPlugin {
         getCommand("map").setExecutor(new MapCommand());
         getCommand("sudo").setExecutor(new SudoCommand());
         getCommand("op").setExecutor(new OpCommand());
+        getCommand("deop").setExecutor(new DeopCommand());
 
         ConfigManager.load(); // Checked
         currencyManager.load();
@@ -115,7 +116,6 @@ public class OddJob extends JavaPlugin {
         guildManager.load();
         warpManager.load();
         worldManager.load();
-        deathManager.load();
         arenaManager.load();
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);

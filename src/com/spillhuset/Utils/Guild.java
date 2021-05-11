@@ -1,5 +1,6 @@
 package com.spillhuset.Utils;
 
+import com.spillhuset.SQL.GuildSQL;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
 
@@ -173,4 +174,6 @@ public class Guild {
     public int getMaxClaims() {
         return maxClaims;
     }
+
+
 }

@@ -63,7 +63,7 @@ public class ShopManager {
         itemsBought.put(material, itemsBought.getOrDefault(material, 0) + amount);
 
         ItemStack itemStack = new ItemStack(material, amount);
-        OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId(), cost, player.hasPermission("currency.negative"),sender);
+        OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId(), cost, player.hasPermission("currency.negative"));
         OddJob.getInstance().getMessageManager().buy(amount, material, cost, player);
 
         player.getInventory().addItem(itemStack);
