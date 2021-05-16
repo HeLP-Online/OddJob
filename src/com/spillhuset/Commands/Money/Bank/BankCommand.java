@@ -1,21 +1,20 @@
-package com.spillhuset.Commands.Currency.Pocket;
+package com.spillhuset.Commands.Money.Bank;
 
-import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PocketCommand extends SubCommand {
+public class BankCommand extends SubCommand {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public PocketCommand() {
-        subCommands.add(new PocketSetCommand());
-        subCommands.add(new PocketSubCommand());
-        subCommands.add(new PocketAddCommand());
+    public BankCommand() {
+        subCommands.add(new BankAddCommand());
+        subCommands.add(new BankSetCommand());
+        subCommands.add(new BankDepositCommand());
+        subCommands.add(new BankWithdrawCommand());
     }
 
     @Override
@@ -35,22 +34,22 @@ public class PocketCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "pocket";
+        return "bank";
     }
 
     @Override
     public String getDescription() {
-        return "Utility for a players pocket";
+        return null;
     }
 
     @Override
     public String getSyntax() {
-        return "/currency pocket <args>";
+        return null;
     }
 
     @Override
     public String getPermission() {
-        return "currency.pocket";
+        return null;
     }
 
     @Override
@@ -67,12 +66,7 @@ public class PocketCommand extends SubCommand {
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-
-        // /currency pocket
-
-        sender.sendMessage(ChatColor.GOLD + "args: " + ChatColor.RESET + nameBuilder.toString());
     }
-
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {

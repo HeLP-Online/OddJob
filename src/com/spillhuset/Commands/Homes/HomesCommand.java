@@ -49,18 +49,6 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
 
     @Override
     public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
-        if (!(sender instanceof Player)) {
-            if (args.length == 1) {
-                if (args[0].equalsIgnoreCase("save")) {
-                    OddJob.getInstance().getHomesManager().save();
-                    return true;
-                } else if (args[0].equalsIgnoreCase("load")) {
-                    OddJob.getInstance().getHomesManager().load();
-                    return true;
-                }
-            }
-        }
-
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
@@ -81,7 +69,7 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
 
         if (args.length == 0) {
             UUID target = ((Player) sender).getUniqueId();
-            Set<String> test = OddJob.getInstance().getHomesManager().getList(target);
+            List<String> test = OddJob.getInstance().getHomesManager().getList(target);
             if (test == null || test.isEmpty()) {
                 OddJob.getInstance().getMessageManager().homesNotSet(sender);
                 return true;

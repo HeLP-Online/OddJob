@@ -1,17 +1,16 @@
-package com.spillhuset.Commands.Currency.Pocket;
+package com.spillhuset.Commands.Money.Pocket;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PocketSetCommand extends SubCommand {
+public class PocketSubCommand extends SubCommand {
     @Override
     public boolean allowConsole() {
         return false;
@@ -29,47 +28,51 @@ public class PocketSetCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "set";
+        return "sub";
     }
 
     @Override
     public String getDescription() {
-        return "Sets a value to a players pocket";
+        return "Subtract an amount from players pocket";
     }
 
     @Override
     public String getSyntax() {
-        return "/currency pocket set <player> <amount>";
+        return "/currency pocket subtract <name> <value>";
     }
 
     @Override
     public String getPermission() {
-        return "currency.pocket.set";
+        return "currency.pocket.sub";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (args.length != 4) {
-            OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.currency,sender);
-            OddJob.getInstance().getMessageManager().sendSyntax(Plugin.warp, getSyntax(), sender);
-            sender.sendMessage(ChatColor.GOLD + "args: " + ChatColor.RESET + "<player> <amount>");
+        if (checkArgs(4,4,args,sender,Plugin.currency)){
             return;
         }
+
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[2]);
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.ban, args[2], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.currency, args[2], sender);
             return;
         }
         double amount;
         try {
-            amount = Integer.parseInt(args[3]);
-        } catch (Exception e) {
-            OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency,args[3],sender);
+            amount = Double.parseDouble(args[3]);
+        } catch (NumberFormatException e) {
+            OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency, args[3], sender);
             return;
         }
+        if (OddJob.getInstance().getCurrencyManager().subtractPocketBalance(target, amount, sender.hasPermission("currency.negative"))) {
+            OddJob.getInstance().getMessageManager().currencyChanged(Currency.pocket, amount, OddJob.getInstance().getCurrencyManager().getPocketBalance(target), target,sender);
+        } else {
+            OddJob.getInstance().getMessageManager().insufficientFunds(sender);
+        }
 
-        OddJob.getInstance().getCurrencyManager().setPocketBalance(target, amount);
-        OddJob.getInstance().getMessageManager().currencySuccessSet(args[2], args[3], sender, Currency.pocket);
+
+        double balance = OddJob.getInstance().getCurrencyManager().getPocketBalance(target);
+        OddJob.getInstance().getMessageManager().currencySuccessSubtracted(args[2], args[3], balance, sender, Currency.pocket);
     }
 
     @Override

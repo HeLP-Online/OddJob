@@ -181,8 +181,10 @@ public class MySQLManager {
         statement.execute(sting);
         OddJob.getInstance().log("YEH!!!!");
     }
-
-    protected static void close() {
+protected static void close() {
+        close(false);
+    }
+    protected static void close(boolean force) {
         try {
             if (resultSetsec != null) {
                 resultSetsec.close();
@@ -204,7 +206,7 @@ public class MySQLManager {
                 preparedStatement.close();
                 preparedStatement = null;
             }
-            if (connection != null) {
+            if (connection != null && force) {
                 connection.close();
                 connection = null;
             }

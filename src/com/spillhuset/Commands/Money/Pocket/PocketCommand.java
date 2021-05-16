@@ -1,24 +1,20 @@
-package com.spillhuset.Commands.Currency.Bank;
-import com.spillhuset.Commands.Currency.Pocket.PocketAddCommand;
-import com.spillhuset.Commands.Currency.Pocket.PocketSetCommand;
-import com.spillhuset.Commands.Currency.Pocket.PocketSubCommand;
+package com.spillhuset.Commands.Money.Pocket;
+
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BankCommand extends SubCommand {
+public class PocketCommand extends SubCommand {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public BankCommand() {
-        subCommands.add(new BankAddCommand());
-        subCommands.add(new BankDelCommand());
-        subCommands.add(new BankSetCommand());
-        subCommands.add(new BankInvestCommand());
-        subCommands.add(new BankDepositCommand());
-        subCommands.add(new BankWithdrawCommand());
+    public PocketCommand() {
+        subCommands.add(new PocketSetCommand());
+        subCommands.add(new PocketSubCommand());
+        subCommands.add(new PocketAddCommand());
     }
 
     @Override
@@ -38,22 +34,22 @@ public class BankCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "bank";
+        return "pocket";
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return "Utility for a players pocket";
     }
 
     @Override
     public String getSyntax() {
-        return null;
+        return "/currency pocket <args>";
     }
 
     @Override
     public String getPermission() {
-        return null;
+        return "currency.pocket";
     }
 
     @Override
@@ -70,7 +66,12 @@ public class BankCommand extends SubCommand {
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
+
+        // /currency pocket
+
+        sender.sendMessage(ChatColor.GOLD + "args: " + ChatColor.RESET + nameBuilder.toString());
     }
+
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {

@@ -1,4 +1,4 @@
-package com.spillhuset.Commands.Currency.Bank;
+package com.spillhuset.Commands.Money.Bank;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Currency;

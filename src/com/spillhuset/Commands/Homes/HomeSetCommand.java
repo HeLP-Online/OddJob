@@ -48,8 +48,6 @@ public class HomeSetCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        // homes set
-        // homes set <home>
         if (!(sender instanceof Player)) {
             OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
@@ -59,17 +57,21 @@ public class HomeSetCommand extends SubCommand {
             return;
         }
 
+        // Default name
         String name = "home";
         UUID target;
 
         if (args.length == 2) {
+            // Defining a home name
             target = ((Player) sender).getUniqueId();
             name = args[1];
         } else {
+            // Using default
             target = ((Player) sender).getUniqueId();
         }
-        OddJob.getInstance().log("Max: " + getMax(target));
-        Set<String> list = OddJob.getInstance().getHomesManager().getList(target);
+
+        //Set<String> list = OddJob.getInstance().getHomesManager().getList(target);
+        List<String> list = OddJob.getInstance().getHomesManager().getList(target);
         if (list != null && list.size() >= getMax(target)) {
             OddJob.getInstance().getMessageManager().errorHomeMaximal(sender);
         }

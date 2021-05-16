@@ -38,7 +38,7 @@ public class BanCommand extends SubCommandInterface implements CommandExecutor, 
 
     @Override
     public String getPermission() {
-        return null;
+        return "ban";
     }
 
     @Override

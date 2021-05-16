@@ -3,7 +3,6 @@ package com.spillhuset.Commands.Homes;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -49,35 +48,32 @@ public class HomeDelCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        // homes del <player> <home>
-        // homes del
-        // homes del <home>
 
         String home = "home";
         UUID target = null;
 
         if (!(sender instanceof Player)) {
-            if (checkArgs(3,3,args,sender,getPlugin())){
+            if (checkArgs(3, 3, args, sender, getPlugin())) {
                 return;
             }
 
             target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
             home = args[2];
         } else if (sender.hasPermission("homes.del.others")) {
-            if (checkArgs(1,3,args,sender,getPlugin())) {
+            if (checkArgs(1, 3, args, sender, getPlugin())) {
                 return;
             }
             if (args.length == 3) {
                 target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
                 home = args[2];
-            }else {
+            } else {
                 target = ((Player) sender).getUniqueId();
                 if (args.length == 2) {
                     home = args[1];
                 }
             }
         } else {
-            if (checkArgs(1,2,args,sender,getPlugin())) {
+            if (checkArgs(1, 2, args, sender, getPlugin())) {
                 return;
             }
 
@@ -87,7 +83,7 @@ public class HomeDelCommand extends SubCommand {
             }
         }
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player,args[0],sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[0], sender);
             return;
         }
 

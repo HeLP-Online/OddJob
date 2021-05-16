@@ -3,10 +3,10 @@ package com.spillhuset;
 
 import com.spillhuset.Commands.*;
 import com.spillhuset.Commands.Ban.BanCommand;
-import com.spillhuset.Commands.Currency.CurrencyCommand;
 import com.spillhuset.Commands.Guild.GuildCommand;
 import com.spillhuset.Commands.Homes.HomesCommand;
 import com.spillhuset.Commands.Lock.LockCommand;
+import com.spillhuset.Commands.Money.MoneyCommand;
 import com.spillhuset.Commands.Player.PlayerCommand;
 import com.spillhuset.Commands.Trade.TradeCommand;
 import com.spillhuset.Commands.Warp.WarpCommand;
@@ -14,9 +14,12 @@ import com.spillhuset.Events.*;
 import com.spillhuset.Managers.*;
 import com.spillhuset.Utils.Arena.ArenaManager;
 import com.spillhuset.Utils.Arena.ChestManager;
-import com.spillhuset.Utils.Broadcaster;
 import com.spillhuset.Utils.SignManager;
-import org.bukkit.*;
+import net.dv8tion.jda.api.JDA;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -25,12 +28,13 @@ import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
     private static OddJob instance;
+    public JDA discordBot;
 
     private ArenaManager arenaManager;
     private BanManager banManager;
     private ChestManager chestManager;
     private DeathManager deathManager;
-    private CurrencyManager currencyManager;
+    private MoneyManager moneyManager;
     private FreezeManager freezeManager;
     private GuildManager guildManager;
     private HomesManager homesManager;
@@ -59,7 +63,7 @@ public class OddJob extends JavaPlugin {
         banManager = new BanManager();
         chestManager = new ChestManager();
         deathManager = new DeathManager();
-        currencyManager = new CurrencyManager();
+        moneyManager = new MoneyManager();
         freezeManager = new FreezeManager();
         guildManager = new GuildManager();
         homesManager = new HomesManager();
@@ -81,7 +85,7 @@ public class OddJob extends JavaPlugin {
             e.printStackTrace();
         }
 
-        getCommand("currency").setExecutor(new CurrencyCommand()); // SubCommand
+        getCommand("currency").setExecutor(new MoneyCommand()); // SubCommand
         getCommand("guild").setExecutor(new GuildCommand()); // SubCommand
         getCommand("homes").setExecutor(new HomesCommand()); // SubCommand
         getCommand("invsee").setExecutor(new InvseeCommand());
@@ -110,9 +114,8 @@ public class OddJob extends JavaPlugin {
         getCommand("deop").setExecutor(new DeopCommand());
 
         ConfigManager.load(); // Checked
-        currencyManager.load();
+        moneyManager.load();
         lockManager.load();
-        homesManager.load();
         guildManager.load();
         warpManager.load();
         worldManager.load();
@@ -141,11 +144,6 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
         Bukkit.getPluginManager().registerEvents(new ChunkLoad(), this);
 
-        Server server = getServer();
-        Broadcaster broadcaster = new Broadcaster(Broadcaster.createSocket(), server.getPort(), server.getMotd(), server.getIp());
-        getServer().getScheduler().runTaskAsynchronously(this, broadcaster);
-
-
         if (!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
             Bukkit.getConsoleSender().sendMessage("WorldEdit found");
         }
@@ -162,6 +160,7 @@ public class OddJob extends JavaPlugin {
             Bukkit.getConsoleSender().sendMessage("Craftbukkit found");
         }
 
+
         saver = Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), () -> {
             OddJob.getInstance().save();
         }, 7200, 7200);
@@ -170,9 +169,8 @@ public class OddJob extends JavaPlugin {
     }
 
     private void save() {
-        currencyManager.save();
+        moneyManager.save();
         warpManager.save();
-        homesManager.save();
     }
 
 
@@ -204,8 +202,8 @@ public class OddJob extends JavaPlugin {
         return deathManager;
     }
 
-    public CurrencyManager getCurrencyManager() {
-        return currencyManager;
+    public MoneyManager getCurrencyManager() {
+        return moneyManager;
     }
 
     public FreezeManager getFreezeManager() {

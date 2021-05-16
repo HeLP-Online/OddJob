@@ -1,11 +1,11 @@
-package com.spillhuset.Commands.Currency.Bank;
+package com.spillhuset.Commands.Money.Bank;
 
 import com.spillhuset.Utils.Enum.Plugin;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-public class BankDelCommand extends com.spillhuset.Utils.SubCommand {
+public class BankSetCommand extends com.spillhuset.Utils.SubCommand {
     @Override
     public boolean allowConsole() {
         return false;
@@ -23,7 +23,7 @@ public class BankDelCommand extends com.spillhuset.Utils.SubCommand {
 
     @Override
     public String getName() {
-        return "del";
+        return "set";
     }
 
     @Override

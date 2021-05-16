@@ -1,11 +1,11 @@
-package com.spillhuset.Commands.Currency.Bank;
+package com.spillhuset.Commands.Money.Bank;
 
 import com.spillhuset.Utils.Enum.Plugin;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-public class BankAddCommand extends com.spillhuset.Utils.SubCommand {
+public class BankWithdrawCommand extends com.spillhuset.Utils.SubCommand {
     @Override
     public boolean allowConsole() {
         return false;
@@ -23,27 +23,26 @@ public class BankAddCommand extends com.spillhuset.Utils.SubCommand {
 
     @Override
     public String getName() {
-        return "add";
+        return "withdraw";
     }
 
     @Override
     public String getDescription() {
-        return "Adds an amount to the given bank";
+        return null;
     }
 
     @Override
     public String getSyntax() {
-        return "/currency bank add <bank_guild,bank_player> <name> <amount>";
+        return null;
     }
 
     @Override
     public String getPermission() {
-        return "currency.bank.add";
+        return null;
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-
 
     }
 

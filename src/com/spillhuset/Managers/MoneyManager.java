@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class CurrencyManager {
+public class MoneyManager {
     private final HashMap<UUID, Double> playerBank = new HashMap<>();
     private final HashMap<UUID, Double> guildBank = new HashMap<>();
     private final HashMap<UUID, Double> pocket = new HashMap<>();

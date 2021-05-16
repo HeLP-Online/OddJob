@@ -47,10 +47,8 @@ public class HomeListCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        // homes list
-        // homes list <player>
-        UUID target = null;
-        String targetName = "";
+        UUID target;
+        String targetName;
         if (!(sender instanceof Player)) {
             if (checkArgs(2, 2, args, sender, getPlugin())) {
                 return;

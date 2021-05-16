@@ -1,7 +1,7 @@
-package com.spillhuset.Commands.Currency;
+package com.spillhuset.Commands.Money;
 
-import com.spillhuset.Commands.Currency.Bank.BankCommand;
-import com.spillhuset.Commands.Currency.Pocket.PocketCommand;
+import com.spillhuset.Commands.Money.Bank.BankCommand;
+import com.spillhuset.Commands.Money.Pocket.PocketCommand;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
@@ -18,10 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class CurrencyCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
+public class MoneyCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public CurrencyCommand() {
+    public MoneyCommand() {
         subCommands.add(new PocketCommand());
         subCommands.add(new BankCommand());
     }

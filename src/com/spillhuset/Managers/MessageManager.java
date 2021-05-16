@@ -1069,7 +1069,7 @@ public class MessageManager {
 
     }
 
-    public void homesCount(Set<String> list, int max, CommandSender sender) {
+    public void homesCount(List<String> list, int max, CommandSender sender) {
         if (list == null) {
             homesNotSet(sender);
             return;
@@ -1153,5 +1153,9 @@ public class MessageManager {
 
     public void locksKey(CommandSender sender) {
         success(type(Plugin.lock),"Here is your key to your locked objects, keep it safe!",sender,false);
+    }
+
+    public void homesChangedSuccess(String name, UUID uuid) {
+        success(type(Plugin.home),"Location for "+cValue+name+cSuccess+" has been changed",uuid,false);
     }
 }

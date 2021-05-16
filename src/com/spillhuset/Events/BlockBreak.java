@@ -17,10 +17,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import java.util.UUID;
 
 public class BlockBreak implements Listener {
-
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
+
         Block block = event.getBlock();
         Player player = event.getPlayer();
         Location location = block.getLocation();
@@ -76,7 +75,7 @@ public class BlockBreak implements Listener {
         }
 
         // Authorization override
-        if (player.isOp() || player.hasPermission("oddjob.guild.admin")) {
+        if (player.isOp() || player.hasPermission("guild.admin")) {
             return;
         }
 

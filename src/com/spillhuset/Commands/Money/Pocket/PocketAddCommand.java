@@ -1,4 +1,4 @@
-package com.spillhuset.Commands.Currency.Pocket;
+package com.spillhuset.Commands.Money.Pocket;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Currency;
@@ -47,21 +47,20 @@ public class PocketAddCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (args.length != 4) {
-            OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.currency,sender);
-            OddJob.getInstance().getMessageManager().sendSyntax(Plugin.warp, getSyntax(), sender);
+        if (checkArgs(4,4,args,sender,getPlugin())) {
             return;
         }
+
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[2]);
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.ban, args[2], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[2], sender);
             return;
         }
         double amount;
         try {
             amount = Integer.parseInt(args[3]);
         } catch (Exception e) {
-            OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency,args[3], sender);
+            OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(),args[3], sender);
             return;
         }
         OddJob.getInstance().getCurrencyManager().addPocketBalance(target, amount);
