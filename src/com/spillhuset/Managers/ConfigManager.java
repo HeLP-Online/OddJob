@@ -22,8 +22,6 @@ public class ConfigManager {
             e.printStackTrace();
         }
 
-        config.set("discord.token","ODQzMTk5ODY5MTY2NjgyMTIz.YKAZEg.knq9I07sRfvSgL_1bcNMabF-L4I");
-
         config.addDefault("Arena.Use-permission", true);
         config.addDefault("Arena.Broadcast-win", true);
 
