@@ -22,7 +22,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
         Player player = (Player) sender;
         UUID guild;
-        if (args.length == 2 && can(sender, true)) {
+        if (args.length == 2 && can(sender,false)) {
             try {
                 guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.valueOf(args[1]));
                 if (guild == null) {

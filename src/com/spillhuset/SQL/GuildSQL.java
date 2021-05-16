@@ -25,7 +25,7 @@ public class GuildSQL extends MySQLManager {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                OddJob.getInstance().log("Nope--------------------------------");
+                OddJob.getInstance().log(resultSet.getString("name"));
                 HashMap<UUID, Role> members = new HashMap<>();
                 UUID guildUUID = UUID.fromString(resultSet.getString("uuid"));
                 preparedStatementsec = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
@@ -154,7 +154,7 @@ public class GuildSQL extends MySQLManager {
         try {
             connect();
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `server` = ?");
-            preparedStatement.setString(1,OddJob.getInstance().getConfig().getString("server_unique_id"));
+            preparedStatement.setString(1,OddJob.getInstance().getServerId().toString());
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
@@ -208,6 +208,7 @@ public class GuildSQL extends MySQLManager {
     }
 
     public static void saveChunks(HashMap<Chunk, UUID> chunks) {
+        OddJob.getInstance().log("server: "+OddJob.getInstance().getServerId());
         for (Chunk chunk : chunks.keySet()) {
 
             World world = chunk.getWorld();

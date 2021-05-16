@@ -25,6 +25,7 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
         subCommands.add(new GuildUnclaimCommand());
         subCommands.add(new GuildDisbandCommand());
         subCommands.add(new GuildLeaveCommand());
+        subCommands.add(new GuildMapCommand());
     }
 
     @Override
