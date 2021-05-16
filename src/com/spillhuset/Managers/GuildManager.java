@@ -108,19 +108,20 @@ public class GuildManager {
         chunks.clear();
         chunks = GuildSQL.loadChunks();
         List<Chunk> rChunk = new ArrayList<>();
-
-        for (Chunk chunk : chunks.keySet()) {
-            UUID guild = chunks.get(chunk);
-            if (getGuild(guild) == null) {
-                unClaim(chunk, null);
-                rChunk.add(chunk);
+        if(chunks.size() >= 1) {
+            for (Chunk chunk : chunks.keySet()) {
+                UUID guild = chunks.get(chunk);
+                if (getGuild(guild) == null) {
+                    unClaim(chunk, null);
+                    rChunk.add(chunk);
+                }
             }
+
+            for (Chunk chunk : rChunk) chunks.remove(chunk);
+
+            clearDynmap();
+            updateDynmap();
         }
-
-        for (Chunk chunk : rChunk) chunks.remove(chunk);
-
-        clearDynmap();
-        updateDynmap();
     }
 
     private void clearDynmap() {

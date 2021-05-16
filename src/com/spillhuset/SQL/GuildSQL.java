@@ -153,7 +153,8 @@ public class GuildSQL extends MySQLManager {
         HashMap<Chunk, UUID> chunks = new HashMap<>();
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks`");
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `server` = ?");
+            preparedStatement.setString(1,OddJob.getInstance().getConfig().getString("server_unique_id"));
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
@@ -216,24 +217,26 @@ public class GuildSQL extends MySQLManager {
 
             try {
                 connect();
-                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
                 preparedStatement.setString(1, world.getUID().toString());
                 preparedStatement.setInt(2, x);
                 preparedStatement.setInt(3, z);
+                preparedStatement.setString(4,OddJob.getInstance().getServerId().toString());
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ?");
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ? ");
                     preparedStatement.setString(1, guild.toString());
                     preparedStatement.setString(2, world.getUID().toString());
                     preparedStatement.setInt(3, x);
                     preparedStatement.setInt(4, z);
                     preparedStatement.executeUpdate();
                 } else {
-                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`) VALUES (?,?,?,?)");
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`,`server`) VALUES (?,?,?,?,?)");
                     preparedStatement.setString(1, guild.toString());
                     preparedStatement.setString(2, world.getUID().toString());
                     preparedStatement.setInt(3, x);
                     preparedStatement.setInt(4, z);
+                    preparedStatement.setString(5,OddJob.getInstance().getServerId().toString());
                     preparedStatement.execute();
                 }
 
@@ -302,10 +305,11 @@ public class GuildSQL extends MySQLManager {
         UUID uuid = null;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ?");
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
             preparedStatement.setString(1, chunk.getWorld().getUID().toString());
             preparedStatement.setInt(2, chunk.getX());
             preparedStatement.setInt(3, chunk.getZ());
+            preparedStatement.setString(4,OddJob.getInstance().getServerId().toString());
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -323,11 +327,12 @@ public class GuildSQL extends MySQLManager {
     public static void createGuildClaim(@Nonnull Chunk chunk, @Nonnull UUID guild) {
         try {
             connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`x`,`z`,`world`,`uuid`) VALUES (?,?,?,?)");
+            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`x`,`z`,`world`,`uuid`,`server`) VALUES (?,?,?,?,?)");
             preparedStatement.setInt(1, chunk.getX());
             preparedStatement.setInt(2, chunk.getZ());
             preparedStatement.setString(3, chunk.getWorld().getUID().toString());
             preparedStatement.setString(4, guild.toString());
+            preparedStatement.setString(5,OddJob.getInstance().getServerId().toString());
             preparedStatement.execute();
         } catch (SQLException ex) {
             ex.printStackTrace();
