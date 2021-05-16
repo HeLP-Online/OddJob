@@ -15,7 +15,6 @@ import com.spillhuset.Managers.*;
 import com.spillhuset.Utils.Arena.ArenaManager;
 import com.spillhuset.Utils.Arena.ChestManager;
 import com.spillhuset.Utils.SignManager;
-import net.dv8tion.jda.api.JDA;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -28,7 +27,6 @@ import java.util.logging.Level;
 
 public class OddJob extends JavaPlugin {
     private static OddJob instance;
-    public JDA discordBot;
 
     private ArenaManager arenaManager;
     private BanManager banManager;
