@@ -1,16 +1,16 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.ScoreBoard;
-import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.Utility;
-import com.spillhuset.Utils.Warp;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,14 +19,25 @@ import java.util.UUID;
 
 public class MySQLManager {
     protected static PreparedStatement preparedStatement = null;
-    protected static PreparedStatement preparedStatementsec = null;
     protected static Connection connection = null;
     protected static Statement statement = null;
     protected static ResultSet resultSet = null;
-    protected static ResultSet resultSetsec = null;
+    protected static ResultSet resultSetSec = null;
+    static HikariConfig config = new HikariConfig();
+    static HikariDataSource dataSource;
     protected static String prefix = "";
 
     protected static void connect() throws SQLException {
+
+        config.setJdbcUrl("jdbc:mariadb://10.0.4.9:3306/odderik");
+        config.setUsername("odderik");
+        config.setPassword("503504");
+        config.addDataSourceProperty("cachePrepStmts", true);
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+
+        dataSource = new HikariDataSource(config);
+
         if (connection == null) {
             String hostname = OddJob.getInstance().getConfig().getString("SQL.Hostname");
             String database = OddJob.getInstance().getConfig().getString("SQL.Database");
@@ -35,7 +46,14 @@ public class MySQLManager {
             int port = OddJob.getInstance().getConfig().getInt("SQL.Port");
             String type = OddJob.getInstance().getConfig().getString("SQL.Type");
             prefix = OddJob.getInstance().getConfig().getString("SQL.Prefix");
-            connection = DriverManager.getConnection("jdbc:" + type + "://" + hostname + "/" + database, username, password);
+            try {
+                connection = DriverManager.getConnection("jdbc:" + type + "://" + hostname + "/" + database, username, password);
+            } catch (SQLTimeoutException e) {
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -181,14 +199,16 @@ public class MySQLManager {
         statement.execute(sting);
         OddJob.getInstance().log("YEH!!!!");
     }
-protected static void close() {
-        close(false);
+
+    protected static void close() {
+        close(true);
     }
+
     protected static void close(boolean force) {
         try {
-            if (resultSetsec != null) {
-                resultSetsec.close();
-                resultSetsec = null;
+            if (resultSetSec != null) {
+                resultSetSec.close();
+                resultSetSec = null;
             }
             if (resultSet != null) {
                 resultSet.close();
@@ -198,10 +218,7 @@ protected static void close() {
                 statement.close();
                 statement = null;
             }
-            if (preparedStatementsec != null) {
-                preparedStatementsec.close();
-                preparedStatementsec = null;
-            }
+
             if (preparedStatement != null) {
                 preparedStatement.close();
                 preparedStatement = null;
@@ -426,7 +443,7 @@ protected static void close() {
         boolean ret = false;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_worlds` SET `jail_" + name + "` = ? WHERE `uuid` = ?");
+            preparedStatement = connection.prepareStatement("UPDATE `mine_worlds` SET `mine_jail` = ? WHERE `uuid` = ?");
             preparedStatement.setString(1, Utility.serializeLoc(location));
             preparedStatement.setString(2, world.toString());
             preparedStatement.executeUpdate();
@@ -444,7 +461,7 @@ protected static void close() {
         Location location = null;
         try {
             connect();
-            preparedStatement = connection.prepareStatement("SELECT `jail_" + name + "` FROM `mine_worlds` WHERE `uuid` = ?");
+            preparedStatement = connection.prepareStatement("SELECT `mine_jail` FROM `mine_worlds` WHERE `uuid` = ?");
             preparedStatement.setString(1, world.toString());
             resultSet = preparedStatement.executeQuery();
 
@@ -470,16 +487,16 @@ protected static void close() {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 if (name.equalsIgnoreCase(resultSet.getString("name"))) {
-                    preparedStatementsec = connection.prepareStatement("UPDATE `mine_worlds` SET `name` = ? WHERE `uuid` = ?");
-                    preparedStatementsec.setString(2, worldUUID.toString());
-                    preparedStatementsec.setString(1, name);
-                    preparedStatementsec.executeUpdate();
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_worlds` SET `name` = ? WHERE `uuid` = ?");
+                    preparedStatement.setString(2, worldUUID.toString());
+                    preparedStatement.setString(1, name);
+                    preparedStatement.executeUpdate();
                 }
             } else {
-                preparedStatementsec = connection.prepareStatement("INSERT INTO `mine_worlds` (`uuid`,`name`) VALUES (?,?)");
-                preparedStatementsec.setString(1, worldUUID.toString());
-                preparedStatementsec.setString(2, name);
-                preparedStatementsec.execute();
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_worlds` (`uuid`,`name`) VALUES (?,?)");
+                preparedStatement.setString(1, worldUUID.toString());
+                preparedStatement.setString(2, name);
+                preparedStatement.execute();
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

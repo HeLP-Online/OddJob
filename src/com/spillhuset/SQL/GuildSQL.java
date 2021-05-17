@@ -28,12 +28,12 @@ public class GuildSQL extends MySQLManager {
                 OddJob.getInstance().log("Nope--------------------------------");
                 HashMap<UUID, Role> members = new HashMap<>();
                 UUID guildUUID = UUID.fromString(resultSet.getString("uuid"));
-                preparedStatementsec = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
-                preparedStatementsec.setString(1, resultSet.getString("uuid"));
-                resultSetsec = preparedStatementsec.executeQuery();
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
+                preparedStatement.setString(1, resultSet.getString("uuid"));
+                resultSetSec = preparedStatement.executeQuery();
 
-                while (resultSetsec.next()) {
-                    members.put(UUID.fromString(resultSetsec.getString("player")), Role.valueOf(resultSetsec.getString("role")));
+                while (resultSetSec.next()) {
+                    members.put(UUID.fromString(resultSetSec.getString("player")), Role.valueOf(resultSetSec.getString("role")));
                 }
                 guilds.put(guildUUID, new Guild(
                         guildUUID,
