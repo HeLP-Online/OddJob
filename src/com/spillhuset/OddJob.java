@@ -112,6 +112,7 @@ public class OddJob extends JavaPlugin {
         getCommand("deop").setExecutor(new DeopCommand());
 
         ConfigManager.load(); // Checked
+        playerManager.load();
         moneyManager.load();
         lockManager.load();
         guildManager.load();
@@ -167,6 +168,7 @@ public class OddJob extends JavaPlugin {
     }
 
     private void save() {
+        playerManager.save();
         moneyManager.save();
         warpManager.save();
     }

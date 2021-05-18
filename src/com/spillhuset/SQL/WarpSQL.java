@@ -63,8 +63,9 @@ public class WarpSQL extends MySQLManager {
 
             while (resultSet.next()) {
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                UUID world = UUID.fromString(resultSet.getString("world"));
                 Location location = new Location(
-                        Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))),
+                        Bukkit.getWorld(world),
                         resultSet.getDouble("x"),
                         resultSet.getDouble("y"),
                         resultSet.getDouble("z"),
@@ -94,12 +95,12 @@ public class WarpSQL extends MySQLManager {
                 Warp warp = warps.get(uuid);
                 Location location = warp.getLocation();
 
-                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `"+prefix+"warps` WHERE `uuid` = ?");
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_warps` WHERE `uuid` = ?");
                 preparedStatement.setString(1,uuid.toString());
                 resultSet = preparedStatement.executeQuery();
 
                 if (resultSet.next()) {
-                    preparedStatement = connection.prepareStatement("UPDATE `"+prefix+"warps` SET `name` = ?,`passwd` = ?,`cost` = ?,`world` = ?,`x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ? WHERE `uuid` = ?");
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_warps` SET `name` = ?,`passwd` = ?,`cost` = ?,`world` = ?,`x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ? WHERE `uuid` = ?");
                     preparedStatement.setString(1,warp.getName());
                     preparedStatement.setString(2,warp.getPassword());
                     preparedStatement.setDouble(3,warp.getCost());

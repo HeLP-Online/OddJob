@@ -107,7 +107,10 @@ public class GuildManager {
     public void loadChunks() {
         chunks.clear();
         chunks = GuildSQL.loadChunks();
-        updateDynmap();
+        if (chunks.size() >= 1) {
+            clearDynmap();
+            updateDynmap();
+        }
     }
 
     private void clearDynmap() {
@@ -207,8 +210,6 @@ public class GuildManager {
                 name,
                 Zone.GUILD,
                 guild,
-                false,
-                false,
                 player,
                 Role.Master));
 
@@ -1079,8 +1080,8 @@ public class GuildManager {
     }
 
     public void load() {
-        loadGuilds();
         loadChunks();
+        loadGuilds();
     }
 
     public int getSumChunks(UUID guild) {

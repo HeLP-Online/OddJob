@@ -52,7 +52,6 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
-            OddJob.getInstance().log("Can: "+can(sender,false));
             if (args.length >= 1 && name.equalsIgnoreCase(args[0]) && can(sender, false)) {
                 subCommand.perform(sender, args);
                 return true;
@@ -74,7 +73,7 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
                 OddJob.getInstance().getMessageManager().homesNotSet(sender);
                 return true;
             }
-            OddJob.getInstance().getMessageManager().homesCount(test, OddJob.getInstance().getPlayerManager().getMaxHomes(target), sender);
+            OddJob.getInstance().getMessageManager().homesCount(test, sender.getName(), OddJob.getInstance().getHomesManager().getMaxHomes(target), sender,true);
             return true;
         }
 

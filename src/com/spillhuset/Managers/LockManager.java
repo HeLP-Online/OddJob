@@ -1,6 +1,7 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
+import com.spillhuset.SQL.LockSQL;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -114,23 +115,23 @@ public class LockManager {
     public void lock(UUID uuid, Entity entity) {
         if (entity.getType().equals(EntityType.ARMOR_STAND)) {
             armor.put(entity.getUniqueId(), uuid);
-            OddJob.getInstance().getMySQLManager().createSecuredArmorStand(uuid, entity);
+            LockSQL.createSecuredArmorStand(uuid, entity);
         }
     }
 
     public void lock(UUID uuid, Location location) {
         locked.put(location, uuid);
-        OddJob.getInstance().getMySQLManager().createSecuredBlock(uuid, location);
+        LockSQL.createSecuredBlock(uuid, location);
     }
 
     public void unlock(Entity entity) {
         armor.remove(entity.getUniqueId());
-        OddJob.getInstance().getMySQLManager().deleteSecuredArmorStand(entity);
+        LockSQL.deleteSecuredArmorStand(entity);
     }
 
     public void unlock(Location location) {
         locked.remove(location);
-        OddJob.getInstance().getMySQLManager().deleteSecuredBlock(location);
+        LockSQL.deleteSecuredBlock(location);
     }
 
     public boolean isLocked(Entity entity) {
@@ -204,13 +205,13 @@ public class LockManager {
         doors.add(Material.SPRUCE_DOOR);
 
         // List of Lockable Blocks
-        lockAble = OddJob.getInstance().getMySQLManager().getLockableMaterials();
+        lockAble = LockSQL.getLockableMaterials();
 
         // List of Locked ArmorStands
-        armor = OddJob.getInstance().getMySQLManager().loadSecuredArmorStands();
+        armor = LockSQL.loadSecuredArmorStands();
 
         // List of Locked Blocks
-        locked = OddJob.getInstance().getMySQLManager().loadSecuredBlocks();
+        locked = LockSQL.loadSecuredBlocks();
         // BUTTON TRAPDOOR PRESSURE_PLATE FENCE_GATE
         // CRIMSON WARPED
         // -DOOR -BUTTON -TRAPDOOR

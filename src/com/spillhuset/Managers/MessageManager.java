@@ -33,33 +33,18 @@ public class MessageManager {
     String tHome = "[" + cHome + "H" + cReset + "] ";
     String tPlayer = "[" + cPlayer + "P" + cReset + "] ";
     String tCurrency = "[" + cCurrency + "C" + cReset + "] ";
-    String tBan = "[" + cBan + "B" + cReset + "]";
+    String tBan = "[" + cBan + "B" + cReset + "] ";
 
     public String type(Plugin type) {
-        String string;
-        switch (type) {
-            case ban:
-                string = tBan;
-                break;
-            case currency:
-                string = tCurrency;
-                break;
-            case home:
-                string = tHome;
-                break;
-            case warp:
-                string = tWarp;
-                break;
-            case guild:
-                string = tGuild;
-                break;
-            case player:
-                string = tPlayer;
-                break;
-            default:
-                string = "[*] ";
-        }
-        return string;
+        return switch (type) {
+            case ban -> tBan;
+            case currency -> tCurrency;
+            case home -> tHome;
+            case warp -> tWarp;
+            case guild -> tGuild;
+            case player -> tPlayer;
+            default -> "[*] ";
+        };
     }
 
     public void console(String text) {
@@ -95,9 +80,8 @@ public class MessageManager {
     }
 
     public void success(String type, String text, CommandSender sender, boolean console) {
-        if (sender instanceof Player) {
+        if (sender instanceof Player player) {
             sender.sendMessage(type + cSuccess + text);
-            Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cSuccess + text);
         } else {
             console(cSuccess + text);
@@ -105,9 +89,8 @@ public class MessageManager {
     }
 
     public void warning(String type, String text, CommandSender sender, boolean console) {
-        if (sender instanceof Player) {
+        if (sender instanceof Player player) {
             sender.sendMessage(type + cWarning + text);
-            Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cWarning + text);
         } else {
             console(cWarning + text);
@@ -115,9 +98,8 @@ public class MessageManager {
     }
 
     public void info(String type, String text, CommandSender sender, boolean console) {
-        if (sender instanceof Player) {
+        if (sender instanceof Player player) {
             sender.sendMessage(type + cInfo + text);
-            Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cInfo + text);
         } else {
             console(cInfo + text);
@@ -125,9 +107,8 @@ public class MessageManager {
     }
 
     public void danger(String type, String text, CommandSender sender, boolean console) {
-        if (sender instanceof Player) {
+        if (sender instanceof Player player) {
             sender.sendMessage(type + cDanger + text);
-            Player player = (Player) sender;
             if (console) console(player.getName() + ": " + cDanger + text);
         } else {
             console(cDanger + text);
@@ -572,7 +553,12 @@ public class MessageManager {
     }
 
     public void banRemoveSuccess(String name, CommandSender sender) {
-        success(type(Plugin.ban), "Ban removed from " + cValue + name, sender, true);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission("ban")) {
+                success(type(Plugin.ban), "Ban removed from " + cValue + name + cSuccess + " by " + cPlayer + sender.getName(), player, true);
+            }
+        }
+
     }
 
     public void banRemoveError(String name, CommandSender sender) {
@@ -580,7 +566,12 @@ public class MessageManager {
     }
 
     public void banAddedSuccess(String name, String text, String send, CommandSender sender) {
-        success(type(Plugin.ban), "Player " + cPlayer + name + cSuccess + " was successfully banned with the text '" + cValue + text + cSuccess + "' by " + cPlayer + send, sender, true);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission("ban")) {
+                success(type(Plugin.ban), "Player " + cPlayer + name + cSuccess + " was successfully banned with the text '" + cValue + text + cSuccess + "' by " + cPlayer + send, sender, true);
+            }
+        }
+
     }
 
     public void banList(HashMap<OddPlayer, String> bans, CommandSender sender) {
@@ -1064,18 +1055,26 @@ public class MessageManager {
         warning(type(type), "We can't find " + cValue + name + cWarning + " as " + cValue + account, sender, false);
     }
 
-    public void guildMenu(String toString, String guildNameByUUID, Role guildMemberRole, CommandSender sender) {
-        info(type(Plugin.guild), "You are a " + cValue + guildMemberRole.name() + cInfo + " of " + cGuild + guildNameByUUID, sender, false);
-
+    public void guildMenu(Guild guild, String guildNameByUUID, Role guildMemberRole, CommandSender sender) {
+        info(type(Plugin.guild), "As a " + cValue + guildMemberRole.name() + cInfo + " of " + cGuild + guildNameByUUID, sender, false);
+        info(type(Plugin.guild),"Guild is open: "+String.valueOf(guild.getOpen()),sender,false);
+        info(type(Plugin.guild),"Friendly fire activated: "+String.valueOf(guild.getFriendlyFire()),sender,false);
+        info(type(Plugin.guild),""+cValue+guild.getChunks()+cInfo+"/"+cValue+guild.getMaxClaims(),sender,false);
+        info(type(Plugin.guild),"Players with role; "+cValue+"<player>:<role>",sender,false);
+        for (UUID uuid : guild.getMembers().keySet()) {
+            Role role = guild.getMembers().get(uuid);
+            OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(uuid);
+            info(type(Plugin.guild),oddPlayer.getName()+":"+role.name(),sender,false);
+        }
     }
 
-    public void homesCount(List<String> list, int max, CommandSender sender) {
+    public void homesCount(List<String> list,String target, int max, CommandSender sender,boolean self) {
         if (list == null) {
             homesNotSet(sender);
             return;
         }
-        info(type(Plugin.home), "You have assigned " + cValue + list.size() + cInfo + " of " + cValue + max, sender, false);
-        info(type(Plugin.home), "------------------------------------", sender, false);
+        info(type(Plugin.home), ((self) ?"You": cPlayer+target+cInfo)+" have assigned " + cValue + list.size() + cInfo + " of " + cValue + max, sender, false);
+        space(Plugin.home,sender);
         int i = 1;
         for (String name : list) {
             info(type(Plugin.home), i + ".) " + cValue + name, sender, false);
@@ -1119,11 +1118,11 @@ public class MessageManager {
         }
     }
 
-    public void opSet(Player player, CommandSender sender,boolean self) {
+    public void opSet(Player player, CommandSender sender, boolean self) {
         success(type(Plugin.op), "Successfully op'ed " + cPlayer + player, sender, false);
     }
 
-    public void deopSet(Player player, CommandSender sender,boolean self) {
+    public void deopSet(Player player, CommandSender sender, boolean self) {
         success(type(Plugin.deop), "Successfully deop'ed " + cPlayer + player, sender, false);
     }
 
@@ -1152,10 +1151,14 @@ public class MessageManager {
     }
 
     public void locksKey(CommandSender sender) {
-        success(type(Plugin.lock),"Here is your key to your locked objects, keep it safe!",sender,false);
+        success(type(Plugin.lock), "Here is your key to your locked objects, keep it safe!", sender, false);
     }
 
     public void homesChangedSuccess(String name, UUID uuid) {
-        success(type(Plugin.home),"Location for "+cValue+name+cSuccess+" has been changed",uuid,false);
+        success(type(Plugin.home), "Location for " + cValue + name + cSuccess + " has been changed", uuid, false);
+    }
+
+    public void guildInfoSelf(Guild guild, CommandSender sender) {
+
     }
 }

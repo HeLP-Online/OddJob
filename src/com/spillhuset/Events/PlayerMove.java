@@ -2,8 +2,12 @@ package com.spillhuset.Events;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Zone;
+import net.minecraft.server.v1_16_R3.IChatBaseComponent;
+import net.minecraft.server.v1_16_R3.PacketPlayOutTitle;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,7 +19,6 @@ public class PlayerMove implements Listener {
 
     @EventHandler
     public void freeze(PlayerMoveEvent event) {
-
         Player player = event.getPlayer();
         // If Player is frozen
         if (OddJob.getInstance().getFreezeManager().get(player.getUniqueId()) != null) {
@@ -34,8 +37,8 @@ public class PlayerMove implements Listener {
         boolean print = false;
 
         // Have the player changed chunk?
-        if (movingFromChunk.equals(movingToChunk)) {
-            // Player is within the same guild
+        if (movingFromChunk.getX() == movingToChunk.getX() && movingFromChunk.getZ() == movingToChunk.getZ()) {
+            // Player is within the same chunk
             return;
         }
 
@@ -48,9 +51,20 @@ public class PlayerMove implements Listener {
 
 
         // Auto claiming
-        if (movingToGuild != null && (movingFromGuild != null && !movingFromGuild.equals(movingToGuild)) && movingToGuild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
-            if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
-                OddJob.getInstance().getGuildManager().autoClaim(player, movingToChunk);
+        if (movingToGuild != null) {
+            // Moving to not null
+            if (movingFromGuild != null) {
+                // Moving from not null
+                if (movingFromGuild != movingToGuild) {
+                    // Moving to is not moving from
+                    if (movingToGuild == OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
+                        // Moving to is WILD
+                        if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
+                            // Auto Claim is on
+                            OddJob.getInstance().getGuildManager().autoClaim(player, movingToChunk);
+                        }
+                    }
+                }
             }
         }
 
@@ -62,38 +76,27 @@ public class PlayerMove implements Listener {
         }
 
         // Actionbar
-        /*if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
+        if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk));
             print = true;
         } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals(OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk))) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingFromChunk));
             print = true;
         }
-
+        UUID uuid = OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId());
+        OddJob.getInstance().log(OddJob.getInstance().getGuildManager().getZoneByGuild(uuid).name());
         if (print) {
             // Printing to Actionbar
             StringBuilder s = new StringBuilder();
             switch (OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild)) {
-                case GUILD:
-                    s.append(ChatColor.DARK_BLUE).append(OddJob.getInstance().getGuildManager().getGuildNameByUUID(movingToGuild)).append(" hails you!");
-                    break;
-                case ARENA:
-                case WAR:
-                    s.append(ChatColor.RED).append("Draw your weapon!");
-                    break;
-                case JAIL:
-                    s.append(ChatColor.GOLD).append("Serve your time!");
-                    break;
-                case SAFE:
-                    s.append(ChatColor.GREEN).append("Take a break and prepare!");
-                    break;
-                default:
-                    s.append(ChatColor.YELLOW).append("Welcome to the wild!");
-                    break;
-
+                case GUILD -> s.append(ChatColor.DARK_BLUE).append(OddJob.getInstance().getGuildManager().getGuildNameByUUID(movingToGuild)).append(" hails you!");
+                case ARENA, WAR -> s.append(ChatColor.RED).append("Draw your weapon!");
+                case JAIL -> s.append(ChatColor.GOLD).append("Serve your time!");
+                case SAFE -> s.append(ChatColor.GREEN).append("Take a break and prepare!");
+                default -> s.append(ChatColor.YELLOW).append("Welcome to the wild!");
             }
-            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s.toString() + "\"}"), 40, 20, 20);
+            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
             (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
-        }*/
+        }
     }
 }
