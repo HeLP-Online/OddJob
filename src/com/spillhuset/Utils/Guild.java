@@ -1,6 +1,6 @@
 package com.spillhuset.Utils;
 
-import com.spillhuset.SQL.GuildSQL;
+import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
 
@@ -11,43 +11,34 @@ public class Guild {
     String name;
     Zone zone;
     UUID guildUUID;
-    boolean invited_only, friendly_fire;
+    boolean invited_only = OddJob.getInstance().getConfig().getBoolean("guild.default.invitedOnly");
+    boolean friendly_fire = OddJob.getInstance().getConfig().getBoolean("guild.default.friendlyFire");
     HashMap<UUID, Role> members = new HashMap<>();
-    Role permissionInvite;
-    Role permissionKick;
+    Role permissionInvite = Role.valueOf(OddJob.getInstance().getConfig().getString("guild.default.permissionInvite"));
+    Role permissionKick = Role.valueOf(OddJob.getInstance().getConfig().getString("guild.default.permissionKick"));
     private int chunks;
-    boolean open;
-    private int maxClaims;
+    boolean open = OddJob.getInstance().getConfig().getBoolean("guild.default.open");
+    private int maxClaims = OddJob.getInstance().getConfig().getInt("guild.default.maxClaims");
 
     /**
      * Creating a new Guild from the command
      *
-     * @param name String name of the Guild
-     * @param zone Zone the Guild belongs to
-     * @param guildUUID Guilds unique ID
-     * @param invited_only boolean Only invited Players may join
-     * @param friendly_fire boolean Members may damage each other inside the Guild
-     * @param playerUUID UUID of the Player creating the Guild
-     * @param role Role of the Player creating the Guild
+     * @param name          String name of the Guild
+     * @param zone          Zone the Guild belongs to
+     * @param guildUUID     Guilds unique ID
+     * @param playerUUID    UUID of the Player creating the Guild
+     * @param role          Role of the Player creating the Guild
      */
     public Guild(
             String name,
             Zone zone,
             UUID guildUUID,
-            boolean invited_only,
-            boolean friendly_fire,
             UUID playerUUID,
             Role role) {
         this.name = name;
         this.zone = zone;
         this.guildUUID = guildUUID;
-        this.invited_only = invited_only;
-        this.friendly_fire = friendly_fire;
-        this.permissionInvite = Role.Members;
-        this.permissionKick = Role.Mods;
         this.members.put(playerUUID, role);
-        this.open = false;
-        this.maxClaims = 0;
     }
 
     public Guild(
@@ -61,9 +52,6 @@ public class Guild {
         this.guildUUID = guildUUID;
         this.invited_only = invited_only;
         this.friendly_fire = friendly_fire;
-        this.permissionInvite = Role.Members;
-        this.permissionKick = Role.Mods;
-        this.open = true;
     }
 
     /**
@@ -100,7 +88,6 @@ public class Guild {
         this.open = open;
         this.maxClaims = maxClaims;
     }
-
 
 
     public UUID getGuildUUID() {
@@ -156,7 +143,7 @@ public class Guild {
     }
 
     public void setMaster(UUID member) {
-        members.put(member,Role.Master);
+        members.put(member, Role.Master);
     }
 
     public void setOpen(boolean open) {
@@ -172,7 +159,8 @@ public class Guild {
     }
 
     public int getMaxClaims() {
-        return maxClaims;
+        int i = maxClaims;
+        return i;
     }
 
 

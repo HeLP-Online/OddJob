@@ -6,6 +6,7 @@ import com.spillhuset.Utils.Odd.OddPlayer;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,12 +40,12 @@ public class PlayerSQL extends MySQLManager {
                 denyTrade = resultSet.getBoolean("denytrade");
 
                 name = resultSet.getString("name");
-                banned = resultSet.getString("banned");
+                banned = resultSet.getString("banned") != null ? resultSet.getString("banned") : null;
 
                 scoreboard = ScoreBoard.valueOf(resultSet.getString("scoreboard"));
                 maxHomes = resultSet.getInt("maxhomes");
 
-                oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade,maxHomes);
+                oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade, maxHomes);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -57,30 +58,37 @@ public class PlayerSQL extends MySQLManager {
     public static void save(OddPlayer oddPlayer) {
         try {
             StringBuilder whitelist = new StringBuilder();
-            for (UUID uuid:oddPlayer.getWhitelist()) {
-                whitelist.append(uuid.toString()).append(",");
+            if (oddPlayer.getWhitelist().size() >= 1) {
+                for (UUID uuid : oddPlayer.getWhitelist()) {
+                    whitelist.append(uuid.toString()).append(",");
+                }
+                whitelist.deleteCharAt(whitelist.lastIndexOf(","));
             }
-            whitelist.deleteCharAt(whitelist.lastIndexOf(","));
             StringBuilder blacklist = new StringBuilder();
-            for (UUID uuid:oddPlayer.getBlacklist()) {
-                blacklist.append(uuid.toString()).append(",");
+            if (oddPlayer.getBlacklist().size() >= 1) {
+                for (UUID uuid : oddPlayer.getBlacklist()) {
+                    blacklist.append(uuid.toString()).append(",");
+                }
+                blacklist.deleteCharAt(blacklist.lastIndexOf(","));
             }
-            blacklist.deleteCharAt(blacklist.lastIndexOf(","));
             connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?,`whitelist` = ?,`scoreboard` = ?,`maxhomes` = ?,`denytpa` = ?,`denytrade` = ? WHERE `uuid` =?");
-            preparedStatement.setString(1,blacklist.toString());
-            preparedStatement.setString(2,whitelist.toString());
-            preparedStatement.setString(3,oddPlayer.getScoreboard().name());
-            preparedStatement.setInt(4,oddPlayer.getMaxHomes());
+            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?,`whitelist` = ?,`scoreboard` = ?,`maxhomes` = ?,`denytpa` = ?,`denytrade` = ?,`banned` =? WHERE `uuid` =?");
+            preparedStatement.setString(1, blacklist.toString());
+            preparedStatement.setString(2, whitelist.toString());
+            preparedStatement.setString(3, oddPlayer.getScoreboard().name());
+            preparedStatement.setInt(4, oddPlayer.getMaxHomes());
             preparedStatement.setBoolean(5, oddPlayer.getDenyTpa());
             preparedStatement.setBoolean(6, oddPlayer.getDenyTrade());
-            preparedStatement.setString(7,oddPlayer.getUuid().toString());
+            preparedStatement.setString(7, oddPlayer.getBanned());
+            preparedStatement.setString(8, oddPlayer.getUuid().toString());
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             close();
         }
     }
+
     public static void setScoreboard(UUID uuid, ScoreBoard score) {
         try {
             connect();
@@ -93,5 +101,34 @@ public class PlayerSQL extends MySQLManager {
         } finally {
             close();
         }
+    }
+
+    public static void save(HashMap<UUID, OddPlayer> players) {
+        for (UUID uuid : players.keySet()) {
+            save(players.get(uuid));
+        }
+    }
+
+    public static HashMap<UUID, OddPlayer> load() {
+        HashMap<UUID, OddPlayer> players = new HashMap<>();
+        List<UUID> player = new ArrayList<>();
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players`");
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                player.add(UUID.fromString(resultSet.getString("uuid")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+
+        for (UUID uuid : player) {
+            players.put(uuid, load(uuid));
+        }
+        return players;
     }
 }

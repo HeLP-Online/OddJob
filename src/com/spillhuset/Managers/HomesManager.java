@@ -87,11 +87,14 @@ public class HomesManager {
      * @return
      */
     public void list(UUID uuid, CommandSender sender) {
-        OddJob.getInstance().getMessageManager().homesCount(getList(uuid), getMaxHomes(uuid), sender);
+        OddJob.getInstance().getMessageManager().homesCount(getList(uuid),OddJob.getInstance().getPlayerManager().getName(uuid), getMaxHomes(uuid), sender,false);
     }
 
     public int getMaxHomes(UUID uuid) {
-        return OddJob.getInstance().getPlayerManager().getMaxHomes(uuid);
+        int i = OddJob.getInstance().getConfig().getInt("default.player.maxHomes");
+        i += ConfigManager.maxHomes(uuid);
+        i += OddJob.getInstance().getPlayerManager().getMaxHomes(uuid);
+        return i;
     }
 
     public void teleport(Player player, UUID uuid, String string) {

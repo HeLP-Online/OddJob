@@ -120,7 +120,7 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
         if (args.length == 0) {
             if (guild != null) {
-                OddJob.getInstance().getMessageManager().guildMenu(nameBuilder.toString(), OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()), sender);
+                OddJob.getInstance().getMessageManager().guildMenu(OddJob.getInstance().getGuildManager().getGuild(guild), OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()), sender);
             } else {
                 OddJob.getInstance().getMessageManager().guildNotAssociated(player.getUniqueId());
             }

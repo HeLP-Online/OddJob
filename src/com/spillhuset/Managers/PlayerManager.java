@@ -36,7 +36,7 @@ public class PlayerManager {
     }
 
     public void save() {
-        //TODO PlayerSQL.save();
+        PlayerSQL.save(players);
     }
 
     public String getName(UUID uuid) {
@@ -241,15 +241,21 @@ public class PlayerManager {
     }
 
     public void setMaxHomes(UUID target,int i) {
-        players.get(target).setMaxHomes(i);
-        save(target);
+        OddPlayer oddPlayer = players.get(target);
+        oddPlayer.setMaxHomes(i);
+        save(oddPlayer);
     }
 
-    private void save(UUID target) {
-        PlayerSQL.save(players.get(target));
+    public void save(OddPlayer target) {
+        OddJob.getInstance().log("saving: "+target.getName());
+        PlayerSQL.save(target);
     }
 
     public void setGameMode(Player target, GameMode gm) {
         target.setGameMode(gm);
+    }
+
+    public void load() {
+        players = PlayerSQL.load();
     }
 }

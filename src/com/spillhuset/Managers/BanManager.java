@@ -1,6 +1,7 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
+import com.spillhuset.Utils.Odd.OddPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -10,13 +11,17 @@ import java.util.UUID;
 public class BanManager {
 
     public void ban(UUID playerUUID, String text) {
-        OddJob.getInstance().getPlayerManager().getOddPlayer(playerUUID).setBanned(text);
+        OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(playerUUID);
+        oddPlayer.setBanned(text);
+        OddJob.getInstance().getPlayerManager().save(oddPlayer);
         Player player = OddJob.getInstance().getPlayerManager().getPlayer(playerUUID);
         if (player != null && player.isOnline()) kick(player, text);
     }
 
     public void unban(UUID player) {
-        OddJob.getInstance().getPlayerManager().getOddPlayer(player).setBanned(null);
+        OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(player);
+        oddPlayer.setBanned(null);
+        OddJob.getInstance().getPlayerManager().save(oddPlayer);
     }
 
     public List<UUID> getBans() {

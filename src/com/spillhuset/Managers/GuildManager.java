@@ -42,7 +42,7 @@ public class GuildManager {
 
     /**
      * List of Players with a pending invitation to a Guild
-     *
+     * <p>
      * HashMap<UUID,UUID> Player , Guild
      */
     private HashMap<UUID, UUID> guildPending = new HashMap<>();   // PlayerUUID   | GuildUUID
@@ -107,18 +107,7 @@ public class GuildManager {
     public void loadChunks() {
         chunks.clear();
         chunks = GuildSQL.loadChunks();
-        List<Chunk> rChunk = new ArrayList<>();
-        if(chunks.size() >= 1) {
-            for (Chunk chunk : chunks.keySet()) {
-                UUID guild = chunks.get(chunk);
-                if (getGuild(guild) == null) {
-                    unClaim(chunk, null);
-                    rChunk.add(chunk);
-                }
-            }
-
-            for (Chunk chunk : rChunk) chunks.remove(chunk);
-
+        if (chunks.size() >= 1) {
             clearDynmap();
             updateDynmap();
         }
@@ -221,8 +210,6 @@ public class GuildManager {
                 name,
                 Zone.GUILD,
                 guild,
-                false,
-                false,
                 player,
                 Role.Master));
 

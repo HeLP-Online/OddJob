@@ -43,10 +43,11 @@ public class BanCommand extends SubCommandInterface implements CommandExecutor, 
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
-            if (name.equalsIgnoreCase(args[0])) {
+            if (args.length > 0 && name.equalsIgnoreCase(args[0])) {
                 subCommand.perform(sender, args);
                 return true;
             }
