@@ -3,6 +3,7 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.GuildSQL;
 import com.spillhuset.Utils.Enum.Role;
+import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Guild;
 import org.bukkit.Bukkit;
@@ -216,7 +217,7 @@ public class GuildManager {
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
             // Gives the Player the Guild Scoreboard
-            //TODO OddJob.getInstance().getScoreManager().guild(p);
+            OddJob.getInstance().getScoreManager().create(p, ScoreBoard.Guild);
         }
         return true;
     }

@@ -52,7 +52,7 @@ public class GuildJoinCommand extends SubCommand implements GuildRole {
         // guild create <name>
         if (!(sender instanceof Player)) {
             // Sender is console
-            OddJob.getInstance().getMessageManager().errorConsole(Plugin.guild);
+            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
 

@@ -3,11 +3,13 @@ package com.spillhuset.Commands.Guild;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Role;
+import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ public class GuildDisbandCommand extends SubCommand implements GuildRole {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        UUID guild = null;
+        UUID guild;
         boolean console = false;
         UUID player = null;
         if (!(sender instanceof Player)) {
@@ -82,11 +84,14 @@ public class GuildDisbandCommand extends SubCommand implements GuildRole {
         }
         OddJob.getInstance().getMessageManager().guildDisband(guild, sender);
         OddJob.getInstance().getGuildManager().disband(guild);
+        if (sender instanceof Player) {
+            OddJob.getInstance().getScoreManager().create((Player) sender, ScoreBoard.Player);
+        }
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override

@@ -52,7 +52,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (checkArgs(1, 2, args, sender, getPlugin())) {
+        if (checkArgs(1, 3, args, sender, getPlugin())) {
             return;
         }
 
@@ -63,14 +63,9 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
         Player player = (Player) sender;
         UUID guild;
-        if (args.length == 2 && can(sender,true)) {
-            try {
-                guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.valueOf(args[1]));
-                if (guild == null) {
-                    OddJob.getInstance().getMessageManager().guildZoneError(args[1], player);
-                    return;
-                }
-            } catch (Exception e) {
+        if (args.length == 2 && can(sender, true)) {
+            guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.valueOf(args[1]));
+            if (guild == null) {
                 OddJob.getInstance().getMessageManager().guildZoneError(args[1], player);
                 return;
             }
@@ -85,15 +80,12 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
         if (OddJob.getInstance().getGuildManager().getSumChunks(guild) >= gg.getMaxClaims()) {
             OddJob.getInstance().getGuildManager().claim(guild, player.getLocation().getChunk(), player);
         }
-
-        OddJob.getInstance().log("Chunk:" + OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()) + "    Guild:" + guild);
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
-        List<String> list = new ArrayList<>();
 
-        return list;
+        return new ArrayList<>();
     }
 
     @Override
