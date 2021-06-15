@@ -1,10 +1,7 @@
 package com.spillhuset.Events;
 
-import net.minecraft.server.v1_16_R3.IChatBaseComponent;
-import net.minecraft.server.v1_16_R3.PacketPlayOutTitle;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Zone;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,8 +26,8 @@ public class PlayerJoin implements Listener {
             OddJob.getInstance().getBanManager().kick(player);
         } else {
             // Welcome message
-            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to Spillhuset\"}"), 40, 20, 20);
-            (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
+            //PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to Spillhuset\"}"), 40, 20, 20);
+            //(((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
 
             // Remove locking items if the player has any
             OddJob.getInstance().getLockManager().remove(uuid);

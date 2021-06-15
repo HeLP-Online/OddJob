@@ -1,10 +1,7 @@
 package com.spillhuset.Utils;
 
-import org.dynmap.markers.AreaMarker;
-import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerIcon;
-
 public class DynmapUtil {
+    /*
     public static MarkerIcon getMarkerIcon(MarkerAPI markerAPI, String name) {
         MarkerIcon markerIcon = markerAPI.getMarkerIcon(name);
         if (markerIcon == null) markerAPI.getMarkerIcon("home");
@@ -31,4 +28,6 @@ public class DynmapUtil {
         }
         return true;
     }
+
+     */
 }

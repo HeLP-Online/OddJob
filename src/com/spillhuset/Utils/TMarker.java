@@ -1,11 +1,5 @@
 package com.spillhuset.Utils;
 
-import org.dynmap.markers.Marker;
-import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerSet;
-
-import java.util.Optional;
-
 public class TMarker {
     public String label;
     public String world;
@@ -14,7 +8,7 @@ public class TMarker {
     public double z;
     public String iconName;
     public String description;
-
+/*
     public Optional<Marker> create(MarkerAPI markerApi, MarkerSet markerSet, String markerId) {
         Marker marker = markerSet.createMarker(markerId, label, world, x, y, z, markerApi.getMarkerIcon(iconName), false);
         if (marker == null) return Optional.empty();
@@ -32,5 +26,5 @@ public class TMarker {
 
     public boolean equals(Marker marker) {
         return marker.getWorld().equals(world) && marker.getX() == x && marker.getY() == y && marker.getZ() == z;
-    }
+    }*/
 }

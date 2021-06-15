@@ -35,7 +35,8 @@ public class BanManager {
     }
 
     public String getBan(UUID uuid) {
-        return OddJob.getInstance().getPlayerManager().getOddPlayer(uuid).getBanned();
+        String mesg = OddJob.getInstance().getPlayerManager().getOddPlayer(uuid).getBanned();
+        return mesg;
     }
 
     public void kick(Player player) {

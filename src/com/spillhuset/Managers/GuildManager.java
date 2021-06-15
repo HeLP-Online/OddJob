@@ -13,18 +13,13 @@ import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.dynmap.DynmapAPI;
-import org.dynmap.markers.AreaMarker;
-import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerIcon;
-import org.dynmap.markers.MarkerSet;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 
 public class GuildManager {
-    private MarkerSet markerSet = null;
-    private HashMap<String, AreaMarker> markers;
+    //private MarkerSet markerSet = null;
+    //private HashMap<String, AreaMarker> markers;
 
     /**
      * List of Players auto-claiming to a Guild
@@ -58,6 +53,7 @@ public class GuildManager {
     }
 
     private void dynmapInit() {
+        /*
         markers = new HashMap<>();
         try {
             DynmapAPI dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
@@ -71,7 +67,7 @@ public class GuildManager {
             }
         } catch (Exception e) {
             OddJob.getInstance().getMessageManager().console("Map Marker disabled");
-        }
+        }*/
     }
 
     /**
@@ -115,9 +111,10 @@ public class GuildManager {
     }
 
     private void clearDynmap() {
+        /*
         for (String s : markers.keySet()) {
             markers.get(s).deleteMarker();
-        }
+        }*/
     }
 
     private void updateDynmap() {
@@ -130,10 +127,10 @@ public class GuildManager {
         String coords = chunk.getX() + "x" + chunk.getZ();
         UUID worldUUID = chunk.getWorld().getUID();
         String markerId = worldUUID.toString().substring(0, 8) + "-" + coords;
-
+/*
         AreaMarker areaMarker = markers.get(markerId);
         if (areaMarker != null) areaMarker.deleteMarker();
-        markers.remove(markerId);
+        markers.remove(markerId);*/
     }
 
     /**
@@ -144,7 +141,7 @@ public class GuildManager {
         UUID worldUUID = chunk.getWorld().getUID();
         UUID guildUUID = getGuildUUIDByChunk(chunk);
         String markerId = worldUUID.toString().substring(0, 8) + "-" + coords;
-
+/*
         AreaMarker areaMarker = markers.get(markerId);
         if (areaMarker == null)
             areaMarker = markerSet.createAreaMarker(markerId, getGuildNameByUUID(guildUUID), true, chunk.getWorld().getName(), new double[1000], new double[1000], false);
@@ -174,6 +171,8 @@ public class GuildManager {
             }
         }
         markers.put(markerId, areaMarker);
+
+ */
     }
 
     /**

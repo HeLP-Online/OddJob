@@ -1,11 +1,5 @@
 package com.spillhuset.Utils;
 
-import org.dynmap.markers.AreaMarker;
-import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerSet;
-
-import java.util.Optional;
-
 public class TAreaMarker {
     private String label;
     private String world;
@@ -17,7 +11,7 @@ public class TAreaMarker {
     private int lineColor;
     private double fillOpacity;
     private int fillColor;
-
+/*
     public Optional<AreaMarker> create(MarkerAPI markerAPI, MarkerSet markerSet, String markerId) {
         AreaMarker marker = markerSet.createAreaMarker(markerId, label, false, world, x, z, false);
         if (marker == null) return Optional.empty();
@@ -45,5 +39,5 @@ public class TAreaMarker {
         if (!fillOpacity.equals(this.fillOpacity) || !fillColor.equals(this.fillColor)) {
             marker.setFillStyle(this.fillOpacity, this.fillColor);
         }
-    }
+    }*/
 }

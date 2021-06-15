@@ -3,13 +3,10 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.PlayerSQL;
 import com.spillhuset.Utils.Odd.OddPlayer;
-import net.minecraft.server.v1_16_R3.IChatBaseComponent;
-import net.minecraft.server.v1_16_R3.PacketPlayOutTitle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -105,9 +102,9 @@ public class PlayerManager {
     }
 
     private void setCombatTitle(String text, UUID player) {
-        PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + "\"}"), 40, 20, 20);
+        /*PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + "\"}"), 40, 20, 20);
         if (OddJob.getInstance().getPlayerManager().getPlayer(player).isOnline())
-            (((CraftPlayer) Bukkit.getPlayer(player)).getHandle()).playerConnection.sendPacket(title);
+            (((CraftPlayer) Bukkit.getPlayer(player)).getHandle()).playerConnection.sendPacket(title);*/
     }
 
     private void removeInCombat(UUID player) {
@@ -240,14 +237,14 @@ public class PlayerManager {
         return players.get(target).getMaxHomes();
     }
 
-    public void setMaxHomes(UUID target,int i) {
+    public void setMaxHomes(UUID target, int i) {
         OddPlayer oddPlayer = players.get(target);
         oddPlayer.setMaxHomes(i);
         save(oddPlayer);
     }
 
     public void save(OddPlayer target) {
-        OddJob.getInstance().log("saving: "+target.getName());
+        OddJob.getInstance().log("saving: " + target.getName());
         PlayerSQL.save(target);
     }
 

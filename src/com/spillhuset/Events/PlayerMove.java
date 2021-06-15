@@ -2,12 +2,9 @@ package com.spillhuset.Events;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Zone;
-import net.minecraft.server.v1_16_R3.IChatBaseComponent;
-import net.minecraft.server.v1_16_R3.PacketPlayOutTitle;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -95,8 +92,9 @@ public class PlayerMove implements Listener {
                 case SAFE -> s.append(ChatColor.GREEN).append("Take a break and prepare!");
                 default -> s.append(ChatColor.YELLOW).append("Welcome to the wild!");
             }
+            /*
             PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
-            (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
+            (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);*/
         }
     }
 }

@@ -182,6 +182,9 @@ public class MessageManager {
     public void insufficientFunds(CommandSender player) {
         player.sendMessage(tCurrency + cWarning + " Insufficient funds.");
     }
+    public void insufficientFunds(UUID target, CommandSender player) {
+        player.sendMessage(tCurrency + cWarning + " Insufficient funds.");
+    }
 
 
     public void infoListPlayers(String string, Collection<UUID> list, CommandSender commandSender) {

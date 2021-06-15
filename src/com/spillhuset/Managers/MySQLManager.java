@@ -25,15 +25,20 @@ public class MySQLManager {
 
 
         if (connection == null) {
-            String hostname = OddJob.getInstance().getConfig().getString("SQL.Hostname");
-            String database = OddJob.getInstance().getConfig().getString("SQL.Database");
-            String username = OddJob.getInstance().getConfig().getString("SQL.Username");
-            String password = OddJob.getInstance().getConfig().getString("SQL.Password");
-            int port = OddJob.getInstance().getConfig().getInt("SQL.Port");
-            String type = OddJob.getInstance().getConfig().getString("SQL.Type");
-            prefix = OddJob.getInstance().getConfig().getString("SQL.Prefix");
-                connection = DriverManager.getConnection("jdbc:" + type + "://" + hostname + ":"+port+"/" + database, username, password);
+            String hostname = OddJob.getInstance().getConfig().getString("sql.hostname");
+            String database = OddJob.getInstance().getConfig().getString("sql.database");
+            String username = OddJob.getInstance().getConfig().getString("sql.username");
+            String password = OddJob.getInstance().getConfig().getString("sql.password");
+            int port = OddJob.getInstance().getConfig().getInt("sql.port");
+            String type = OddJob.getInstance().getConfig().getString("sql.type");
+            prefix = OddJob.getInstance().getConfig().getString("sql.prefix");
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
 
+            connection = DriverManager.getConnection("jdbc:" + type + "://" + hostname + ":" + port + "/" + database, username, password);
         }
     }
 

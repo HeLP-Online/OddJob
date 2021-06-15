@@ -36,13 +36,13 @@ public class ConfigManager {
         config.addDefault("arena.use-permission", true);
         config.addDefault("arena.broadcast-win", true);
 
-        config.addDefault("sql.Type", "mysql");
-        config.addDefault("sql.Prefix", "mine_");
-        config.addDefault("sql.Hostname", "localhost");
-        config.addDefault("sql.Port", 3306);
-        config.addDefault("sql.Database", "minecraft");
-        config.addDefault("sql.Username", "root");
-        config.addDefault("sql.Password", "");
+        config.addDefault("sql.type", "mysql");
+        config.addDefault("sql.prefix", "mine_");
+        config.addDefault("sql.hostname", "localhost");
+        config.addDefault("sql.port", 3306);
+        config.addDefault("sql.database", "minecraft");
+        config.addDefault("sql.username", "root");
+        config.addDefault("sql.password", "");
 
         config.addDefault("guild.default.maxClaims", 10);
         config.addDefault("guild.default.open", false);

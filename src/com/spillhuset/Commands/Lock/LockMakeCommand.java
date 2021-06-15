@@ -61,7 +61,7 @@ public class LockMakeCommand extends SubCommand {
                     , cost, player.hasPermission("currency.negative"))) {
                 OddJob.getInstance().getMessageManager().locksKey(sender);
             } else {
-                OddJob.getInstance().getMessageManager().insufficientFunds(sender);
+                OddJob.getInstance().getMessageManager().insufficientFunds( sender);
                 return;
             }
         }
