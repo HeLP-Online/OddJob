@@ -113,9 +113,9 @@ public class OddJob extends JavaPlugin {
 
         ConfigManager.load(); // Checked
         playerManager.load();
+        guildManager.load();
         moneyManager.load();
         lockManager.load();
-        guildManager.load();
         warpManager.load();
         worldManager.load();
         arenaManager.load();

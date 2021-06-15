@@ -71,7 +71,7 @@ public class BankSubCommand extends SubCommand {
         }
 
         if (OddJob.getInstance().getCurrencyManager().subtractBankBalance(target, amount, sender.hasPermission("currency.negative"), account)) {
-            OddJob.getInstance().getMessageManager().currencyChanged(Currency.pocket, amount, OddJob.getInstance().getCurrencyManager().getPocketBalance(target), target, sender);
+            OddJob.getInstance().getMessageManager().currencyChanged(account, amount, OddJob.getInstance().getCurrencyManager().getPocketBalance(target), target, sender);
         } else {
             OddJob.getInstance().getMessageManager().insufficientFunds(target,sender);
         }

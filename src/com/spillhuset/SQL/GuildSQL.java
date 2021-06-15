@@ -45,13 +45,14 @@ public class GuildSQL extends MySQLManager {
                         members,
                         resultSet.getInt("maxclaims")
                 ));
-
+                OddJob.getInstance().log(resultSet.getString("name"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
+        OddJob.getInstance().log("Loaded GZ "+guilds.size());
         return guilds;
     }
 

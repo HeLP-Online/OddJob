@@ -119,7 +119,7 @@ public class GuildManager {
 
     private void updateDynmap() {
         for (Chunk chunk : chunks.keySet()) {
-            updateDynmapChunk(chunk);
+            //updateDynmapChunk(chunk);
         }
     }
 
@@ -278,7 +278,7 @@ public class GuildManager {
         if (!chunks.containsKey(chunk)) {
             chunks.put(chunk, guild);
             GuildSQL.createGuildClaim(chunk, guild);
-            updateDynmapChunk(chunk);
+            //updateDynmapChunk(chunk);
             OddJob.getInstance().getMessageManager().guildClaiming(chunk.getX(), chunk.getZ(), player, getGuildNameByUUID(guild));
         } else {
             OddJob.getInstance().getMessageManager().guildClaimed(player);
@@ -1080,8 +1080,8 @@ public class GuildManager {
     }
 
     public void load() {
-        loadChunks();
         loadGuilds();
+        loadChunks();
     }
 
     public int getSumChunks(UUID guild) {
