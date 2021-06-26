@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 
 import java.sql.SQLException;
@@ -77,12 +78,17 @@ public class LockSQL extends MySQLManager {
     public static List<Material> getLockableMaterials() {
         List<Material> materials = new ArrayList<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_lockable_materials` WHERE `value` = ?");
-            preparedStatement.setBoolean(1, true);
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                materials.add(Material.valueOf(resultSet.getString("name")));
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_lockable_materials` WHERE `value` = ?");
+                preparedStatement.setBoolean(1, true);
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    materials.add(Material.valueOf(resultSet.getString("name")));
+                }
+            } else {
+                for(String string : oddjobConfig.getStringList("lockable_materials")) {
+                    materials.add(Material.valueOf(string));
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -95,12 +101,22 @@ public class LockSQL extends MySQLManager {
     public static HashMap<UUID, UUID> loadSecuredArmorStands() {
         HashMap<UUID, UUID> stands = new HashMap<>();
         try {
-            connect();
+            if (connect()) {
             preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_armorstands`");
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 stands.put(UUID.fromString(resultSet.getString("entity")), UUID.fromString(resultSet.getString("player")));
+            }
+            }else {
+                ConfigurationSection cs = oddjobConfig.getConfigurationSection("secured_armorstands");
+                if (cs != null) {
+                    for (String string : cs.getKeys(false)) {
+                        UUID entity = UUID.fromString(string);
+                        UUID player = UUID.fromString(cs.getString("player",""));
+                        stands.put(entity,player);
+                    }
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -114,16 +130,32 @@ public class LockSQL extends MySQLManager {
     public static HashMap<Location, UUID> loadSecuredBlocks() {
         HashMap<Location, UUID> blocks = new HashMap<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_blocks`");
-            resultSet = preparedStatement.executeQuery();
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_blocks`");
+                resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                if (world != null) {
+                while (resultSet.next()) {
+                    World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                    if (world != null) {
 
-                    Location location = new Location(world, resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"));
-                    blocks.put(location, UUID.fromString(resultSet.getString("uuid")));
+                        Location location = new Location(world, resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"));
+                        blocks.put(location, UUID.fromString(resultSet.getString("uuid")));
+                    }
+                }
+            }else{
+                ConfigurationSection cs = oddjobConfig.getConfigurationSection("secured_blocks");
+                if (cs != null) {
+                    // world;x;y;z
+                    for (String string : cs.getKeys(false)) {
+                        World world = Bukkit.getWorld(UUID.fromString(cs.getString("world")));
+                        if (world != null) {
+                            int x = cs.getInt("x");
+                            int y = cs.getInt("y");
+                            int z = cs.getInt("z");
+                            Location location = new Location(world,x,y,z);
+                            blocks.put(location,UUID.fromString(cs.getString("uuid")));
+                        }
+                    }
                 }
             }
         } catch (Exception ex) {

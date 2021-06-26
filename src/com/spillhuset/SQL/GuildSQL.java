@@ -18,46 +18,70 @@ public class GuildSQL extends MySQLManager {
     public static HashMap<UUID, Guild> loadGuilds() {
         HashMap<UUID, Guild> guilds = new HashMap<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds` WHERE `server` = ?");
-            preparedStatement.setString(1, OddJob.getInstance().getServerId().toString());
-            resultSet = preparedStatement.executeQuery();
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds` WHERE `server` = ?");
+                preparedStatement.setString(1, OddJob.getInstance().getServerId().toString());
+                resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                HashMap<UUID, Role> members = new HashMap<>();
-                UUID guildUUID = UUID.fromString(resultSet.getString("uuid"));
-                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
-                preparedStatement.setString(1, resultSet.getString("uuid"));
-                resultSetSec = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    HashMap<UUID, Role> members = new HashMap<>();
+                    UUID guildUUID = UUID.fromString(resultSet.getString("uuid"));
+                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
+                    preparedStatement.setString(1, resultSet.getString("uuid"));
+                    resultSetSec = preparedStatement.executeQuery();
 
-                while (resultSetSec.next()) {
-                    members.put(UUID.fromString(resultSetSec.getString("player")), Role.valueOf(resultSetSec.getString("role")));
+                    while (resultSetSec.next()) {
+                        members.put(UUID.fromString(resultSetSec.getString("player")), Role.valueOf(resultSetSec.getString("role")));
+                    }
+                    guilds.put(guildUUID, new Guild(
+                            guildUUID,
+                            resultSet.getString("name"),
+                            Zone.valueOf(resultSet.getString("zone")),
+                            resultSet.getInt("invited_only") == 1,
+                            resultSet.getInt("friendly_fire") == 1,
+                            resultSet.getInt("open") == 1,
+                            Role.valueOf(resultSet.getString("permission_invite")),
+                            Role.valueOf(resultSet.getString("permission_kick")),
+                            members,
+                            resultSet.getInt("maxclaims")
+                    ));
+                    OddJob.getInstance().log(resultSet.getString("name"));
                 }
-                guilds.put(guildUUID, new Guild(
-                        guildUUID,
-                        resultSet.getString("name"),
-                        Zone.valueOf(resultSet.getString("zone")),
-                        resultSet.getInt("invited_only") == 1,
-                        resultSet.getInt("friendly_fire") == 1,
-                        resultSet.getInt("open") == 1,
-                        Role.valueOf(resultSet.getString("permission_invite")),
-                        Role.valueOf(resultSet.getString("permission_kick")),
-                        members,
-                        resultSet.getInt("maxclaims")
-                ));
-                OddJob.getInstance().log(resultSet.getString("name"));
+            } else {
+                if (oddjobConfig.getConfigurationSection("guilds") != null) {
+                    for (String string : oddjobConfig.getConfigurationSection("guilds").getKeys(false)) {
+                        UUID uuid = UUID.fromString(string);
+                        HashMap<UUID, Role> members = new HashMap<>();
+                        for (String player : oddjobConfig.getStringList("guilds." + string + ".members")) {
+                            members.put(UUID.fromString(player), Role.valueOf(oddjobConfig.getString("guilds." + string + ".members." + player)));
+                        }
+                        guilds.put(uuid, new Guild(
+                                uuid,
+                                oddjobConfig.getString("guilds." + string + ".name"),
+                                Zone.valueOf(oddjobConfig.getString("guilds." + string + ".zone")),
+                                oddjobConfig.getBoolean("guilds." + string + ".invited_only"),
+                                oddjobConfig.getBoolean("guilds." + string + ".friendly_fire"),
+                                oddjobConfig.getBoolean("guilds." + string + ".open"),
+                                Role.valueOf(oddjobConfig.getString("guilds." + string + ".permission_invite")),
+                                Role.valueOf(oddjobConfig.getString("guilds." + string + ".permission_kick")),
+                                members,
+                                oddjobConfig.getInt("guilds." + string + ".maxclaims")
+                        ));
+                    }
+                }
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException ignored) {
         } finally {
             close();
         }
-        OddJob.getInstance().log("Loaded GZ "+guilds.size());
+        OddJob.getInstance().log("Loaded GZ " + guilds.size());
         return guilds;
     }
 
     public static void saveGuilds(HashMap<UUID, Guild> guilds) {
+        int i = 0;
         for (UUID guildUUID : guilds.keySet()) {
+            OddJob.getInstance().log("Saving guild: " + i);
             Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
             String name = guild.getName();
             Zone zone = guild.getZone();
@@ -70,66 +94,84 @@ public class GuildSQL extends MySQLManager {
             int maxClaims = guild.getMaxClaims();
 
             try {
-                connect();
-                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `uuid` = ? AND `server` = ?");
-                preparedStatement.setString(1, guildUUID.toString());
-                preparedStatement.setString(2, OddJob.getInstance().getServerId().toString());
-                resultSet = preparedStatement.executeQuery();
+                if (connect()) {
 
-                if (resultSet.next()) {
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? ,`maxclaims` = ? WHERE `uuid` = ?");
-                    preparedStatement.setString(1, name);
-                    preparedStatement.setString(2, zone.name());
-                    preparedStatement.setInt(3, invitedOnly ? 1 : 0);
-                    preparedStatement.setInt(4, friendlyFire ? 1 : 0);
-                    preparedStatement.setString(5, permissionInviteRole.name());
-                    preparedStatement.setString(6, permissionKickRole.name());
-                    preparedStatement.setInt(7, open ? 1 : 0);
-                    preparedStatement.setInt(8, maxClaims);
-                    preparedStatement.setString(9, guildUUID.toString());
-                    preparedStatement.executeUpdate();
-                } else {
-                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`) VALUES (?,?,?,?,?,?,?,?,?,?)");
+                    preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `uuid` = ? AND `server` = ?");
                     preparedStatement.setString(1, guildUUID.toString());
-                    preparedStatement.setString(2, name);
-                    preparedStatement.setString(3, zone.name());
-                    preparedStatement.setInt(4, invitedOnly ? 1 : 0);
-                    preparedStatement.setInt(5, friendlyFire ? 1 : 0);
-                    preparedStatement.setString(6, permissionInviteRole.name());
-                    preparedStatement.setString(7, permissionKickRole.name());
-                    preparedStatement.setInt(8, open ? 1 : 0);
-                    preparedStatement.setString(9, OddJob.getInstance().getServerId().toString());
-                    preparedStatement.setInt(10, maxClaims);
-                    preparedStatement.execute();
-                }
-
-                for (UUID uuid : members.keySet()) {
-                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `player` = ?");
-                    preparedStatement.setString(1, uuid.toString());
+                    preparedStatement.setString(2, OddJob.getInstance().getServerId().toString());
                     resultSet = preparedStatement.executeQuery();
 
                     if (resultSet.next()) {
-                        if (!UUID.fromString(resultSet.getString("uuid")).equals(guildUUID) || !Role.valueOf(resultSet.getString("role")).equals(members.get(uuid))) {
-                            preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `uuid` = ?, `role` = ? WHERE `player` = ?");
-                            preparedStatement.setString(1, guildUUID.toString());
-                            preparedStatement.setString(2, members.get(uuid).name());
-                            preparedStatement.setString(3, uuid.toString());
-                            preparedStatement.executeUpdate();
-                        }
+                        preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? ,`maxclaims` = ? WHERE `uuid` = ?");
+                        preparedStatement.setString(1, name);
+                        preparedStatement.setString(2, zone.name());
+                        preparedStatement.setInt(3, invitedOnly ? 1 : 0);
+                        preparedStatement.setInt(4, friendlyFire ? 1 : 0);
+                        preparedStatement.setString(5, permissionInviteRole.name());
+                        preparedStatement.setString(6, permissionKickRole.name());
+                        preparedStatement.setInt(7, open ? 1 : 0);
+                        preparedStatement.setInt(8, maxClaims);
+                        preparedStatement.setString(9, guildUUID.toString());
+                        preparedStatement.executeUpdate();
                     } else {
-                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
+                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`) VALUES (?,?,?,?,?,?,?,?,?,?)");
                         preparedStatement.setString(1, guildUUID.toString());
-                        preparedStatement.setString(2, uuid.toString());
-                        preparedStatement.setString(3, members.get(uuid).name());
+                        preparedStatement.setString(2, name);
+                        preparedStatement.setString(3, zone.name());
+                        preparedStatement.setInt(4, invitedOnly ? 1 : 0);
+                        preparedStatement.setInt(5, friendlyFire ? 1 : 0);
+                        preparedStatement.setString(6, permissionInviteRole.name());
+                        preparedStatement.setString(7, permissionKickRole.name());
+                        preparedStatement.setInt(8, open ? 1 : 0);
+                        preparedStatement.setString(9, OddJob.getInstance().getServerId().toString());
+                        preparedStatement.setInt(10, maxClaims);
                         preparedStatement.execute();
                     }
+
+                    for (UUID uuid : members.keySet()) {
+                        preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `player` = ?");
+                        preparedStatement.setString(1, uuid.toString());
+                        resultSet = preparedStatement.executeQuery();
+
+                        if (resultSet.next()) {
+                            if (!UUID.fromString(resultSet.getString("uuid")).equals(guildUUID) || !Role.valueOf(resultSet.getString("role")).equals(members.get(uuid))) {
+                                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `uuid` = ?, `role` = ? WHERE `player` = ?");
+                                preparedStatement.setString(1, guildUUID.toString());
+                                preparedStatement.setString(2, members.get(uuid).name());
+                                preparedStatement.setString(3, uuid.toString());
+                                preparedStatement.executeUpdate();
+                            }
+                        } else {
+                            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
+                            preparedStatement.setString(1, guildUUID.toString());
+                            preparedStatement.setString(2, uuid.toString());
+                            preparedStatement.setString(3, members.get(uuid).name());
+                            preparedStatement.execute();
+                        }
+                    }
+                } else {
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".name", name);
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".zone", zone.name());
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".invited_only", invitedOnly);
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".friendly_fire", friendlyFire);
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".permission_invite", permissionInviteRole.name());
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".permission_kick", permissionKickRole.name());
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".open", open);
+                    oddjobConfig.set("guilds." + guildUUID.toString() + ".maxclaims", maxClaims);
+
+                    for (UUID uuid : members.keySet()) {
+                        oddjobConfig.set("guilds." + guild.toString() + ".members." + uuid.toString(), members.get(uuid).name());
+                    }
+                    i++;
+                    close();
                 }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            } catch (SQLException ignored) {
             } finally {
                 close();
             }
         }
+        OddJob.getInstance().log("saved " + i + " guilds");
+        close();
     }
 
     public static boolean deleteGuildsChunks(Chunk chunk) {
@@ -153,23 +195,39 @@ public class GuildSQL extends MySQLManager {
     public static HashMap<Chunk, UUID> loadChunks() {
         HashMap<Chunk, UUID> chunks = new HashMap<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `server` = ?");
-            preparedStatement.setString(1, OddJob.getInstance().getConfig().getString("server_unique_id"));
-            resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                if (world != null) {
-                    UUID guild = UUID.fromString(resultSet.getString("uuid"));
-                    int x = resultSet.getInt("x");
-                    int z = resultSet.getInt("z");
-                    Chunk chunk = world.getChunkAt(x, z);
-                    chunk.load();
-                    chunks.put(chunk, guild);
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `server` = ?");
+                preparedStatement.setString(1, OddJob.getInstance().getConfig().getString("server_unique_id"));
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    World world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                    if (world != null) {
+                        UUID guild = UUID.fromString(resultSet.getString("uuid"));
+                        int x = resultSet.getInt("x");
+                        int z = resultSet.getInt("z");
+                        Chunk chunk = world.getChunkAt(x, z);
+                        chunk.load();
+                        chunks.put(chunk, guild);
+                    }
+                }
+            } else {
+                // W;X;Z;
+                if (oddjobConfig.getConfigurationSection("chunks") != null) {
+                    for (String string : oddjobConfig.getConfigurationSection("chunks").getKeys(false)) {
+
+                        String[] strings = string.split(";");
+                        World world = Bukkit.getWorld(UUID.fromString(strings[0]));
+                        if (world != null) {
+                            int x = Integer.parseInt(strings[1]);
+                            int z = Integer.parseInt(strings[2]);
+                            Chunk chunk = world.getChunkAt(x, z);
+                            chunk.load();
+                            chunks.put(chunk, UUID.fromString(oddjobConfig.getString("chunks." + string)));
+                        }
+                    }
                 }
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException ignored) {
         } finally {
             close();
         }
@@ -255,12 +313,17 @@ public class GuildSQL extends MySQLManager {
     public static HashMap<UUID, UUID> loadGuildsPending() {
         HashMap<UUID, UUID> pending = new HashMap<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_pendings`");
-            resultSet = preparedStatement.executeQuery();
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_pendings`");
+                resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                pending.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+                while (resultSet.next()) {
+                    pending.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+                }
+            } else {
+                for (String string : oddjobConfig.getStringList("pending")) {
+                    pending.put(UUID.fromString(string), UUID.fromString(oddjobConfig.getString("pending." + string, "")));
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -276,12 +339,17 @@ public class GuildSQL extends MySQLManager {
     public static HashMap<UUID, UUID> loadGuildsInvites() {
         HashMap<UUID, UUID> invites = new HashMap<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_invites`");
-            resultSet = preparedStatement.executeQuery();
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_invites`");
+                resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                invites.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+                while (resultSet.next()) {
+                    invites.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+                }
+            } else {
+                for (String string : oddjobConfig.getStringList("invites")) {
+                    invites.put(UUID.fromString(string), UUID.fromString(oddjobConfig.getString("invites" + string, "")));
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

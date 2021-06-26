@@ -60,7 +60,7 @@ public class HomeSQL extends MySQLManager {
             preparedStatement.setFloat(6, location.getPitch());
             preparedStatement.setString(7, uuid.toString());
             preparedStatement.setString(8, name);
-            preparedStatement.setString(9, OddJob.getInstance().getConfig().get("server_unique_id").toString());
+            preparedStatement.setString(9, OddJob.getInstance().getServerId().toString());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -100,8 +100,10 @@ public class HomeSQL extends MySQLManager {
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                UUID world = UUID.fromString(resultSet.getString("world"));
-                location = new Location(Bukkit.getWorld(world),resultSet.getDouble("x"),resultSet.getDouble("y"),resultSet.getDouble("z"),resultSet.getFloat("yaw"),resultSet.getFloat("pitch"));
+                UUID worldUUID = UUID.fromString(resultSet.getString("world"));
+                World world = Bukkit.getWorld(worldUUID);
+                if (world == null) return null;
+                location = new Location(world,resultSet.getDouble("x"),resultSet.getDouble("y"),resultSet.getDouble("z"),resultSet.getFloat("yaw"),resultSet.getFloat("pitch"));
             }
         } catch (SQLException e){
             e.printStackTrace();

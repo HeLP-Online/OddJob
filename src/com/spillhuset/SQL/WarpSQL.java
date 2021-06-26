@@ -5,6 +5,7 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Warp;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
@@ -63,9 +64,11 @@ public class WarpSQL extends MySQLManager {
 
             while (resultSet.next()) {
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                UUID world = UUID.fromString(resultSet.getString("world"));
+                UUID worldUUID = UUID.fromString(resultSet.getString("world"));
+                World world = Bukkit.getWorld(worldUUID);
+                if(world == null) continue;
                 Location location = new Location(
-                        Bukkit.getWorld(world),
+                        world,
                         resultSet.getDouble("x"),
                         resultSet.getDouble("y"),
                         resultSet.getDouble("z"),
@@ -94,6 +97,7 @@ public class WarpSQL extends MySQLManager {
             for (UUID uuid : warps.keySet()) {
                 Warp warp = warps.get(uuid);
                 Location location = warp.getLocation();
+                UUID world = location.getWorld().getUID();
 
                 preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_warps` WHERE `uuid` = ?");
                 preparedStatement.setString(1,uuid.toString());
@@ -104,7 +108,7 @@ public class WarpSQL extends MySQLManager {
                     preparedStatement.setString(1,warp.getName());
                     preparedStatement.setString(2,warp.getPassword());
                     preparedStatement.setDouble(3,warp.getCost());
-                    preparedStatement.setString(4,location.getWorld().getUID().toString());
+                    preparedStatement.setString(4,world.toString());
                     preparedStatement.setDouble(5,location.getX());
                     preparedStatement.setDouble(6,location.getY());
                     preparedStatement.setDouble(7,location.getZ());

@@ -1,14 +1,12 @@
 package com.spillhuset.SQL;
 
 import com.spillhuset.Managers.MySQLManager;
+import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Odd.OddPlayer;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerSQL extends MySQLManager {
     public static OddPlayer load(UUID uuid) {
@@ -113,13 +111,20 @@ public class PlayerSQL extends MySQLManager {
         HashMap<UUID, OddPlayer> players = new HashMap<>();
         List<UUID> player = new ArrayList<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players`");
-            resultSet = preparedStatement.executeQuery();
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_players`");
+                resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                player.add(UUID.fromString(resultSet.getString("uuid")));
+                while (resultSet.next()) {
+                    player.add(UUID.fromString(resultSet.getString("uuid")));
+                }
+            } else {
+                if (oddjobConfig != null && !oddjobConfig.getStringList("players").isEmpty()) {
+                    player.addAll(Collections.singleton(UUID.fromString(String.valueOf(oddjobConfig.getStringList("players")))));
+                    OddJob.getInstance().log("players: " + player.size());
+                }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

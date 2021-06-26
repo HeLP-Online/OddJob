@@ -3,6 +3,7 @@ package com.spillhuset.SQL;
 import com.spillhuset.Managers.MySQLManager;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Currency;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -41,29 +42,51 @@ public class CurrencySQL extends MySQLManager {
             close();
         }
     }
+
     public static HashMap<String, HashMap<UUID, Double>> load() {
         HashMap<String, HashMap<UUID, Double>> values = new HashMap<>();
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances`");
-            resultSet = preparedStatement.executeQuery();
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances`");
+                resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                double bank = resultSet.getDouble("bank");
-                double pocket = resultSet.getDouble("pocket");
-                boolean guild = resultSet.getInt("guild") == 1;
-                if (guild) {
-                    if (!values.containsKey("guild")) values.put("guild", new HashMap<>());
-                    values.get("guild").put(uuid, bank);
-                } else {
-                    if (!values.containsKey("bank")) values.put("bank", new HashMap<>());
-                    values.get("bank").put(uuid, bank);
-                    if (!values.containsKey("pocket")) values.put("pocket", new HashMap<>());
-                    values.get("pocket").put(uuid, bank);
+                while (resultSet.next()) {
+                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                    double bank = resultSet.getDouble("bank");
+                    double pocket = resultSet.getDouble("pocket");
+                    boolean guild = resultSet.getInt("guild") == 1;
+                    if (guild) {
+                        if (!values.containsKey("guild")) values.put("guild", new HashMap<>());
+                        values.get("guild").put(uuid, bank);
+                    } else {
+                        if (!values.containsKey("bank")) values.put("bank", new HashMap<>());
+                        values.get("bank").put(uuid, bank);
+                        if (!values.containsKey("pocket")) values.put("pocket", new HashMap<>());
+                        values.get("pocket").put(uuid, pocket);
+                    }
+                }
+            } else {
+                if (oddjobConfig.getConfigurationSection("currency") != null) {
+                    for (String string : oddjobConfig.getConfigurationSection("currency").getKeys(false)) {
+                        ConfigurationSection user = oddjobConfig.getConfigurationSection("currency."+string);
+                        if (user != null) {
+                            boolean guild = user.getBoolean("guild");
+                            double bank = user.getDouble("bank");
+                            double pocket = user.getDouble("pocket");
+                            UUID uuid = UUID.fromString(string);
+                            if (guild) {
+                                if (!values.containsKey("guild")) values.put("guild", new HashMap<>());
+                                values.get("guild").put(uuid, bank);
+                            } else {
+                                if (!values.containsKey("bank")) values.put("bank", new HashMap<>());
+                                values.get("bank").put(uuid, bank);
+                                if (!values.containsKey("pocket")) values.put("pocket", new HashMap<>());
+                                values.get("pocket").put(uuid, pocket);
+                            }
+                        }
+                    }
                 }
             }
-
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -90,7 +113,7 @@ public class CurrencySQL extends MySQLManager {
     }
 
     public static void setBalance(UUID uuid, double amount, Currency account) {
-        try{
+        try {
             connect();
             switch (account) {
                 case bank_player:
@@ -101,13 +124,13 @@ public class CurrencySQL extends MySQLManager {
                     preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `pocket` = ? WHERE `uuid` = ?");
                     break;
             }
-            preparedStatement.setDouble(1,amount);
-            preparedStatement.setString(2,uuid.toString());
+            preparedStatement.setDouble(1, amount);
+            preparedStatement.setString(2, uuid.toString());
             preparedStatement.executeUpdate();
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             close();
         }
     }
