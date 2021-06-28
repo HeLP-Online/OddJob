@@ -54,12 +54,11 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
             return;
         }
 
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
-        Player player = (Player) sender;
-        UUID guild;
+        UUID guild = null;
         if (args.length == 2 && can(sender, true)) {
             try {
                 guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.valueOf(args[1]));
@@ -78,8 +77,7 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
                 return;
             }
         }
-        OddJob.getInstance().log("Chunk:"+OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk())+"    Guild:"+guild);
-        if (OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()) == guild) {
+        if (OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()).equals(guild)) {
             OddJob.getInstance().getGuildManager().unClaim(player);
         }
     }

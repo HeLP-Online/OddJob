@@ -56,15 +56,21 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
             return;
         }
 
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
 
-        Player player = (Player) sender;
-        UUID guild;
+        UUID guild = null;
         if (args.length == 2 && can(sender, true)) {
-            guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.valueOf(args[1]));
+            for (Zone zone : Zone.values()) {
+                if (zone.name().equals(args[1])) {
+                    guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(zone);
+                } else {
+                    OddJob.getInstance().getMessageManager().guildZoneError(args[1],player);
+                    return;
+                }
+            }
             if (guild == null) {
                 OddJob.getInstance().getMessageManager().guildZoneError(args[1], player);
                 return;
