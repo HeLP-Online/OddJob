@@ -52,6 +52,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+
         if (checkArgs(1, 3, args, sender, getPlugin())) {
             return;
         }
@@ -64,7 +65,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
         UUID guild = null;
         if (args.length == 2 && can(sender, true)) {
             for (Zone zone : Zone.values()) {
-                if (zone.name().equals(args[1])) {
+                if (zone.name().equalsIgnoreCase(args[1])) {
                     guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(zone);
                 } else {
                     OddJob.getInstance().getMessageManager().guildZoneError(args[1],player);

@@ -39,6 +39,7 @@ public class PlayerMove implements Listener {
             return;
         }
 
+
         // Who owns the chunk the Player is going to?
         movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk);
         //OddJob.getInstance().getMessageManager().console("x="+movingToChunk.getX()+" z="+movingToChunk.getZ()+" world="+movingToChunk.getWorld().getName());
@@ -46,6 +47,13 @@ public class PlayerMove implements Listener {
         // Who owns the chunk the Player is going from?
         movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingFromChunk);
 
+        Zone zoneTo = OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild);
+        Zone zoneFrom = OddJob.getInstance().getGuildManager().getZoneByGuild(movingFromGuild);
+
+        if (zoneTo.equals(zoneFrom)) {
+            // Zone is the same
+            return;
+        }
 
         // Auto claiming
         if (movingToGuild != null) {
@@ -81,7 +89,7 @@ public class PlayerMove implements Listener {
             print = true;
         }
         UUID uuid = OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId());
-        OddJob.getInstance().log(OddJob.getInstance().getGuildManager().getZoneByGuild(uuid).name());
+        OddJob.getInstance().log(OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild).name());
         if (print) {
             // Printing to Actionbar
             StringBuilder s = new StringBuilder();
