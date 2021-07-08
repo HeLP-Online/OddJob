@@ -16,13 +16,8 @@ public class PlayerDeath implements Listener {
         Location location = player.getLocation();
 
         // ArmorStand
-        Entity entity = null;
-        try {
-            entity = location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
-            OddJob.getInstance().getDeathManager().add(entity, player);
-        } catch (Exception exception) {
-            OddJob.getInstance().getMessageManager().console("Not able to spawn Spirit");
-        }
+        Entity entity = location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
+        OddJob.getInstance().getDeathManager().add(entity, player);
 
         // Clean up
         event.getDrops().clear();

@@ -12,8 +12,6 @@ import com.spillhuset.Commands.Trade.TradeCommand;
 import com.spillhuset.Commands.Warp.WarpCommand;
 import com.spillhuset.Events.*;
 import com.spillhuset.Managers.*;
-import com.spillhuset.Utils.Arena.ArenaManager;
-import com.spillhuset.Utils.Arena.ChestManager;
 import com.spillhuset.Utils.SignManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,7 +28,7 @@ public class OddJob extends JavaPlugin {
 
     private ArenaManager arenaManager;
     private BanManager banManager;
-    private ChestManager chestManager;
+    //private ChestManager chestManager;
     private DeathManager deathManager;
     private MoneyManager moneyManager;
     private FreezeManager freezeManager;
@@ -59,7 +57,7 @@ public class OddJob extends JavaPlugin {
         messageManager = new MessageManager();
         arenaManager = new ArenaManager();
         banManager = new BanManager();
-        chestManager = new ChestManager();
+        //chestManager = new ChestManager();
         deathManager = new DeathManager();
         moneyManager = new MoneyManager();
         freezeManager = new FreezeManager();
@@ -118,7 +116,7 @@ public class OddJob extends JavaPlugin {
         lockManager.load();
         warpManager.load();
         worldManager.load();
-        arenaManager.load();
+        //arenaManager.load();
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
         Bukkit.getPluginManager().registerEvents(new BlockExplode(), this);

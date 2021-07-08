@@ -14,6 +14,8 @@ import java.util.UUID;
 public class EntityDamageByEntity implements Listener {
     @EventHandler
     public void entityDamageByEntity(EntityDamageByEntityEvent event) {
+        EntityType type = event.getDamager().getType();
+
         UUID entityGuild = null;
         UUID damagerGuild = null;
         Player player = null;
@@ -41,7 +43,9 @@ public class EntityDamageByEntity implements Listener {
 
         if (event.getEntity().getType().equals(EntityType.ARMOR_STAND) && OddJob.getInstance().getDeathManager().getOwners().containsKey(event.getEntity().getUniqueId())) {
             event.setCancelled(true);
-            OddJob.getInstance().getDeathManager().replace(event.getEntity(), null);
+            if (event.getDamager() instanceof Player) {
+                OddJob.getInstance().getDeathManager().replace(event.getEntity(), null);
+            }
             return;
         }
 
