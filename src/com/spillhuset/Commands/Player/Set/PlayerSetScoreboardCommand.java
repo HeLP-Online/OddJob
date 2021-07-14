@@ -3,12 +3,14 @@ package com.spillhuset.Commands.Player.Set;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.ScoreBoard;
+import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PlayerSetScoreboardCommand extends SubCommand {
     @Override
@@ -54,12 +56,33 @@ public class PlayerSetScoreboardCommand extends SubCommand {
         }
 
         // Check Player
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
-        Player player = (Player) sender;
-        OddJob.getInstance().getScoreManager().create(player, ScoreBoard.valueOf(args[2]));
+
+        // Find scoreboard
+        ScoreBoard scoreboard = null;
+        for (ScoreBoard scoreBoard : ScoreBoard.values()) {
+            if (scoreBoard.name().equals(args[2])) {
+                scoreboard = scoreBoard;
+            }
+        }
+        if (scoreboard == null) {
+            OddJob.getInstance().getMessageManager().playerErrorScoreboard(sender,args[2]);
+            return;
+        }
+
+        // If Guild, then find guild!
+        if (scoreboard.equals(ScoreBoard.Guild)) {
+            UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+            if (guild == null) {
+                OddJob.getInstance().getMessageManager().guildNotAssociated(player.getUniqueId());
+                return;
+            }
+        }
+
+        OddJob.getInstance().getScoreManager().create(player, scoreboard);
     }
 
     @Override

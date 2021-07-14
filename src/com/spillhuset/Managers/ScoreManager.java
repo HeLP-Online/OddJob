@@ -1,7 +1,6 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Arena.Arena;
 import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Guild;
@@ -53,60 +52,7 @@ public class ScoreManager {
         Objective objective = objectives.getOrDefault(player.getUniqueId(), scoreboard.registerNewObjective("p" + unique, "dummy", player.getName()));
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         switch (type) {
-            case ArenaMaker:
-                int arenaId = OddJob.getInstance().getArenaManager().getEditor(player.getUniqueId());
-                Arena arena = OddJob.getInstance().getArenaManager().getArena(arenaId);
-                objective.setDisplayName("ArenaMaker - " + arenaId);
 
-                Team arenaName;
-                arenaName = scoreboard.getTeam("an" + arenaId);
-                if (arenaName == null) arenaName = scoreboard.registerNewTeam("an" + arenaId);
-                arenaName.addEntry(ChatColor.GOLD + "ID: " + ChatColor.WHITE);
-                objective.getScore(ChatColor.GOLD + "ID: " + ChatColor.WHITE).setScore(15);
-
-                Team arenaType;
-                arenaType = scoreboard.getTeam("at" + arenaId);
-                if (arenaType == null) arenaType = scoreboard.registerNewTeam("at" + arenaId);
-                arenaType.addEntry(ChatColor.GOLD + "Type: " + ChatColor.WHITE);
-                objective.getScore(ChatColor.GOLD + "Type: " + ChatColor.WHITE).setScore(15);
-
-                Team arenaLobbySpawn;
-                arenaLobbySpawn = scoreboard.getTeam("als" + arenaId);
-                if (arenaLobbySpawn == null) arenaLobbySpawn = scoreboard.registerNewTeam("als" + arenaId);
-                arenaLobbySpawn.addEntry(ChatColor.GOLD + "LobbySpawn: " + ChatColor.WHITE);
-                objective.getScore(ChatColor.GOLD + "LobbySpawn: " + ChatColor.WHITE).setScore(15);
-
-                Team arenaGameSpawn;
-                arenaGameSpawn = scoreboard.getTeam("ags" + arenaId);
-                if (arenaGameSpawn == null) arenaGameSpawn = scoreboard.registerNewTeam("ags" + arenaId);
-                arenaGameSpawn.addEntry(ChatColor.GOLD + "GameSpawn: " + ChatColor.WHITE);
-                objective.getScore(ChatColor.GOLD + "GameSpawn: " + ChatColor.WHITE).setScore(15);
-
-                Team arenaSigns;
-                arenaSigns = scoreboard.getTeam("as" + arenaId);
-                if (arenaSigns == null) arenaSigns = scoreboard.registerNewTeam("as" + arenaId);
-                arenaSigns.addEntry(ChatColor.GOLD + "Sign: " + ChatColor.WHITE);
-                objective.getScore(ChatColor.GOLD + "Sign: " + ChatColor.WHITE).setScore(15);
-
-                Team finalArenaName = arenaName;
-                Team finalArenaType = arenaType;
-                Team finalArenaLobbySpawn = arenaLobbySpawn;
-                Team finalArenaGameSpawn = arenaGameSpawn;
-                Team finalArenaSigns = arenaSigns;
-                taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), new Runnable() {
-                    final com.spillhuset.Utils.ScoreBoard scoreBoard = new com.spillhuset.Utils.ScoreBoard(player.getUniqueId());
-
-                    @Override
-                    public void run() {
-                        if (!scoreBoard.hasID()) scoreBoard.setID(taskID);
-                        finalArenaName.setSuffix("" + arenaId);
-                        finalArenaType.setSuffix("" + arena.getGameType().name());
-                        finalArenaLobbySpawn.setSuffix(arena.getLobbySpawn() != null ? ChatColor.GREEN + "Set!" : ChatColor.DARK_RED + "None");
-                        finalArenaGameSpawn.setSuffix("" + arena.getGameSpawns());
-                        finalArenaSigns.setSuffix(arena.getSignLocation() != null ? ChatColor.GREEN + "Set!" : ChatColor.DARK_RED + "None");
-                    }
-                }, 0, 10);
-                break;
             case Player:
                 objective.setDisplayName("Player - " + player.getName());
                 // Topic - Money

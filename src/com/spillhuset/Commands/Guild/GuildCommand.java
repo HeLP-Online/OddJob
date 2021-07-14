@@ -50,7 +50,7 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             if (args.length == 0) {
                 OddJob.getInstance().getMessageManager().errorMissingArgs(getPlugin(), sender);
             } else if (args[0].equalsIgnoreCase("save")) {
@@ -106,6 +106,8 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
 
         }
 
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
+
         // SubCommands
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subcommand : subCommands) {
@@ -117,8 +119,6 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        Player player = (Player) sender;
-        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
         if (args.length == 0) {
             if (guild != null) {
                 OddJob.getInstance().getMessageManager().guildMenu(OddJob.getInstance().getGuildManager().getGuild(guild), OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild), OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId()), sender);
@@ -134,14 +134,17 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args) {
         List<String> list = new ArrayList<>();
+        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(((Player) sender).getUniqueId());
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
-            if (args[0].isEmpty()) {
-                list.add(name);
-            } else if (name.equalsIgnoreCase(args[0]) && args.length > 1) {
-                return subCommand.getTab(sender, args);
-            } else if (name.startsWith(args[0])) {
-                list.add(name);
+            if (subCommand.needGuild() && guild != null) {
+                if (args[0].isEmpty()) {
+                    list.add(name);
+                } else if (name.equalsIgnoreCase(args[0]) && args.length > 1) {
+                    return subCommand.getTab(sender, args);
+                } else if (name.startsWith(args[0])) {
+                    list.add(name);
+                }
             }
         }
         return list;

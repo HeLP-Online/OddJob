@@ -1,6 +1,7 @@
 package com.spillhuset;
 
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.spillhuset.Commands.*;
 import com.spillhuset.Commands.Ban.BanCommand;
 import com.spillhuset.Commands.Guild.GuildCommand;
@@ -17,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -96,7 +98,7 @@ public class OddJob extends JavaPlugin {
         getCommand("gamemode").setExecutor(new GameModeCommand());
         getCommand("player").setExecutor(new PlayerCommand());
         getCommand("warp").setExecutor(new WarpCommand()); // SubCommand
-        getCommand("arena").setExecutor(new ArenaCommand());
+        //getCommand("arena").setExecutor(new ArenaCommand());
         getCommand("freeze").setExecutor(new FreezeCommand()); // Cleaned
         getCommand("backup").setExecutor(new RollbackCommand());
         getCommand("rollback").setExecutor(new RollbackCommand());
@@ -244,7 +246,6 @@ public class OddJob extends JavaPlugin {
         return shopManager;
     }
 
-
     public TeleportManager getTeleportManager() {
         return teleportManager;
     }
@@ -268,5 +269,10 @@ public class OddJob extends JavaPlugin {
             saveConfig();
         }
         return id;
+    }
+
+    public WorldEditPlugin getWorldEdit() {
+        Plugin p = Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
+        return (p instanceof WorldEditPlugin) ? (WorldEditPlugin) p : null;
     }
 }

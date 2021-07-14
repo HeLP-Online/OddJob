@@ -279,7 +279,9 @@ public class GuildManager {
             chunks.put(chunk, guild);
             GuildSQL.createGuildClaim(chunk, guild);
             //updateDynmapChunk(chunk);
-            OddJob.getInstance().getMessageManager().guildClaiming(chunk.getX(), chunk.getZ(), player, getGuildNameByUUID(guild));
+            int count = getSumChunks(guild);
+            int max = getGuild(guild).getMaxClaims();
+            OddJob.getInstance().getMessageManager().guildClaiming(count, max, chunk.getX(), chunk.getZ(), player, getGuildNameByUUID(guild));
         } else {
             OddJob.getInstance().getMessageManager().guildClaimed(player);
         }
@@ -399,24 +401,16 @@ public class GuildManager {
      *
      * @param player Player which is toggling the AutoClaim
      * @param guild  Zone the Player is claiming for
+     * @param auto
      */
-    public void toggleAutoClaim(@Nonnull Player player, @Nonnull UUID guild) {
-        if (autoClaim.containsKey(player.getUniqueId())) {
-            if (!guild.equals(autoClaim.get(player.getUniqueId()))) {
-                // Changing Zone to autoClaim for
-                autoClaim.put(player.getUniqueId(), guild);
-                OddJob.getInstance().getMessageManager().guildChangingZone(getGuildNameByUUID(guild), player);
-            } else {
-                // Stops autoClaim
-                autoClaim.remove(player.getUniqueId());
-                OddJob.getInstance().getMessageManager().guildAutoOff(getGuildNameByUUID(guild), player);
-            }
-        } else {
-            // Starts autoClaim
+    public void toggleAutoClaim(@Nonnull Player player, @Nonnull UUID guild, boolean auto) {
+        if (auto) {
             autoClaim.put(player.getUniqueId(), guild);
             OddJob.getInstance().getMessageManager().guildAutoOn(getGuildNameByUUID(guild), player);
+        } else {
+            autoClaim.remove(player.getUniqueId());
+            OddJob.getInstance().getMessageManager().guildAutoOff(getGuildNameByUUID(guild), player);
         }
-
     }
 
     /**

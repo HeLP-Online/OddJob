@@ -1,87 +1,105 @@
 package com.spillhuset.Utils;
 
-import com.spillhuset.OddJob;
-import org.bukkit.Bukkit;
+import com.spillhuset.Utils.Enum.ArenaType;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.block.Chest;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class Game {
-    private String displayName;
-    private int minPlayers;
-    private int maxPlayers;
-    private World world;
-    private List<Location> spawnPoints;
-    private boolean isTeamGame;
-    private Location lobbyPoint;
-    private List<ItemStack> normalItems;
-    private List<ItemStack> rareItems;
+    private final UUID uuid;
+    private String name;
+    private int minPlayers,maxPlayers;
+    private ArenaType type;
+    private Location lobbySpawn;
+    private HashMap<Integer,Location> spawns = new HashMap<>();
+    private boolean active;
 
-    private List<UUID> players;
-    private List<UUID> spectators;
-    private GameState gameState = GameState.LOBBY;
-    private HashMap<UUID, Location> gamePlayerToSpawnPoint = new HashMap<>();
-    private List<Chest> opened;
-    private boolean movementFrozen = false;
-
-    public Game(String gameName, String displayName, int maxPlayers, int minPlayers, String worldName, Location lobbyPoint, List<Location> spawnPoints, List<ItemStack> normalItems, List<ItemStack> rareItems) {
-        RollbackHandler.getRollbackHandler().rollback(worldName);
-        world = Bukkit.createWorld(new WorldCreator(worldName + "_active"));
-        this.spawnPoints = spawnPoints;
-        opened = new ArrayList<>();
-        this.normalItems = normalItems;
-        this.rareItems = rareItems;
-        players = new ArrayList<>();
-        spectators = new ArrayList<>();
+    public Game(UUID uuid, String name, int minPlayers, int maxPlayers, ArenaType type, Location lobbySpawn) {
+        this.uuid = uuid;
+        this.name = name;
+        this.minPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
+        this.type = type;
+        this.lobbySpawn = lobbySpawn;
     }
 
-    public boolean joinGame(UUID gamePlayer) {
-        if (isState(GameState.LOBBY) || isState(GameState.STARTING)) {
-            if (players.size() >= maxPlayers) {
-                // SEND MESSAGE 'FULL'
-                return false;
-            }
-
-            players.add(gamePlayer);
-            // Teleport player   gamePlayer.teleport(isState(GameState.LOBBY) ? lobbyPoint : null);
-            // Send message -- size
-
-            // COPY INVENTORY
-            // COPY ARMOR
-            // SET ADVENTURE
-            // SET HEALTH AND FOOD
-
-            if (players.size() == minPlayers && !isState(GameState.STARTING)) {
-                gameState = GameState.STARTING;
-                // ANNOUNCE COUNTDOWN TO START
-                startCountdown();
-                OddJob.getInstance().getArenaManager().setGame(gamePlayer, this);
-            } else {
-                activateSpectatorSettings(gamePlayer);
-                OddJob.getInstance().getArenaManager().setGame(gamePlayer, this);
-            }
-
-        }
-        return true;
-
+    public Game(UUID uuid, String name, int minPlayers, int maxPlayers, ArenaType type, Location lobbySpawn, HashMap<Integer, Location> spawns, boolean active) {
+        this.uuid = uuid;
+        this.name = name;
+        this.minPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
+        this.type = type;
+        this.lobbySpawn = lobbySpawn;
+        this.spawns = spawns;
+        this.active = active;
     }
 
-    private boolean isState(GameState state) {
-        return gameState == state;
+    public UUID getUUID() {
+        return uuid;
     }
 
-    public void activateSpectatorSettings(UUID player) {
-
+    public String getName() {
+        return name;
     }
 
-    public enum GameState {
-        STARTING, LOBBY
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getMinPlayers() {
+        return minPlayers;
+    }
+
+    public void setMinPlayers(int minPlayers) {
+        this.minPlayers = minPlayers;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    public ArenaType getType() {
+        return type;
+    }
+
+    public void setType(ArenaType type) {
+        this.type = type;
+    }
+
+    public Location getLobbySpawn() {
+        return lobbySpawn;
+    }
+
+    public void setLobbySpawn(Location lobbySpawn) {
+        this.lobbySpawn = lobbySpawn;
+    }
+
+    public HashMap<Integer, Location> getSpawns() {
+        return spawns;
+    }
+
+    public Location getSpawn(int num) {
+        return spawns.get(num);
+    }
+
+    public void setSpawn(int num,Location location) {
+        spawns.put(num,location);
+    }
+
+    public void setSpawns(HashMap<Integer, Location> spawns) {
+        this.spawns = spawns;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

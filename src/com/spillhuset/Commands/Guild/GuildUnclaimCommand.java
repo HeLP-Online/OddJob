@@ -90,4 +90,8 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
     public Role getRole() {
         return Role.Admins;
     }
+    @Override
+    public boolean needGuild() {
+        return true;
+    }
 }

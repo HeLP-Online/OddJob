@@ -64,4 +64,8 @@ public abstract class SubCommand {
             }
         }
     }
+
+    public boolean needGuild() {
+        return true;
+    }
 }

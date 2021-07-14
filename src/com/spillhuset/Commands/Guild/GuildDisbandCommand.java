@@ -98,4 +98,8 @@ public class GuildDisbandCommand extends SubCommand implements GuildRole {
     public Role getRole() {
         return Role.Master;
     }
+    @Override
+    public boolean needGuild() {
+        return true;
+    }
 }

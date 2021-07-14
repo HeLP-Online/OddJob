@@ -99,4 +99,9 @@ public class GuildCreateCommand extends SubCommand implements GuildRole {
     public Role getRole() {
         return Role.all;
     }
+
+    @Override
+    public boolean needGuild() {
+        return false;
+    }
 }

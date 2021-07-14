@@ -18,18 +18,15 @@ import java.util.UUID;
 public class EntityExplode implements Listener {
     /**
      * Cancel Creeper AND TNT
-     *
-     * @param event
      */
     @EventHandler
     public void entityExplode(EntityExplodeEvent event) {
-        // CHECK GUILD
         List<Block> blocks = event.blockList();
         HashMap<Location, BlockData> keep = new HashMap<>();
-        Location location;
         for (Block block : blocks) {
             // Every Block in the explosion
             Chunk chunk = block.getChunk();
+
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
             if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
                 // The Chunk is inside a Guild
@@ -39,7 +36,7 @@ public class EntityExplode implements Listener {
 
             // CHECK LOCKS
             if (OddJob.getInstance().getLockManager().getLockable().contains(block.getType()) || OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {
-                location = block.getLocation();
+                Location location = block.getLocation();
                 if (OddJob.getInstance().getLockManager().isLocked(location)) {
                     event.setCancelled(true);
                 }

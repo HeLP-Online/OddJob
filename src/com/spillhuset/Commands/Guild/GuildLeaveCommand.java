@@ -91,4 +91,8 @@ public class GuildLeaveCommand extends SubCommand implements GuildRole {
     public Role getRole() {
         return Role.Members;
     }
+    @Override
+    public boolean needGuild() {
+        return true;
+    }
 }

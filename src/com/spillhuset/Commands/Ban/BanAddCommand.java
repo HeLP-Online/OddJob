@@ -52,13 +52,14 @@ public class BanAddCommand extends SubCommand {
             return;
         }
 
-        // Check Player
+        // Find Player
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
         if (target == null) {
             OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[1], sender);
             return;
         }
 
+        // Make string message
         String ban = OddJob.getInstance().getBanManager().getBan(target);
         if (ban == null) {
             StringBuilder sb = new StringBuilder();

@@ -4,7 +4,6 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
-import com.spillhuset.Utils.Guild;
 import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
@@ -12,9 +11,11 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class GuildClaimCommand extends SubCommand implements GuildRole {
+
     @Override
     public boolean allowConsole() {
         return false;
@@ -42,7 +43,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getSyntax() {
-        return "/guild claim [zone]";
+        return "/guild claim zone=<zone> auto=<auto>";
     }
 
     @Override
@@ -53,50 +54,93 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
     @Override
     public void perform(CommandSender sender, String[] args) {
 
-        if (checkArgs(1, 3, args, sender, getPlugin())) {
-            return;
-        }
-
+        // Check player
         if (!(sender instanceof Player player)) {
             OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
             return;
         }
 
+        Zone zone = Zone.GUILD;
+        boolean auto = false;
         UUID guild = null;
-        if (args.length == 2 && can(sender, true)) {
-            for (Zone zone : Zone.values()) {
-                if (zone.name().equalsIgnoreCase(args[1])) {
+
+        // Check args
+        if (checkArgs(1, 3, args, sender, getPlugin())) {
+            return;
+        }
+
+        if (args.length >= 2) {
+            for (int i = 1; i <= args.length; i++) {
+                if (args[i].startsWith("zone") && can(sender, true)) {
+                    // Setting zone
+                    String[] value = args[i].split("=");
+                    if (value.length != 2) {
+                        OddJob.getInstance().getMessageManager().syntaxError(Plugin.guild, "args=value", sender);
+                        return;
+                    }
+                    for (Zone z : Zone.values()) {
+                        if (z.name().toLowerCase().startsWith(value[1].toLowerCase())) {
+                            zone = z;
+                        }
+                    }
+                    if (zone == Zone.GUILD) {
+                        OddJob.getInstance().getMessageManager().errorZone(Plugin.guild, args[1],sender);
+                        return;
+                    }
+
                     guild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(zone);
-                } else {
-                    OddJob.getInstance().getMessageManager().guildZoneError(args[1],player);
-                    return;
+                } else if (args[i].startsWith("auto")) {
+                    // Setting auto claim
+                    String[] value = args[i].split("=");
+                    if (value.length != 2) {
+                        OddJob.getInstance().getMessageManager().syntaxError(Plugin.guild, "args=value", sender);
+                        return;
+                    }
+                    auto = value[1].equalsIgnoreCase("1") || value[1].equalsIgnoreCase("on") || value[1].equalsIgnoreCase("true");
                 }
             }
-            if (guild == null) {
-                OddJob.getInstance().getMessageManager().guildZoneError(args[1], player);
-                return;
-            }
-        } else {
+        }
+
+        if (zone == Zone.GUILD) {
             guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-            if (guild == null) {
-                OddJob.getInstance().getMessageManager().guildNotAssociated(player.getUniqueId());
+            if (OddJob.getInstance().getGuildManager().getSumChunks(guild) >= OddJob.getInstance().getGuildManager().getGuild(guild).getMaxClaims()) {
+                OddJob.getInstance().getMessageManager().guildMaxClaimsReached(sender);
                 return;
             }
         }
-        Guild gg = OddJob.getInstance().getGuildManager().getGuild(guild);
-        if (OddJob.getInstance().getGuildManager().getSumChunks(guild) >= gg.getMaxClaims()) {
-            OddJob.getInstance().getGuildManager().claim(guild, player.getLocation().getChunk(), player);
-        }
+
+        OddJob.getInstance().getGuildManager().claim(player, guild);
+        OddJob.getInstance().getGuildManager().toggleAutoClaim(player, guild, auto);
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
+        List<String> auto = new ArrayList<>();
+        auto.add("auto=on");
+        auto.add("auto=off");
 
-        return new ArrayList<>();
+        List<String> list = new ArrayList<>();
+        if (args.length == 2) {
+            for (String string :auto) {
+                if (string.toLowerCase().startsWith(args[1].toLowerCase())) {
+                    list.add(string);
+                }
+            }
+            for (Zone zone:Zone.values()) {
+                if (zone.name().toLowerCase().startsWith(args[1].toLowerCase()) && can(sender,true)) {
+                    list.add("zone=" + zone.name());
+                }
+            }
+        }
+        return list;
     }
 
     @Override
     public Role getRole() {
         return Role.Admins;
+    }
+
+    public boolean needGuild() {
+        return true;
     }
 }

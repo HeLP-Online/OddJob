@@ -58,4 +58,8 @@ public class GuildMapCommand extends SubCommand {
     public List<String> getTab(CommandSender sender, String[] args) {
         return null;
     }
+    @Override
+    public boolean needGuild() {
+        return true;
+    }
 }

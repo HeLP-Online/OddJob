@@ -182,6 +182,7 @@ public class MessageManager {
     public void insufficientFunds(CommandSender player) {
         player.sendMessage(tCurrency + cWarning + " Insufficient funds.");
     }
+
     public void insufficientFunds(UUID target, CommandSender player) {
         player.sendMessage(tCurrency + cWarning + " Insufficient funds.");
     }
@@ -898,8 +899,8 @@ public class MessageManager {
         danger(type(Plugin.trade), "No players wanna trade with you", player, false);
     }
 
-    public void guildClaiming(int x, int z, Player player, String guild) {
-        success(type(Plugin.guild), "Claiming chunk X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName() + cSuccess + " to " + cGuild + guild, player, true);
+    public void guildClaiming(int count, int max, int x, int z, Player player, String guild) {
+        success(type(Plugin.guild), "Claiming:" + cValue + count + cSuccess + "/" + cValue + max + cSuccess + " chunk X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName() + cSuccess + " to " + cGuild + guild, player, true);
     }
 
     public void guildClaimed(Player player) {
@@ -1060,24 +1061,24 @@ public class MessageManager {
 
     public void guildMenu(Guild guild, String guildNameByUUID, Role guildMemberRole, CommandSender sender) {
         info(type(Plugin.guild), "As a " + cValue + guildMemberRole.name() + cInfo + " of " + cGuild + guildNameByUUID, sender, false);
-        info(type(Plugin.guild),"Guild is open: "+String.valueOf(guild.getOpen()),sender,false);
-        info(type(Plugin.guild),"Friendly fire activated: "+String.valueOf(guild.getFriendlyFire()),sender,false);
-        info(type(Plugin.guild),""+cValue+guild.getChunks()+cInfo+"/"+cValue+guild.getMaxClaims(),sender,false);
-        info(type(Plugin.guild),"Players with role; "+cValue+"<player>:<role>",sender,false);
+        info(type(Plugin.guild), "Guild is open: " + String.valueOf(guild.getOpen()), sender, false);
+        info(type(Plugin.guild), "Friendly fire activated: " + String.valueOf(guild.getFriendlyFire()), sender, false);
+        info(type(Plugin.guild), "" + cValue + guild.getChunks() + cInfo + "/" + cValue + guild.getMaxClaims(), sender, false);
+        info(type(Plugin.guild), "Players with role; " + cValue + "<player>:<role>", sender, false);
         for (UUID uuid : guild.getMembers().keySet()) {
             Role role = guild.getMembers().get(uuid);
             OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(uuid);
-            info(type(Plugin.guild),oddPlayer.getName()+":"+role.name(),sender,false);
+            info(type(Plugin.guild), oddPlayer.getName() + ":" + role.name(), sender, false);
         }
     }
 
-    public void homesCount(List<String> list,String target, int max, CommandSender sender,boolean self) {
+    public void homesCount(List<String> list, String target, int max, CommandSender sender, boolean self) {
         if (list == null) {
             homesNotSet(sender);
             return;
         }
-        info(type(Plugin.home), ((self) ?"You": cPlayer+target+cInfo)+" have assigned " + cValue + list.size() + cInfo + " of " + cValue + max, sender, false);
-        space(Plugin.home,sender);
+        info(type(Plugin.home), ((self) ? "You" : cPlayer + target + cInfo) + " have assigned " + cValue + list.size() + cInfo + " of " + cValue + max, sender, false);
+        space(Plugin.home, sender);
         int i = 1;
         for (String name : list) {
             info(type(Plugin.home), i + ".) " + cValue + name, sender, false);
@@ -1130,11 +1131,11 @@ public class MessageManager {
     }
 
     public void areOp(CommandSender sender) {
-        danger(type(Plugin.player), "You are an " + ChatColor.GRAY + "OP", sender, false);
+        danger(type(Plugin.player), "You are an " + cValue + "OP", sender, false);
     }
 
     public void notOp(CommandSender sender) {
-        success(type(Plugin.player), "You are " + cDanger + "NOT" + cSuccess + " an " + ChatColor.GRAY + "OP", sender, false);
+        success(type(Plugin.player), "You are " + cDanger + "NOT" + cSuccess + " an " + cValue + "OP", sender, false);
     }
 
     public void lockList(List<String> list, CommandSender sender) {
@@ -1163,5 +1164,21 @@ public class MessageManager {
 
     public void guildInfoSelf(Guild guild, CommandSender sender) {
 
+    }
+
+    public void playerErrorScoreboard(CommandSender sender, String board) {
+        danger(type(Plugin.player), "Scoreboard " + cValue + board + cDanger + " not found", sender, false);
+    }
+
+    public void guildMaxClaimsReached(CommandSender sender) {
+        danger(type(Plugin.guild),"Claiming count reached maximum.",sender,false);
+    }
+
+    public void syntaxError(Plugin plugin, String s, CommandSender sender) {
+        danger(type(plugin),"Unknown syntax: "+s,sender,false);
+    }
+
+    public void errorZone(Plugin plugin, String arg, CommandSender sender) {
+        danger(type(plugin),"Unknown Zone: "+cValue+arg,sender,false);
     }
 }
