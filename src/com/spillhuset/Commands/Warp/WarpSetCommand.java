@@ -24,12 +24,12 @@ public class WarpSetCommand extends SubCommand {
 
     @Override
     public boolean allowConsole() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override
@@ -59,6 +59,12 @@ public class WarpSetCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        if(checkArgs(2,0,args,sender,getPlugin())) {
+            return;
+        }
+        if (!can(sender,false)) {
+            return;
+        }
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();

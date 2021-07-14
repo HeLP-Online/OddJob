@@ -76,7 +76,7 @@ public class MoneyManager {
     public void createAccounts(UUID uuid, double startValue, Currency account) {
         createBankAccount(uuid, startValue, account);
         if (!account.equals(Currency.bank_guild)) createPocket(uuid, startValue);
-        CurrencySQL.createAccount(uuid, startValue, account);
+        CurrencySQL.createAccount(uuid,0,ConfigManager.getCurrencyInitialGuild(),Currency.bank_guild);
     }
 
     public void createPocket(UUID uuid, double startValue) {

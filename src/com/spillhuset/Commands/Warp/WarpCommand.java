@@ -23,6 +23,7 @@ public class WarpCommand extends SubCommandInterface implements CommandExecutor,
         subCommands.add(new WarpAddCommand());
         subCommands.add(new WarpDelCommand());
         subCommands.add(new WarpSetCommand());
+        subCommands.add(new WarpListCommand());
     }
 
     @Override
@@ -42,7 +43,7 @@ public class WarpCommand extends SubCommandInterface implements CommandExecutor,
 
     @Override
     public String getPermission() {
-        return null;
+        return "warp.use";
     }
 
     @Override
@@ -60,19 +61,18 @@ public class WarpCommand extends SubCommandInterface implements CommandExecutor,
             }
         }
 
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            for (String name : OddJob.getInstance().getWarpManager().listWarps()) {
-                if (name.equals(args[0])) {
-                    UUID uuid = OddJob.getInstance().getWarpManager().getUUID(name);
-                    if (sender.hasPermission("warp.use")) {
+        if (sender instanceof Player player) {
+            for (UUID uuid : OddJob.getInstance().getWarpManager().listWarps().keySet()) {
+                Warp warp = OddJob.getInstance().getWarpManager().listWarps().get(uuid);
+                if (warp.getName().equals(args[0])) {
+                    if (can(sender,false)) {
                         if (args.length == 1) {
                             OddJob.getInstance().getWarpManager().pass(player, uuid);
                         } else if (args.length == 2) {
                             String pass = args[1];
                             OddJob.getInstance().getWarpManager().pass(player, uuid, pass);
                         } else {
-                            OddJob.getInstance().getMessageManager().warpError(name, sender);
+                            OddJob.getInstance().getMessageManager().warpError(args[0], sender);
                         }
                         return true;
                     }

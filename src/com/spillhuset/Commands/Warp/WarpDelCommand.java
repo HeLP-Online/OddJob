@@ -3,6 +3,7 @@ package com.spillhuset.Commands.Warp;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
+import com.spillhuset.Utils.Warp;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -85,9 +86,10 @@ public class WarpDelCommand extends SubCommand {
             if(args[1].equalsIgnoreCase("")) {
                 list.add("<name>");
             } else {
-                for(String name: OddJob.getInstance().getWarpManager().listWarps()) {
-                    if (name.startsWith(args[1])) {
-                        list.add(name);
+                for(UUID uuid: OddJob.getInstance().getWarpManager().listWarps().keySet()) {
+                    Warp warp = OddJob.getInstance().getWarpManager().listWarps().get(uuid);
+                    if (warp.getName().startsWith(args[1])) {
+                        list.add(warp.getName());
                     }
                 }
             }

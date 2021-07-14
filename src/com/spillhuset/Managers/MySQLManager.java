@@ -24,7 +24,7 @@ public class MySQLManager {
     protected static ResultSet resultSetSec = null;
     protected static String prefix = "";
     private static boolean sql = true;
-    private static File oddjobConfigFile = null;
+    public static File oddjobConfigFile = null;
     protected static FileConfiguration oddjobConfig = null;
 
     protected static boolean connect() throws SQLException {

@@ -5,6 +5,7 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Currency;
 import org.bukkit.configuration.ConfigurationSection;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
@@ -12,31 +13,47 @@ import java.util.UUID;
 public class CurrencySQL extends MySQLManager {
     public static void save() {
         try {
-            connect();
-            for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
-                if (OddJob.getInstance().getCurrencyManager().hasBankAccount(uuid, Currency.bank_guild)) {
-                    double amount = OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.bank_guild);
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ? WHERE `uuid` = ?");
-                    preparedStatement.setDouble(1, amount);
-                    preparedStatement.setString(2, uuid.toString());
+            if (connect()) {
+                for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
+                    if (OddJob.getInstance().getCurrencyManager().hasBankAccount(uuid, Currency.bank_guild)) {
+                        double amount = OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.bank_guild);
+                        preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ? WHERE `uuid` = ?");
+                        preparedStatement.setDouble(1, amount);
+                        preparedStatement.setString(2, uuid.toString());
+                        preparedStatement.executeUpdate();
+                    }
+                }
+                for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
+                    double pocket = 0.0, bank = 0.0;
+                    if (OddJob.getInstance().getCurrencyManager().hasBankAccount(uuid, Currency.bank_player)) {
+                        bank = OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.bank_player);
+                    }
+                    if (OddJob.getInstance().getCurrencyManager().hasPocket(uuid)) {
+                        pocket = OddJob.getInstance().getCurrencyManager().getPocketBalance(uuid);
+                    }
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ?, `pocket` = ? WHERE `uuid` = ?");
+                    preparedStatement.setDouble(1, bank);
+                    preparedStatement.setDouble(2, pocket);
+                    preparedStatement.setString(3, uuid.toString());
                     preparedStatement.executeUpdate();
                 }
-            }
-            for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
-                double pocket = 0.0, bank = 0.0;
-                if (OddJob.getInstance().getCurrencyManager().hasBankAccount(uuid, Currency.bank_player)) {
-                    bank = OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.pocket);
+            } else {
+                for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
+                    String string = uuid.toString();
+                    oddjobConfig.set("balances."+string+".bank",OddJob.getInstance().getCurrencyManager().getBankBalance(uuid,Currency.bank_guild));
                 }
-                if (OddJob.getInstance().getCurrencyManager().hasPocket(uuid)) {
-                    pocket = OddJob.getInstance().getCurrencyManager().getPocketBalance(uuid);
+                for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
+                    String string = uuid.toString();
+                    if (OddJob.getInstance().getCurrencyManager().hasBankAccount(uuid,Currency.bank_player)) {
+                        oddjobConfig.set("balances."+string+".bank",OddJob.getInstance().getCurrencyManager().getBankBalance(uuid,Currency.bank_player));
+                    }
+                    if (OddJob.getInstance().getCurrencyManager().hasPocket(uuid)) {
+                        oddjobConfig.set("balances."+string+".pocket",OddJob.getInstance().getCurrencyManager().getPocketBalance(uuid));
+                    }
                 }
-                preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ?, `pocket` = ? WHERE `uuid` = ?");
-                preparedStatement.setDouble(1, bank);
-                preparedStatement.setDouble(2, pocket);
-                preparedStatement.setString(3, uuid.toString());
-                preparedStatement.executeUpdate();
+                oddjobConfig.save(oddjobConfigFile);
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | IOException ex) {
             ex.printStackTrace();
         } finally {
             close();
@@ -95,15 +112,27 @@ public class CurrencySQL extends MySQLManager {
         return values;
     }
 
-    public static void createAccount(UUID uuid, double startValue, Currency account) {
+    /**
+     *
+     * @param uuid UUID uuid of guild or player
+     * @param pocketStart double Starting pocket value
+     * @param bankStart double Starting bank value
+     * @param account Account Type of account
+     */
+    public static void createAccount(UUID uuid, double pocketStart,double bankStart, Currency account) {
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_balances` (`uuid`,`pocket`,`bank`,`guild`) VALUES (?,?,?,?)");
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setDouble(2, startValue);
-            preparedStatement.setDouble(3, startValue);
-            preparedStatement.setInt(4, account.equals(Currency.bank_guild) ? 1 : 0);
-            preparedStatement.execute();
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_balances` (`uuid`,`pocket`,`bank`,`guild`) VALUES (?,?,?,?)");
+                preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setDouble(2, pocketStart);
+                preparedStatement.setDouble(3, bankStart);
+                preparedStatement.setInt(4, account.equals(Currency.bank_guild) ? 1 : 0);
+                preparedStatement.execute();
+            } else {
+                oddjobConfig.set("balances."+uuid.toString()+".bank",bankStart);
+                oddjobConfig.set("balances."+uuid.toString()+".pocket",pocketStart);
+                oddjobConfig.set("balances."+uuid.toString()+".guild",(account == Currency.bank_guild));
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
@@ -114,21 +143,22 @@ public class CurrencySQL extends MySQLManager {
 
     public static void setBalance(UUID uuid, double amount, Currency account) {
         try {
-            connect();
-            switch (account) {
-                case bank_player:
-                case bank_guild:
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ? WHERE `uuid` = ?");
-                    break;
-                case pocket:
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `pocket` = ? WHERE `uuid` = ?");
-                    break;
+            if (connect()) {
+                switch (account) {
+                    case bank_player, bank_guild -> preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `bank` = ? WHERE `uuid` = ?");
+                    case pocket -> preparedStatement = connection.prepareStatement("UPDATE `mine_balances` SET `pocket` = ? WHERE `uuid` = ?");
+                }
+                preparedStatement.setDouble(1, amount);
+                preparedStatement.setString(2, uuid.toString());
+                preparedStatement.executeUpdate();
+            } else {
+                switch (account) {
+                    case bank_player, bank_guild -> oddjobConfig.set("balances." + uuid.toString() + ".bank", amount);
+                    case pocket -> oddjobConfig.set("balances." + uuid.toString() + ".pocket", amount);
+                }
+                oddjobConfig.save(oddjobConfigFile);
             }
-            preparedStatement.setDouble(1, amount);
-            preparedStatement.setString(2, uuid.toString());
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         } finally {
             close();

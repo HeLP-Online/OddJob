@@ -8,8 +8,10 @@ import com.spillhuset.Utils.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
@@ -375,16 +377,25 @@ public class GuildSQL extends MySQLManager {
     public static UUID getGuildUUIDByChunk(Chunk chunk) {
         UUID uuid = null;
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
-            preparedStatement.setString(1, chunk.getWorld().getUID().toString());
-            preparedStatement.setInt(2, chunk.getX());
-            preparedStatement.setInt(3, chunk.getZ());
-            preparedStatement.setString(4, OddJob.getInstance().getServerId().toString());
-            resultSet = preparedStatement.executeQuery();
+            if(connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
+                preparedStatement.setString(1, chunk.getWorld().getUID().toString());
+                preparedStatement.setInt(2, chunk.getX());
+                preparedStatement.setInt(3, chunk.getZ());
+                preparedStatement.setString(4, OddJob.getInstance().getServerId().toString());
+                resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                uuid = UUID.fromString(resultSet.getString("uuid"));
+                if (resultSet.next()) {
+                    uuid = UUID.fromString(resultSet.getString("uuid"));
+                }
+            } else {
+                if (oddjobConfig.getConfigurationSection("guild_chunks") != null) {
+                    ConfigurationSection cs = oddjobConfig.getConfigurationSection("guild_chunks");
+                    String world = chunk.getWorld().getUID().toString();
+                    String x = String.valueOf(chunk.getX());
+                    String z = String.valueOf(chunk.getX());
+                    cs.get(world+"."+x+"."+z+".uuid");
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -397,15 +408,25 @@ public class GuildSQL extends MySQLManager {
 
     public static void createGuildClaim(@Nonnull Chunk chunk, @Nonnull UUID guild) {
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`x`,`z`,`world`,`uuid`,`server`) VALUES (?,?,?,?,?)");
-            preparedStatement.setInt(1, chunk.getX());
-            preparedStatement.setInt(2, chunk.getZ());
-            preparedStatement.setString(3, chunk.getWorld().getUID().toString());
-            preparedStatement.setString(4, guild.toString());
-            preparedStatement.setString(5, OddJob.getInstance().getServerId().toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`x`,`z`,`world`,`uuid`,`server`) VALUES (?,?,?,?,?)");
+                preparedStatement.setInt(1, chunk.getX());
+                preparedStatement.setInt(2, chunk.getZ());
+                preparedStatement.setString(3, chunk.getWorld().getUID().toString());
+                preparedStatement.setString(4, guild.toString());
+                preparedStatement.setString(5, OddJob.getInstance().getServerId().toString());
+                preparedStatement.execute();
+            } else {
+                String world = chunk.getWorld().getUID().toString();
+                String x = String.valueOf(chunk.getX());
+                String z = String.valueOf(chunk.getX());
+                String uuid = guild.toString();
+
+                oddjobConfig.set("guild_chunks."+world+"."+x+"."+z,uuid);
+
+                oddjobConfig.save(oddjobConfigFile);
+            }
+        } catch (SQLException | IOException ex) {
             ex.printStackTrace();
         } finally {
             close();

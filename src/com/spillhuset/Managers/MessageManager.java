@@ -209,19 +209,23 @@ public class MessageManager {
         commandSender.sendMessage(builder.toString());
     }
 
-    public void infoListWarps(String string, HashMap<String, Warp> warps, Player player) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(string).append("\n");
-        builder.append("---------------------\n");
-        int i = 0;
-        for (String st : warps.keySet()) {
-            String name = warps.get(st).getName();
-            ChatColor color = (player.hasPermission("warps." + name)) ? ChatColor.GREEN : ChatColor.RED;
-            builder.append(i).append(".) ").append(color).append(name);
-            if (warps.get(st).hasPassword()) builder.append("*");
-            builder.append("\n");
+    public void infoListWarps(HashMap<UUID, Warp> warps, CommandSender sender) {
+        if (warps.size() == 0) {
+            warpsNotSet(sender);
+            return;
         }
-        player.sendMessage(builder.toString());
+
+        info(type(Plugin.warp), "There " + ((warps.size() == 1) ? "is " : "are ") + cValue + warps.size() + cInfo + " warps", sender, false);
+        space(Plugin.warp, sender);
+        int i = 1;
+        for (UUID uuid : warps.keySet()) {
+            info(type(Plugin.warp), i + ".) " + cValue + warps.get(uuid).getName() + ((warps.get(uuid).hasPassword()) ? "*" : "") + ((warps.get(uuid).getCost() > 0) ? "$" : ""), sender, false);
+            i++;
+        }
+    }
+
+    private void warpsNotSet(CommandSender sender) {
+        warning(type(Plugin.warp), "No warps set on this server!", sender, false);
     }
 
     public void save(String string, int i, int u) {
@@ -1171,14 +1175,14 @@ public class MessageManager {
     }
 
     public void guildMaxClaimsReached(CommandSender sender) {
-        danger(type(Plugin.guild),"Claiming count reached maximum.",sender,false);
+        danger(type(Plugin.guild), "Claiming count reached maximum.", sender, false);
     }
 
     public void syntaxError(Plugin plugin, String s, CommandSender sender) {
-        danger(type(plugin),"Unknown syntax: "+s,sender,false);
+        danger(type(plugin), "Unknown syntax: " + s, sender, false);
     }
 
     public void errorZone(Plugin plugin, String arg, CommandSender sender) {
-        danger(type(plugin),"Unknown Zone: "+cValue+arg,sender,false);
+        danger(type(plugin), "Unknown Zone: " + cValue + arg, sender, false);
     }
 }

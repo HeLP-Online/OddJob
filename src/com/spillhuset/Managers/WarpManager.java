@@ -15,14 +15,10 @@ import java.util.UUID;
 
 public class WarpManager {
 
-    HashMap<UUID, Warp> warps = new HashMap<>();
+    private HashMap<UUID, Warp> warps = new HashMap<>();
 
-    public Set<String> listWarps() {
-        Set<String> list = new HashSet<>();
-        for (UUID uuid : warps.keySet()) {
-            list.add(warps.get(uuid).getName());
-        }
-        return list;
+    public HashMap<UUID, Warp> listWarps() {
+        return warps;
     }
 
     public void add(Player player, String name) {
