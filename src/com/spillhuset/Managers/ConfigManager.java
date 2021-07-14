@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class ConfigManager {
+
     public FileConfiguration scoreboard;
     private static final List<String> permissions = new ArrayList<>();
     public static FileConfiguration config;
@@ -35,6 +36,10 @@ public class ConfigManager {
 
         config.addDefault("arena.use-permission", true);
         config.addDefault("arena.broadcast-win", true);
+
+        config.addDefault("currency.initial.pocket",200D);
+        config.addDefault("currency.initial.bank",200D);
+        config.addDefault("currency.initial.guild",200D);
 
         config.addDefault("sql.type", "mysql");
         config.addDefault("sql.prefix", "mine_");
@@ -90,6 +95,12 @@ public class ConfigManager {
 
     public static double getCurrencyInitialGuild() {
         return config.getDouble("currency.initial.guild", 200D);
+    }
+    public static double getCurrencyInitialBank() {
+        return config.getDouble("currency.initial.bank", 200D);
+    }
+    public static double getCurrencyInitialPocket() {
+        return config.getDouble("currency.initial.pocket", 200D);
     }
 
     public static int maxHomes(UUID uuid) {

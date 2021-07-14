@@ -50,6 +50,12 @@ public class WarpManager {
         del(commandSender, uuid, "");
     }
 
+    /**
+     *
+     * @param player Player to warp
+     * @param uuid UUID of Warp
+     * @param password String password to Warp
+     */
     public void pass(Player player, UUID uuid, String password) {
         Warp warp = warps.get(uuid);
         Location location = warp.getLocation();
@@ -105,6 +111,11 @@ public class WarpManager {
     public void help(CommandSender commandSender) {
     }
 
+    /**
+     *
+     * @param player Player to warp
+     * @param uuid UUID of Warp
+     */
     public void pass(Player player, UUID uuid) {
         pass(player, uuid, "");
     }

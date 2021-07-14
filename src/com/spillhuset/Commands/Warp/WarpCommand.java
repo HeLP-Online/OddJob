@@ -28,7 +28,7 @@ public class WarpCommand extends SubCommandInterface implements CommandExecutor,
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class WarpCommand extends SubCommandInterface implements CommandExecutor,
         if (sender instanceof Player player) {
             for (UUID uuid : OddJob.getInstance().getWarpManager().listWarps().keySet()) {
                 Warp warp = OddJob.getInstance().getWarpManager().listWarps().get(uuid);
-                if (warp.getName().equals(args[0])) {
+                if (warp.getName().equalsIgnoreCase(args[0])) {
                     if (can(sender,false)) {
                         if (args.length == 1) {
                             OddJob.getInstance().getWarpManager().pass(player, uuid);
@@ -117,7 +117,7 @@ public class WarpCommand extends SubCommandInterface implements CommandExecutor,
             String name = warp.getName();
             if (args[0].isEmpty()) {
                 list.add(name);
-            } else if (name.startsWith(args[0]) && args.length == 1) {
+            } else if (name.toLowerCase().startsWith(args[0].toLowerCase()) && args.length == 1) {
                 list.add(name);
             }
         }

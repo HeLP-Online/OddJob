@@ -45,6 +45,7 @@ public class WarpSQL extends MySQLManager {
 
                 oddjobConfig.save(oddjobConfigFile);
             }
+            OddJob.getInstance().log("Warp saved "+name);
         } catch (SQLException | IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -114,6 +115,7 @@ public class WarpSQL extends MySQLManager {
                     }
                 }
             }
+            OddJob.getInstance().log("Warps loaded: "+warps.size());
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -164,6 +166,7 @@ public class WarpSQL extends MySQLManager {
                 }
                 oddjobConfig.save(oddjobConfigFile);
             }
+            OddJob.getInstance().log("Warps saved"+warps.size());
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         } finally {

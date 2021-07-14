@@ -30,7 +30,7 @@ public class MoneyManager {
     public double getBankBalance(UUID uuid, Currency account) {
         if (account.equals(Currency.bank_guild)) {
             if (!hasBankAccount(uuid, Currency.bank_guild))
-                createAccounts(uuid, ConfigManager.getCurrencyInitialGuild(), account);
+                createAccounts(uuid, 0,ConfigManager.getCurrencyInitialGuild(), true);
             return guildBank.get(uuid);
         } else {
             return playerBank.get(uuid);
@@ -73,18 +73,8 @@ public class MoneyManager {
         return OddJob.getInstance().getConfig().getDouble("econ.cost." + name, 0.0);
     }
 
-    public void createAccounts(UUID uuid, double startValue, Currency account) {
-        createBankAccount(uuid, startValue, account);
-        if (!account.equals(Currency.bank_guild)) createPocket(uuid, startValue);
-        CurrencySQL.createAccount(uuid,0,ConfigManager.getCurrencyInitialGuild(),Currency.bank_guild);
-    }
-
-    public void createPocket(UUID uuid, double startValue) {
-        setPocketBalance(uuid, startValue);
-    }
-
-    public void createBankAccount(UUID uuid, double startValue, Currency guild) {
-        setBankBalance(uuid, startValue, guild);
+    public void createAccounts(UUID uuid, double pocket, double bank, boolean guild) {
+        CurrencySQL.createAccount(uuid, pocket, bank, guild);
     }
 
     public void addBankBalance(UUID uuid, Double cost, CommandSender sender, Currency account) {

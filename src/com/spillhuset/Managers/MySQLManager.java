@@ -367,14 +367,19 @@ public class MySQLManager {
     public World playerInJail(UUID player) {
         World world = null;
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `world` FROM `mine_players_jailed` WHERE `uuid` = ?");
-            preparedStatement.setString(1, player.toString());
-            resultSet = preparedStatement.executeQuery();
+            if(connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `world` FROM `mine_players_jailed` WHERE `uuid` = ?");
+                preparedStatement.setString(1, player.toString());
+                resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                OddJob.getInstance().getMessageManager().console(resultSet.getString("world"));
+                if (resultSet.next()) {
+                    world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                    OddJob.getInstance().getMessageManager().console(resultSet.getString("world"));
+                }
+            }else {
+                if (oddjobConfig.getConfigurationSection("players_jailed") != null) {
+                    OddJob.getInstance().log("");
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

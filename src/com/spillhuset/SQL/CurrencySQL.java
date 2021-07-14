@@ -40,15 +40,15 @@ public class CurrencySQL extends MySQLManager {
             } else {
                 for (UUID uuid : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
                     String string = uuid.toString();
-                    oddjobConfig.set("balances."+string+".bank",OddJob.getInstance().getCurrencyManager().getBankBalance(uuid,Currency.bank_guild));
+                    oddjobConfig.set("currency." + string + ".bank", OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.bank_guild));
                 }
                 for (UUID uuid : OddJob.getInstance().getPlayerManager().getUUIDs()) {
                     String string = uuid.toString();
-                    if (OddJob.getInstance().getCurrencyManager().hasBankAccount(uuid,Currency.bank_player)) {
-                        oddjobConfig.set("balances."+string+".bank",OddJob.getInstance().getCurrencyManager().getBankBalance(uuid,Currency.bank_player));
+                    if (OddJob.getInstance().getCurrencyManager().hasBankAccount(uuid, Currency.bank_player)) {
+                        oddjobConfig.set("currency." + string + ".bank", OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.bank_player));
                     }
                     if (OddJob.getInstance().getCurrencyManager().hasPocket(uuid)) {
-                        oddjobConfig.set("balances."+string+".pocket",OddJob.getInstance().getCurrencyManager().getPocketBalance(uuid));
+                        oddjobConfig.set("currency." + string + ".pocket", OddJob.getInstance().getCurrencyManager().getPocketBalance(uuid));
                     }
                 }
                 oddjobConfig.save(oddjobConfigFile);
@@ -85,7 +85,7 @@ public class CurrencySQL extends MySQLManager {
             } else {
                 if (oddjobConfig.getConfigurationSection("currency") != null) {
                     for (String string : oddjobConfig.getConfigurationSection("currency").getKeys(false)) {
-                        ConfigurationSection user = oddjobConfig.getConfigurationSection("currency."+string);
+                        ConfigurationSection user = oddjobConfig.getConfigurationSection("currency." + string);
                         if (user != null) {
                             boolean guild = user.getBoolean("guild");
                             double bank = user.getDouble("bank");
@@ -113,32 +113,34 @@ public class CurrencySQL extends MySQLManager {
     }
 
     /**
-     *
-     * @param uuid UUID uuid of guild or player
+     * @param uuid        UUID uuid of guild or player
      * @param pocketStart double Starting pocket value
-     * @param bankStart double Starting bank value
-     * @param account Account Type of account
+     * @param bankStart   double Starting bank value
+     * @param guild       boolean is a guild?
      */
-    public static void createAccount(UUID uuid, double pocketStart,double bankStart, Currency account) {
+    public static void createAccount(UUID uuid, double pocketStart, double bankStart, boolean guild) {
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("INSERT INTO `mine_balances` (`uuid`,`pocket`,`bank`,`guild`) VALUES (?,?,?,?)");
                 preparedStatement.setString(1, uuid.toString());
                 preparedStatement.setDouble(2, pocketStart);
                 preparedStatement.setDouble(3, bankStart);
-                preparedStatement.setInt(4, account.equals(Currency.bank_guild) ? 1 : 0);
+                preparedStatement.setInt(4, guild ? 1 : 0);
                 preparedStatement.execute();
             } else {
-                oddjobConfig.set("balances."+uuid.toString()+".bank",bankStart);
-                oddjobConfig.set("balances."+uuid.toString()+".pocket",pocketStart);
-                oddjobConfig.set("balances."+uuid.toString()+".guild",(account == Currency.bank_guild));
+                oddjobConfig.set("balances." + uuid.toString() + ".bank", bankStart);
+                oddjobConfig.set("balances." + uuid.toString() + ".pocket", pocketStart);
+                oddjobConfig.set("balances." + uuid.toString() + ".guild", guild);
+
+                oddjobConfig.save(oddjobConfigFile);
+                load();
             }
-        } catch (SQLException ex) {
+            OddJob.getInstance().getMessageManager().console("Currency created: " + ((guild) ? "guild" : "player") + " " + uuid.toString());
+        } catch (SQLException | IOException ex) {
             ex.printStackTrace();
         } finally {
             close();
         }
-        OddJob.getInstance().getMessageManager().console("Created Account");
     }
 
     public static void setBalance(UUID uuid, double amount, Currency account) {
@@ -158,6 +160,7 @@ public class CurrencySQL extends MySQLManager {
                 }
                 oddjobConfig.save(oddjobConfigFile);
             }
+            OddJob.getInstance().log("Currency of "+uuid.toString()+" changed with amount");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         } finally {

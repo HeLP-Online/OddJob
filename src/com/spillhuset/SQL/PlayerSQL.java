@@ -4,6 +4,7 @@ import com.spillhuset.Managers.MySQLManager;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Odd.OddPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ public class PlayerSQL extends MySQLManager {
         List<UUID> blacklist = new ArrayList<>();
         List<UUID> whitelist = new ArrayList<>();
         boolean denyTpa = false, denyTrade = false;
-        String name = "", banned = "";
+        String name = "", banned = null;
         ScoreBoard scoreboard = ScoreBoard.Player;
         OddPlayer oddPlayer = null;
         int maxHomes = 0;
@@ -49,7 +50,7 @@ public class PlayerSQL extends MySQLManager {
             } else {
                 if (oddjobConfig.getConfigurationSection("players") != null) {
                     for (String string : oddjobConfig.getConfigurationSection("players").getKeys(false)) {
-                        ConfigurationSection cs = oddjobConfig.getConfigurationSection("players."+string);
+                        ConfigurationSection cs = oddjobConfig.getConfigurationSection("players." + string);
                         if (cs != null) {
                             // Blacklist
                             List<String> black = cs.getStringList("blacklist");
@@ -71,17 +72,17 @@ public class PlayerSQL extends MySQLManager {
                             denyTrade = cs.getBoolean("denytrade");
 
                             name = cs.getString("name");
-                            banned = !cs.getString("banned").equals("") ? cs.getString("banned") : null;
+                            banned = !Objects.equals(cs.getString("banned"), "") ? cs.getString("banned") : null;
 
                             scoreboard = ScoreBoard.valueOf(cs.getString("scoreboard"));
                             maxHomes = cs.getInt("maxhomes");
-
-
                         }
                     }
+                } else {
+                    name = Objects.requireNonNull(Bukkit.getPlayer(uuid)).getName();
                 }
             }
-            oddPlayer = new OddPlayer(uuid,blacklist,whitelist,denyTpa,name,banned,scoreboard,denyTrade,maxHomes);
+            oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade, maxHomes);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -118,16 +119,16 @@ public class PlayerSQL extends MySQLManager {
                 preparedStatement.setString(7, oddPlayer.getBanned());
                 preparedStatement.setString(8, oddPlayer.getUuid().toString());
                 preparedStatement.executeUpdate();
-            }else {
+            } else {
                 String string = oddPlayer.getUuid().toString();
-                oddjobConfig.set("players."+string+".blacklist",oddPlayer.getBlacklist());
-                oddjobConfig.set("players."+string+".whitelist",oddPlayer.getWhitelist());
-                oddjobConfig.set("players."+string+".scoreboard",oddPlayer.getScoreboard().name());
-                oddjobConfig.set("players."+string+".maxhomes",oddPlayer.getMaxHomes());
-                oddjobConfig.set("players."+string+".denytpa",oddPlayer.getDenyTpa());
-                oddjobConfig.set("players."+string+".denytrade",oddPlayer.getDenyTrade());
-                oddjobConfig.set("players."+string+".banned",oddPlayer.getBanned());
-                oddjobConfig.set("players."+string+".name",oddPlayer.getName());
+                oddjobConfig.set("players." + string + ".blacklist", oddPlayer.getBlacklist());
+                oddjobConfig.set("players." + string + ".whitelist", oddPlayer.getWhitelist());
+                oddjobConfig.set("players." + string + ".scoreboard", oddPlayer.getScoreboard().name());
+                oddjobConfig.set("players." + string + ".maxhomes", oddPlayer.getMaxHomes());
+                oddjobConfig.set("players." + string + ".denytpa", oddPlayer.getDenyTpa());
+                oddjobConfig.set("players." + string + ".denytrade", oddPlayer.getDenyTrade());
+                oddjobConfig.set("players." + string + ".banned", oddPlayer.getBanned());
+                oddjobConfig.set("players." + string + ".name", oddPlayer.getName());
 
                 oddjobConfig.save(oddjobConfigFile);
             }

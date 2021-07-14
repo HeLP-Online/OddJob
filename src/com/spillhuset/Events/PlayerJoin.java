@@ -1,6 +1,8 @@
 package com.spillhuset.Events;
 
+import com.spillhuset.Managers.ConfigManager;
 import com.spillhuset.OddJob;
+import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Zone;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,6 +22,7 @@ public class PlayerJoin implements Listener {
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid); // nullable
 
         OddJob.getInstance().getPlayerManager().loadPlayer(player.getUniqueId());
+        OddJob.getInstance().getCurrencyManager().createAccounts(uuid, ConfigManager.getCurrencyInitialPocket(), ConfigManager.getCurrencyInitialBank(), false);
 
         // If banned Player
         if (OddJob.getInstance().getBanManager().getBan(uuid) != null) {
