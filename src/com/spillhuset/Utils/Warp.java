@@ -61,4 +61,8 @@ public class Warp {
     public Location getLocation() {
         return location;
     }
+
+    public UUID getUuid() {
+        return uuid;
+    }
 }

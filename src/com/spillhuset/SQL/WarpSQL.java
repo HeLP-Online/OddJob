@@ -56,12 +56,20 @@ public class WarpSQL extends MySQLManager {
     public static boolean del(UUID uuid, String password) {
         boolean a = false;
         try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_warps` WHERE `uuid` = ? AND `passwd` = ?");
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setString(2, password);
-            preparedStatement.execute();
-            a = true;
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("DELETE FROM `mine_warps` WHERE `uuid` = ? AND `passwd` = ?");
+                preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setString(2, password);
+                preparedStatement.execute();
+                a = true;
+            } else {
+                String passwd = oddjobConfig.getString("warps."+uuid.toString()+".passwd");
+                if (password.equals(passwd)) {
+                    oddjobConfig.set("warps."+uuid,null);
+                    a = true;
+                }
+            }
+
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
@@ -157,7 +165,7 @@ public class WarpSQL extends MySQLManager {
                     oddjobConfig.set("warps."+uuid.toString()+".name",warp.getName());
                     oddjobConfig.set("warps."+uuid.toString()+".passwd",warp.getPassword());
                     oddjobConfig.set("warps."+uuid.toString()+".cost",warp.getCost());
-                    oddjobConfig.set("warps."+uuid.toString()+".world",warp.getLocation().getWorld().getUID());
+                    oddjobConfig.set("warps."+uuid.toString()+".world",warp.getLocation().getWorld().getUID().toString());
                     oddjobConfig.set("warps."+uuid.toString()+".x",warp.getLocation().getX());
                     oddjobConfig.set("warps."+uuid.toString()+".y",warp.getLocation().getY());
                     oddjobConfig.set("warps."+uuid.toString()+".z",warp.getLocation().getZ());

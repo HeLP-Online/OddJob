@@ -1,4 +1,5 @@
 package com.spillhuset.Commands.Warp;
+
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
@@ -7,7 +8,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class WarpAddCommand extends SubCommand {
     @Override
@@ -17,7 +17,7 @@ public class WarpAddCommand extends SubCommand {
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class WarpAddCommand extends SubCommand {
 
     @Override
     public String getSyntax() {
-        return "/warp add <name> [password] [cost]";
+        return "/warp add <name> [password=<password>] [cost=<value>]";
     }
 
     @Override
@@ -47,52 +47,64 @@ public class WarpAddCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
+        // Check console
+        if (!(sender instanceof Player player)) {
             OddJob.getInstance().getMessageManager().errorConsole(Plugin.warp);
             return;
         }
 
-        Player player = (Player)  sender;
-        if (args.length < 2) {
-            OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.warp,sender);
-            return;
-        } else if (args.length > 4) {
-            OddJob.getInstance().getMessageManager().errorTooManyArgs(Plugin.warp, sender);
+        // Check arguments
+        if (checkArgs(2, 4, args, sender, getPlugin())) {
             return;
         }
 
+        // Check permission
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+            return;
+        }
+
+        // Sets initial values
         String name = args[1];
-        UUID warp = OddJob.getInstance().getWarpManager().getUUID(name);
-        if (warp != null) {
-            OddJob.getInstance().getMessageManager().errorWarpExists(name,sender);
+        String password = "";
+        double value = 0D;
+
+        // Check name
+        if (OddJob.getInstance().getWarpManager().getUUID(name) != null) {
+            OddJob.getInstance().getMessageManager().errorWarpExists(name, sender);
             return;
         }
 
-        if (args.length == 4) {
-            try {
-                double cost = Double.parseDouble(args[3]);
-                String password = args[2];
-                OddJob.getInstance().getWarpManager().add(player,name,password,cost);
-            } catch (NumberFormatException ignored) {
-                OddJob.getInstance().getMessageManager().errorNumber(Plugin.warp,args[3],sender);
+        // Check attributes
+        for (int i = 2; i < args.length; i++) {
+            String[] split = args[i].split("=");
+            if (split[0].equalsIgnoreCase("password")) {
+                password = split[1];
+            } else if (split[0].equalsIgnoreCase("cost")) {
+                value = Double.parseDouble(split[1]);
+            } else {
+                OddJob.getInstance().getMessageManager().sendSyntax(getPlugin(), getSyntax(), sender);
+                return;
             }
-        } else if (args.length == 3){
-            String password = args[2];
-            OddJob.getInstance().getWarpManager().add(player,name,password);
-        } else {
-            OddJob.getInstance().getWarpManager().add(player,name);
         }
+        OddJob.getInstance().getWarpManager().add(player, name, password, value);
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
         if (args.length == 2) {
-            list.add("<name>");
-        } else if(args.length == 3) {
-            list.add("[password]");
-        } else if(args.length == 4) {
-            list.add("[cost]");
+            list.add("name");
+        } else if (args.length == 3) {
+            list.add("password=");
+            list.add("cost=");
+        } else if (args.length == 4) {
+            if (args[2].toLowerCase().startsWith("cost")) {
+                list.add("password=");
+            }
+            if (args[2].toLowerCase().startsWith("password")) {
+                list.add("cost=");
+            }
         }
         return list;
     }

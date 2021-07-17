@@ -4,6 +4,7 @@ import com.spillhuset.Commands.Warp.Set.WarpSetCost;
 import com.spillhuset.Commands.Warp.Set.WarpSetLocation;
 import com.spillhuset.Commands.Warp.Set.WarpSetName;
 import com.spillhuset.Commands.Warp.Set.WarpSetPasswd;
+import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.ChatColor;
@@ -59,12 +60,18 @@ public class WarpSetCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if(checkArgs(2,0,args,sender,getPlugin())) {
+        // Check args
+        if (checkArgs(2, 0, args, sender, getPlugin())) {
             return;
         }
-        if (!can(sender,false)) {
+
+        // Check permission
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return;
         }
+
+        // Make subcommands
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
