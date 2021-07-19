@@ -2,6 +2,7 @@ package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.WarpSQL;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.Warp;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -112,8 +113,8 @@ public class WarpManager {
 
         if (OddJob.getInstance().getConfig().getBoolean("enabled.currency.pocket", true)) {
             if (warp.getCost() > 0d) {
-                if (OddJob.getInstance().getCurrencyManager().getPocketBalance(player.getUniqueId()) >= cost) {
-                    OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId(), cost, player.hasPermission("currency.negative"));
+                if (OddJob.getInstance().getCurrencyManager().get(player.getUniqueId()).get(Types.AccountType.pocket) >= cost) {
+                    OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), cost, player.hasPermission("currency.negative"), Types.AccountType.pocket);
                 } else {
                     OddJob.getInstance().getMessageManager().insufficientFunds(player);
                     return;

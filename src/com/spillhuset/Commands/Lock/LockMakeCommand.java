@@ -2,6 +2,7 @@ package com.spillhuset.Commands.Lock;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -57,11 +58,11 @@ public class LockMakeCommand extends SubCommand {
             return;
         } else {
             double cost = OddJob.getInstance().getConfig().getDouble("default.lock.make", 100d);
-            if (OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId()
-                    , cost, player.hasPermission("currency.negative"))) {
+            if (OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId()
+                    , cost, player.hasPermission("currency.negative"), Types.AccountType.pocket)) {
                 OddJob.getInstance().getMessageManager().locksKey(sender);
             } else {
-                OddJob.getInstance().getMessageManager().insufficientFunds( sender);
+                OddJob.getInstance().getMessageManager().insufficientFunds(sender);
                 return;
             }
         }

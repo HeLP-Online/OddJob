@@ -2,107 +2,99 @@ package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.CurrencySQL;
-import com.spillhuset.Utils.Enum.Currency;
-import org.bukkit.command.CommandSender;
+import com.spillhuset.Utils.Account.Account;
+import com.spillhuset.Utils.Enum.Types;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class MoneyManager {
-    private final HashMap<UUID, Double> playerBank = new HashMap<>();
-    private final HashMap<UUID, Double> guildBank = new HashMap<>();
-    private final HashMap<UUID, Double> pocket = new HashMap<>();
+    private HashMap<UUID, Account> accounts = new HashMap<>();
 
-    public void setBankBalance(UUID uuid, double amount, Currency account) {
-        if (account.equals(Currency.bank_guild)) {
-            guildBank.put(uuid, amount);
-        } else {
-            playerBank.put(uuid, amount);
-        }
+    /**
+     * @param uuid    UUID of Player or Guild
+     * @param amount  Balance to be set
+     * @param account Account to set
+     */
+    public void set(UUID uuid, double amount, Types.AccountType account) {
+        accounts.get(uuid).set(account, amount);
         CurrencySQL.setBalance(uuid, amount, account);
     }
 
-    public void setPocketBalance(UUID uuid, double amount) {
-        pocket.put(uuid, amount);
-        //OddJob.getInstance().getMySQLManager().econSet(uuid,amount, Econ.POCKET);
-    }
-
-    public double getBankBalance(UUID uuid, Currency account) {
-        if (account.equals(Currency.bank_guild)) {
-            if (!hasBankAccount(uuid, Currency.bank_guild))
-                createAccounts(uuid, 0,ConfigManager.getCurrencyInitialGuild(), true);
-            return guildBank.get(uuid);
+    /**
+     * @param uuid  UUID of Player of Guild
+     * @param guild Is a guild?
+     * @return Double balance
+     */
+    public Account get(UUID uuid, boolean guild) {
+        if (accounts.containsKey(uuid)) {
+            return accounts.get(uuid);
         } else {
-            return playerBank.get(uuid);
+            if (guild) {
+                create(uuid, ConfigManager.getCurrencyInitialGuild());
+            } else {
+                create(uuid, ConfigManager.getCurrencyInitialBank(), ConfigManager.getCurrencyInitialPocket());
+            }
+            return get(uuid, guild);
         }
     }
 
-    public double getPocketBalance(UUID player) {
-        return pocket.get(player);
-    }
-
-    public boolean hasBankAccount(UUID uuid, Currency account) {
-        if (account.equals(Currency.bank_guild)) {
-            return guildBank.containsKey(uuid);
-        } else {
-            return playerBank.containsKey(uuid);
-        }
-    }
-
-    public boolean hasPocket(UUID player) {
-        return pocket.containsKey(player);
-    }
-
-    public boolean subtractBankBalance(UUID uuid, double cost, boolean negative, Currency account) {
-        if (!negative || getBankBalance(uuid, account) > cost) {
-            setBankBalance(uuid, getBankBalance(uuid, account) - cost, account);
+    /**
+     *
+     * @param uuid UUID of target account
+     * @param value Double Transaction value
+     * @param negative Boolean value can be negative
+     * @param type Type of transaction
+     * @return Boolean if success
+     */
+    public boolean subtract(UUID uuid, double value, boolean negative, Types.AccountType type) {
+        // Check if negative value is ok?
+        if (!negative || get(uuid).get(type) > value) {
+            // Set amount
+            set(uuid, get(uuid).get(type) - value, type);
             return true;
         }
         return false;
     }
 
-    public boolean subtractPocketBalance(UUID uuid, double cost, boolean negative) {
-        if (!negative || getPocketBalance(uuid) > cost) {
-            setPocketBalance(uuid, getPocketBalance(uuid) - cost);
-            return true;
-        }
-        return false;
-    }
-
+    /**
+     *
+     * @param name String of transaction
+     * @return Double value
+     */
     public Double cost(String name) {
-        return OddJob.getInstance().getConfig().getDouble("econ.cost." + name, 0.0);
+        return OddJob.getInstance().getConfig().getDouble("econ.cost." + name, 0.0d);
     }
 
-    public void createAccounts(UUID uuid, double pocket, double bank, boolean guild) {
-        CurrencySQL.createAccount(uuid, pocket, bank, guild);
+    public void create(UUID uuid, double bank, double pocket) {
+        accounts.put(uuid, new Account(uuid, bank, pocket, false));
+        CurrencySQL.createAccount(uuid, bank, pocket, false);
     }
 
-    public void addBankBalance(UUID uuid, Double cost, CommandSender sender, Currency account) {
-        double bankBalance = getBankBalance(uuid, account);
-        setBankBalance(uuid, bankBalance + cost, account);
-        String name = (account.equals(Currency.bank_guild)) ? OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid) : OddJob.getInstance().getPlayerManager().getName(uuid);
-        OddJob.getInstance().getMessageManager().currencySuccessAdded(name, String.valueOf(cost), bankBalance, sender, account);
-
+    public void create(UUID uuid, double bank) {
+        accounts.put(uuid, new Account(uuid, bank, 0, true));
+        CurrencySQL.createAccount(uuid, bank, 0, true);
     }
 
-    public void addPocketBalance(UUID player, double cost) {
-        setPocketBalance(player, getPocketBalance(player) + cost);
+    /**
+     *
+     * @param uuid UUID of target account
+     * @param value Double Transaction value
+     * @param type Type of transaction
+     */
+    public void add(UUID uuid, double value, Types.AccountType type) {
+        set(uuid, get(uuid).get(type) + value, type);
     }
 
     public void load() {
-        HashMap<String, HashMap<UUID, Double>> values = CurrencySQL.load();
-        if (values.containsKey("pocket") && values.get("pocket").size() > 0) {
-            pocket.putAll(values.get("pocket"));
-        }
-        if (values.containsKey("guild") && values.get("guild").size() > 0) {
-            guildBank.putAll(values.get("guild"));
-        }
-        if (values.containsKey("bank") && values.get("bank").size() > 0) {
-            playerBank.putAll(values.get("bank"));
-        }
+        accounts = CurrencySQL.load();
     }
 
     public void save() {
-        CurrencySQL.save();
+        CurrencySQL.save(accounts);
+    }
+
+    public Account get(UUID uuid) {
+        return accounts.get(uuid);
     }
 }

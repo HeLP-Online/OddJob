@@ -1,7 +1,7 @@
 package com.spillhuset.Commands.Money.Bank;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
@@ -52,10 +52,10 @@ public class BankSubCommand extends SubCommand {
         }
 
         UUID target;
-        Currency account = Currency.valueOf(args[2]);
-        switch (account) {
-            case bank_player -> target = OddJob.getInstance().getPlayerManager().getUUID(args[3]);
-            case bank_guild -> target = OddJob.getInstance().getGuildManager().getGuildUUIDByName(args[3]);
+        Types.BankType type = Types.BankType.valueOf(args[2]);
+        switch (type) {
+            case player -> target = OddJob.getInstance().getPlayerManager().getUUID(args[3]);
+            case guild -> target = OddJob.getInstance().getGuildManager().getGuildUUIDByName(args[3]);
             default -> {
                 OddJob.getInstance().getMessageManager().cannotIdentify(args[3], args[2], getPlugin(), sender);
                 return;
@@ -70,8 +70,8 @@ public class BankSubCommand extends SubCommand {
             return;
         }
 
-        if (OddJob.getInstance().getCurrencyManager().subtractBankBalance(target, amount, sender.hasPermission("currency.negative"), account)) {
-            OddJob.getInstance().getMessageManager().currencyChanged(account, amount, OddJob.getInstance().getCurrencyManager().getPocketBalance(target), target, sender);
+        if (OddJob.getInstance().getCurrencyManager().subtract(target, amount, sender.hasPermission("currency.negative"), Types.AccountType.bank)) {
+            OddJob.getInstance().getMessageManager().currencyChanged(Types.AccountType.bank, amount, OddJob.getInstance().getCurrencyManager().get(target).get(Types.AccountType.bank), target, sender);
         } else {
             OddJob.getInstance().getMessageManager().insufficientFunds(target,sender);
         }

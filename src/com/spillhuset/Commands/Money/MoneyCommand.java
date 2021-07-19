@@ -3,7 +3,7 @@ package com.spillhuset.Commands.Money;
 import com.spillhuset.Commands.Money.Bank.BankCommand;
 import com.spillhuset.Commands.Money.Pocket.PocketCommand;
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
+import com.spillhuset.Utils.Enum.Types.AccountType;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import com.spillhuset.Utils.SubCommandInterface;
@@ -64,8 +64,8 @@ public class MoneyCommand extends SubCommandInterface implements CommandExecutor
         double pocket, bank;
         if (args.length == 0) {
             uuid = ((Player) sender).getUniqueId();
-            pocket = OddJob.getInstance().getCurrencyManager().getPocketBalance(uuid);
-            bank = OddJob.getInstance().getCurrencyManager().getBankBalance(uuid, Currency.bank_player);
+            pocket = OddJob.getInstance().getCurrencyManager().get(uuid).get(AccountType.pocket);
+            bank = OddJob.getInstance().getCurrencyManager().get(uuid).get(AccountType.bank);
             OddJob.getInstance().getMessageManager().infoCurrencyBalance(uuid, pocket, bank);
             return true;
         }

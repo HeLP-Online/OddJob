@@ -1,8 +1,8 @@
 package com.spillhuset.Commands.Money.Pocket;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -50,7 +50,7 @@ public class PocketSetCommand extends SubCommand {
     @Override
     public void perform(CommandSender sender, String[] args) {
         if (args.length != 4) {
-            OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.currency,sender);
+            OddJob.getInstance().getMessageManager().errorMissingArgs(Plugin.currency, sender);
             OddJob.getInstance().getMessageManager().sendSyntax(Plugin.warp, getSyntax(), sender);
             sender.sendMessage(ChatColor.GOLD + "args: " + ChatColor.RESET + "<player> <amount>");
             return;
@@ -64,12 +64,12 @@ public class PocketSetCommand extends SubCommand {
         try {
             amount = Integer.parseInt(args[3]);
         } catch (Exception e) {
-            OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency,args[3],sender);
+            OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency, args[3], sender);
             return;
         }
 
-        OddJob.getInstance().getCurrencyManager().setPocketBalance(target, amount);
-        OddJob.getInstance().getMessageManager().currencySuccessSet(args[2], args[3], sender, Currency.pocket);
+        OddJob.getInstance().getCurrencyManager().set(target, amount, Types.AccountType.pocket);
+        OddJob.getInstance().getMessageManager().currencySuccessSet(args[2], args[3], sender, Types.AccountType.pocket);
     }
 
     @Override

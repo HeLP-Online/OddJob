@@ -1,7 +1,8 @@
 package com.spillhuset.Commands.Money.Bank;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
+import com.spillhuset.Utils.Enum.Types.BankType;
+import com.spillhuset.Utils.Enum.Types.AccountType;
 import com.spillhuset.Utils.Enum.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -39,7 +40,7 @@ public class BankDepositCommand extends com.spillhuset.Utils.SubCommand {
 
     @Override
     public String getSyntax() {
-        return null;
+        return "/currency bank deposit <guild/player> <amount>";
     }
 
     @Override
@@ -53,12 +54,12 @@ public class BankDepositCommand extends com.spillhuset.Utils.SubCommand {
             return;
         }
 
-        Currency account = null;
+        BankType account = null;
         double value = 0d;
         UUID target = null;
 
         try {
-            account = Currency.valueOf(args[2]);
+            account = BankType.valueOf(args[2]);
             value = Double.parseDouble(args[4]);
         } catch (NumberFormatException e){
             OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency,args[4],sender);
@@ -71,59 +72,37 @@ public class BankDepositCommand extends com.spillhuset.Utils.SubCommand {
         }
 
         switch (account) {
-            case bank_player:
+            case player -> {
                 target = OddJob.getInstance().getPlayerManager().getUUID(args[3]);
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player,args[3],sender);
+                    OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[3], sender);
                     return;
                 }
-
-
-                break;
-            case bank_guild:
+            }
+            case guild -> {
                 target = OddJob.getInstance().getGuildManager().getGuildUUIDByName(args[3]);
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().errorGuild(args[3],sender);
+                    OddJob.getInstance().getMessageManager().errorGuild(args[3], sender);
                     return;
                 }
-                break;
+            }
         }
 
-        OddJob.getInstance().getCurrencyManager().subtractPocketBalance(target,value,sender.hasPermission("currency.negative"));
-        OddJob.getInstance().getCurrencyManager().addBankBalance(target,value,sender,account);
+        OddJob.getInstance().getCurrencyManager().subtract(target,value,sender.hasPermission("currency.negative"),AccountType.pocket);
+        OddJob.getInstance().getCurrencyManager().add(target,value,AccountType.bank);
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
-        List<Currency> accounts = new ArrayList<>();
-        accounts.add(Currency.bank_guild);
-        accounts.add(Currency.bank_player);
         if (args.length == 3) {
-            for (Currency account : accounts) {
-                if (account.name().startsWith(args[2])) {
+            for (BankType account : BankType.values()) {
+                if (args[2].isEmpty() || account.name().startsWith(args[2])) {
                     list.add(account.name());
                 }
             }
         } else if(args.length == 4) {
-            Currency account = Currency.valueOf(args[2]);
-            switch (account) {
-                case pocket:
-                case bank_player:
-                    for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-                        if (offlinePlayer.getName().startsWith(args[3])) {
-                            list.add(offlinePlayer.getName());
-                        }
-                    }
-                    break;
-                case bank_guild:
-                    for (UUID guild : OddJob.getInstance().getGuildManager().getGuilds().keySet()) {
-                        if (OddJob.getInstance().getGuildManager().getGuild(guild).getName().startsWith(args[3])) {
-                            list.add(OddJob.getInstance().getGuildManager().getGuild(guild).getName());
-                        }
-                    }
-                    break;
-            }
+            list.add("<amount>");
         }
         return list;
     }

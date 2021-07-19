@@ -2,6 +2,7 @@ package com.spillhuset.Managers;
 
 import com.google.common.collect.Sets;
 import com.spillhuset.OddJob;
+import com.spillhuset.Utils.Enum.Types;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -53,7 +54,7 @@ public class ShopManager {
 
     public void buy(Material material, int amount, Player player,CommandSender sender) {
         double cost = priceBuy.getOrDefault(material, 2.5) * amount;
-        double wallet = OddJob.getInstance().getCurrencyManager().getPocketBalance(player.getUniqueId());
+        double wallet = OddJob.getInstance().getCurrencyManager().get(player.getUniqueId()).get(Types.AccountType.pocket);
 
         if (wallet < cost) {
             OddJob.getInstance().getMessageManager().insufficientFunds(player);
@@ -63,7 +64,7 @@ public class ShopManager {
         itemsBought.put(material, itemsBought.getOrDefault(material, 0) + amount);
 
         ItemStack itemStack = new ItemStack(material, amount);
-        OddJob.getInstance().getCurrencyManager().subtractPocketBalance(player.getUniqueId(), cost, player.hasPermission("currency.negative"));
+        OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), cost, player.hasPermission("currency.negative"), Types.AccountType.pocket);
         OddJob.getInstance().getMessageManager().buy(amount, material, cost, player);
 
         player.getInventory().addItem(itemStack);
@@ -87,7 +88,7 @@ public class ShopManager {
         itemsSold.put(material, itemsSold.getOrDefault(material, 0) + amount);
 
         OddJob.getInstance().getMessageManager().console("giving money");
-        OddJob.getInstance().getCurrencyManager().addPocketBalance(player.getUniqueId(), cost);
+        OddJob.getInstance().getCurrencyManager().add(player.getUniqueId(), cost, Types.AccountType.pocket);
         OddJob.getInstance().getMessageManager().sold(amount, material, cost, player);
     }
 

@@ -1086,4 +1086,12 @@ public class GuildManager {
         }
         return i;
     }
+
+    public List<String> getNames() {
+        List<String> list = new ArrayList<>();
+        for (UUID uuid : guilds.keySet()) {
+            list.add(guilds.get(uuid).getName());
+        }
+        return list;
+    }
 }

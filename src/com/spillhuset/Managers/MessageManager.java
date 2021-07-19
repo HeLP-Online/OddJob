@@ -1,9 +1,9 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Role;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.Guild;
 import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.Warp;
@@ -548,15 +548,15 @@ public class MessageManager {
         warning(type(type), "syntax: " + syntax, sender, false);
     }
 
-    public void currencySuccessSet(String target, String amount, CommandSender sender, Currency account) {
+    public void currencySuccessSet(String target, String amount, CommandSender sender, Types.AccountType account) {
         success(type(Plugin.currency), "You have sucessfully set " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + " to " + cValue + amount, sender, true);
     }
 
-    public void currencySuccessAdded(String target, String amount, double balance, CommandSender sender, Currency account) {
+    public void currencySuccessAdded(String target, String amount, double balance, CommandSender sender, Types.AccountType account) {
         success(type(Plugin.currency), "You have successfully added " + cValue + amount + cSuccess + " to " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender, false);
     }
 
-    public void currencySuccessSubtracted(String target, String amount, double balance, CommandSender sender, Currency account) {
+    public void currencySuccessSubtracted(String target, String amount, double balance, CommandSender sender, Types.AccountType account) {
         success(type(Plugin.currency), "You have successfully subtracted " + cValue + amount + cSuccess + " from " + cPlayer + target + cSuccess + "`s " + cValue + account + cSuccess + ", new balance is " + cValue + balance, sender, true);
     }
 
@@ -661,7 +661,7 @@ public class MessageManager {
         success(type(Plugin.warp), "Successfully changed warp name from " + cWarp + oldName + cSuccess + " to " + cWarp + newName, sender, true);
     }
 
-    public void currencyChanged(Currency type, double cost, double pocketBalance, UUID uuid, CommandSender sender) {
+    public void currencyChanged(Types.AccountType type, double cost, double pocketBalance, UUID uuid, CommandSender sender) {
         if (sender == null) {
             info(type(Plugin.currency), "Subtracted " + cCurrency + cost + cInfo + " from your " + cValue + type.name() + cInfo + ", new balance is " + cValue + pocketBalance, uuid);
         } else {
@@ -1179,10 +1179,26 @@ public class MessageManager {
     }
 
     public void syntaxError(Plugin plugin, String s, CommandSender sender) {
-        danger(type(plugin), "Unknown syntax: " + s, sender, false);
+        danger(type(plugin), "Unknown syntax: " + cValue + s, sender, false);
     }
 
     public void errorZone(Plugin plugin, String arg, CommandSender sender) {
         danger(type(plugin), "Unknown Zone: " + cValue + arg, sender, false);
+    }
+
+    public void arenaNameAlreadyExists(String arg, CommandSender sender) {
+        danger(type(Plugin.arena), "Game with name " + cValue + arg + cDanger + " already exists", sender, false);
+    }
+
+    public void arenaTypeNotFound(String arg, CommandSender sender) {
+        danger(type(Plugin.arena), "Arena Type " + cValue + arg + cDanger + " not found", sender, false);
+    }
+
+    public void arenaCreateSuccess(String name, CommandSender sender) {
+        success(type(Plugin.arena), "Game " + cValue + name + cSuccess + " successfully created", sender, false);
+    }
+
+    public void errorCurrencyBankType(Plugin plugin, String arg, CommandSender sender) {
+        danger(type(plugin), "Invalid bank-type " + cValue + arg, sender, false);
     }
 }

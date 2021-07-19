@@ -3,6 +3,7 @@ package com.spillhuset;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.spillhuset.Commands.*;
+import com.spillhuset.Commands.Arena.ArenaCommand;
 import com.spillhuset.Commands.Ban.BanCommand;
 import com.spillhuset.Commands.Guild.GuildCommand;
 import com.spillhuset.Commands.Homes.HomesCommand;
@@ -22,6 +23,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -98,7 +100,7 @@ public class OddJob extends JavaPlugin {
         getCommand("gamemode").setExecutor(new GameModeCommand());
         getCommand("player").setExecutor(new PlayerCommand());
         getCommand("warp").setExecutor(new WarpCommand()); // SubCommand
-        //getCommand("arena").setExecutor(new ArenaCommand());
+        getCommand("arena").setExecutor(new ArenaCommand());
         getCommand("freeze").setExecutor(new FreezeCommand()); // Cleaned
         getCommand("backup").setExecutor(new RollbackCommand());
         getCommand("rollback").setExecutor(new RollbackCommand());

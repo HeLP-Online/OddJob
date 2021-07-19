@@ -1,8 +1,8 @@
 package com.spillhuset.Commands.Money.Pocket;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 
@@ -47,7 +47,7 @@ public class PocketAddCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (checkArgs(4,4,args,sender,getPlugin())) {
+        if (checkArgs(4, 4, args, sender, getPlugin())) {
             return;
         }
 
@@ -60,12 +60,12 @@ public class PocketAddCommand extends SubCommand {
         try {
             amount = Integer.parseInt(args[3]);
         } catch (Exception e) {
-            OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(),args[3], sender);
+            OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(), args[3], sender);
             return;
         }
-        OddJob.getInstance().getCurrencyManager().addPocketBalance(target, amount);
-        double balance = OddJob.getInstance().getCurrencyManager().getPocketBalance(target);
-        OddJob.getInstance().getMessageManager().currencySuccessAdded(args[2], args[3], balance, sender, Currency.pocket);
+        OddJob.getInstance().getCurrencyManager().add(target, amount, Types.AccountType.pocket);
+        double balance = OddJob.getInstance().getCurrencyManager().get(target).get(Types.AccountType.pocket);
+        OddJob.getInstance().getMessageManager().currencySuccessAdded(args[2], args[3], balance, sender, Types.AccountType.pocket);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.spillhuset.Commands.Money.Pocket;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Currency;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 
@@ -48,7 +48,7 @@ public class PocketSubCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (checkArgs(4,4,args,sender,Plugin.currency)){
+        if (checkArgs(4, 4, args, sender, Plugin.currency)) {
             return;
         }
 
@@ -64,15 +64,15 @@ public class PocketSubCommand extends SubCommand {
             OddJob.getInstance().getMessageManager().invalidNumber(Plugin.currency, args[3], sender);
             return;
         }
-        if (OddJob.getInstance().getCurrencyManager().subtractPocketBalance(target, amount, sender.hasPermission("currency.negative"))) {
-            OddJob.getInstance().getMessageManager().currencyChanged(Currency.pocket, amount, OddJob.getInstance().getCurrencyManager().getPocketBalance(target), target,sender);
+        if (OddJob.getInstance().getCurrencyManager().subtract(target, amount, sender.hasPermission("currency.negative"), Types.AccountType.pocket)) {
+            OddJob.getInstance().getMessageManager().currencyChanged(Types.AccountType.pocket, amount, OddJob.getInstance().getCurrencyManager().get(target).get(Types.AccountType.pocket), target, sender);
         } else {
             OddJob.getInstance().getMessageManager().insufficientFunds(target, sender);
         }
 
 
-        double balance = OddJob.getInstance().getCurrencyManager().getPocketBalance(target);
-        OddJob.getInstance().getMessageManager().currencySuccessSubtracted(args[2], args[3], balance, sender, Currency.pocket);
+        double balance = OddJob.getInstance().getCurrencyManager().get(target).get(Types.AccountType.pocket);
+        OddJob.getInstance().getMessageManager().currencySuccessSubtracted(args[2], args[3], balance, sender, Types.AccountType.pocket);
     }
 
     @Override
