@@ -1201,4 +1201,10 @@ public class MessageManager {
     public void errorCurrencyBankType(Plugin plugin, String arg, CommandSender sender) {
         danger(type(plugin), "Invalid bank-type " + cValue + arg, sender, false);
     }
+
+    public void tpOffline(String name, Player player) {
+        if (player != null) {
+            danger(type(Plugin.tp), "Player " + cPlayer + name + cDanger + " is no longer online", player, false);
+        }
+    }
 }

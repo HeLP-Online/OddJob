@@ -3,6 +3,7 @@ package com.spillhuset.Commands.Tp;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -45,25 +46,27 @@ public class TpAcceptCommand extends SubCommand {
         return "tp";
     }
 
+    /*
+     * /tp accept performed by the destination (sender)
+     */
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(Plugin.tp);
-        } else {
-
-            UUID playerUUID = ((Player) sender).getUniqueId();
-
-            UUID targetUUID = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
-            if (targetUUID == null) {
-                OddJob.getInstance().getMessageManager().errorPlayer(Plugin.tp, args[1], sender);
+        if (can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
+        }
+        Player moving = null;
+        Player destination = (Player) sender;
+        if (checkArgs(2,2,args,sender,getPlugin())) {
+            moving = Bukkit.getPlayer(args[1]);
+            if (moving == null) {
+                OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
                 return;
             }
-
-            if(OddJob.getInstance().getTeleportManager().hasRequest(targetUUID)){
-                OddJob.getInstance().getTeleportManager().accept(targetUUID);
-            }
+        } else {
+            OddJob.getInstance().getTeleportManager().hasRequest(destination.getUniqueId());
         }
     }
+
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {

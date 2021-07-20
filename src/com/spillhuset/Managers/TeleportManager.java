@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class TeleportManager {
+    /**
+     * Moving | Destination
+     */
     private final HashMap<UUID, UUID> request = new HashMap<>();
     private final HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
     private final HashMap<UUID, BukkitTask> teleportTimer;
@@ -24,31 +27,53 @@ public class TeleportManager {
         teleportTimer = new HashMap<>();
     }
 
-    public boolean request(UUID movingPlayer, UUID destinationPlayer) {
-        request.put(movingPlayer, destinationPlayer);
-        startTimer(movingPlayer, destinationPlayer);
+    /**
+     * Performing the requested /tpa
+     * @param moving
+     * @param destination
+     * @return
+     */
+    public boolean request(UUID moving, UUID destination) {
+        request.put(moving, destination);
+        startTimer(moving, destination);
         return true;
     }
-    // player (sends request) | target (teleport to)
 
-    public boolean hasRequest(UUID from) {
-        return request.containsKey(from);
+    /**
+     * Check if a player got has a request.
+     * @param moving UUID of the sender of /tpa
+     * @return boolean true if exists
+     */
+    public boolean hasRequest(UUID moving) {
+        return request.containsKey(moving);
     }
 
     // TODO Tpa cost?
-    public void accept(UUID movingUUID) {
-        if (hasRequest(movingUUID)) {
-            // Player got a request
-            UUID destinationUUID = request.get(movingUUID);
+    public void accept(UUID moving) {
+        if (hasRequest(moving)) {
+            // Find the request
+            UUID destination = request.get(moving);
+
             // player (sends request) // target (teleport to)
-            Player movingPlayer = OddJob.getInstance().getPlayerManager().getPlayer(movingUUID);
-            Player destinationPlayer = OddJob.getInstance().getPlayerManager().getPlayer(destinationUUID);
-            OddJob.getInstance().getMessageManager().tpAccepted(destinationUUID, destinationPlayer.getName(), movingUUID, movingPlayer.getName());
-            teleport(movingPlayer, destinationPlayer, PlayerTeleportEvent.TeleportCause.COMMAND,true);
-            if (reset.containsKey(movingUUID)) {
-                reset.get(movingUUID).cancel();
+            Player movingPlayer = Bukkit.getPlayer(moving);
+            Player destinationPlayer = Bukkit.getPlayer(destination);
+
+            // Check if both is online
+            if (movingPlayer == null || !movingPlayer.isOnline()) {
+                OddJob.getInstance().getMessageManager().tpOffline(OddJob.getInstance().getPlayerManager().getOddPlayer(moving).getName(),destinationPlayer);
+                return;
+            } else if(destinationPlayer == null || !destinationPlayer.isOnline()){
+                OddJob.getInstance().getMessageManager().tpOffline(OddJob.getInstance().getPlayerManager().getOddPlayer(destination).getName(),movingPlayer);
+                return;
             }
-            removeRequest(movingUUID);
+
+            // Performing
+            OddJob.getInstance().getMessageManager().tpAccepted(destination, destinationPlayer.getName(), moving, movingPlayer.getName());
+            teleport(movingPlayer, destinationPlayer, PlayerTeleportEvent.TeleportCause.COMMAND, true);
+            if (reset.containsKey(moving)) {
+                reset.get(moving).cancel();
+            }
+            removeRequest(moving);
         }
 
     }
@@ -62,7 +87,7 @@ public class TeleportManager {
         }
     }
 
-    public void teleport(Player movingPlayer, Player destinationPlayer, PlayerTeleportEvent.TeleportCause cause, boolean countdown) {
+    public void teleport(Player movingPlayer, CommandSender destinationPlayer, PlayerTeleportEvent.TeleportCause cause, boolean countdown) {
         boolean test = true;
         if (OddJob.getInstance().getPlayerManager().isInCombat(movingPlayer.getUniqueId())) {
             // Player is in combat
@@ -90,7 +115,7 @@ public class TeleportManager {
             UUID movingUUID = movingPlayer.getUniqueId();
             if (movingPlayer.hasPermission("oddjob.teleport.now")) {
                 OddJob.getInstance().getMessageManager().tpNow(movingUUID);
-                movingPlayer.teleport(destinationPlayer, cause);
+                movingPlayer.teleport((Player) destinationPlayer, cause);
                 return;
             }
             if (teleportTimer.containsKey(movingUUID)) {
@@ -117,7 +142,7 @@ public class TeleportManager {
                             OddJob.getInstance().getMessageManager().tpCountdown(i, movingUUID);
                         } else {
                             OddJob.getInstance().getMessageManager().tpTeleporting(movingUUID);
-                            movingPlayer.teleport(destinationPlayer, cause);
+                            movingPlayer.teleport((Player) destinationPlayer, cause);
 
                             cancel();
                         }
@@ -125,7 +150,7 @@ public class TeleportManager {
                     }
                 }.runTaskTimer(OddJob.getInstance(), 20, 10));
             } else {
-                movingPlayer.teleport(destinationPlayer, cause);
+                movingPlayer.teleport((Player) destinationPlayer, cause);
             }
         }
     }
@@ -263,7 +288,7 @@ public class TeleportManager {
         }
 
         if (destinationPlayer != null) {
-            OddJob.getInstance().getTeleportManager().teleport(movingPlayer, destinationPlayer.getLocation(), PlayerTeleportEvent.TeleportCause.COMMAND,true);
+            OddJob.getInstance().getTeleportManager().teleport(movingPlayer, destinationPlayer.getLocation(), PlayerTeleportEvent.TeleportCause.COMMAND, true);
         } else {
             OddJob.getInstance().getMessageManager().tpError(commandSender);
         }
@@ -271,28 +296,27 @@ public class TeleportManager {
     }
 
     public void teleport(Player target, int x, int y, int
-            z, World world,boolean countdown) {
+            z, World world, boolean countdown) {
         Location destination = new Location(world, x, y, z);
-        teleport(target, destination, PlayerTeleportEvent.TeleportCause.COMMAND,countdown);
+        teleport(target, destination, PlayerTeleportEvent.TeleportCause.COMMAND, countdown);
         OddJob.getInstance().getMessageManager().tpPos(target.getUniqueId());
     }
 
     public void teleport(CommandSender commandSender, String destinationName) {
-        if (!(commandSender instanceof Player)) {
+        if (!(commandSender instanceof Player movingPlayer)) {
             return;
         }
-        Player movingPlayer = (Player) commandSender;
         Player destinationPlayer = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(destinationName));
         if (destinationPlayer == null) {
             OddJob.getInstance().getMessageManager().errorPlayer(Plugin.tp, destinationName, commandSender);
             return;
         }
-        teleport(movingPlayer, destinationPlayer.getLocation(), PlayerTeleportEvent.TeleportCause.COMMAND,true);
+        teleport(movingPlayer, destinationPlayer.getLocation(), PlayerTeleportEvent.TeleportCause.COMMAND, true);
         OddJob.getInstance().getMessageManager().tpPlayer(destinationName, movingPlayer);
     }
 
     public void spawn(Player player, Location location) {
-        teleport(player, location, PlayerTeleportEvent.TeleportCause.COMMAND,true);
+        teleport(player, location, PlayerTeleportEvent.TeleportCause.COMMAND, true);
         OddJob.getInstance().getMessageManager().tpSpawn(player);
     }
 
@@ -303,4 +327,5 @@ public class TeleportManager {
     public Location getSpawn() {
         return Bukkit.getWorld("world").getSpawnLocation();
     }
+
 }

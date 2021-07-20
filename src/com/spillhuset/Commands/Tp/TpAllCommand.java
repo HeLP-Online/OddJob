@@ -47,17 +47,14 @@ public class TpAllCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(Plugin.tp);
-            return;
+        if (can(sender,false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
         }
 
-        Player player = (Player) sender;
-
         for (Player target: Bukkit.getOnlinePlayers()) {
-            if (!target.equals(player)) {
-                OddJob.getInstance().getMessageManager().tpAllPlayer(target,player.getName());
-                OddJob.getInstance().getTeleportManager().teleport(target,player, PlayerTeleportEvent.TeleportCause.COMMAND,false);
+            if (!target.equals(sender)) {
+                OddJob.getInstance().getMessageManager().tpAllPlayer(target,sender.getName());
+                OddJob.getInstance().getTeleportManager().teleport(target,sender, PlayerTeleportEvent.TeleportCause.COMMAND,false);
             } else {
                 OddJob.getInstance().getMessageManager().tpAllTarget(sender);
             }
