@@ -55,16 +55,18 @@ public class ArenaSQL extends MySQLManager {
 
     public static HashMap<String, Object> loadSettings() {
         HashMap<String, Object> settings = new HashMap<>();
-        ConfigurationSection arenas = oddjobConfig.getConfigurationSection("arenas");
-        if (arenas != null) {
-            World world = Bukkit.getWorld(UUID.fromString(arenas.getString("world")));
-            double x = arenas.getDouble("x");
-            double y = arenas.getDouble("y");
-            double z = arenas.getDouble("z");
-            float yaw = arenas.getInt("yaw");
-            float pitch = arenas.getInt("pitch");
+        if (oddjobConfig.isConfigurationSection("arenas")) {
+            ConfigurationSection arenas = oddjobConfig.getConfigurationSection("arenas");
+            if (arenas != null) {
+                World world = Bukkit.getWorld(UUID.fromString(arenas.getString("world")));
+                double x = arenas.getDouble("x");
+                double y = arenas.getDouble("y");
+                double z = arenas.getDouble("z");
+                float yaw = arenas.getInt("yaw");
+                float pitch = arenas.getInt("pitch");
 
-            settings.put("lobby", new Location(world, x, y, z, yaw, pitch));
+                settings.put("lobby", new Location(world, x, y, z, yaw, pitch));
+            }
         }
         return settings;
     }
