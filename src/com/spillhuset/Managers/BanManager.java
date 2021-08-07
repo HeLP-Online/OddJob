@@ -13,7 +13,7 @@ public class BanManager {
     public void ban(UUID playerUUID, String text) {
         OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(playerUUID);
         oddPlayer.setBanned(text);
-        OddJob.getInstance().getPlayerManager().save(oddPlayer);
+        OddJob.getInstance().getPlayerManager().savePlayer(playerUUID);
         Player player = OddJob.getInstance().getPlayerManager().getPlayer(playerUUID);
         if (player != null && player.isOnline()) kick(player, text);
     }
@@ -21,7 +21,7 @@ public class BanManager {
     public void unban(UUID player) {
         OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(player);
         oddPlayer.setBanned(null);
-        OddJob.getInstance().getPlayerManager().save(oddPlayer);
+        OddJob.getInstance().getPlayerManager().savePlayer(player);
     }
 
     public List<UUID> getBans() {
@@ -35,8 +35,7 @@ public class BanManager {
     }
 
     public String getBan(UUID uuid) {
-        String mesg = OddJob.getInstance().getPlayerManager().getOddPlayer(uuid).getBanned();
-        return mesg;
+        return OddJob.getInstance().getPlayerManager().getOddPlayer(uuid).getBanned();
     }
 
     public void kick(Player player) {

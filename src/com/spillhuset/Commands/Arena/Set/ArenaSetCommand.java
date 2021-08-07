@@ -1,5 +1,6 @@
-package com.spillhuset.Commands.Player.Set;
+package com.spillhuset.Commands.Arena.Set;
 
+import com.spillhuset.Commands.Player.Set.PlayerSetScoreboardCommand;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
@@ -8,26 +9,26 @@ import org.bukkit.command.CommandSender;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerSetCommand extends SubCommand {
+public class ArenaSetCommand extends SubCommand {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public PlayerSetCommand() {
-        subCommands.add(new PlayerSetScoreboardCommand());
+    public ArenaSetCommand() {
+        subCommands.add(new ArenaSetAreaCommand());
     }
 
     @Override
     public boolean allowConsole() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.player;
+        return Plugin.arena;
     }
 
     @Override
@@ -37,17 +38,17 @@ public class PlayerSetCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Players 'set' menu";
+        return "Arena 'set' menu";
     }
 
     @Override
     public String getSyntax() {
-        return "/player set ...";
+        return "/arena <name> set ...";
     }
 
     @Override
     public String getPermission() {
-        return "player";
+        return "arena.admin";
     }
 
     @Override
@@ -56,14 +57,14 @@ public class PlayerSetCommand extends SubCommand {
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subcommand : subCommands) {
             String name = subcommand.getName();
-            if (args.length >= 2 && name.equalsIgnoreCase(args[1])) {
+            if (args.length >= 2 && name.equalsIgnoreCase(args[1]) && subcommand.can(sender,false)) {
                 subcommand.perform(sender, args);
                 return;
             }
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player, nameBuilder.toString(), sender);
+        OddJob.getInstance().getMessageManager().infoArgs(Plugin.arena, nameBuilder.toString(), sender);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class PlayerSetCommand extends SubCommand {
             String name = subCommand.getName();
             if (args[1].isEmpty()) {
                 list.add(name);
-            } else if (name.equalsIgnoreCase(args[1]) && args.length > 2) {
+            } else if (name.equalsIgnoreCase(args[1]) && args.length > 2 && can(sender,false)) {
                 return subCommand.getTab(sender, args);
             } else if (name.startsWith(args[1])) {
                 list.add(name);

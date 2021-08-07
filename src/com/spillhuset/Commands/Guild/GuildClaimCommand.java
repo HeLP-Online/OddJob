@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 public class GuildClaimCommand extends SubCommand implements GuildRole {
@@ -43,7 +42,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getSyntax() {
-        return "/guild claim zone=<zone> auto=<auto>";
+        return "/guild claim [zone=<zone>|auto=<auto>]";
     }
 
     @Override
@@ -70,7 +69,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
         }
 
         if (args.length >= 2) {
-            for (int i = 1; i <= args.length; i++) {
+            for (int i = 1; i <= (args.length - 1); i++) {
                 if (args[i].startsWith("zone") && can(sender, true)) {
                     // Setting zone
                     String[] value = args[i].split("=");
@@ -84,7 +83,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
                         }
                     }
                     if (zone == Zone.GUILD) {
-                        OddJob.getInstance().getMessageManager().errorZone(Plugin.guild, args[1],sender);
+                        OddJob.getInstance().getMessageManager().errorZone(Plugin.guild, args[1], sender);
                         return;
                     }
 
@@ -108,9 +107,11 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
                 return;
             }
         }
-
+        OddJob.getInstance().log("Claiming for: " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
         OddJob.getInstance().getGuildManager().claim(player, guild);
-        OddJob.getInstance().getGuildManager().toggleAutoClaim(player, guild, auto);
+        if ((!OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) && auto) || (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) && !auto)) {
+            OddJob.getInstance().getGuildManager().toggleAutoClaim(player, guild, auto);
+        }
     }
 
     @Override
@@ -121,13 +122,13 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
         List<String> list = new ArrayList<>();
         if (args.length == 2) {
-            for (String string :auto) {
+            for (String string : auto) {
                 if (string.toLowerCase().startsWith(args[1].toLowerCase())) {
                     list.add(string);
                 }
             }
-            for (Zone zone:Zone.values()) {
-                if (zone.name().toLowerCase().startsWith(args[1].toLowerCase()) && can(sender,true)) {
+            for (Zone zone : Zone.values()) {
+                if (zone.name().toLowerCase().startsWith(args[1].toLowerCase()) && can(sender, true)) {
                     list.add("zone=" + zone.name());
                 }
             }

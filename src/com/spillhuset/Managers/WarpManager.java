@@ -151,11 +151,11 @@ public class WarpManager {
     }
 
     public void load() {
-        warps = WarpSQL.loadWarps();
+        warps = WarpSQL.load();
     }
 
     public void save() {
-        WarpSQL.saveWarps(warps);
+        WarpSQL.save(warps);
     }
 
     /**
@@ -181,7 +181,7 @@ public class WarpManager {
         boolean a = false;
         if (warp.getPassword().equals(password)) {
             warp.setLocation(location);
-            WarpSQL.saveWarps(warps);
+            WarpSQL.save(warps);
             a = true;
         }
         return a;

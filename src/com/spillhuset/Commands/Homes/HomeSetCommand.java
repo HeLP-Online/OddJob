@@ -3,11 +3,12 @@ package com.spillhuset.Commands.Homes;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public class HomeSetCommand extends SubCommand {
@@ -74,6 +75,7 @@ public class HomeSetCommand extends SubCommand {
         List<String> list = OddJob.getInstance().getHomesManager().getList(target);
         if (list != null && list.size() >= getMax(target)) {
             OddJob.getInstance().getMessageManager().errorHomeMaximal(sender);
+            return;
         }
         OddJob.getInstance().getHomesManager().add(target, name, ((Player) sender).getLocation());
 
@@ -82,7 +84,18 @@ public class HomeSetCommand extends SubCommand {
     private int getMax(UUID target) {
         int config = OddJob.getInstance().getConfig().getInt("homes.max", 5);
         int player = OddJob.getInstance().getPlayerManager().getMaxHomes(target);
-        return config + player;
+        int permission = 0;
+        Player bukkit_player = Bukkit.getPlayer(target);
+        String[] tracks = {"moderators", "vip", "emerald", "diamond", "gold", "iron", "stone", "wood", "default", "operators"};
+        for (String i : tracks) {
+            if (OddJob.getInstance().getConfig().isConfigurationSection("homes." + i)) {
+                ConfigurationSection cf = OddJob.getInstance().getConfig().getConfigurationSection("homes." + i);
+                if (cf != null && bukkit_player != null && bukkit_player.hasPermission("homes." + i)) {
+                    permission = Math.max(cf.getInt("maxHomes"), permission);
+                }
+            }
+        }
+        return config + player + permission;
     }
 
     @Override

@@ -1,12 +1,10 @@
 package com.spillhuset.Commands.Player;
 
-import com.spillhuset.Commands.CommandCompleter;
 import com.spillhuset.Commands.Player.Set.PlayerSetCommand;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import com.spillhuset.Utils.SubCommandInterface;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +20,8 @@ public class PlayerCommand extends SubCommandInterface implements CommandExecuto
         subCommands.add(new PlayerSetCommand());
         //subCommands.add(new PlayerWhitelistCommand());
         //subCommands.add(new PlayerBlacklistCommand());
+        subCommands.add(new PlayerLoadCommand());
+        subCommands.add(new PlayerSaveCommand());
     }
 
     @Override
@@ -70,6 +70,9 @@ public class PlayerCommand extends SubCommandInterface implements CommandExecuto
         List<String> list = new ArrayList<>();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
+            if (!subCommand.can(sender,false)) {
+                continue;
+            }
             if (args[0].isEmpty()) {
                 list.add(name);
             } else if (name.equalsIgnoreCase(args[0]) && args.length > 1) {

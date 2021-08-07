@@ -37,18 +37,18 @@ public class ArenaSQL extends MySQLManager {
             oddjobConfig.set("games." + value + ".active", game.isActive());
             oddjobConfig.set("games." + value + ".type", game.getType().name());
             oddjobConfig.set("games." + value + ".world", game.getLobbySpawn().getWorld().getUID().toString());
-            oddjobConfig.set("games." + value + ".lobbySpawn.getX", game.getLobbySpawn().getX());
-            oddjobConfig.set("games." + value + ".lobbySpawn.getY", game.getLobbySpawn().getY());
-            oddjobConfig.set("games." + value + ".lobbySpawn.getZ", game.getLobbySpawn().getZ());
-            oddjobConfig.set("games." + value + ".lobbySpawn.getYaw", game.getLobbySpawn().getYaw());
-            oddjobConfig.set("games." + value + ".lobbySpawn.getPitch", game.getLobbySpawn().getPitch());
+            oddjobConfig.set("games." + value + ".lobbySpawn.x", game.getLobbySpawn().getX());
+            oddjobConfig.set("games." + value + ".lobbySpawn.y", game.getLobbySpawn().getY());
+            oddjobConfig.set("games." + value + ".lobbySpawn.z", game.getLobbySpawn().getZ());
+            oddjobConfig.set("games." + value + ".lobbySpawn.yaw", game.getLobbySpawn().getYaw());
+            oddjobConfig.set("games." + value + ".lobbySpawn.pitch", game.getLobbySpawn().getPitch());
             for (Integer num : game.getSpawns().keySet()) {
                 Location location = game.getSpawn(num);
-                oddjobConfig.set("games." + value + ".spawn.getX", location.getX());
-                oddjobConfig.set("games." + value + ".spawn.getY", location.getY());
-                oddjobConfig.set("games." + value + ".spawn.getZ", location.getZ());
-                oddjobConfig.set("games." + value + ".spawn.getYaw", location.getYaw());
-                oddjobConfig.set("games." + value + ".spawn.getPitch", location.getPitch());
+                oddjobConfig.set("games." + value + ".spawn.x", location.getX());
+                oddjobConfig.set("games." + value + ".spawn.y", location.getY());
+                oddjobConfig.set("games." + value + ".spawn.z", location.getZ());
+                oddjobConfig.set("games." + value + ".spawn.yaw", location.getYaw());
+                oddjobConfig.set("games." + value + ".spawn.pitch", location.getPitch());
             }
         }
     }
@@ -71,7 +71,7 @@ public class ArenaSQL extends MySQLManager {
 
     public static HashMap<UUID, Game> load() {
         HashMap<UUID, Game> games = new HashMap<>();
-
+        int i = 0;
 
         if (oddjobConfig.getConfigurationSection("games") != null) {
             for (String value : oddjobConfig.getConfigurationSection("games").getKeys(false)) {
@@ -82,28 +82,30 @@ public class ArenaSQL extends MySQLManager {
                 boolean active = oddjobConfig.getBoolean("games." + value + ".active");
                 ArenaType type = ArenaType.valueOf(oddjobConfig.getString("games." + value + ".type"));
                 UUID world = UUID.fromString(oddjobConfig.getString("games." + value + ".world"));
-                double lobbySpawnX = oddjobConfig.getDouble("games." + value + ".lobbySpawn.getX");
-                double lobbySpawnY = oddjobConfig.getDouble("games." + value + ".lobbySpawn.getY");
-                double lobbySpawnZ = oddjobConfig.getDouble("games." + value + ".lobbySpawn.getZ");
-                float lobbySpawnYaw = oddjobConfig.getInt("games." + value + ".lobbySpawn.getYaw");
-                float lobbySpawnPitch = oddjobConfig.getInt("games." + value + ".lobbySpawn.getPitch");
+                double lobbySpawnX = oddjobConfig.getDouble("games." + value + ".lobbySpawn.x");
+                double lobbySpawnY = oddjobConfig.getDouble("games." + value + ".lobbySpawn.y");
+                double lobbySpawnZ = oddjobConfig.getDouble("games." + value + ".lobbySpawn.x");
+                float lobbySpawnYaw = oddjobConfig.getInt("games." + value + ".lobbySpawn.yaw");
+                float lobbySpawnPitch = oddjobConfig.getInt("games." + value + ".lobbySpawn.pitch");
                 Location lobbySpawn = new Location(Bukkit.getWorld(world), lobbySpawnX, lobbySpawnY, lobbySpawnZ, lobbySpawnYaw, lobbySpawnPitch);
                 HashMap<Integer, Location> spawns = new HashMap<>();
                 if (oddjobConfig.getConfigurationSection("games." + value + ".spawns") != null) {
                     for (String num : oddjobConfig.getConfigurationSection("games." + value + ".spawns").getKeys(false)) {
-                        double spawnX = oddjobConfig.getDouble("games." + value + ".spawn." + num + ".getX");
-                        double spawnY = oddjobConfig.getDouble("games." + value + ".spawn." + num + ".getY");
-                        double spawnZ = oddjobConfig.getDouble("games." + value + ".spawn." + num + ".getZ");
-                        float spawnYaw = oddjobConfig.getInt("games." + value + ".spawn." + num + ".getYaw");
-                        float spawnPitch = oddjobConfig.getInt("games." + value + ".spawn." + num + ".getPitch");
+                        double spawnX = oddjobConfig.getDouble("games." + value + ".spawn." + num + ".x");
+                        double spawnY = oddjobConfig.getDouble("games." + value + ".spawn." + num + ".y");
+                        double spawnZ = oddjobConfig.getDouble("games." + value + ".spawn." + num + ".z");
+                        float spawnYaw = oddjobConfig.getInt("games." + value + ".spawn." + num + ".yaw");
+                        float spawnPitch = oddjobConfig.getInt("games." + value + ".spawn." + num + ".pitch");
                         Location spawn = new Location(Bukkit.getWorld(world), spawnX, spawnY, spawnZ, spawnYaw, spawnPitch);
                         spawns.put(Integer.parseInt(num), spawn);
                     }
                 }
 
                 games.put(uuid, new Game(uuid, name, minPlayers, maxPlayers, type, lobbySpawn, spawns, active));
+                i++;
             }
         }
+        OddJob.getInstance().log("ArenaGames loaded " + i);
         return games;
     }
 }

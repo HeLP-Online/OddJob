@@ -75,6 +75,7 @@ public class LockSQL extends MySQLManager {
             close();
         }
     }
+
     public static List<Material> getLockableMaterials() {
         List<Material> materials = new ArrayList<>();
         try {
@@ -86,7 +87,7 @@ public class LockSQL extends MySQLManager {
                     materials.add(Material.valueOf(resultSet.getString("name")));
                 }
             } else {
-                for(String string : oddjobConfig.getStringList("lockable_materials")) {
+                for (String string : oddjobConfig.getStringList("lockable_materials")) {
                     materials.add(Material.valueOf(string));
                 }
             }
@@ -100,21 +101,24 @@ public class LockSQL extends MySQLManager {
 
     public static HashMap<UUID, UUID> loadSecuredArmorStands() {
         HashMap<UUID, UUID> stands = new HashMap<>();
+        int i= 0;
         try {
             if (connect()) {
-            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_armorstands`");
-            resultSet = preparedStatement.executeQuery();
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_armorstands`");
+                resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
-                stands.put(UUID.fromString(resultSet.getString("entity")), UUID.fromString(resultSet.getString("player")));
-            }
-            }else {
+                while (resultSet.next()) {
+                    stands.put(UUID.fromString(resultSet.getString("entity")), UUID.fromString(resultSet.getString("player")));
+                    i++;
+                }
+            } else {
                 ConfigurationSection cs = oddjobConfig.getConfigurationSection("secured_armorstands");
                 if (cs != null) {
                     for (String string : cs.getKeys(false)) {
                         UUID entity = UUID.fromString(string);
-                        UUID player = UUID.fromString(cs.getString("player",""));
-                        stands.put(entity,player);
+                        UUID player = UUID.fromString(cs.getString("player", ""));
+                        stands.put(entity, player);
+                        i++;
                     }
                 }
             }
@@ -123,12 +127,13 @@ public class LockSQL extends MySQLManager {
         } finally {
             close();
         }
-        OddJob.getInstance().getMessageManager().load("Secured ArmorStands", stands.size());
+        OddJob.getInstance().log("Secured ArmorStands Loaded: "+ i);
         return stands;
     }
 
     public static HashMap<Location, UUID> loadSecuredBlocks() {
         HashMap<Location, UUID> blocks = new HashMap<>();
+        int i = 0;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_blocks`");
@@ -140,9 +145,10 @@ public class LockSQL extends MySQLManager {
 
                         Location location = new Location(world, resultSet.getInt("x"), resultSet.getInt("y"), resultSet.getInt("z"));
                         blocks.put(location, UUID.fromString(resultSet.getString("uuid")));
+                        i++;
                     }
                 }
-            }else{
+            } else {
                 ConfigurationSection cs = oddjobConfig.getConfigurationSection("secured_blocks");
                 if (cs != null) {
                     // world;x;y;z
@@ -152,8 +158,9 @@ public class LockSQL extends MySQLManager {
                             int x = cs.getInt("x");
                             int y = cs.getInt("y");
                             int z = cs.getInt("z");
-                            Location location = new Location(world,x,y,z);
-                            blocks.put(location,UUID.fromString(cs.getString("uuid")));
+                            Location location = new Location(world, x, y, z);
+                            blocks.put(location, UUID.fromString(cs.getString("uuid")));
+                            i++;
                         }
                     }
                 }
@@ -163,7 +170,7 @@ public class LockSQL extends MySQLManager {
         } finally {
             close();
         }
-        OddJob.getInstance().getMessageManager().load("Secured Blocks", blocks.size());
+        OddJob.getInstance().log("Secured Blocks Loaded: "+i);
         return blocks;
     }
 }

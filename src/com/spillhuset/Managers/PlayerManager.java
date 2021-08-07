@@ -23,6 +23,9 @@ public class PlayerManager {
     private final HashMap<UUID, UUID> tradingPlayers;
     private final HashMap<UUID, Long> inCombat = new HashMap<>();
     private final HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
+    /**
+     * UUID Player - UUID Guild
+     */
     public HashMap<UUID, UUID> in = new HashMap<>();
     private final HashMap<UUID, List<UUID>> inBed = new HashMap<>();
     private final HashMap<UUID, List<UUID>> notInBed = new HashMap<>();
@@ -240,12 +243,7 @@ public class PlayerManager {
     public void setMaxHomes(UUID target, int i) {
         OddPlayer oddPlayer = players.get(target);
         oddPlayer.setMaxHomes(i);
-        save(oddPlayer);
-    }
-
-    public void save(OddPlayer target) {
-        OddJob.getInstance().log("saving: " + target.getName());
-        PlayerSQL.save(target);
+        savePlayer(target);
     }
 
     public void setGameMode(Player target, GameMode gm) {
@@ -254,5 +252,12 @@ public class PlayerManager {
 
     public void load() {
         players = PlayerSQL.load();
+    }
+
+    public void savePlayer(UUID uuid) {
+        OddPlayer oddPlayer = players.get(uuid);
+        if (oddPlayer != null) {
+            PlayerSQL.save(oddPlayer);
+        }
     }
 }

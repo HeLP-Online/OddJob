@@ -42,7 +42,6 @@ public class WarpSQL extends MySQLManager {
                 oddjobConfig.set("warps."+uuid.toString()+".z",location.getZ());
                 oddjobConfig.set("warps."+uuid.toString()+".yaw",location.getYaw());
                 oddjobConfig.set("warps."+uuid.toString()+".pitch",location.getPitch());
-
                 oddjobConfig.save(oddjobConfigFile);
             }
             OddJob.getInstance().log("Warp saved "+name);
@@ -51,6 +50,7 @@ public class WarpSQL extends MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().log("Warp Added");
     }
 
     public static boolean del(UUID uuid, String password) {
@@ -75,11 +75,13 @@ public class WarpSQL extends MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().log("Warp Deleted");
         return a;
     }
 
-    public static HashMap<UUID, Warp> loadWarps() {
+    public static HashMap<UUID, Warp> load() {
         HashMap<UUID, Warp> warps = new HashMap<>();
+        int i = 0;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_warps` WHERE `server` = ?");
@@ -105,6 +107,7 @@ public class WarpSQL extends MySQLManager {
                             resultSet.getDouble("cost"),
                             uuid);
                     warps.put(uuid, warp);
+                    i++;
                 }
             } else {
                 if (oddjobConfig.getConfigurationSection("warps") != null) {
@@ -120,6 +123,7 @@ public class WarpSQL extends MySQLManager {
                                 cs.getInt(string + ".pitch"));
                         Warp warp = new Warp(cs.getString(string + ".name"), location, cs.getString(string + ".passwd"), cs.getDouble(string + ".cost"), uuid);
                         warps.put(uuid, warp);
+                        i++;
                     }
                 }
             }
@@ -129,13 +133,14 @@ public class WarpSQL extends MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().log("Warps Loaded: "+i);
         return warps;
     }
 
-    public static void saveWarps(HashMap<UUID, Warp> warps) {
+    public static void save(HashMap<UUID, Warp> warps) {
+        int i = 0;
         try {
             if (connect()) {
-
                 for (UUID uuid : warps.keySet()) {
                     Warp warp = warps.get(uuid);
                     Location location = warp.getLocation();
@@ -157,6 +162,7 @@ public class WarpSQL extends MySQLManager {
                         preparedStatement.setFloat(8, location.getYaw());
                         preparedStatement.setFloat(9, location.getPitch());
                         preparedStatement.setString(10, uuid.toString());
+                        i++;
                     }
                 }
             } else {
@@ -171,10 +177,11 @@ public class WarpSQL extends MySQLManager {
                     oddjobConfig.set("warps."+uuid.toString()+".z",warp.getLocation().getZ());
                     oddjobConfig.set("warps."+uuid.toString()+".yaw",warp.getLocation().getYaw());
                     oddjobConfig.set("warps."+uuid.toString()+".pitch",warp.getLocation().getPitch());
+                    i++;
                 }
                 oddjobConfig.save(oddjobConfigFile);
             }
-            OddJob.getInstance().log("Warps saved"+warps.size());
+            OddJob.getInstance().log("Warps saved: "+i);
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         } finally {

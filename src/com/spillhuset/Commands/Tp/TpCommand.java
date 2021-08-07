@@ -25,7 +25,7 @@ public class TpCommand extends SubCommandInterface implements TabCompleter, Comm
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override

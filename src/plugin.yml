@@ -16,6 +16,7 @@ commands:
   arena:
     aliases: ['a']
     description: Arena Menu
+    permission: arena
   guild:
     description: Guild Menu
     aliases: ['g']
@@ -81,6 +82,7 @@ commands:
   player:
     description: Access Player settings
     aliases: ['p']
+    permission: player
   warp:
     usage: /<command> <name> [password]
     description: Warp you to a specified location
@@ -120,6 +122,11 @@ commands:
   deop:
     usage: /<command> <player>
 permissions:
+  arena:
+    default: true
+    children:
+      arena.create:
+        default: op
   op:
     default: false
   deop:
@@ -191,6 +198,8 @@ permissions:
   locks.make.skeleton:
     default: op
   locks.show:
+    default: true
+  player:
     default: true
   warp:
     default: true

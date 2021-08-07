@@ -115,12 +115,12 @@ public class OddJob extends JavaPlugin {
 
         ConfigManager.load(); // Checked
         playerManager.load();
-        guildManager.load();
         moneyManager.load();
+        guildManager.load();
         lockManager.load();
-        warpManager.load();
         worldManager.load();
-        //arenaManager.load();
+        arenaManager.load();
+
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
         Bukkit.getPluginManager().registerEvents(new BlockExplode(), this);
@@ -145,19 +145,19 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
         Bukkit.getPluginManager().registerEvents(new ChunkLoad(), this);
 
-        if (!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("worldedit")) {
             Bukkit.getConsoleSender().sendMessage("WorldEdit found");
         }
-        if (!Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
             Bukkit.getConsoleSender().sendMessage("WorldGuard found");
         }
-        if (!Bukkit.getVersion().toLowerCase().contains("spigot")) {
+        if (Bukkit.getVersion().toLowerCase().contains("spigot")) {
             Bukkit.getConsoleSender().sendMessage("Spigot found");
         }
-        if (!Bukkit.getVersion().toLowerCase().contains("paper")) {
+        if (Bukkit.getVersion().toLowerCase().contains("paper")) {
             Bukkit.getConsoleSender().sendMessage("Paper found");
         }
-        if (!Bukkit.getVersion().toLowerCase().contains("craftbukkit")) {
+        if (Bukkit.getVersion().toLowerCase().contains("craftbukkit")) {
             Bukkit.getConsoleSender().sendMessage("Craftbukkit found");
         }
 
@@ -179,6 +179,7 @@ public class OddJob extends JavaPlugin {
     public void onDisable() {
         getGuildManager().saveChunks();
         getGuildManager().saveGuilds();
+        getPlayerManager().save();
         for (World world : Bukkit.getWorlds()) {
             getDeathManager().cleanUp(world);
         }

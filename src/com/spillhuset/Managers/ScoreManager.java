@@ -28,7 +28,8 @@ public class ScoreManager {
             objective.setDisplaySlot(DisplaySlot.SIDEBAR);
             objective.getScore(ChatColor.BOLD + "Show Scoreboard:").setScore(3);
             objective.getScore(ChatColor.GOLD + "/player set scoreboard <option>").setScore(2);
-            objective.getScore(ChatColor.WHITE + "Guild or Player").setScore(1);
+            objective.getScore(ChatColor.WHITE + "Option: None, Guild or Player").setScore(1);
+
         }
     }
 
@@ -46,14 +47,12 @@ public class ScoreManager {
 
         // Sending it to the player
         player.setScoreboard(scoreboard);
-
         String unique = player.getUniqueId().toString().substring(0, 8);
 
         Objective objective = objectives.getOrDefault(player.getUniqueId(), scoreboard.registerNewObjective("p" + unique, "dummy", player.getName()));
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         switch (type) {
-
-            case Player:
+            case Player -> {
                 objective.setDisplayName("Player - " + player.getName());
                 // Topic - Money
                 objective.getScore(ChatColor.BOLD + "Money:").setScore(15);
@@ -98,12 +97,10 @@ public class ScoreManager {
 
                 // Break
                 objective.getScore("          ").setScore(5);
-
                 objective.getScore(ChatColor.BOLD + "Community").setScore(4);
                 objective.getScore(ChatColor.BLUE + "Facebook: " + ChatColor.WHITE + "@spillhusetminecraft").setScore(3);
                 objective.getScore(ChatColor.RED + "Discord:   " + ChatColor.WHITE + "ZPQVHKA").setScore(2);
                 objective.getScore(ChatColor.DARK_GREEN + "IP:          " + ChatColor.WHITE + "mine-craft.no").setScore(1);
-
                 Team finalPlayerBank = playerBank;
                 Team finalPlayerWallet = playerWallet;
                 Team finalCoords = coords;
@@ -122,8 +119,8 @@ public class ScoreManager {
                         finalCg.setSuffix(color + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                     }
                 }, 0, 10);
-                break;
-            case Guild:
+            }
+            case Guild -> {
                 objective.setDisplayName("Guild - " + ChatColor.BOLD + OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId())));
                 Guild guild = OddJob.getInstance().getGuildManager().getGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()));
 
@@ -142,12 +139,11 @@ public class ScoreManager {
                 guildOnline.addEntry(ChatColor.GOLD + "Online: " + ChatColor.WHITE);
                 guildOnline.setSuffix("" + OddJob.getInstance().getGuildManager().getOnline(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId())) + "/" + OddJob.getInstance().getGuildManager().getGuildMembers(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId())).size());
                 objective.getScore(ChatColor.GOLD + "Online: " + ChatColor.WHITE).setScore(13);
-
                 Team guildBank;
                 guildBank = scoreboard.getTeam("gb" + unique);
                 if (guildBank == null) guildBank = scoreboard.registerNewTeam("gb" + unique);
                 guildBank.addEntry(ChatColor.GOLD + "Bank: " + ChatColor.WHITE);
-                guildBank.setSuffix("" + OddJob.getInstance().getCurrencyManager().get(guild.getGuildUUID()).get(AccountType.bank));
+                //guildBank.setSuffix("" + OddJob.getInstance().getCurrencyManager().get(guild.getGuildUUID()).get(AccountType.bank));
                 objective.getScore(ChatColor.GOLD + "Bank: " + ChatColor.WHITE).setScore(14);
 
                 // Break
@@ -157,24 +153,23 @@ public class ScoreManager {
                 objective.getScore(ChatColor.BOLD + "Location:").setScore(8);
 
                 // Content - Coords
-                coords = scoreboard.getTeam("co" + unique);
+                Team coords = scoreboard.getTeam("co" + unique);
                 if (coords == null) coords = scoreboard.registerNewTeam("co" + unique);
                 coords.addEntry(ChatColor.GOLD + "Chunk: " + ChatColor.WHITE);
                 coords.setSuffix("X=" + player.getLocation().getChunk().getX() + " Z=" + player.getLocation().getChunk().getZ());
                 objective.getScore(ChatColor.GOLD + "Chunk: " + ChatColor.WHITE).setScore(7);
 
                 // Content - CG
-                cg = scoreboard.getTeam("cg" + unique);
+                Team cg = scoreboard.getTeam("cg" + unique);
                 if (cg == null) cg = scoreboard.registerNewTeam("cg" + unique);
                 cg.addEntry(ChatColor.GOLD + "GUILD: " + ChatColor.WHITE);
                 UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk());
                 ChatColor color = OddJob.getInstance().getGuildManager().color(OddJob.getInstance().getGuildManager().getZoneByGuild(guildUUID));
                 cg.setSuffix(color + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guildUUID));
                 objective.getScore(ChatColor.GOLD + "GUILD: " + ChatColor.WHITE).setScore(6);
-
-                finalCoords = coords;
+                Team finalCoords = coords;
                 Team finalGuildBank = guildBank;
-                finalCg = cg;
+                Team finalCg = cg;
                 Team finalGuildRole = guildRole;
                 Team finalGuildOnline = guildOnline;
                 taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), new Runnable() {
@@ -192,10 +187,8 @@ public class ScoreManager {
                         finalCg.setSuffix(color + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
                     }
                 }, 0, 10);
-                break;
-            default:
-                clear(player);
-                break;
+            }
+            default -> clear(player);
         }
 
         // Break

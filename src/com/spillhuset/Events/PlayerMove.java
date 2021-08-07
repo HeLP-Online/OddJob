@@ -38,41 +38,44 @@ public class PlayerMove implements Listener {
             // Player is within the same chunk
             return;
         }
-
+        OddJob.getInstance().log("Chunk changed");
 
         // Who owns the chunk the Player is going to?
         movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk);
+        OddJob.getInstance().log("Moving to "+OddJob.getInstance().getGuildManager().getGuildNameByUUID(movingToGuild));
         //OddJob.getInstance().getMessageManager().console("x="+movingToChunk.getX()+" z="+movingToChunk.getZ()+" world="+movingToChunk.getWorld().getName());
 
         // Who owns the chunk the Player is going from?
-        movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingFromChunk);
+        movingFromGuild = OddJob.getInstance().getPlayerManager().in.getOrDefault(player.getUniqueId(), movingToGuild);
 
+        // Is it wild?
         Zone zoneTo = OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild);
-        Zone zoneFrom = OddJob.getInstance().getGuildManager().getZoneByGuild(movingFromGuild);
+        OddJob.getInstance().log("Zone is "+zoneTo.name());
 
-        if (zoneTo.equals(zoneFrom)) {
+        if (movingFromGuild != movingToGuild || movingFromGuild == null) {
+            OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), movingToGuild);
+            OddJob.getInstance().log("Changed Guild");
+        } else {
+            OddJob.getInstance().log("Not Changing Zone");
             // Zone is the same
             return;
         }
 
         // Auto claiming
-        if (movingToGuild != null) {
-            // Moving to not null
-            if (movingFromGuild != null) {
-                // Moving from not null
-                if (movingFromGuild != movingToGuild) {
-                    // Moving to is not moving from
-                    if (movingToGuild == OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
-                        // Moving to is WILD
-                        if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
-                            // Auto Claim is on
-                            OddJob.getInstance().getGuildManager().autoClaim(player, movingToChunk);
-                        }
+        if ((movingToGuild != null) && (movingFromGuild != null)) {
+            OddJob.getInstance().log("Moving to "+OddJob.getInstance().getGuildManager().getGuildNameByUUID(movingToGuild)+"; Moving from "+OddJob.getInstance().getGuildManager().getGuildNameByUUID(movingFromGuild));
+            // Moving from not null
+                if (movingToGuild == OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
+                    OddJob.getInstance().log("Moving to the Wild, Claimable");
+                    // Moving to is WILD
+                    if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId())) {
+                        OddJob.getInstance().log("Autoclaim is activated");
+                        // Auto Claim is on
+                        OddJob.getInstance().getGuildManager().autoClaim(player, movingToChunk);
                     }
-                }
             }
         }
-
+        OddJob.getInstance().log("move 8");
         // Prison break!
         if (OddJob.getInstance().getJailManager().in(player.getUniqueId()) != null) {
             if (movingToGuild != OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.JAIL)) {

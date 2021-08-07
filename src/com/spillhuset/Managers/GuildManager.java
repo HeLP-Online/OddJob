@@ -216,7 +216,7 @@ public class GuildManager {
         Player p = Bukkit.getPlayer(player);
         if (p != null) {
             // Gives the Player the Guild Scoreboard
-            OddJob.getInstance().getScoreManager().create(p, ScoreBoard.Guild);
+            //OddJob.getInstance().getScoreManager().create(p, ScoreBoard.Guild);
         }
         return true;
     }
@@ -238,7 +238,7 @@ public class GuildManager {
      * @param chunk  Chunk the Player is in
      */
     public void autoClaim(Player player, Chunk chunk) {
-        if (getGuildUUIDByChunk(chunk).equals(getGuildUUIDByZone(Zone.WILD))) {
+        if (getGuildUUIDByChunk(chunk) == (getGuildUUIDByZone(Zone.WILD))) {
             // Chunk is not already claimed
             UUID claimingGuild = autoClaim.get(player.getUniqueId());
 

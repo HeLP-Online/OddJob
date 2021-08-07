@@ -70,6 +70,8 @@ public class ArenaCreateCommand extends SubCommand {
         String name = args[1];
         int min = Integer.parseInt(args[2]);
         int max = Integer.parseInt(args[3]);
+
+        /* Finding arenaType*/
         ArenaType type = null;
         for (ArenaType arenaType : ArenaType.values()) {
             if (arenaType.name().equalsIgnoreCase(args[4])) {
@@ -80,6 +82,7 @@ public class ArenaCreateCommand extends SubCommand {
             OddJob.getInstance().getMessageManager().arenaTypeNotFound(args[4], sender);
             return;
         }
+
         Location lobby = player.getLocation();
 
         if (OddJob.getInstance().getArenaManager().create(name, min, max, type, lobby)) {

@@ -13,6 +13,7 @@ import java.util.UUID;
 
 public class CurrencySQL extends MySQLManager {
     public static void save(HashMap<UUID, Account> accounts) {
+        int i = 0;
         try {
             if (connect()) {
                 for (Account account : accounts.values()) {
@@ -21,12 +22,14 @@ public class CurrencySQL extends MySQLManager {
                     preparedStatement.setDouble(2,account.get(Types.AccountType.pocket));
                     preparedStatement.setString(3,account.getUuid().toString());
                     preparedStatement.executeUpdate();
+                    i++;
                 }
             } else {
                 for (Account account : accounts.values()) {
                     String string = account.getUuid().toString();
                     oddjobConfig.set("balances."+string+".bank",account.get(Types.AccountType.bank));
                     oddjobConfig.set("balances."+string+".pocket",account.get(Types.AccountType.pocket));
+                    i++;
                 }
                 oddjobConfig.save(oddjobConfigFile);
             }
@@ -35,10 +38,12 @@ public class CurrencySQL extends MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().log("Balances saved: "+i);
     }
 
     public static HashMap<UUID, Account> load() {
         HashMap<UUID, Account> accounts = new HashMap<>();
+        int i = 0;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_balances`");
@@ -50,11 +55,12 @@ public class CurrencySQL extends MySQLManager {
                     double pocket = resultSet.getDouble("pocket");
                     boolean guild = resultSet.getInt("guild") == 1;
                     accounts.put(uuid,new Account(uuid,bank,pocket,guild));
+                    i++;
                 }
             } else {
-                if (oddjobConfig.getConfigurationSection("currency") != null) {
-                    for (String string : oddjobConfig.getConfigurationSection("currency").getKeys(false)) {
-                        ConfigurationSection user = oddjobConfig.getConfigurationSection("currency." + string);
+                if (oddjobConfig.getConfigurationSection("balances") != null) {
+                    for (String string : oddjobConfig.getConfigurationSection("balances").getKeys(false)) {
+                        ConfigurationSection user = oddjobConfig.getConfigurationSection("balances." + string);
                         if (user != null) {
                             boolean guild = user.getBoolean("guild");
                             double bank = user.getDouble("bank");
@@ -62,6 +68,7 @@ public class CurrencySQL extends MySQLManager {
                             UUID uuid = UUID.fromString(string);
                             accounts.put(uuid,new Account(uuid,bank,pocket,guild));
                         }
+                        i++;
                     }
                 }
             }
@@ -70,6 +77,7 @@ public class CurrencySQL extends MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().log("Balances Loaded: "+i);
         return accounts;
     }
 
@@ -96,7 +104,7 @@ public class CurrencySQL extends MySQLManager {
                 oddjobConfig.save(oddjobConfigFile);
                 load();
             }
-            OddJob.getInstance().getMessageManager().console("Currency created: " + ((guild) ? "guild" : "player") + " " + uuid.toString());
+            OddJob.getInstance().getMessageManager().console("Balance created: " + ((guild) ? "guild" : "player") + " " + uuid.toString());
         } catch (SQLException | IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -121,7 +129,7 @@ public class CurrencySQL extends MySQLManager {
                 }
                 oddjobConfig.save(oddjobConfigFile);
             }
-            OddJob.getInstance().log("Currency of "+uuid.toString()+" changed with amount");
+            OddJob.getInstance().log("Balance of "+uuid.toString()+" changed with amount");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         } finally {

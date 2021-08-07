@@ -154,12 +154,16 @@ public class PlayerSQL extends MySQLManager {
     }
 
     public static void save(HashMap<UUID, OddPlayer> players) {
+        int i = 0;
         for (UUID uuid : players.keySet()) {
             save(players.get(uuid));
+            i++;
         }
+        OddJob.getInstance().log("Players Saved: " + i);
     }
 
     public static HashMap<UUID, OddPlayer> load() {
+        int i = 0;
         HashMap<UUID, OddPlayer> players = new HashMap<>();
         List<UUID> player = new ArrayList<>();
         try {
@@ -172,8 +176,9 @@ public class PlayerSQL extends MySQLManager {
                 }
             } else {
                 if (oddjobConfig != null && !oddjobConfig.getStringList("players").isEmpty()) {
-                    player.addAll(Collections.singleton(UUID.fromString(String.valueOf(oddjobConfig.getStringList("players")))));
-                    OddJob.getInstance().log("players: " + player.size());
+                    for (String string : oddjobConfig.getConfigurationSection("players").getKeys(false)) {
+                        player.add(UUID.fromString(string));
+                    }
                 }
             }
 
@@ -185,7 +190,9 @@ public class PlayerSQL extends MySQLManager {
 
         for (UUID uuid : player) {
             players.put(uuid, load(uuid));
+            i++;
         }
+        OddJob.getInstance().log("Players Loaded: " + i);
         return players;
     }
 }

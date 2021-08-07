@@ -1207,4 +1207,21 @@ public class MessageManager {
             danger(type(Plugin.tp), "Player " + cPlayer + name + cDanger + " is no longer online", player, false);
         }
     }
+
+    public void arenaList(CommandSender sender, List<String> names) {
+        if (names.size() == 0) {
+            warning(type(Plugin.arena), "There are no Games set", sender, false);
+        } else {
+            if(names.size() == 1) {
+                info(type(Plugin.arena),"There is "+cValue+ names.size()+cInfo+" Game set",sender,false);
+            }else {
+                info(type(Plugin.arena),"There are "+cValue+ names.size()+cInfo+" Games set",sender,false);
+            }
+            space(Plugin.arena,sender);
+            int i = 1;
+            for (String name : names) {
+                info(type(Plugin.arena),i+++".) "+cValue+name,sender,false);
+            }
+        }
+    }
 }

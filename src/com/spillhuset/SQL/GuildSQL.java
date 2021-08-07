@@ -54,8 +54,13 @@ public class GuildSQL extends MySQLManager {
                     for (String string : oddjobConfig.getConfigurationSection("guilds").getKeys(false)) {
                         UUID uuid = UUID.fromString(string);
                         HashMap<UUID, Role> members = new HashMap<>();
-                        for (String player : oddjobConfig.getStringList("guilds." + string + ".members")) {
-                            members.put(UUID.fromString(player), Role.valueOf(oddjobConfig.getString("guilds." + string + ".members." + player)));
+                        OddJob.getInstance().log("here");
+                        if (oddjobConfig.getConfigurationSection("guilds."+string+".members") != null) {
+
+                            for (String player : oddjobConfig.getConfigurationSection("guilds." + string + ".members").getKeys(false)) {
+                                OddJob.getInstance().log(player);
+                                members.put(UUID.fromString(player), Role.valueOf(oddjobConfig.getString("guilds." + string + ".members." + player)));
+                            }
                         }
                         guilds.put(uuid, new Guild(
                                 uuid,
@@ -76,14 +81,13 @@ public class GuildSQL extends MySQLManager {
         } finally {
             close();
         }
-        OddJob.getInstance().log("Loaded GZ " + guilds.size());
+        OddJob.getInstance().log("Guilds Loaded: " + guilds.size());
         return guilds;
     }
 
     public static void saveGuilds(HashMap<UUID, Guild> guilds) {
         int i = 0;
         for (UUID guildUUID : guilds.keySet()) {
-            OddJob.getInstance().log("Saving guild: " + i);
             Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
             String name = guild.getName();
             Zone zone = guild.getZone();
@@ -150,6 +154,8 @@ public class GuildSQL extends MySQLManager {
                             preparedStatement.setString(3, members.get(uuid).name());
                             preparedStatement.execute();
                         }
+                        i++;
+                        close();
                     }
                 } else {
                     oddjobConfig.set("guilds." + guildUUID.toString() + ".name", name);
@@ -162,18 +168,16 @@ public class GuildSQL extends MySQLManager {
                     oddjobConfig.set("guilds." + guildUUID.toString() + ".maxclaims", maxClaims);
 
                     for (UUID uuid : members.keySet()) {
-                        oddjobConfig.set("guilds." + guild.toString() + ".members." + uuid.toString(), members.get(uuid).name());
+                        oddjobConfig.set("guilds." + guildUUID.toString() + ".members." + uuid.toString(), members.get(uuid).name());
                     }
                     i++;
-                    close();
                 }
             } catch (SQLException ignored) {
             } finally {
                 close();
             }
         }
-        OddJob.getInstance().log("saved " + i + " guilds");
-        close();
+        OddJob.getInstance().log("Guilds Saves: "+i);
     }
 
     public static boolean deleteGuildsChunks(Chunk chunk) {
@@ -196,6 +200,7 @@ public class GuildSQL extends MySQLManager {
 
     public static HashMap<Chunk, UUID> loadChunks() {
         HashMap<Chunk, UUID> chunks = new HashMap<>();
+        int i = 0;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `server` = ?");
@@ -210,6 +215,7 @@ public class GuildSQL extends MySQLManager {
                         Chunk chunk = world.getChunkAt(x, z);
                         chunk.load();
                         chunks.put(chunk, guild);
+                        i++;
                     }
                 }
             } else {
@@ -225,6 +231,7 @@ public class GuildSQL extends MySQLManager {
                             Chunk chunk = world.getChunkAt(x, z);
                             chunk.load();
                             chunks.put(chunk, UUID.fromString(oddjobConfig.getString("chunks." + string)));
+                            i++;
                         }
                     }
                 }
@@ -233,7 +240,7 @@ public class GuildSQL extends MySQLManager {
         } finally {
             close();
         }
-        OddJob.getInstance().getMessageManager().load("Chunks", chunks.size());
+        OddJob.getInstance().log("Guild Chunks Loaded: "+ i);
         return chunks;
     }
 
@@ -269,36 +276,42 @@ public class GuildSQL extends MySQLManager {
     }
 
     public static void saveChunks(HashMap<Chunk, UUID> chunks) {
+        int i = 0;
         for (Chunk chunk : chunks.keySet()) {
-
             World world = chunk.getWorld();
             int x = chunk.getX();
             int z = chunk.getZ();
             UUID guild = chunks.get(chunk);
 
             try {
-                connect();
-                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
-                preparedStatement.setString(1, world.getUID().toString());
-                preparedStatement.setInt(2, x);
-                preparedStatement.setInt(3, z);
-                preparedStatement.setString(4, OddJob.getInstance().getServerId().toString());
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ? ");
-                    preparedStatement.setString(1, guild.toString());
-                    preparedStatement.setString(2, world.getUID().toString());
-                    preparedStatement.setInt(3, x);
-                    preparedStatement.setInt(4, z);
-                    preparedStatement.executeUpdate();
-                } else {
-                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`,`server`) VALUES (?,?,?,?,?)");
-                    preparedStatement.setString(1, guild.toString());
-                    preparedStatement.setString(2, world.getUID().toString());
-                    preparedStatement.setInt(3, x);
-                    preparedStatement.setInt(4, z);
-                    preparedStatement.setString(5, OddJob.getInstance().getServerId().toString());
-                    preparedStatement.execute();
+                if (connect()) {
+                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_chunks` WHERE `world` = ? AND `x` = ? AND `z` = ? AND `server` = ?");
+                    preparedStatement.setString(1, world.getUID().toString());
+                    preparedStatement.setInt(2, x);
+                    preparedStatement.setInt(3, z);
+                    preparedStatement.setString(4, OddJob.getInstance().getServerId().toString());
+                    resultSet = preparedStatement.executeQuery();
+                    if (resultSet.next()) {
+                        preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_chunks` SET `uuid` = ? WHERE `world` = ? AND `x` = ? AND `z` = ? ");
+                        preparedStatement.setString(1, guild.toString());
+                        preparedStatement.setString(2, world.getUID().toString());
+                        preparedStatement.setInt(3, x);
+                        preparedStatement.setInt(4, z);
+                        preparedStatement.executeUpdate();
+                        i++;
+                    } else {
+                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_chunks` (`uuid`,`world`,`x`,`z`,`server`) VALUES (?,?,?,?,?)");
+                        preparedStatement.setString(1, guild.toString());
+                        preparedStatement.setString(2, world.getUID().toString());
+                        preparedStatement.setInt(3, x);
+                        preparedStatement.setInt(4, z);
+                        preparedStatement.setString(5, OddJob.getInstance().getServerId().toString());
+                        preparedStatement.execute();
+                        i++;
+                    }
+                } else{
+                    oddjobConfig.set("guilds_chunks."+world.getUID().toString()+"."+x+"."+z,guild.toString());
+                    i++;
                 }
 
             } catch (SQLException ex) {
@@ -306,6 +319,7 @@ public class GuildSQL extends MySQLManager {
             } finally {
                 close();
             }
+            OddJob.getInstance().log("Guild Chunks Saved: "+i);
         }
     }
 
@@ -314,6 +328,7 @@ public class GuildSQL extends MySQLManager {
      */
     public static HashMap<UUID, UUID> loadGuildsPending() {
         HashMap<UUID, UUID> pending = new HashMap<>();
+        int i = 0;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_pendings`");
@@ -321,10 +336,12 @@ public class GuildSQL extends MySQLManager {
 
                 while (resultSet.next()) {
                     pending.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+                    i++;
                 }
             } else {
                 for (String string : oddjobConfig.getStringList("pending")) {
                     pending.put(UUID.fromString(string), UUID.fromString(oddjobConfig.getString("pending." + string, "")));
+                    i++;
                 }
             }
         } catch (SQLException ex) {
@@ -332,6 +349,7 @@ public class GuildSQL extends MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().log("Guild Pending Loaded: "+i);
         return pending;
     }
 
@@ -339,6 +357,7 @@ public class GuildSQL extends MySQLManager {
      * @return HashMap UUID of Player and UUID of Guild
      */
     public static HashMap<UUID, UUID> loadGuildsInvites() {
+        int i = 0;
         HashMap<UUID, UUID> invites = new HashMap<>();
         try {
             if (connect()) {
@@ -347,10 +366,12 @@ public class GuildSQL extends MySQLManager {
 
                 while (resultSet.next()) {
                     invites.put(UUID.fromString(resultSet.getString("player")), UUID.fromString(resultSet.getString("uuid")));
+                    i++;
                 }
             } else {
                 for (String string : oddjobConfig.getStringList("invites")) {
                     invites.put(UUID.fromString(string), UUID.fromString(oddjobConfig.getString("invites" + string, "")));
+                    i++;
                 }
             }
         } catch (SQLException ex) {
@@ -358,6 +379,7 @@ public class GuildSQL extends MySQLManager {
         } finally {
             close();
         }
+        OddJob.getInstance().log("Guild Invites Loaded: "+i);
         return invites;
     }
 
@@ -417,12 +439,8 @@ public class GuildSQL extends MySQLManager {
                 preparedStatement.setString(5, OddJob.getInstance().getServerId().toString());
                 preparedStatement.execute();
             } else {
-                String world = chunk.getWorld().getUID().toString();
-                String x = String.valueOf(chunk.getX());
-                String z = String.valueOf(chunk.getX());
-                String uuid = guild.toString();
 
-                oddjobConfig.set("guild_chunks."+world+"."+x+"."+z,uuid);
+                oddjobConfig.set("guilds_chunks."+chunk.getWorld().getUID().toString()+"."+chunk.getX()+"."+chunk.getZ(),guild.toString());
 
                 oddjobConfig.save(oddjobConfigFile);
             }
