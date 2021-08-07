@@ -20,7 +20,7 @@ public class TpRequestCommand extends SubCommand {
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.spillhuset.Commands.Homes.HomesCommand;
 import com.spillhuset.Commands.Lock.LockCommand;
 import com.spillhuset.Commands.Money.MoneyCommand;
 import com.spillhuset.Commands.Player.PlayerCommand;
+import com.spillhuset.Commands.Tp.TpCommand;
 import com.spillhuset.Commands.Trade.TradeCommand;
 import com.spillhuset.Commands.Warp.WarpCommand;
 import com.spillhuset.Events.*;
@@ -112,6 +113,7 @@ public class OddJob extends JavaPlugin {
         getCommand("sudo").setExecutor(new SudoCommand());
         getCommand("op").setExecutor(new OpCommand());
         getCommand("deop").setExecutor(new DeopCommand());
+        getCommand("tp").setExecutor(new TpCommand());
 
         ConfigManager.load(); // Checked
         playerManager.load();
