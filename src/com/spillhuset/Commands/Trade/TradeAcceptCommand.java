@@ -49,16 +49,16 @@ public class TradeAcceptCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(Plugin.trade);
+        if (!can(sender,false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
             return;
         }
-
-        Player player = (Player) sender;
 
         if (!checkArgs(2, 2, args, sender, Plugin.trade)) {
             return;
         }
+
+        Player player = (Player) sender;
 
         if (OddJob.getInstance().getPlayerManager().getRequestTrade().containsKey(player.getUniqueId())) {
             UUID uuid = OddJob.getInstance().getPlayerManager().getRequestTrade().get(player.getUniqueId());
