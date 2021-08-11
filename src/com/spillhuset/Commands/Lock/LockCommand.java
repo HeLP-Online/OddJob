@@ -19,6 +19,9 @@ public class LockCommand extends SubCommandInterface implements CommandExecutor,
         subCommands.add(new LockInfoCommand());
         subCommands.add(new LockCoordsCommand());
         subCommands.add(new LockMakeCommand());
+        subCommands.add(new LockAddCommand());
+        subCommands.add(new LockRemoveCommand());
+
     }
 
     @Override

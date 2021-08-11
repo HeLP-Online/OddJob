@@ -51,6 +51,10 @@ public class TpCommand extends SubCommandInterface implements TabCompleter, Comm
         if (args.length >= 1) {
             Player target = Bukkit.getPlayer(args[0]);
             if (target != null) {
+                if (args.length == 1) {
+                    OddJob.getInstance().getTeleportManager().teleport((Player) sender,target, PlayerTeleportEvent.TeleportCause.COMMAND,false);
+                    return true;
+                }
                 Player dest = Bukkit.getPlayer(args[1]);
                 if (dest == null) {
                     OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);

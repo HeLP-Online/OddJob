@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public class HomesCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
@@ -73,7 +72,7 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
                 OddJob.getInstance().getMessageManager().homesNotSet(sender);
                 return true;
             }
-            OddJob.getInstance().getMessageManager().homesCount(test, sender.getName(), OddJob.getInstance().getHomesManager().getMaxHomes(target), sender,true);
+            OddJob.getInstance().getMessageManager().homesCount(test, sender.getName(), OddJob.getInstance().getHomesManager().getMaxHomes(target), sender, true);
             return true;
         }
 
@@ -129,46 +128,39 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
         // Listing SubCommands
         if (args.length >= 1) {
             for (SubCommand subCommand : subCommands) {
-                if (subCommand.getName().equalsIgnoreCase(args[0])) {
-                    return list = subCommand.getTab(sender, args);
+                if (subCommand.getName().equalsIgnoreCase(args[0]) && args.length > 1) {
+                    return subCommand.getTab(sender, args);
+                } else if (args[0].isEmpty() || subCommand.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+                    list.add(subCommand.getName());
                 }
-                list.add(subCommand.getName());
             }
         }
         // homes <home>
         // homes <player> <home>
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (sender instanceof Player player) {
             if (args.length == 1) {
                 // Listing own homes
                 if (OddJob.getInstance().getHomesManager().getList(player.getUniqueId()) != null) {
                     for (String name : OddJob.getInstance().getHomesManager().getList(player.getUniqueId())) {
-                        if (args[0].isEmpty()) {
-                            list.add(name);
-                        } else if (name.startsWith(args[0])) {
+                        if (args[0].isEmpty() || name.toLowerCase().startsWith(args[0].toLowerCase())) {
                             list.add(name);
                         }
                     }
                 }
                 // Listing other players
-                if (player.hasPermission("homes.others")) {
+                if (can(sender, true)) {
                     for (String name : OddJob.getInstance().getPlayerManager().getNames()) {
-                        if (name.equals(player.getName())) continue;
-                        if (args[0].isEmpty()) {
-                            list.add(name);
-                        } else if (name.startsWith(args[0])) {
+                        if (args[0].isEmpty() || name.toLowerCase().startsWith(args[0].toLowerCase())) {
                             list.add(name);
                         }
                     }
                 }
-            } else if (args.length == 2 && player.hasPermission("homes.others")) {
+            } else if (args.length == 2 && can(sender, true)) {
                 UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[0]);
                 if (target != null) {
                     if (OddJob.getInstance().getHomesManager().getList(target) != null) {
                         for (String name : OddJob.getInstance().getHomesManager().getList(target)) {
-                            if (args[1].isEmpty()) {
-                                list.add(name);
-                            } else if (name.startsWith(args[1])) {
+                            if (args[1].isEmpty() || name.toLowerCase().startsWith(args[1].toLowerCase())) {
                                 list.add(name);
                             }
                         }
@@ -176,8 +168,6 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
                 }
             }
         }
-
-
         return list;
     }
 }

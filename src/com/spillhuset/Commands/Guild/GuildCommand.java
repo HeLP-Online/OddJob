@@ -63,11 +63,18 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
                 UUID safe = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.SAFE);
                 String nameSafe = "SafeZone";
                 if (safe == null) {
-
                     OddJob.getInstance().getGuildManager().create(nameSafe, Zone.SAFE, true, false);
                     OddJob.getInstance().getMessageManager().infoGuildCreated(nameSafe, sender);
                 } else {
                     OddJob.getInstance().getMessageManager().infoGuildExists(nameSafe, sender);
+                }
+                UUID quest = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.SAFE);
+                String nameQuest = "QuestZone";
+                if (quest == null) {
+                    OddJob.getInstance().getGuildManager().create(nameQuest, Zone.QUEST, true, false);
+                    OddJob.getInstance().getMessageManager().infoGuildCreated(nameQuest, sender);
+                } else {
+                    OddJob.getInstance().getMessageManager().infoGuildExists(nameQuest, sender);
                 }
                 UUID war = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WAR);
                 String nameWar = "WarZone";

@@ -233,6 +233,7 @@ public class PlayerManager {
         OddPlayer oddPlayer = PlayerSQL.load(uuid);
         if (oddPlayer != null) {
             players.put(uuid, oddPlayer);
+            oddPlayer.getPlayer().setScoreboard(OddJob.getInstance().getScoreManager().scoreboardManager.getNewScoreboard());
         }
     }
 

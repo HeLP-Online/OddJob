@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,35 +72,18 @@ public class HomeSetCommand extends SubCommand {
             target = ((Player) sender).getUniqueId();
         }
 
-        //Set<String> list = OddJob.getInstance().getHomesManager().getList(target);
         List<String> list = OddJob.getInstance().getHomesManager().getList(target);
-        if (list != null && list.size() >= getMax(target)) {
+        if (list != null && list.size() >= OddJob.getInstance().getHomesManager().getMax(target)) {
             OddJob.getInstance().getMessageManager().errorHomeMaximal(sender);
             return;
         }
         OddJob.getInstance().getHomesManager().add(target, name, ((Player) sender).getLocation());
-
-    }
-
-    private int getMax(UUID target) {
-        int config = OddJob.getInstance().getConfig().getInt("homes.max", 5);
-        int player = OddJob.getInstance().getPlayerManager().getMaxHomes(target);
-        int permission = 0;
-        Player bukkit_player = Bukkit.getPlayer(target);
-        String[] tracks = {"moderators", "vip", "emerald", "diamond", "gold", "iron", "stone", "wood", "default", "operators"};
-        for (String i : tracks) {
-            if (OddJob.getInstance().getConfig().isConfigurationSection("homes." + i)) {
-                ConfigurationSection cf = OddJob.getInstance().getConfig().getConfigurationSection("homes." + i);
-                if (cf != null && bukkit_player != null && bukkit_player.hasPermission("homes." + i)) {
-                    permission = Math.max(cf.getInt("maxHomes"), permission);
-                }
-            }
-        }
-        return config + player + permission;
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
-        return null;
+        List<String> list = new ArrayList<>();
+        list.add("<name>");
+        return list;
     }
 }

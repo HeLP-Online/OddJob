@@ -41,7 +41,9 @@ public class BlockPlace implements Listener {
         // Prevent placement of the Locking tools and keys
         if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().unlockWand) ||
                 event.getItemInHand().equals(OddJob.getInstance().getLockManager().lockWand) ||
-                event.getItemInHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
+                event.getItemInHand().equals(OddJob.getInstance().getLockManager().infoWand) ||
+                event.getItemInHand().equals(OddJob.getInstance().getLockManager().addMaterialWand) ||
+                event.getItemInHand().equals(OddJob.getInstance().getLockManager().delMaterialWand)) {
             event.setCancelled(true);
             return;
         } else if (event.getItemInHand().getType().equals(Material.TRIPWIRE_HOOK)) {
@@ -69,7 +71,7 @@ public class BlockPlace implements Listener {
         }
 
         // Authorization override
-        if (player.isOp() || player.hasPermission("oddjob.guild.admin")) {
+        if (player.isOp() || player.hasPermission("guild.admin")) {
             return;
         }
 

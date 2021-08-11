@@ -16,18 +16,17 @@ public class Guild {
     HashMap<UUID, Role> members = new HashMap<>();
     Role permissionInvite = Role.valueOf(OddJob.getInstance().getConfig().getString("guild.default.permissionInvite"));
     Role permissionKick = Role.valueOf(OddJob.getInstance().getConfig().getString("guild.default.permissionKick"));
-    private int chunks;
     boolean open = OddJob.getInstance().getConfig().getBoolean("guild.default.open");
     private int maxClaims = OddJob.getInstance().getConfig().getInt("guild.default.maxClaims");
 
     /**
      * Creating a new Guild from the command
      *
-     * @param name          String name of the Guild
-     * @param zone          Zone the Guild belongs to
-     * @param guildUUID     Guilds unique ID
-     * @param playerUUID    UUID of the Player creating the Guild
-     * @param role          Role of the Player creating the Guild
+     * @param name       String name of the Guild
+     * @param zone       Zone the Guild belongs to
+     * @param guildUUID  Guilds unique ID
+     * @param playerUUID UUID of the Player creating the Guild
+     * @param role       Role of the Player creating the Guild
      */
     public Guild(
             String name,
@@ -75,8 +74,7 @@ public class Guild {
             boolean open,
             Role permission_invite,
             Role permission_kick,
-            HashMap<UUID, Role> members,
-            int maxClaims) {
+            HashMap<UUID, Role> members) {
         this.guildUUID = guildUUID;
         this.name = name;
         this.zone = zone;
@@ -86,7 +84,6 @@ public class Guild {
         this.permissionInvite = permission_invite;
         this.members = members;
         this.open = open;
-        this.maxClaims = maxClaims;
     }
 
 
@@ -127,15 +124,7 @@ public class Guild {
     }
 
     public int getChunks() {
-        return chunks;
-    }
-
-    public void addChunks() {
-        chunks++;
-    }
-
-    public void removeChunks() {
-        chunks--;
+        return OddJob.getInstance().getGuildManager().getChunks(guildUUID).size();
     }
 
     public boolean getFriendlyFire() {
@@ -159,8 +148,7 @@ public class Guild {
     }
 
     public int getMaxClaims() {
-        int i = maxClaims;
-        return i;
+        return maxClaims + (members.size() * 5);
     }
 
 

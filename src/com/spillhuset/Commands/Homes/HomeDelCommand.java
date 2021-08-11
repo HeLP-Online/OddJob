@@ -97,9 +97,7 @@ public class HomeDelCommand extends SubCommand {
         Player player = (Player) sender;
         for (String name : OddJob.getInstance().getHomesManager().getList(player.getUniqueId())) {
             if (args.length == 2) {
-                if (args[1].isEmpty()) {
-                    list.add(name);
-                } else if (name.startsWith(args[1])) {
+                if (args[1].isEmpty() || name.toLowerCase().startsWith(args[1].toLowerCase())) {
                     list.add(name);
                 }
             }

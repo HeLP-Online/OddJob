@@ -4,7 +4,6 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Lore;
 import com.spillhuset.Utils.Utility;
-import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,8 +26,10 @@ public class PlayerInteract implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteractEvent(PlayerInteractEvent event) {
-        OddJob.getInstance().log("Triggered");
         Player player = event.getPlayer();
+        if(event.getClickedBlock() != null && event.getItem() != null) {
+            OddJob.getInstance().log(player.getName() + ": Interacted with " + event.getClickedBlock().getType().name() + " using " + event.getItem().getType().name());
+        }
         boolean door = false;
         UUID uuid = null;
 
@@ -42,15 +43,38 @@ public class PlayerInteract implements Listener {
             OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(), item, "interact");
 
         // Check Authorization
-        if ((event.getHand() == EquipmentSlot.OFF_HAND) || (event.getClickedBlock() == null) || player.isOp()) {
+        if ((event.getClickedBlock() == null || event.getClickedBlock().getType().equals(Material.AIR)) || (event.getHand() == EquipmentSlot.OFF_HAND)) {
             return;
         }
-
+        if (player.isOp() && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            Block block = event.getClickedBlock();
+            Material t = block.getType();
+            if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().delMaterialWand)) {
+                uuid = event.getPlayer().getUniqueId();
+                OddJob.getInstance().getLockManager().remove(t);
+                OddJob.getInstance().getLockManager().remove(uuid);
+                OddJob.getInstance().getMessageManager().lockMaterialAdded(t.name(),player);
+                event.setCancelled(true);
+                return;
+            }
+            if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().addMaterialWand)) {
+                if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
+                    OddJob.getInstance().getMessageManager().lockMaterialAlready(t.name(),player);
+                    return;
+                }
+                uuid = event.getPlayer().getUniqueId();
+                OddJob.getInstance().getLockManager().add(t);
+                OddJob.getInstance().getLockManager().remove(uuid);
+                OddJob.getInstance().getMessageManager().lockMaterialRemoved(t.name(),player);
+                event.setCancelled(true);
+                return;
+            }
+            return;
+        }
         if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (event.getAction().equals(Action.PHYSICAL))) {
             // Opening or Stepping
             Block block = event.getClickedBlock();
             Material t = block.getType();
-
             if (OddJob.getInstance().getLockManager().getLockable().contains(t)) {
                 OddJob.getInstance().log("Lockable");
                 // Lockable Block
@@ -82,7 +106,7 @@ public class PlayerInteract implements Listener {
                         if (OddJob.getInstance().getPlayerManager().getPlayer(player.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
                             if (OddJob.getInstance().getPlayerManager().getName(uuid) != null)
 
-                                OddJob.getInstance().getMessageManager().lockBlockOwned(block.getType().name(),OddJob.getInstance().getPlayerManager().getName(uuid), player);
+                                OddJob.getInstance().getMessageManager().lockBlockOwned(block.getType().name(), OddJob.getInstance().getPlayerManager().getName(uuid), player);
                             event.setCancelled(true);
                             return;
                         }
@@ -99,7 +123,7 @@ public class PlayerInteract implements Listener {
                             // Unlocking
                             OddJob.getInstance().getLockManager().unlock(block.getLocation());
                             OddJob.getInstance().getLockManager().remove(player.getUniqueId());
-                            OddJob.getInstance().getMessageManager().lockUnlocked(block.getType().name(),player);
+                            OddJob.getInstance().getMessageManager().lockUnlocked(block.getType().name(), player);
                             event.setCancelled(true);
                             return;
                         }
@@ -166,7 +190,7 @@ public class PlayerInteract implements Listener {
                         // Locking
                         OddJob.getInstance().getLockManager().lock(player.getUniqueId(), block.getLocation());
                         OddJob.getInstance().getLockManager().remove(player.getUniqueId());
-                        OddJob.getInstance().getMessageManager().lockBlockLocked(block.getType().name(),player);
+                        OddJob.getInstance().getMessageManager().lockBlockLocked(block.getType().name(), player);
                         event.setCancelled(true);
                         return;
                     }

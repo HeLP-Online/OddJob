@@ -9,11 +9,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class ArenaSQL extends MySQLManager {
     public static void saveSettings(HashMap<String, Object> settings) {
+        /*
         for (String string : settings.keySet()) {
             if (string.equals("lobby")) {
                 Location lobby = (Location) settings.get(string);
@@ -25,6 +27,11 @@ public class ArenaSQL extends MySQLManager {
                 oddjobConfig.set("arenas." + string + ".pitch", lobby.getPitch());
             }
         }
+        try {
+            oddjobConfig.save(oddjobConfigFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 
     public static void save(HashMap<UUID, Game> games) {
@@ -55,7 +62,7 @@ public class ArenaSQL extends MySQLManager {
 
     public static HashMap<String, Object> loadSettings() {
         HashMap<String, Object> settings = new HashMap<>();
-        if (oddjobConfig.isConfigurationSection("arenas")) {
+        /*if (oddjobConfig.isConfigurationSection("arenas")) {
             ConfigurationSection arenas = oddjobConfig.getConfigurationSection("arenas");
             if (arenas != null) {
                 World world = Bukkit.getWorld(UUID.fromString(arenas.getString("world")));
@@ -67,7 +74,7 @@ public class ArenaSQL extends MySQLManager {
 
                 settings.put("lobby", new Location(world, x, y, z, yaw, pitch));
             }
-        }
+        }*/
         return settings;
     }
 

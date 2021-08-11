@@ -3,7 +3,6 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.GuildSQL;
 import com.spillhuset.Utils.Enum.Role;
-import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Guild;
 import org.bukkit.Bukkit;
@@ -13,13 +12,18 @@ import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.dynmap.DynmapAPI;
+import org.dynmap.markers.AreaMarker;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerIcon;
+import org.dynmap.markers.MarkerSet;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 
 public class GuildManager {
-    //private MarkerSet markerSet = null;
-    //private HashMap<String, AreaMarker> markers;
+    private MarkerSet markerSet = null;
+    private HashMap<String, AreaMarker> markers;
 
     /**
      * List of Players auto-claiming to a Guild
@@ -53,7 +57,7 @@ public class GuildManager {
     }
 
     private void dynmapInit() {
-        /*
+
         markers = new HashMap<>();
         try {
             DynmapAPI dynmapApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
@@ -67,7 +71,7 @@ public class GuildManager {
             }
         } catch (Exception e) {
             OddJob.getInstance().getMessageManager().console("Map Marker disabled");
-        }*/
+        }
     }
 
     /**
@@ -91,6 +95,7 @@ public class GuildManager {
             create("JailZone", Zone.JAIL, false, false);
             create("WarZone", Zone.WAR, false, false);
             create("ArenaZone", Zone.ARENA, false, false);
+            create("QuestZone", Zone.QUEST,false,false);
             saveGuilds();
             loadGuilds();
         }
@@ -104,6 +109,7 @@ public class GuildManager {
     public void loadChunks() {
         chunks.clear();
         chunks = GuildSQL.loadChunks();
+        OddJob.getInstance().log("Loaded Chunks: "+chunks.size());
         if (chunks.size() >= 1) {
             clearDynmap();
             updateDynmap();
@@ -111,15 +117,15 @@ public class GuildManager {
     }
 
     private void clearDynmap() {
-        /*
+
         for (String s : markers.keySet()) {
             markers.get(s).deleteMarker();
-        }*/
+        }
     }
 
     private void updateDynmap() {
         for (Chunk chunk : chunks.keySet()) {
-            //updateDynmapChunk(chunk);
+            updateDynmapChunk(chunk);
         }
     }
 
@@ -127,10 +133,10 @@ public class GuildManager {
         String coords = chunk.getX() + "x" + chunk.getZ();
         UUID worldUUID = chunk.getWorld().getUID();
         String markerId = worldUUID.toString().substring(0, 8) + "-" + coords;
-/*
+
         AreaMarker areaMarker = markers.get(markerId);
         if (areaMarker != null) areaMarker.deleteMarker();
-        markers.remove(markerId);*/
+        markers.remove(markerId);
     }
 
     /**
@@ -141,14 +147,20 @@ public class GuildManager {
         UUID worldUUID = chunk.getWorld().getUID();
         UUID guildUUID = getGuildUUIDByChunk(chunk);
         String markerId = worldUUID.toString().substring(0, 8) + "-" + coords;
-/*
+        String name = "";
+        try {
+            name = OddJob.getInstance().getGuildManager().getGuildNameByUUID(guildUUID);
+        } catch (Exception ignored) {
+            return;
+        }
         AreaMarker areaMarker = markers.get(markerId);
         if (areaMarker == null)
             areaMarker = markerSet.createAreaMarker(markerId, getGuildNameByUUID(guildUUID), true, chunk.getWorld().getName(), new double[1000], new double[1000], false);
         double[] x = {chunk.getX() * 16, (chunk.getX() * 16) + 16};
         double[] z = {chunk.getZ() * 16, (chunk.getZ() * 16) + 16};
         areaMarker.setCornerLocations(x, z);
-        areaMarker.setLabel(OddJob.getInstance().getGuildManager().getGuildNameByUUID(guildUUID));
+
+        areaMarker.setLabel(name);
         switch (OddJob.getInstance().getGuildManager().getZoneByGuild(guildUUID)) {
             case SAFE: {
                 areaMarker.setFillStyle(0.5, Integer.parseInt("00FF00", 16));
@@ -172,7 +184,7 @@ public class GuildManager {
         }
         markers.put(markerId, areaMarker);
 
- */
+
     }
 
     /**
@@ -186,7 +198,7 @@ public class GuildManager {
      * Saving the Chunk-list to the Database
      */
     public void saveChunks() {
-        GuildSQL.saveChunks(chunks);
+        //GuildSQL.saveChunks(chunks);
     }
 
     /**
@@ -278,7 +290,7 @@ public class GuildManager {
         if (!chunks.containsKey(chunk)) {
             chunks.put(chunk, guild);
             GuildSQL.createGuildClaim(chunk, guild);
-            //updateDynmapChunk(chunk);
+            updateDynmapChunk(chunk);
             int count = getSumChunks(guild);
             int max = getGuild(guild).getMaxClaims();
             OddJob.getInstance().getMessageManager().guildClaiming(count, max, chunk.getX(), chunk.getZ(), player, getGuildNameByUUID(guild));
@@ -316,7 +328,7 @@ public class GuildManager {
         UUID playerGuild = getGuildUUIDByMember(player.getUniqueId());
         UUID chunkGuild = getGuildUUIDByChunk(inChunk);
 
-        if (!chunkGuild.equals(playerGuild)) {
+        if (!chunkGuild.equals(playerGuild) && !player.isOp()) {
             // Chunk is not by the Players Guild
             OddJob.getInstance().getMessageManager().guildNotAssociatedGuild(player);
         } else {
@@ -491,15 +503,9 @@ public class GuildManager {
         Role newRole = null;
         if (master == null) {
             switch (prevRole.level()) {
-                case 11:
-                    newRole = Role.Mods;
-                    break;
-                case 22:
-                    newRole = Role.Admins;
-                    break;
-                case 33:
-                    newRole = Role.Master;
-                    break;
+                case 11 -> newRole = Role.Mods;
+                case 22 -> newRole = Role.Admins;
+                case 33 -> newRole = Role.Master;
             }
             if (newRole != null) {
                 guilds.get(guildUUID).getMembers().put(targetUUID, newRole);
@@ -519,18 +525,12 @@ public class GuildManager {
      */
     public Role demoteMember(@Nonnull UUID guildUUID, @Nonnull UUID targetUUID) {
         Role prevRole = getGuildMemberRole(targetUUID);
-        Role newRole = null;
-        switch (prevRole.level()) {
-            case 22:
-                newRole = Role.Members;
-                break;
-            case 33:
-                newRole = Role.Mods;
-                break;
-            case 99:
-                newRole = Role.Admins;
-                break;
-        }
+        Role newRole = switch (prevRole.level()) {
+            case 22 -> Role.Members;
+            case 33 -> Role.Mods;
+            case 99 -> Role.Admins;
+            default -> null;
+        };
         if (newRole != null) {
             guilds.get(guildUUID).getMembers().put(targetUUID, newRole);
         }
@@ -795,7 +795,7 @@ public class GuildManager {
     public void disband(UUID guild) {
         List<Chunk> chunkList = new ArrayList<>();
         for (Chunk chunk : chunks.keySet()) {
-            if (chunks.get(chunk).equals(guild)) {
+            if (chunks.get(chunk) == guild) {
                 unClaim(chunk, null);
                 chunkList.add(chunk);
             }
@@ -828,48 +828,35 @@ public class GuildManager {
         Chunk chunk = player.getLocation().getChunk();
         World world = player.getWorld();
         switch (facing) {
-            case NORTH:
-            case NORTH_NORTH_EAST:
-            case NORTH_NORTH_WEST:
-            case NORTH_EAST:
-            case NORTH_WEST:
+            case NORTH, NORTH_NORTH_EAST, NORTH_NORTH_WEST, NORTH_EAST, NORTH_WEST -> {
                 dir = "north";
                 minZ = chunk.getZ() - 4;
                 maxZ = chunk.getZ() + 4;
                 minX = chunk.getX() - 9;
                 maxX = chunk.getX() + 9;
-                break;
-            case EAST:
-            case EAST_NORTH_EAST:
-            case EAST_SOUTH_EAST:
+            }
+            case EAST, EAST_NORTH_EAST, EAST_SOUTH_EAST -> {
                 dir = "east";
                 minZ = chunk.getZ() - 9;
                 maxZ = chunk.getZ() + 9;
                 minX = chunk.getX() - 4;
                 maxX = chunk.getX() + 4;
-                break;
-            case SOUTH_EAST:
-            case SOUTH:
-            case SOUTH_SOUTH_EAST:
-            case SOUTH_SOUTH_WEST:
-            case SOUTH_WEST:
+            }
+            case SOUTH_EAST, SOUTH, SOUTH_SOUTH_EAST, SOUTH_SOUTH_WEST, SOUTH_WEST -> {
                 dir = "south";
                 minZ = chunk.getZ() - 4;
                 maxZ = chunk.getZ() + 4;
                 minX = chunk.getX() - 9;
                 maxX = chunk.getX() + 9;
-                break;
-            case WEST:
-            case WEST_NORTH_WEST:
-            case WEST_SOUTH_WEST:
+            }
+            case WEST, WEST_NORTH_WEST, WEST_SOUTH_WEST -> {
                 dir = "west";
                 minZ = chunk.getZ() - 9;
                 maxZ = chunk.getZ() + 9;
                 minX = chunk.getX() - 4;
                 maxX = chunk.getX() + 4;
-                break;
-            default:
-                dir = "";
+            }
+            default -> dir = "";
         }
 
         String[] chars = new String[]{"W", "A", "J", "S", "#", "%", "&", "/", "+", "-", ":", "!"};
@@ -1034,19 +1021,13 @@ public class GuildManager {
     }
 
     public ChatColor color(Zone zone) {
-        switch (zone) {
-            case WAR:
-            case ARENA:
-                return ChatColor.RED;
-            case JAIL:
-                return ChatColor.YELLOW;
-            case SAFE:
-                return ChatColor.GREEN;
-            case GUILD:
-                return ChatColor.BLUE;
-            default:
-                return ChatColor.RESET;
-        }
+        return switch (zone) {
+            case WAR, ARENA -> ChatColor.RED;
+            case JAIL -> ChatColor.YELLOW;
+            case SAFE -> ChatColor.GREEN;
+            case GUILD -> ChatColor.BLUE;
+            default -> ChatColor.RESET;
+        };
     }
 
     public void listGuilds() {
@@ -1078,12 +1059,22 @@ public class GuildManager {
         loadChunks();
     }
 
+    public List<Chunk> getChunks(UUID guild) {
+        List<Chunk> list = new ArrayList<>();
+        for (Chunk chunk : chunks.keySet()) {
+            if (chunks.get(chunk).equals(guild)) list.add(chunk);
+        }
+        return list;
+    }
+
     public int getSumChunks(UUID guild) {
 
         int i = 0;
         for (UUID uuid : chunks.values()) {
-            if (uuid == guild) i++;
+            OddJob.getInstance().log("uuid="+uuid.toString()+"; guild="+guild.toString());
+            if (uuid.equals(guild)) i++;
         }
+        OddJob.getInstance().log("SUM: "+OddJob.getInstance().getGuildManager().getGuild(guild).getName()+" - "+i);
         return i;
     }
 

@@ -1029,6 +1029,16 @@ public class MessageManager {
         info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
     }
 
+    public void lockToolDel(UUID uniqueId) {
+        info(type(Plugin.lock), "Right click with the " + cValue + "Remove material tool" + cInfo + " to remove it from the list.", uniqueId);
+        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
+    }
+
+    public void lockToolAdd(UUID uniqueId) {
+        info(type(Plugin.lock), "Right click with the " + cValue + "New material tool" + cInfo + " to add it to the list.", uniqueId);
+        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
+    }
+
     public void lockToolLock(UUID uniqueId) {
         info(type(Plugin.lock), "Right click with the " + cValue + "Locking tool" + cInfo + " to lock the object.", uniqueId);
         info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
@@ -1081,7 +1091,8 @@ public class MessageManager {
             homesNotSet(sender);
             return;
         }
-        info(type(Plugin.home), ((self) ? "You" : cPlayer + target + cInfo) + " have assigned " + cValue + list.size() + cInfo + " of " + cValue + max, sender, false);
+        String count = (list.size() > max) ? ChatColor.RED + String.valueOf(list.size()) : String.valueOf(list.size());
+        info(type(Plugin.home), ((self) ? "You" : cPlayer + target + cInfo) + " have assigned " + cValue + count + cInfo + " of " + cValue + max, sender, false);
         space(Plugin.home, sender);
         int i = 1;
         for (String name : list) {
@@ -1212,16 +1223,32 @@ public class MessageManager {
         if (names.size() == 0) {
             warning(type(Plugin.arena), "There are no Games set", sender, false);
         } else {
-            if(names.size() == 1) {
-                info(type(Plugin.arena),"There is "+cValue+ names.size()+cInfo+" Game set",sender,false);
-            }else {
-                info(type(Plugin.arena),"There are "+cValue+ names.size()+cInfo+" Games set",sender,false);
+            if (names.size() == 1) {
+                info(type(Plugin.arena), "There is " + cValue + names.size() + cInfo + " Game set", sender, false);
+            } else {
+                info(type(Plugin.arena), "There are " + cValue + names.size() + cInfo + " Games set", sender, false);
             }
-            space(Plugin.arena,sender);
+            space(Plugin.arena, sender);
             int i = 1;
             for (String name : names) {
-                info(type(Plugin.arena),i+++".) "+cValue+name,sender,false);
+                info(type(Plugin.arena), i++ + ".) " + cValue + name, sender, false);
             }
         }
+    }
+
+    public void guildFriendlyFireDisabled(Player damage) {
+        warning(type(Plugin.guild), "Friendlyfire is disabled", damage, false);
+    }
+
+    public void lockMaterialAdded(String name, Player player) {
+        success(type(Plugin.lock), cValue + name + cSuccess + " added to the list of lockable materials", player, false);
+    }
+
+    public void lockMaterialRemoved(String name, Player player) {
+        success(type(Plugin.lock), cValue + name + cSuccess + " removed from the list of lockable materials", player, false);
+    }
+
+    public void lockMaterialAlready(String name, Player player) {
+        warning(type(Plugin.lock), cValue + name + cWarning + " already exists in the list of lockable materials", player, false);
     }
 }

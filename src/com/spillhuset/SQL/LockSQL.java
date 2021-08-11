@@ -101,7 +101,7 @@ public class LockSQL extends MySQLManager {
 
     public static HashMap<UUID, UUID> loadSecuredArmorStands() {
         HashMap<UUID, UUID> stands = new HashMap<>();
-        int i= 0;
+        int i = 0;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_secured_armorstands`");
@@ -127,7 +127,7 @@ public class LockSQL extends MySQLManager {
         } finally {
             close();
         }
-        OddJob.getInstance().log("Secured ArmorStands Loaded: "+ i);
+        OddJob.getInstance().log("Secured ArmorStands Loaded: " + i);
         return stands;
     }
 
@@ -170,7 +170,42 @@ public class LockSQL extends MySQLManager {
         } finally {
             close();
         }
-        OddJob.getInstance().log("Secured Blocks Loaded: "+i);
+        OddJob.getInstance().log("Secured Blocks Loaded: " + i);
         return blocks;
+    }
+
+    public static void addMaterial(Material material) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_lockable_materials` WHERE `name` = ?");
+                preparedStatement.setString(1, material.name());
+                resultSet = preparedStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_lockable_materials` SET `value` = 1 WHERE `name` = ?");
+                    preparedStatement.setString(1, material.name());
+                    preparedStatement.executeUpdate();
+                } else {
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_lockable_materials` (`name`,`value`) VALUES (?,?)");
+                    preparedStatement.setString(1, material.name());
+                    preparedStatement.setInt(2, 1);
+                    preparedStatement.execute();
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static void remove(Material material) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("UPDATE `mine_lockable_materials` SET `value` = 0 WHERE `name` = ?");
+                preparedStatement.setString(1, material.name());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 }

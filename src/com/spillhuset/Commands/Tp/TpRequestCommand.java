@@ -50,7 +50,7 @@ public class TpRequestCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (can(sender, false)) {
+        if (!can(sender, false)) {
             OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return;
         }

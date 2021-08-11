@@ -104,4 +104,5 @@ public class GuildCreateCommand extends SubCommand implements GuildRole {
     public boolean needGuild() {
         return false;
     }
+
 }

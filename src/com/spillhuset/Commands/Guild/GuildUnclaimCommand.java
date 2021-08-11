@@ -1,9 +1,9 @@
 package com.spillhuset.Commands.Guild;
+
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
-import com.spillhuset.Utils.Guild;
 import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
@@ -72,15 +72,18 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
             }
         } else {
             guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-            if (guild == null) {
+            if (guild == null && !player.isOp()) {
                 OddJob.getInstance().getMessageManager().guildNotAssociated(player.getUniqueId());
                 return;
             }
         }
-        if (OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()).equals(guild)) {
+        if (player.isOp() || OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(player.getLocation().getChunk()).equals(guild)) {
             OddJob.getInstance().getGuildManager().unClaim(player);
+        } else {
+            OddJob.getInstance().getMessageManager().guildClaimed(player);
         }
     }
+
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         return null;
@@ -90,6 +93,7 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
     public Role getRole() {
         return Role.Admins;
     }
+
     @Override
     public boolean needGuild() {
         return true;

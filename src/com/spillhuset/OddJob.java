@@ -121,7 +121,7 @@ public class OddJob extends JavaPlugin {
         guildManager.load();
         lockManager.load();
         worldManager.load();
-        arenaManager.load();
+        //arenaManager.load();
 
 
         Bukkit.getPluginManager().registerEvents(new BlockBreak(), this);
@@ -175,6 +175,7 @@ public class OddJob extends JavaPlugin {
         playerManager.save();
         moneyManager.save();
         warpManager.save();
+        guildManager.save();
     }
 
 

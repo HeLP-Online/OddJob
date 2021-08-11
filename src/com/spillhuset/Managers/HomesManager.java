@@ -3,8 +3,10 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.HomeSQL;
 import com.spillhuset.Utils.Enum.Zone;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
@@ -104,6 +106,23 @@ public class HomesManager {
                 OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), PlayerTeleportEvent.TeleportCause.COMMAND, !player.hasPermission("teleport.now"));
             }
         }
+    }
+
+    public int getMax(UUID target) {
+        int config = OddJob.getInstance().getConfig().getInt("homes.max", 5);
+        int player = OddJob.getInstance().getPlayerManager().getMaxHomes(target);
+        int permission = 0;
+        Player bukkit_player = Bukkit.getPlayer(target);
+        String[] tracks = {"moderators", "vip", "emerald", "diamond", "gold", "iron", "stone", "wood", "default", "operators"};
+        for (String i : tracks) {
+            if (OddJob.getInstance().getConfig().isConfigurationSection("homes." + i)) {
+                ConfigurationSection cf = OddJob.getInstance().getConfig().getConfigurationSection("homes." + i);
+                if (cf != null && bukkit_player != null && bukkit_player.hasPermission("homes." + i)) {
+                    permission = Math.max(cf.getInt("maxHomes"), permission);
+                }
+            }
+        }
+        return config + player + permission;
     }
 }
 /**

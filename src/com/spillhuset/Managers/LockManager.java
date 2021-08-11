@@ -20,6 +20,8 @@ import java.util.UUID;
 public class LockManager {
     public ItemStack lockWand = new ItemStack(Material.TRIPWIRE_HOOK);
     public ItemStack unlockWand = new ItemStack(Material.TRIPWIRE_HOOK);
+    public ItemStack addMaterialWand = new ItemStack(Material.COBWEB);
+    public ItemStack delMaterialWand = new ItemStack(Material.CACTUS);
     public ItemStack infoWand = new ItemStack(Material.MAP);
     public ItemStack skeletonKey = new ItemStack(Material.REDSTONE_TORCH);
     private final ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
@@ -33,25 +35,43 @@ public class LockManager {
         if (meta != null) {
             meta.setDisplayName(ChatColor.GREEN + "Locking tool");
             List<String> lore = new ArrayList<>();
-            lore.add("Right click a chest to lock it to you.");
+            lore.add("Right click a material to lock it to you.");
             meta.setLore(lore);
         }
         lockWand.setItemMeta(meta);
 
-        meta = lockWand.getItemMeta();
+        meta = addMaterialWand.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.GREEN + "Make MATERIAL lockable");
+            List<String> lore = new ArrayList<>();
+            lore.add("Right click a material to save it to the list.");
+            meta.setLore(lore);
+        }
+        addMaterialWand.setItemMeta(meta);
+
+        meta = delMaterialWand.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.GREEN + "Remove MATERIAL lockable");
+            List<String> lore = new ArrayList<>();
+            lore.add("Right click a material to remove it from the list.");
+            meta.setLore(lore);
+        }
+        delMaterialWand.setItemMeta(meta);
+
+        meta = unlockWand.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(ChatColor.GREEN + "Unlocking tool");
             List<String> lore = new ArrayList<>();
-            lore.add("Right click a chest of yours to unlock it.");
+            lore.add("Right click a material of yours to unlock it.");
             meta.setLore(lore);
         }
         unlockWand.setItemMeta(meta);
 
-        meta = lockWand.getItemMeta();
+        meta = infoWand.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.GREEN + "Lock info tool");
+            meta.setDisplayName(ChatColor.GREEN + "Lock INFO tool");
             List<String> lore = new ArrayList<>();
-            lore.add("Right click a chest to see who owns it.");
+            lore.add("Right click a material to see who owns it.");
             meta.setLore(lore);
         }
         infoWand.setItemMeta(meta);
@@ -60,7 +80,7 @@ public class LockManager {
         if (meta != null) {
             meta.setDisplayName(ChatColor.GOLD + "The Skeletonkey");
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.YELLOW + "This key may open any locked object.");
+            lore.add(ChatColor.YELLOW + "This key may open any locked materials.");
             meta.setLore(lore);
         }
         skeletonKey.setItemMeta(meta);
@@ -72,6 +92,25 @@ public class LockManager {
             if (uuid.equals(uniqueId)) i++;
         }
         return i;
+    }
+
+    public void addLockMaterial(UUID uniqueId) {
+        if (OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().contains(addMaterialWand)) {
+            remove(uniqueId);
+            return;
+        }
+        remove(uniqueId);
+        OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(addMaterialWand);
+        OddJob.getInstance().getMessageManager().lockToolAdd(uniqueId);
+    }
+    public void delLockMaterial(UUID uniqueId) {
+        if (OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().contains(delMaterialWand)) {
+            remove(uniqueId);
+            return;
+        }
+        remove(uniqueId);
+        OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(delMaterialWand);
+        OddJob.getInstance().getMessageManager().lockToolDel(uniqueId);
     }
 
     public void lockInfo(UUID uniqueId) {
@@ -110,6 +149,8 @@ public class LockManager {
         playerInventory.remove(lockWand);
         playerInventory.remove(unlockWand);
         playerInventory.remove(infoWand);
+        playerInventory.remove(addMaterialWand);
+        playerInventory.remove(delMaterialWand);
     }
 
     public void lock(UUID uuid, Entity entity) {
@@ -164,21 +205,6 @@ public class LockManager {
         return newKey;
     }
 
-    /*
-        public Collection<UUID> getLocking() {
-            return locking;
-        }
-
-
-        public Collection<UUID> getUnlocking() {
-            return unlocking;
-        }
-
-
-        public Collection<UUID> getLockinfo() {
-            return lockinfo;
-        }
-    */
     public List<Material> getDoors() {
         return doors;
     }
@@ -193,6 +219,17 @@ public class LockManager {
 
     public UUID getLockOwner(Entity entity) {
         return armor.get(entity.getUniqueId());
+    }
+
+    public void add(Material material) {
+        lockAble.add(material);
+        LockSQL.addMaterial(material);
+        OddJob.getInstance().log("Material "+material.name()+" added");
+    }
+    public void remove(Material material) {
+        lockAble.remove(material);
+        LockSQL.remove(material);
+        OddJob.getInstance().log("Material "+material.name()+" removed");
     }
 
     public void load() {
