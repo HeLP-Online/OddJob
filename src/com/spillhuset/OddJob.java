@@ -2,9 +2,10 @@ package com.spillhuset;
 
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.spillhuset.Commands.*;
 import com.spillhuset.Commands.Arena.ArenaCommand;
+import com.spillhuset.Commands.Auction.AuctionCommand;
 import com.spillhuset.Commands.Ban.BanCommand;
+import com.spillhuset.Commands.*;
 import com.spillhuset.Commands.Guild.GuildCommand;
 import com.spillhuset.Commands.Homes.HomesCommand;
 import com.spillhuset.Commands.Lock.LockCommand;
@@ -24,7 +25,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -51,6 +51,7 @@ public class OddJob extends JavaPlugin {
     private WorldManger worldManager;
     private WarpManager warpManager;
     private int saver;
+    private AuctionManager auctionManager;
 
     public static OddJob getInstance() {
         return instance;
@@ -61,6 +62,7 @@ public class OddJob extends JavaPlugin {
 
         messageManager = new MessageManager();
         arenaManager = new ArenaManager();
+        auctionManager = new AuctionManager();
         banManager = new BanManager();
         //chestManager = new ChestManager();
         deathManager = new DeathManager();
@@ -86,13 +88,13 @@ public class OddJob extends JavaPlugin {
             e.printStackTrace();
         }
 
+        getCommand("auction").setExecutor(new AuctionCommand());
         getCommand("currency").setExecutor(new MoneyCommand()); // SubCommand
         getCommand("guild").setExecutor(new GuildCommand()); // SubCommand
         getCommand("homes").setExecutor(new HomesCommand()); // SubCommand
         getCommand("invsee").setExecutor(new InvseeCommand());
         getCommand("locks").setExecutor(new LockCommand());
         getCommand("suicide").setExecutor(new SuicideCommand()); // Cleaned
-        //getCommand("kill").setExecutor(new KillCommand());
         getCommand("kick").setExecutor(new KickCommand());
         getCommand("ban").setExecutor(new BanCommand()); // SubCommand
         getCommand("feed").setExecutor(new FeedCommand());
@@ -280,5 +282,9 @@ public class OddJob extends JavaPlugin {
     public WorldEditPlugin getWorldEdit() {
         Plugin p = Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
         return (p instanceof WorldEditPlugin) ? (WorldEditPlugin) p : null;
+    }
+
+    public AuctionManager getAuctionManager() {
+        return auctionManager;
     }
 }

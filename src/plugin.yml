@@ -6,6 +6,10 @@ softdepend:
   - dynmap
 
 commands:
+  auction:
+    description: Auction House
+    usage: /auction ...
+    aliases: [ 'ah' ]
   locks:
     description: Locks Menu
     usage: /locks ...
@@ -14,12 +18,12 @@ commands:
     description: EconomyCommand
     usage: /currency <set|add|remove> <player> <amount>
   arena:
-    aliases: ['a']
+    aliases: [ 'a' ]
     description: Arena Menu
     permission: arena
   guild:
     description: Guild Menu
-    aliases: ['g']
+    aliases: [ 'g' ]
   homes:
     description: Homes Menu
     usage: /homes <set|del|list|tp>
@@ -81,14 +85,14 @@ commands:
     permission: gamemode
   player:
     description: Access Player settings
-    aliases: ['p']
+    aliases: [ 'p' ]
     permission: player
   warp:
     usage: /<command> <name> [password]
     description: Warp you to a specified location
-    aliases: ['w']
+    aliases: [ 'w' ]
   back:
-    usage:  /<command>
+    usage: /<command>
     description: Teleports back to origin
     permission: back
   freeze:
@@ -122,6 +126,8 @@ commands:
   deop:
     usage: /<command> <player>
 permissions:
+  auction:
+    default: true
   arena:
     default: true
     children:

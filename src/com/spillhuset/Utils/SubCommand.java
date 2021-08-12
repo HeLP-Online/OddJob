@@ -47,6 +47,12 @@ public abstract class SubCommand {
         return false;
     }
 
+    /**
+     * Checks if the sender has access/permission to perform
+     * @param sender CommandSender to check
+     * @param others Boolean for administration of other players
+     * @return Boolean if has access/permission
+     */
     public boolean can(CommandSender sender, boolean others) {
         if (!(sender instanceof Player)) {
             OddJob.getInstance().log("console = "+allowConsole());

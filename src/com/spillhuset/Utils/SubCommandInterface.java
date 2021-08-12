@@ -24,6 +24,12 @@ public abstract class SubCommandInterface {
 
     public abstract List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args);
 
+    /**
+     *
+     * @param sender CommandSender should be checked
+     * @param others boolean others...
+     * @return boolean true if access/permission
+     */
     public boolean can(CommandSender sender, boolean others) {
         if (!(sender instanceof Player)) {
             OddJob.getInstance().log("console = "+allowConsole());
