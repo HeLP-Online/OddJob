@@ -137,7 +137,6 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new EntitySpawn(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClose(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryClick(), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerBedEnter(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerBucketEmpty(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerChangesWorld(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerDeath(), this);

@@ -3,10 +3,17 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.PlayerSQL;
 import com.spillhuset.Utils.Odd.OddPlayer;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.network.chat.IChatBaseComponent;
+import net.minecraft.network.protocol.game.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.libs.org.codehaus.plexus.util.ReflectionUtils;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -15,20 +22,35 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.lang.invoke.MethodHandles;
 import java.util.*;
 
 public class PlayerManager {
+    /**
+     * UUID player | UUID guild
+     */
+    public HashMap<UUID, UUID> in = new HashMap<>();
+
     private HashMap<UUID, OddPlayer> players = new HashMap<>();
+    /**
+     * Request from UUID | Trade with UUID
+     */
     private final HashMap<UUID, UUID> requestTrade;
+    /**
+     * Requested trade from UUID | Trading with UUID
+     */
     private final HashMap<UUID, UUID> tradingPlayers;
+    /**
+     * Combat log for UUID started from LONG
+     */
     private final HashMap<UUID, Long> inCombat = new HashMap<>();
+    /**
+     * UUID timing out of combat with BukkitTask
+     */
     private final HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
     /**
      * UUID Player - UUID Guild
      */
-    public HashMap<UUID, UUID> in = new HashMap<>();
-    private final HashMap<UUID, List<UUID>> inBed = new HashMap<>();
-    private final HashMap<UUID, List<UUID>> notInBed = new HashMap<>();
 
     public PlayerManager() {
         requestTrade = new HashMap<>();
@@ -104,10 +126,8 @@ public class PlayerManager {
         }.runTaskLater(OddJob.getInstance(), 200L)); // 200 = 10s (20 ticks/s)
     }
 
-    private void setCombatTitle(String text, UUID player) {
-        /*PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + "\"}"), 40, 20, 20);
-        if (OddJob.getInstance().getPlayerManager().getPlayer(player).isOnline())
-            (((CraftPlayer) Bukkit.getPlayer(player)).getHandle()).playerConnection.sendPacket(title);*/
+    private void setCombatTitle(String text, UUID uuid) {
+
     }
 
     private void removeInCombat(UUID player) {
@@ -139,7 +159,7 @@ public class PlayerManager {
     }
 
     public void acceptTrade(Player player, ItemStack item) {
-        if (item.getType().equals(Material.REDSTONE_BLOCK)) {
+        if (item.getType().equals(Material.BARRIER)) {
             item.setType(Material.EMERALD_BLOCK);
             ItemMeta meta = item.getItemMeta();
             if (meta != null) {
@@ -147,7 +167,7 @@ public class PlayerManager {
             }
             item.setItemMeta(meta);
         } else if (item.getType().equals(Material.EMERALD_BLOCK)) {
-            item.setType(Material.REDSTONE_BLOCK);
+            item.setType(Material.BARRIER);
             ItemMeta meta = item.getItemMeta();
             if (meta != null && meta.getDisplayName().equals(player.getName())) {
                 meta.setDisplayName(null);
@@ -185,35 +205,9 @@ public class PlayerManager {
         tradingPlayers.remove(one.getUniqueId());
     }
 
-    public List<UUID> getInBed(UUID worldUUID) {
-        if (!inBed.containsKey(worldUUID)) inBed.put(worldUUID, new ArrayList<>());
-        return inBed.get(worldUUID);
-    }
-
-    public void setInBed(UUID worldUUID, UUID playerUUID) {
-        if (!inBed.containsKey(worldUUID)) inBed.put(worldUUID, new ArrayList<>());
-        inBed.get(worldUUID).add(playerUUID);
-    }
-
-    public List<UUID> getNotInBed(UUID worldUUID) {
-        if (!notInBed.containsKey(worldUUID)) notInBed.put(worldUUID, new ArrayList<>());
-        return notInBed.get(worldUUID);
-    }
-
-    public void setNotInBed(UUID worldUUID, UUID playerUUID) {
-        if (!notInBed.containsKey(worldUUID)) notInBed.put(worldUUID, new ArrayList<>());
-        notInBed.get(worldUUID).add(playerUUID);
-    }
-
-    public void sleep(UUID worldUUID) {
-        inBed.remove(worldUUID);
-        notInBed.remove(worldUUID);
-        Bukkit.getWorld(worldUUID).setTime(0L);
-    }
-
     public Inventory getTradeInventory() {
         Inventory trade = Bukkit.createInventory(null, 27, "FAIR TRADE");
-        ItemStack button = new ItemStack(Material.REDSTONE_BLOCK);
+        ItemStack button = new ItemStack(Material.BARRIER);
         ItemStack glass = new ItemStack(Material.GLASS_PANE);
 
         trade.setItem(9, glass);

@@ -26,7 +26,7 @@ public class TradeRequestCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.tp;
+        return Plugin.trade;
     }
 
     @Override
@@ -58,17 +58,18 @@ public class TradeRequestCommand extends SubCommand {
 
         Player player = (Player) sender;
 
-        if (!checkArgs(2,2,args,sender,Plugin.trade)) {
+        if (checkArgs(2,2,args,sender,getPlugin())) {
+            OddJob.getInstance().getMessageManager().sendSyntax(getPlugin(),getSyntax(),sender);
             return;
         }
 
         Player tradeWith = Bukkit.getPlayer(args[1]);
         if (tradeWith == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.trade,args[1],sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(),args[1],sender);
             return;
         }
 
-        OddJob.getInstance().getPlayerManager().getRequestTrade().put(tradeWith.getUniqueId(),player.getUniqueId());
+        OddJob.getInstance().getPlayerManager().getRequestTrade().put(player.getUniqueId(),tradeWith.getUniqueId());
         OddJob.getInstance().getMessageManager().tradeRequest(tradeWith,player);
     }
 
@@ -77,12 +78,15 @@ public class TradeRequestCommand extends SubCommand {
         List<String> list = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (sender.getName().equalsIgnoreCase(player.getName())) {
+                OddJob.getInstance().log("me");
                 continue;
             }
             if (args.length == 2 && args[0].equalsIgnoreCase(args[1])) {
+                OddJob.getInstance().log("same");
                 continue;
             }
             if (!sender.isOp() && player.isOp()) {
+                OddJob.getInstance().log("op/noop");
                 continue;
             }
             if (args.length == 1 && player.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
