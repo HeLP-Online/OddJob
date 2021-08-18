@@ -23,7 +23,7 @@ public class LockCoordsCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.lock;
+        return Plugin.locks;
     }
 
     @Override
@@ -43,11 +43,16 @@ public class LockCoordsCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "locks.coords";
+        return "locks.use";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        if (!can(sender,false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+            return;
+        }
+
         if (checkArgs(1,2,args,sender,getPlugin())) {
             return;
         }
@@ -68,13 +73,15 @@ public class LockCoordsCommand extends SubCommand {
         }
 
         List<String> list = new ArrayList<>();
-        if (OddJob.getInstance().getLockManager().getLocks() != null){
-            for(Location location : OddJob.getInstance().getLockManager().getLocks().keySet()) {
-                if (OddJob.getInstance().getLockManager().getLocks().get(location) == target) {
+        if (OddJob.getInstance().getLocksManager().getLocks() != null){
+            for(Location location : OddJob.getInstance().getLocksManager().getLocks().keySet()) {
+                if (OddJob.getInstance().getLocksManager().getLocks().get(location) == target) {
                     list.add("X="+location.getBlockX()+";Y="+location.getBlockY()+";Z="+location.getBlockZ()+";W="+location.getWorld().getName()+";");
                 }
             }
             OddJob.getInstance().getMessageManager().lockList(list,sender);
+        } else {
+            OddJob.getInstance().getMessageManager().locksNoLocks(OddJob.getInstance().getPlayerManager().getName(target),sender);
         }
     }
 

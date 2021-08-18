@@ -41,7 +41,7 @@ public class MessageManager {
             case currency -> tCurrency;
             case home -> tHome;
             case warp -> tWarp;
-            case guild -> tGuild;
+            case guilds -> tGuild;
             case player -> tPlayer;
             default -> "[*] ";
         };
@@ -124,7 +124,7 @@ public class MessageManager {
     }
 
     public void errorGuild(String string, CommandSender sender) {
-        danger(type(Plugin.guild), "Sorry, we can't find the guild: " + cValue + string, sender, false);
+        danger(type(Plugin.guilds), "Sorry, we can't find the guild: " + cValue + string, sender, false);
     }
 
     public void errorArena(String string, UUID player) {
@@ -181,6 +181,10 @@ public class MessageManager {
 
     public void insufficientFunds(CommandSender player) {
         player.sendMessage(tCurrency + cWarning + " Insufficient funds.");
+    }
+
+    public void insufficientFunds(UUID uuid, double price) {
+        warning(type(Plugin.currency), "Insufficient funds. You will need " + cValue + price + cWarning + " to do this.", uuid, false);
     }
 
     public void insufficientFunds(UUID target, CommandSender player) {
@@ -267,11 +271,11 @@ public class MessageManager {
     }
 
     public void guildNameAlreadyExsits(String string, CommandSender sender) {
-        danger(type(Plugin.guild), "A Guild with the name " + cGuild + string + cDanger + " already exists.", sender, false);
+        danger(type(Plugin.guilds), "A Guild with the name " + cGuild + string + cDanger + " already exists.", sender, false);
     }
 
     public void guildAlreadyAssociated(String string, CommandSender sender) {
-        danger(type(Plugin.guild), "You are already associated with the Guild " + cGuild + string, sender, false);
+        danger(type(Plugin.guilds), "You are already associated with the Guild " + cGuild + string, sender, false);
     }
 
 
@@ -279,160 +283,159 @@ public class MessageManager {
         Player p = (Player) sender;
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getUniqueId().equals(p.getUniqueId()))
-                success(type(Plugin.guild), "You have successfully created the Guild " + cGuild + string, sender, true);
+                success(type(Plugin.guilds), "You have successfully created the Guild " + cGuild + string, sender, true);
             else
-                warning(type(Plugin.guild), "A new Guild name " + cGuild + string + cWarning + " has been created by " + cPlayer + sender.getName(), player, false);
+                warning(type(Plugin.guilds), "A new Guild name " + cGuild + string + cWarning + " has been created by " + cPlayer + sender.getName(), player, false);
         }
     }
 
     public void guildCreateError(String string, CommandSender sender) {
-        danger(type(Plugin.guild), "Something went wrong when trying to create a Guild with the name " + cValue + string, sender, true);
+        danger(type(Plugin.guilds), "Something went wrong when trying to create a Guild with the name " + cValue + string, sender, true);
     }
 
     public void guildNotAssociated(UUID uuid) {
-        info(type(Plugin.guild), "You are not associated with any Guild yet.", uuid);
+        info(type(Plugin.guilds), "You are not associated with any Guild yet.", uuid);
     }
 
 
     public void guildLeaveSuccessful(Guild guild, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
             if (uuid.equals(member))
-                success(type(Plugin.guild), "You have successfully left the Guild " + cGuild + guild.getName(), member, true);
+                success(type(Plugin.guilds), "You have successfully left the Guild " + cGuild + guild.getName(), member, true);
             else
-                warning(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + " has left the Guild", uuid, false);
+                warning(type(Plugin.guilds), cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + " has left the Guild", uuid, false);
         }
     }
 
     public void guildDisband(UUID guild, CommandSender sender) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()) == guild) {
-                danger(type(Plugin.guild), cPlayer + sender.getName() + cDanger + " has disbanded the guild", player, false);
+                danger(type(Plugin.guilds), cPlayer + sender.getName() + cDanger + " has disbanded the guild", player, false);
             } else {
-                warning(type(Plugin.guild), "Guild " + cGuild + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild) + cWarning + " disbanded!", player, false);
+                warning(type(Plugin.guilds), "Guild " + cGuild + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild) + cWarning + " disbanded!", player, false);
             }
         }
     }
 
     public void guildNoInvitation(UUID player) {
-        warning(type(Plugin.guild), "You have no pending Guild invites.", player, false);
+        warning(type(Plugin.guilds), "You have no pending Guild invites.", player, false);
     }
 
-    public void guildListPending(String string, List<UUID> list, UUID uuid) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(type(Plugin.guild)).append(string).append("\n");
-        builder.append("---------------------\n");
+    public void guildsListPending(String name, List<UUID> list, CommandSender sender) {
+        info(type(Plugin.guilds), "There is " + cValue + list.size() + cInfo + " pending requests to join the " + cGuild + name, sender, false);
+        space(Plugin.guilds, sender);
         for (UUID pend : list) {
-            builder.append(cPlayer).append(OddJob.getInstance().getPlayerManager().getName(pend)).append("\n");
+            info(type(Plugin.guilds), "- " + cPlayer + OddJob.getInstance().getPlayerManager().getName(pend), sender, false);
         }
-        OddJob.getInstance().getPlayerManager().getPlayer(uuid).sendMessage(builder.toString());
     }
 
-    public void guildNoPending(UUID player) {
-        warning(type(Plugin.guild), "There is no pending requests to join the Guild.", player, false);
+    public void guildsNoPending(String name, UUID player) {
+        warning(type(Plugin.guilds), "There is no pending requests to join the " + cGuild + name, player, false);
     }
 
     public void guildAlreadyInvited(String string, UUID uuid) {
-        warning(type(Plugin.guild), cPlayer + string + cWarning + " is already invited to the Guild.", uuid, false);
+        warning(type(Plugin.guilds), cPlayer + string + cWarning + " is already invited to the Guild.", uuid, false);
     }
 
     public void guildAnotherInvite(String string, UUID uuid) {
-        danger(type(Plugin.guild), cPlayer + string + cDanger + " is already invited to another Guild.", uuid, false);
+        danger(type(Plugin.guilds), cPlayer + string + cDanger + " is already invited to another Guild.", uuid, false);
     }
 
     public void guildAlreadyPending(String string, UUID uuid) {
-        warning(type(Plugin.guild), cPlayer + string + cWarning + " has already requested to join the Guild.", uuid, false);
+        warning(type(Plugin.guilds), cPlayer + string + cWarning + " has already requested to join the Guild.", uuid, false);
     }
 
     public void guildAnotherPending(String string, UUID uuid) {
-        danger(type(Plugin.guild), cPlayer + string + cDanger + " has already requested to join another Guild.", uuid, false);
+        danger(type(Plugin.guilds), cPlayer + string + cDanger + " has already requested to join another Guild.", uuid, false);
     }
 
     public void guildAlreadyJoined(String string, UUID uuid) {
-        warning(type(Plugin.guild), cPlayer + string + cWarning + " is already a member of the Guild.", uuid, false);
+        warning(type(Plugin.guilds), cPlayer + string + cWarning + " is already a member of the Guild.", uuid, false);
     }
 
     public void guildAnotherJoined(String string, UUID uuid) {
-        danger(type(Plugin.guild), cPlayer + string + cDanger + " is already a member of another Guild.", uuid, false);
+        danger(type(Plugin.guilds), cPlayer + string + cDanger + " is already a member of another Guild.", uuid, false);
     }
 
     public void guildRoleNeeded(UUID uuid) {
-        warning(type(Plugin.guild), "Your role has not permission to perform this action.", uuid, false);
+        warning(type(Plugin.guilds), "Your role has not permission to perform this action.", uuid, false);
     }
 
     public void guildInvitedToGuild(Guild guild, UUID player, UUID sender) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(sender))
-                success(type(Plugin.guild), "You have successfully invited " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cSuccess + " to the Guild.", member, true);
+                success(type(Plugin.guilds), "You have successfully invited " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cSuccess + " to the Guild.", member, true);
             else
-                success(type(Plugin.guild), (cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cSuccess) + " has been invited to the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(sender), member, false);
+                success(type(Plugin.guilds), (cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cSuccess) + " has been invited to the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(sender), member, false);
         }
-        success(type(Plugin.guild), "You have been invited to the Guild " + cGuild + guild.getName(), player, false);
+        success(type(Plugin.guilds), "You have been invited to the Guild " + cGuild + guild.getName(), player, false);
     }
 
     public void guildNotInvited(String string, UUID uuid) {
-        danger(type(Plugin.guild), cValue + string + cDanger + " were never invited to the Guild", uuid, false);
+        danger(type(Plugin.guilds), cValue + string + cDanger + " were never invited to the Guild", uuid, false);
     }
 
-    public void guildUninvited(Guild guild, UUID invited, UUID uuid) {
+    public void guildsUnInvited(Guild guild, UUID invited, CommandSender sender) {
+        UUID uuid = ((Player) sender).getUniqueId();
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(uuid))
-                success(type(Plugin.guild), "You have successfully removed invitation of " + cPlayer + OddJob.getInstance().getPlayerManager().getPlayer(invited) + cSuccess + " to the Guild.", member, true);
+                success(type(Plugin.guilds), "You have successfully removed invitation of " + cPlayer + OddJob.getInstance().getPlayerManager().getPlayer(invited) + cSuccess + " to the " + cGuild + guild.getName(), member, true);
             else
-                warning(type(Plugin.guild), (cPlayer + OddJob.getInstance().getPlayerManager().getName(invited) + cWarning) + " is no longer invited to the Guild, removed by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
+                warning(type(Plugin.guilds), (cPlayer + OddJob.getInstance().getPlayerManager().getName(invited) + cWarning) + " is no longer invited to the " + cGuild + guild + cWarning + ", removed by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
         }
-        danger(type(Plugin.guild), "Your invitation to the Guild " + cGuild + guild.getName() + cDanger + " has been revoked.", invited, false);
+        danger(type(Plugin.guilds), "Your invitation to the " + cGuild + guild.getName() + cDanger + " has been revoked.", invited, false);
     }
 
     public void guildNotSame(UUID target, UUID uuid) {
-        danger(type(Plugin.guild), "You and " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cDanger + " is not in the same Guild.", uuid, false);
+        danger(type(Plugin.guilds), "You and " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cDanger + " is not in the same Guild.", uuid, false);
     }
 
     public void guildRoleHighest(UUID target, UUID uuid) {
-        warning(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has already the highest obtainable rank after GuildMaster.", uuid, false);
+        warning(type(Plugin.guilds), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has already the highest obtainable rank after GuildMaster.", uuid, false);
     }
 
     public void guildRoleHigher(UUID target, UUID uuid) {
-        warning(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has the same or higher rank than you.", uuid, false);
+        warning(type(Plugin.guilds), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has the same or higher rank than you.", uuid, false);
     }
 
     public void guildPromoted(Guild guild, UUID target, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(uuid))
-                success(type(Plugin.guild), "You have successfully promoted " + cPlayer + OddJob.getInstance().getPlayerManager().getPlayer(target) + cSuccess + " to " + guild.getMembers().get(target).name() + " in the Guild.", member, true);
+                success(type(Plugin.guilds), "You have successfully promoted " + cPlayer + OddJob.getInstance().getPlayerManager().getPlayer(target) + cSuccess + " to " + guild.getMembers().get(target).name() + " in the Guild.", member, true);
             else if (target.equals(member))
-                success(type(Plugin.guild), "You have been promoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), target, false);
+                success(type(Plugin.guilds), "You have been promoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), target, false);
             else
-                warning(type(Plugin.guild), (cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning) + " has been promoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
+                warning(type(Plugin.guilds), (cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning) + " has been promoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
         }
     }
 
     public void guildDemoted(Guild guild, UUID target, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(uuid))
-                success(type(Plugin.guild), "You have successfully demoted " + cPlayer + OddJob.getInstance().getPlayerManager().getPlayer(target) + cSuccess + " to " + guild.getMembers().get(target).name() + " in the Guild.", member, true);
+                success(type(Plugin.guilds), "You have successfully demoted " + cPlayer + OddJob.getInstance().getPlayerManager().getPlayer(target) + cSuccess + " to " + guild.getMembers().get(target).name() + " in the Guild.", member, true);
             else if (target.equals(member))
-                danger(type(Plugin.guild), "You have been demoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), target, false);
+                danger(type(Plugin.guilds), "You have been demoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), target, false);
             else
-                warning(type(Plugin.guild), (cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning) + " has been demoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
+                warning(type(Plugin.guilds), (cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning) + " has been demoted to " + guild.getMembers().get(target).name() + " in the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
         }
     }
 
     public void guildRoleLowest(UUID target, UUID uuid) {
-        warning(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has already the lowest obtainable rank.", uuid, false);
+        warning(type(Plugin.guilds), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has already the lowest obtainable rank.", uuid, false);
     }
 
     public void guildNeedMaster(UUID uuid) {
-        danger(type(Plugin.guild), "Sorry, but only the GuildMaster may transfer the role to a new Player.", uuid, false);
+        danger(type(Plugin.guilds), "Sorry, but only the GuildMaster may transfer the role to a new Player.", uuid, false);
     }
 
     public void guildAcceptPending(Guild guild, UUID target, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(uuid))
-                success(type(Plugin.guild), "You have accepted the request from " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " to join the Guild", member, true);
+                success(type(Plugin.guilds), "You have accepted the request from " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " to join the Guild", member, true);
             if (member.equals(target))
-                success(type(Plugin.guild), "Welcome to the Guild " + cGuild + guild.getName(), member, true);
+                success(type(Plugin.guilds), "Welcome to the Guild " + cGuild + guild.getName(), member, true);
             else
-                warning(type(Plugin.guild), (cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning) + "'s request to join the Guild has been accepted by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
+                warning(type(Plugin.guilds), (cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning) + "'s request to join the Guild has been accepted by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
         }
     }
 
@@ -440,52 +443,52 @@ public class MessageManager {
         Player p = (Player) sender;
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(p.getUniqueId()))
-                success(type(Plugin.guild), "You have accepted the invitation to join the " + cGuild + guild.getName(), member, true);
+                success(type(Plugin.guilds), "You have accepted the invitation to join the " + cGuild + guild.getName(), member, true);
             else
-                warning(type(Plugin.guild), cPlayer + sender.getName() + cWarning + " has accepted the invitation to join the " + cGuild + guild.getName(), member, false);
+                warning(type(Plugin.guilds), cPlayer + sender.getName() + cWarning + " has accepted the invitation to join the " + cGuild + guild.getName(), member, false);
         }
     }
 
-    public void guildJoining(Guild guild, CommandSender sender) {
+    public void guildsJoining(Guild guild, CommandSender sender) {
         Player p = (Player) sender;
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(p.getUniqueId()))
-                success(type(Plugin.guild), "Welcome to the Guild " + cGuild + guild.getName(), member, true);
+                success(type(Plugin.guilds), "Welcome to the " + cGuild + guild.getName(), member, true);
             else
-                success(type(Plugin.guild), "Please welcome " + cPlayer + sender.getName() + cSuccess + " to the " + cGuild + guild.getName(), member, false);
+                success(type(Plugin.guilds), "Please welcome " + cPlayer + sender.getName() + cSuccess + " to the " + cGuild + guild.getName(), member, false);
         }
     }
 
-    public void guildPending(Guild guild, CommandSender sender) {
+    public void guildsPending(Guild guild, CommandSender sender) {
         for (UUID member : guild.getMembers().keySet()) {
-            warning(type(Plugin.guild), cPlayer + sender.getName() + cWarning + " has requested to join the " + cGuild + guild.getName(), member, false);
+            warning(type(Plugin.guilds), cPlayer + sender.getName() + cWarning + " has requested to join the " + cGuild + guild.getName(), member, false);
         }
-        success(type(Plugin.guild), "You have sent a request to join the " + cGuild + guild.getName(), sender, true);
+        success(type(Plugin.guilds), "You have sent a request to join the " + cGuild + guild.getName(), sender, true);
     }
 
-    public void guildDenyInvite(Guild guild, UUID uuid) {
+    public void guildsDenyInvite(Guild guild, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
-            warning(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + "'s invitation to join the " + cGuild + guild.getName() + cWarning + " has been declined.", member, false);
+            warning(type(Plugin.guilds), "Invitation sent to " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cWarning + " to join the " + cGuild + guild.getName() + cWarning + " has been declined.", member, false);
         }
-        success(type(Plugin.guild), "You have declined the invitation to join the " + cGuild + guild.getName(), uuid, true);
+        success(type(Plugin.guilds), "You have declined the invitation to join the " + cGuild + guild.getName(), uuid, true);
     }
 
-    public void guildDenyRequest(Guild guild, UUID target, UUID uuid) {
+    public void guildsDenyRequest(Guild guild, UUID targetPlayer, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(uuid))
-                warning(type(Plugin.guild), "You have declined " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " request to join the Guild", member, true);
+                warning(type(Plugin.guilds), "You have declined " + cPlayer + OddJob.getInstance().getPlayerManager().getName(targetPlayer) + cWarning + " request to join the " + cGuild + guild.getName(), member, true);
             else
-                danger(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cDanger + " has denied " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + "'s request to join the Guild", member, false);
+                danger(type(Plugin.guilds), cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid) + cDanger + " has denied " + cPlayer + OddJob.getInstance().getPlayerManager().getName(targetPlayer) + "'s request to join the Guild", member, false);
         }
-        danger(type(Plugin.guild), "We are sorry to announce that your request to join " + cGuild + guild.getName() + cDanger + " has been declined.", target, false);
+        warning(type(Plugin.guilds), "We are sorry to announce that your request to join " + cGuild + guild.getName() + cWarning + " has been declined.", targetPlayer, false);
     }
 
     public void guildSetConfirm(Guild guild, String key, String value, UUID uuid) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(uuid))
-                success(type(Plugin.guild), "You have changed " + cValue + key + cSuccess + " changed to " + cValue + value + cSuccess + " for the Guild", member, false);
+                success(type(Plugin.guilds), "You have changed " + cValue + key + cSuccess + " changed to " + cValue + value + cSuccess + " for the Guild", member, false);
             else
-                warning(type(Plugin.guild), "Settings for " + cValue + key + cWarning + " changed to " + cValue + value + cWarning + " by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
+                warning(type(Plugin.guilds), "Settings for " + cValue + key + cWarning + " changed to " + cValue + value + cWarning + " by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), member, false);
         }
     }
 
@@ -496,9 +499,9 @@ public class MessageManager {
     public void guildNewMaster(Guild guild, UUID target, UUID next) {
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(next))
-                success(type(Plugin.guild), "You are the Chosen One to be the new GuildMaster since " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " left.", member, true);
+                success(type(Plugin.guilds), "You are the Chosen One to be the new GuildMaster since " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " left.", member, true);
             else
-                warning(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(next) + cWarning + " is now your new GuildMaster.", member, false);
+                warning(type(Plugin.guilds), cPlayer + OddJob.getInstance().getPlayerManager().getName(next) + cWarning + " is now your new GuildMaster.", member, false);
         }
     }
 
@@ -507,11 +510,11 @@ public class MessageManager {
         if (reason != null) r = " because " + cValue + reason;
         for (UUID member : guild.getMembers().keySet()) {
             if (member.equals(player))
-                success(type(Plugin.guild), "You have successfully kick " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " from the Guild.", member, true);
+                success(type(Plugin.guilds), "You have successfully kick " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " from the Guild.", member, true);
             else
-                warning(type(Plugin.guild), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has been kicked from the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cSuccess + r, member, false);
+                warning(type(Plugin.guilds), cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cWarning + " has been kicked from the Guild by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cSuccess + r, member, false);
         }
-        danger(type(Plugin.guild), "You have been kicked from " + cGuild + guild.getName() + cDanger + " by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cDanger + r, target, false);
+        danger(type(Plugin.guilds), "You have been kicked from " + cGuild + guild.getName() + cDanger + " by " + cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cDanger + r, target, false);
     }
 
     public void arenaSetSpawnTeleport(String s, UUID uniqueId) {
@@ -600,11 +603,11 @@ public class MessageManager {
 
 
     public void infoGuildCreated(String name, CommandSender sender) {
-        success(type(Plugin.guild), "Guild " + cGuild + name + cSuccess + " successfully created", sender, true);
+        success(type(Plugin.guilds), "Guild " + cGuild + name + cSuccess + " successfully created", sender, true);
     }
 
     public void infoGuildExists(String name, CommandSender sender) {
-        success(type(Plugin.guild), "Guild " + cGuild + name + cSuccess + " already exists", sender, false);
+        success(type(Plugin.guilds), "Guild " + cGuild + name + cSuccess + " already exists", sender, false);
     }
 
     public void errorWrongArgs(Plugin type, CommandSender sender) {
@@ -683,15 +686,15 @@ public class MessageManager {
     }
 
     public void skeleton(UUID uuid) {
-        danger(type(Plugin.lock), "Sorry, The SKELETON KEY is tooooooooo powerful!", uuid, true);
+        danger(type(Plugin.locks), "Sorry, The SKELETON KEY is tooooooooo powerful!", uuid, true);
     }
 
     public void broken(UUID uuid) {
-        warning(type(Plugin.lock), "Lock broken!", uuid, true);
+        warning(type(Plugin.locks), "Lock broken!", uuid, true);
     }
 
     public void ownedOther(UUID uuid) {
-        danger(type(Plugin.lock), "This lock is owned by someone else!", uuid, false);
+        danger(type(Plugin.locks), "This lock is owned by someone else!", uuid, false);
     }
 
     public void alreadyJailed(CommandSender sender) {
@@ -807,92 +810,93 @@ public class MessageManager {
     }
 
     public void lockKey(CommandSender sender) {
-        danger(type(Plugin.lock), "! This is a key to all your chests, keep in mind who you share it with.", sender, false);
-        info(type(Plugin.lock), "! Stolen item or lost keys will not be refunded.", sender, false);
+        danger(type(Plugin.locks), "! This is a key to all your chests, keep in mind who you share it with.", sender, false);
+        info(type(Plugin.locks), "! Stolen item or lost keys will not be refunded.", sender, false);
     }
 
     public void tpAlreadySent(String arg, CommandSender sender) {
-        danger(type(Plugin.tp), "You have already sent an request to " + cPlayer + arg, sender, false);
+        danger(type(Plugin.teleport), "You have already sent an request to " + cPlayer + arg, sender, false);
     }
 
     public void tpDenied(String name, CommandSender sender) {
-        warning(type(Plugin.tp), cPlayer + name + cWarning + " has denied your request.", sender, false);
+        warning(type(Plugin.teleport), cPlayer + name + cWarning + " has denied your request.", sender, false);
     }
 
-    public void tpRequestPlayer(String name, CommandSender sender) {
-        warning(type(Plugin.tp), cPlayer + name + cWarning + " want to be teleported to you. To accept this use '" + cValue + "/tp accept" + cWarning + "'", sender, false);
+    public void teleportRequestPlayer(Player topPlayer, CommandSender bottomPlayer) {
+        warning(type(Plugin.teleport), cPlayer + topPlayer.getName() + cWarning + " want to be teleported to you. To accept this use '" + cValue + "/teleport accept" + cWarning + "'", bottomPlayer, false);
+        success(type(Plugin.teleport), "You have requested to teleport to " + cPlayer + bottomPlayer.getName(), topPlayer, false);
     }
 
     public void tpAccepted(UUID destinationUUID, String name, UUID movingUUID, String movingPlayerName) {
-        success(type(Plugin.tp), "Your request has been accepted by " + cPlayer + name, movingUUID, false);
-        success(type(Plugin.tp), "You have accepted the request from " + cPlayer + movingPlayerName, destinationUUID, true);
+        success(type(Plugin.teleport), "Your request has been accepted by " + cPlayer + name, movingUUID, false);
+        success(type(Plugin.teleport), "You have accepted the request from " + cPlayer + movingPlayerName, destinationUUID, true);
     }
 
     public void tpNow(UUID movingUUID) {
-        success(type(Plugin.tp), "Teleporting now!", movingUUID, true);
+        success(type(Plugin.teleport), "Teleporting now!", movingUUID, true);
     }
 
     public void tpInterrupt(UUID movingUUID) {
-        danger(type(Plugin.tp), "Interrupted, in combat!", movingUUID, true);
+        danger(type(Plugin.teleport), "Interrupted, in combat!", movingUUID, true);
     }
 
     public void tpCountdown(int i, UUID movingUUID) {
-        info(type(Plugin.tp), "Teleporting in " + ChatColor.WHITE + i, movingUUID);
+        info(type(Plugin.teleport), "Teleporting in " + ChatColor.WHITE + i, movingUUID);
     }
 
     public void tpTeleporting(UUID movingUUID) {
-        success(type(Plugin.tp), "Teleporting!", movingUUID, true);
+        success(type(Plugin.teleport), "Teleporting!", movingUUID, true);
     }
 
     public void tpChanging(UUID movingUUID) {
-        warning(type(Plugin.tp), "Changing teleport location.", movingUUID, false);
+        warning(type(Plugin.teleport), "Changing teleport location.", movingUUID, false);
     }
 
-    public void tpDeny(UUID playerUUID, String player, UUID targetUUID, String target) {
-        danger(type(Plugin.tp), "Your request has been denied by " + cPlayer + player, targetUUID, false);
-        danger(type(Plugin.tp), "You have denied the request from " + cPlayer + target, playerUUID, true);
+    public void teleportDeny(UUID playerUUID, String player, UUID targetUUID, String target) {
+        danger(type(Plugin.teleport), "Your request has been denied by " + cPlayer + player, targetUUID, false);
+        warning(type(Plugin.teleport), "You have denied the request from " + cPlayer + target, playerUUID, true);
     }
 
     public void tpTimedOut(UUID uuid) {
-        danger(type(Plugin.tp), "The teleport request has timed out", uuid, false);
+        danger(type(Plugin.teleport), "The teleport request has timed out", uuid, false);
     }
 
     public void tpError(CommandSender commandSender) {
-        danger(type(Plugin.tp), "Something went wrong when trying to teleport.", commandSender, false);
+        danger(type(Plugin.teleport), "Something went wrong when trying to teleport.", commandSender, false);
     }
 
     public void tpInvalid(CommandSender commandSender) {
-        warning(type(Plugin.tp), "Invalid x, y or z", commandSender, false);
+        warning(type(Plugin.teleport), "Invalid x, y or z", commandSender, false);
     }
 
     public void tpPos(UUID uniqueId) {
-        success(type(Plugin.tp), "You have been teleported to a specific location", uniqueId, true);
+        success(type(Plugin.teleport), "You have been teleported to a specific location", uniqueId, true);
     }
 
     public void tpPlayer(String destinationName, CommandSender name) {
-        success(type(Plugin.tp), "You have been teleported to " + destinationName, name, true);
+        success(type(Plugin.teleport), "You have been teleported to " + destinationName, name, true);
     }
 
-    public void tpSpawn(CommandSender player) {
-        success(type(Plugin.tp), "You have been teleported to spawn", player, true);
+    public void teleportSpawn(CommandSender player) {
+        success(type(Plugin.teleport), "You have been teleported to spawn", player, true);
     }
 
     public void tpAllTarget(CommandSender sender) {
-        success(type(Plugin.tp), "Say hi to everyone!", sender, true);
+        success(type(Plugin.teleport), "Say hi to everyone!", sender, true);
     }
 
     public void tpAllPlayer(Player target, String sender) {
-        info(type(Plugin.tp), "We are sorry to interrupt, but " + cPlayer + sender + cSuccess + " needs your full attension.", target, false);
+        info(type(Plugin.teleport), "We are sorry to interrupt, but " + cPlayer + sender + cSuccess + " needs your full attension.", target, false);
     }
 
     public void tpPosTarget(CommandSender sender, Player player) {
-        success(type(Plugin.tp), "We 'will' successfulle teleport " + cPlayer + player.getName() + cSuccess + " to the specified location", sender, false);
-        warning(type(Plugin.tp), "You have carefully been selected to a transfer, sepcified by " + cPlayer + sender.getName(), player, false);
+        success(type(Plugin.teleport), "We 'will' successfulle teleport " + cPlayer + player.getName() + cSuccess + " to the specified location", sender, false);
+        warning(type(Plugin.teleport), "You have carefully been selected to a transfer, sepcified by " + cPlayer + sender.getName(), player, false);
     }
 
-    public void tradeRequest(Player tradeWith, Player player) {
-        success(type(Plugin.trade), "You have sent a trade request to " + cPlayer + tradeWith.getName(), player, true);
-        info(type(Plugin.trade), "You got a trade request from " + cPlayer + player.getName(), tradeWith, false);
+    public void tradeRequest(Player topPlayer, Player bottomPlayer) {
+        success(type(Plugin.trade), "You have sent a trade request to " + cPlayer + bottomPlayer.getName(), topPlayer, true);
+        info(type(Plugin.trade), "You got a trade request from " + cPlayer + topPlayer.getName(), bottomPlayer, false);
     }
 
     public void tradeNotOnline(Player player) {
@@ -904,52 +908,52 @@ public class MessageManager {
     }
 
     public void guildClaiming(int count, int max, int x, int z, Player player, String guild) {
-        success(type(Plugin.guild), "Claiming:" + cValue + count + cSuccess + "/" + cValue + max + cSuccess + " chunk X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName() + cSuccess + " to " + cGuild + guild, player, true);
+        success(type(Plugin.guilds), "Claiming:" + cValue + count + cSuccess + "/" + cValue + max + cSuccess + " chunk X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName() + cSuccess + " to " + cGuild + guild, player, true);
     }
 
     public void guildClaimed(Player player) {
-        danger(type(Plugin.guild), "Already claimed", player, false);
+        danger(type(Plugin.guilds), "Already claimed", player, false);
     }
 
     public void guildOwnedBy(String guildNameByUUID, Player player) {
-        danger(type(Plugin.guild), "This chunk is owned by " + cGuild + guildNameByUUID, player, false);
+        danger(type(Plugin.guilds), "This chunk is owned by " + cGuild + guildNameByUUID, player, false);
     }
 
     public void guildNotAssociatedGuild(Player player) {
-        danger(type(Plugin.guild), "Sorry, you are not associated with the guild who claimed this chunk", player, false);
+        danger(type(Plugin.guilds), "Sorry, you are not associated with the guild who claimed this chunk", player, false);
     }
 
     public void guildUnclaimed(int x, int z, Player player) {
-        success(type(Plugin.guild), "You have unclaimed X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName(), player, true);
+        success(type(Plugin.guilds), "You have unclaimed X:" + cValue + x + cSuccess + " Z:" + cValue + z + cSuccess + " World:" + cValue + player.getWorld().getName(), player, true);
     }
 
     public void guildNotClaimed(Player player) {
-        warning(type(Plugin.guild), "Not claimed", player, false);
+        warning(type(Plugin.guilds), "Not claimed", player, false);
     }
 
 
     public void guildChangingZone(String guildNameByUUID, Player player) {
-        warning(type(Plugin.guild), "Changing Zone auto claim to " + cGuild + guildNameByUUID, player, true);
+        warning(type(Plugin.guilds), "Changing Zone auto claim to " + cGuild + guildNameByUUID, player, true);
     }
 
     public void guildAutoOff(String guildNameByUUID, Player player) {
-        warning(type(Plugin.guild), "Turning off Zone auto claim to " + cGuild + guildNameByUUID, player, true);
+        warning(type(Plugin.guilds), "Turning off Zone auto claim to " + cGuild + guildNameByUUID, player, true);
     }
 
     public void guildAutoOn(String guildNameByUUID, Player player) {
-        warning(type(Plugin.guild), "You are now claiming zones for " + cGuild + guildNameByUUID, player, true);
+        warning(type(Plugin.guilds), "You are now claiming zones for " + cGuild + guildNameByUUID, player, true);
     }
 
     public void lockEntityDamage(String name, Player damager) {
-        warning(type(Plugin.lock), "Entity locked by " + cPlayer + name, damager, false);
+        warning(type(Plugin.locks), "Entity locked by " + cPlayer + name, damager, false);
     }
 
     public void lockEntityUnlock(Player damager) {
-        warning(type(Plugin.lock), "Entity unlocked.", damager, true);
+        warning(type(Plugin.locks), "Entity unlocked.", damager, true);
     }
 
     public void lockEntityLock(Player damager) {
-        success(type(Plugin.lock), "Entity secure!", damager, true);
+        success(type(Plugin.locks), "Entity secure!", damager, true);
     }
 
     public void tradeAborted(String name, UUID player) {
@@ -957,39 +961,39 @@ public class MessageManager {
     }
 
     public void lockBlockOwned(String block, String name, Player player) {
-        info(type(Plugin.lock), "The " + cValue + block + cInfo + " is owned by " + cPlayer + name, player, false);
+        info(type(Plugin.locks), "The " + cValue + block + cInfo + " is owned by " + cPlayer + name, player, false);
     }
 
     public void lockSomeoneElse(Player player) {
-        danger(type(Plugin.lock), "A lock is set by someone else.", player, false);
+        danger(type(Plugin.locks), "A lock is set by someone else.", player, false);
     }
 
     public void lockUnlocked(String block, Player player) {
-        warning(type(Plugin.lock), "Unlocked " + cValue + block, player, true);
+        warning(type(Plugin.locks), "Unlocked " + cValue + block, player, true);
     }
 
     public void lockSkeletonOpen(Player player) {
-        danger(type(Plugin.lock), "! Lock opened by the SkeletonKey", player, true);
+        danger(type(Plugin.locks), "! Lock opened by the SkeletonKey", player, true);
     }
 
     public void lockOwned(Player player) {
-        danger(type(Plugin.lock), "This block is locked by someone else.", player, false);
+        danger(type(Plugin.locks), "This block is locked by someone else.", player, false);
     }
 
     public void lockAlreadyBlock(Player player) {
-        warning(type(Plugin.lock), "You have already locked this.", player, false);
+        warning(type(Plugin.locks), "You have already locked this.", player, false);
     }
 
     public void lockAlreadyEntity(Player player) {
-        danger(type(Plugin.lock), "A lock is already set on this.", player, false);
+        danger(type(Plugin.locks), "A lock is already set on this.", player, false);
     }
 
     public void lockBlockLocked(String name, Player player) {
-        success(type(Plugin.lock), "Locked " + cValue + name, player, true);
+        success(type(Plugin.locks), "Locked " + cValue + name, player, true);
     }
 
-    public void lockGuild(String guildNameByUUID, Player player) {
-        warning(type(Plugin.lock), "Block is locked by the guild " + cGuild + guildNameByUUID, player, false);
+    public void locksGuild(String guildNameByUUID, Player player) {
+        warning(type(Plugin.locks), "Block is locked by the guild " + cGuild + guildNameByUUID, player, false);
     }
 
     public void spiritFoundSomeone(UUID player) {
@@ -1025,28 +1029,28 @@ public class MessageManager {
     }
 
     public void lockToolInfo(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the " + cValue + "Information tool" + cInfo + " to show the objects owner.", uniqueId);
-        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
+        info(type(Plugin.locks), "Right click with the " + cValue + "Information tool" + cInfo + " to show the objects owner.", uniqueId);
+        info(type(Plugin.locks), "Use the same command to remove the tool", uniqueId);
     }
 
     public void lockToolDel(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the " + cValue + "Remove material tool" + cInfo + " to remove it from the list.", uniqueId);
-        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
+        info(type(Plugin.locks), "Right click with the " + cValue + "Remove material tool" + cInfo + " to remove it from the list.", uniqueId);
+        info(type(Plugin.locks), "Use the same command to remove the tool", uniqueId);
     }
 
     public void lockToolAdd(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the " + cValue + "New material tool" + cInfo + " to add it to the list.", uniqueId);
-        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
+        info(type(Plugin.locks), "Right click with the " + cValue + "New material tool" + cInfo + " to add it to the list.", uniqueId);
+        info(type(Plugin.locks), "Use the same command to remove the tool", uniqueId);
     }
 
     public void lockToolLock(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the " + cValue + "Locking tool" + cInfo + " to lock the object.", uniqueId);
-        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
+        info(type(Plugin.locks), "Right click with the " + cValue + "Locking tool" + cInfo + " to lock the object.", uniqueId);
+        info(type(Plugin.locks), "Use the same command to remove the tool", uniqueId);
     }
 
     public void lockToolUnlock(UUID uniqueId) {
-        info(type(Plugin.lock), "Right click with the " + cValue + "Unlocking tool" + cInfo + " to unlock the object.", uniqueId);
-        info(type(Plugin.lock), "Use the same command to remove the tool", uniqueId);
+        info(type(Plugin.locks), "Right click with the " + cValue + "Unlocking tool" + cInfo + " to unlock the object.", uniqueId);
+        info(type(Plugin.locks), "Use the same command to remove the tool", uniqueId);
     }
 
     public void playerDenying(String name, UUID player) {
@@ -1054,15 +1058,15 @@ public class MessageManager {
     }
 
     public void lockNotCorrectPlayer(Player player) {
-        warning(type(Plugin.lock), "You don't have the correct Player-Key", player, false);
+        warning(type(Plugin.locks), "You don't have the correct Player-Key", player, false);
     }
 
     public void lockNotCorrectGuild(Player player) {
-        warning(type(Plugin.lock), "You don't have the correct Guild-Key", player, false);
+        warning(type(Plugin.locks), "You don't have the correct Guild-Key", player, false);
     }
 
     public void lockOpened(String displayName, Player player) {
-        success(type(Plugin.lock), "Lock opened with key: " + displayName, player, true);
+        success(type(Plugin.locks), "Lock opened with key: " + displayName, player, true);
     }
 
     public void errorScoreboard(CommandSender sender) {
@@ -1074,15 +1078,17 @@ public class MessageManager {
     }
 
     public void guildMenu(Guild guild, String guildNameByUUID, Role guildMemberRole, CommandSender sender) {
-        info(type(Plugin.guild), "As a " + cValue + guildMemberRole.name() + cInfo + " of " + cGuild + guildNameByUUID, sender, false);
-        info(type(Plugin.guild), "Guild is open: " + String.valueOf(guild.getOpen()), sender, false);
-        info(type(Plugin.guild), "Friendly fire activated: " + String.valueOf(guild.getFriendlyFire()), sender, false);
-        info(type(Plugin.guild), "" + cValue + guild.getChunks() + cInfo + "/" + cValue + guild.getMaxClaims(), sender, false);
-        info(type(Plugin.guild), "Players with role; " + cValue + "<player>:<role>", sender, false);
+        info(type(Plugin.guilds), "As a " + cValue + guildMemberRole.name() + cInfo + " of " + cGuild + guildNameByUUID, sender, false);
+        info(type(Plugin.guilds), "Guild is open: " + String.valueOf(guild.isOpen()), sender, false);
+        info(type(Plugin.guilds), "Friendly fire activated: " + String.valueOf(guild.getFriendlyFire()), sender, false);
+        info(type(Plugin.guilds), "Claimed chunks: " + cValue + guild.getChunks() + cInfo + "/" + cValue + guild.getMaxClaims(), sender, false);
+        info(type(Plugin.guilds), "Spawn set: " + cValue + (guild.getSpawn() != null), sender, false);
+        info(type(Plugin.guilds), "Guild Bank account: " + cCurrency + OddJob.getInstance().getCurrencyManager().get(guild.getGuildUUID(), true).get(Types.AccountType.bank), sender, false);
+        info(type(Plugin.guilds), "Players with role; " + cValue + "<player>:<role>", sender, false);
         for (UUID uuid : guild.getMembers().keySet()) {
             Role role = guild.getMembers().get(uuid);
             OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(uuid);
-            info(type(Plugin.guild), oddPlayer.getName() + ":" + role.name(), sender, false);
+            info(type(Plugin.guilds), "" + cPlayer + oddPlayer.getName() + cInfo + ":" + cValue + role.name(), sender, false);
         }
     }
 
@@ -1110,30 +1116,30 @@ public class MessageManager {
     }
 
     public void guildZoneError(String arg, Player player) {
-        danger(type(Plugin.guild), "Unknown zone " + cValue + arg, player, false);
+        danger(type(Plugin.guilds), "Unknown zone " + cValue + arg, player, false);
     }
 
     public void guildLastOne(CommandSender sender) {
-        warning(type(Plugin.guild), "You are the last one, use " + cValue + "/guild disband" + cWarning + " instead.", sender, false);
+        warning(type(Plugin.guilds), "You are the last one, use " + cValue + "/guild disband" + cWarning + " instead.", sender, false);
     }
 
     public void changeRole(Role role, UUID target, CommandSender sender) {
-        success(type(Plugin.guild), "Your role in the guild has changed to " + cValue + role.name() + cSuccess + " by " + cPlayer + sender.getName(), target, false);
-        success(type(Plugin.guild), "You have changed the role of " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " to " + cValue + role.name(), sender, false);
+        success(type(Plugin.guilds), "Your role in the guild has changed to " + cValue + role.name() + cSuccess + " by " + cPlayer + sender.getName(), target, false);
+        success(type(Plugin.guilds), "You have changed the role of " + cPlayer + OddJob.getInstance().getPlayerManager().getName(target) + cSuccess + " to " + cValue + role.name(), sender, false);
     }
 
     public void guildWelcome(Guild guild, OfflinePlayer player) {
         for (UUID uuid : guild.getMembers().keySet()) {
-            info(type(Plugin.guild), "Please welcome " + player.getName() + " to the guild", uuid);
+            info(type(Plugin.guilds), "Please welcome " + player.getName() + " to the guild", uuid);
         }
     }
 
     public void pendingList(List<UUID> pending, CommandSender sender) {
-        info(type(Plugin.guild), "There are " + pending.size() + " players requesting to join your guild.", sender, false);
-        space(Plugin.guild, sender);
+        info(type(Plugin.guilds), "There are " + pending.size() + " players requesting to join your guild.", sender, false);
+        space(Plugin.guilds, sender);
         int i = 1;
         for (UUID uuid : pending) {
-            info(type(Plugin.guild), i + ".) " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), sender, false);
+            info(type(Plugin.guilds), i + ".) " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), sender, false);
         }
     }
 
@@ -1154,10 +1160,10 @@ public class MessageManager {
     }
 
     public void lockList(List<String> list, CommandSender sender) {
-        info(type(Plugin.lock), "You have " + cValue + list.size() + cInfo + " locked objects", sender, false);
-        space(Plugin.lock, sender);
+        info(type(Plugin.locks), "You have " + cValue + list.size() + cInfo + " locked objects", sender, false);
+        space(Plugin.locks, sender);
         for (int i = 1; i <= list.size(); i++) {
-            info(type(Plugin.lock), i + "). " + list.get(i - 1), sender, false);
+            info(type(Plugin.locks), i + "). " + list.get(i - 1), sender, false);
         }
     }
 
@@ -1166,11 +1172,11 @@ public class MessageManager {
     }
 
     public void lockSkeleton(CommandSender sender) {
-        danger(type(Plugin.lock), ChatColor.YELLOW + "!!!" + cDanger + " Danger " + ChatColor.YELLOW + "!!! " + cDanger + "Unlocks all objects for you!", sender, false);
+        danger(type(Plugin.locks), ChatColor.YELLOW + "!!!" + cDanger + " Danger " + ChatColor.YELLOW + "!!! " + cDanger + "Unlocks all objects for you!", sender, false);
     }
 
     public void locksKey(CommandSender sender) {
-        success(type(Plugin.lock), "Here is your key to your locked objects, keep it safe!", sender, false);
+        success(type(Plugin.locks), "Here is your key to your locked objects, keep it safe!", sender, false);
     }
 
     public void homesChangedSuccess(String name, UUID uuid) {
@@ -1186,7 +1192,7 @@ public class MessageManager {
     }
 
     public void guildMaxClaimsReached(CommandSender sender) {
-        danger(type(Plugin.guild), "Claiming count reached maximum.", sender, false);
+        danger(type(Plugin.guilds), "Claiming count reached maximum.", sender, false);
     }
 
     public void syntaxError(Plugin plugin, String s, CommandSender sender) {
@@ -1215,7 +1221,7 @@ public class MessageManager {
 
     public void tpOffline(String name, Player player) {
         if (player != null) {
-            danger(type(Plugin.tp), "Player " + cPlayer + name + cDanger + " is no longer online", player, false);
+            danger(type(Plugin.teleport), "Player " + cPlayer + name + cDanger + " is no longer online", player, false);
         }
     }
 
@@ -1237,18 +1243,107 @@ public class MessageManager {
     }
 
     public void guildFriendlyFireDisabled(Player damage) {
-        warning(type(Plugin.guild), "Friendlyfire is disabled", damage, false);
+        warning(type(Plugin.guilds), "Friendlyfire is disabled", damage, false);
     }
 
-    public void lockMaterialAdded(String name, Player player) {
-        success(type(Plugin.lock), cValue + name + cSuccess + " added to the list of lockable materials", player, false);
+    public void locksMaterialAdded(String name, Player player) {
+        success(type(Plugin.locks), cValue + name + cSuccess + " added to the list of lockable materials", player, false);
     }
 
     public void lockMaterialRemoved(String name, Player player) {
-        success(type(Plugin.lock), cValue + name + cSuccess + " removed from the list of lockable materials", player, false);
+        success(type(Plugin.locks), cValue + name + cSuccess + " removed from the list of lockable materials", player, false);
     }
 
     public void lockMaterialAlready(String name, Player player) {
-        warning(type(Plugin.lock), cValue + name + cWarning + " already exists in the list of lockable materials", player, false);
+        warning(type(Plugin.locks), cValue + name + cWarning + " already exists in the list of lockable materials", player, false);
+    }
+
+    public void teleportNoRequest(CommandSender sender) {
+        warning(type(Plugin.teleport), "You have no awaiting requests", sender, false);
+    }
+
+    public void teleportRequestList(CommandSender sender, List<String> list) {
+        int i = 1;
+        info(type(Plugin.teleport), "There are " + cValue + list.size() + cInfo + " with teleport request", sender, false);
+        space(Plugin.teleport, sender);
+        for (String string : list) {
+            info(type(Plugin.teleport), "" + (i++) + ".) " + cPlayer + string, sender, false);
+        }
+    }
+
+    public void teleportNotOnline(UUID uuid) {
+        danger(type(Plugin.teleport), "Target teleport is no longer online", uuid, false);
+    }
+
+    public void teleportDenied(Player topPlayer, Player bottomPlayer) {
+        if (topPlayer != null)
+            warning(type(Plugin.teleport), cPlayer + bottomPlayer.getName() + cWarning + " did not accept your request", topPlayer, false);
+        if (bottomPlayer != null)
+            success(type(Plugin.teleport), "You have rejected teleport request from " + cPlayer + topPlayer.getName(), bottomPlayer, false);
+    }
+
+    public void teleportTimedOut(UUID topUUID, UUID bottomUUID) {
+        danger(type(Plugin.teleport), "Request timed out", topUUID, false);
+        danger(type(Plugin.teleport), "Request timed out", bottomUUID, false);
+    }
+
+    public void tradedTopPlayer(Player topPlayer, Player bottomPlayer, double value) {
+        success(type(Plugin.trade), "You have sent " + cValue + value + cSuccess + " to " + cPlayer + bottomPlayer.getUniqueId(), topPlayer, false);
+        success(type(Plugin.trade), "You have recived " + cValue + value + cSuccess + " from " + cPlayer + topPlayer.getName(), bottomPlayer, false);
+    }
+
+    public void tradedBottomPlayer(Player topPlayer, Player bottomPlayer, double value) {
+        success(type(Plugin.trade), "You have sent " + cValue + value + cSuccess + " to " + cPlayer + topPlayer.getUniqueId(), bottomPlayer, false);
+        success(type(Plugin.trade), "You have recived " + cValue + value + cSuccess + " from " + cPlayer + bottomPlayer.getName(), topPlayer, false);
+    }
+
+    public void locksNoLocks(String name, CommandSender sender) {
+        danger(type(Plugin.locks), cPlayer + name + cDanger + " has no locks set", sender, false);
+    }
+
+    public void locksUnlockedWithGuildKey(UUID uuid, String name) {
+        warning(type(Plugin.locks), "Opened with key to " + cGuild + name, uuid, false);
+    }
+
+    public void locksOpenedOwnLock(UUID uuid) {
+        success(type(Plugin.locks), "Opened your own lock", uuid, false);
+    }
+
+    public void locksOpenedWithPlayerKey(UUID uuid, UUID playerUUID) {
+        String name = OddJob.getInstance().getPlayerManager().getName(uuid);
+        warning(type(Plugin.locks), "Opened with key to " + cPlayer + name, playerUUID, false);
+    }
+
+    public void guildsListInvites(List<UUID> invites, CommandSender sender) {
+        info(type(Plugin.guilds), "You have " + cValue + invites.size() + cInfo + " invitations to Guilds", sender, false);
+        space(Plugin.guilds, sender);
+        for (UUID uuid : invites) {
+            info(type(Plugin.guilds), "- " + cGuild + OddJob.getInstance().getGuildManager().getGuildNameByUUID(uuid), sender, false);
+        }
+    }
+
+    public void guildsAlreadyAssociated(String guild, String player, CommandSender sender) {
+        danger(type(Plugin.guilds), "Sorry, " + cPlayer + player + cDanger + " is already associated with the " + cGuild + guild, sender, false);
+    }
+
+    public void guildsListInvitedPlayers(List<UUID> list, CommandSender sender) {
+        String name = OddJob.getInstance().getGuildManager().getGuildNameByUUID(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(((Player) sender).getUniqueId()));
+        if (list.size() == 0) {
+            warning(type(Plugin.guilds), "There are no invitation sent from the " + cGuild + name, sender, false);
+        } else if (list.size() == 1) {
+            info(type(Plugin.guilds), "There is " + cValue + list.size() + cInfo + " invitation sent from the " + cGuild + name, sender, false);
+            space(Plugin.guilds, sender);
+            info(type(Plugin.guilds), "- " + cPlayer + OddJob.getInstance().getPlayerManager().getName(list.get(0)), sender, false);
+        } else {
+            info(type(Plugin.guilds), "There are " + cValue + list.size() + cInfo + " invitation sent from the " + cGuild + name, sender, false);
+            space(Plugin.guilds, sender);
+            for (UUID uuid : list) {
+                info(type(Plugin.guilds), "- " + cPlayer + OddJob.getInstance().getPlayerManager().getName(uuid), sender, false);
+            }
+        }
+    }
+
+    public void guildsSet(String name,Guild guild, boolean value, CommandSender sender) {
+        success(type(Plugin.guilds),"Successfully "+cValue+name+cSuccess+" set to "+cValue+value+cSuccess+" for the "+cGuild+guild.getName(),sender,false);
     }
 }

@@ -13,7 +13,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class GuildSQL extends MySQLManager {
@@ -91,7 +93,7 @@ public class GuildSQL extends MySQLManager {
             Zone zone = guild.getZone();
             boolean invitedOnly = guild.getInvitedOnly();
             boolean friendlyFire = guild.getFriendlyFire();
-            boolean open = guild.getOpen();
+            boolean open = guild.isOpen();
             Role permissionInviteRole = guild.getPermissionInvite();
             Role permissionKickRole = guild.getPermissionKick();
             HashMap<UUID, Role> members = guild.getMembers();
@@ -451,4 +453,177 @@ public class GuildSQL extends MySQLManager {
         }
     }
 
+    public static void addPending(UUID guild, UUID player) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_pendings` (`player`,`uuid`) VALUES (?,?)");
+                preparedStatement.setString(1, player.toString());
+                preparedStatement.setString(2, guild.toString());
+                preparedStatement.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public static void deleteInvite(UUID guild, UUID player) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_invites` WHERE `player` = ? AND `uuid` = ?");
+                preparedStatement.setString(1, player.toString());
+                preparedStatement.setString(2, guild.toString());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public static void deletePending(UUID guild, UUID player) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("DELETE FROM `mine_guilds_pendings` WHERE `player` = ? AND `uuid` = ?");
+                preparedStatement.setString(1, player.toString());
+                preparedStatement.setString(2, guild.toString());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public static UUID getPendingGuild(UUID player) {
+        UUID pending = null;
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_pendings` WHERE `player` = ? ");
+                preparedStatement.setString(1, player.toString());
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    pending = UUID.fromString(resultSet.getString("uuid"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+        return pending;
+    }
+
+    public static List<UUID> listPendingPlayers(UUID guild) {
+        List<UUID> pending = new ArrayList<>();
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_pendings` WHERE `uuid` = ? ");
+                preparedStatement.setString(1, guild.toString());
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    pending.add(UUID.fromString(resultSet.getString("player")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+        return pending;
+    }
+
+    public static UUID getPendingPlayer(UUID guild) {
+        UUID pending = null;
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_pendings` WHERE `uuid` = ? ");
+                preparedStatement.setString(1, guild.toString());
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    pending = UUID.fromString(resultSet.getString("player"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+        return pending;
+    }
+
+    public static void addInvite(UUID player, UUID guild) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_invites` (`player`,`uuid`) VALUES (?,?)");
+                preparedStatement.setString(1, player.toString());
+                preparedStatement.setString(2, guild.toString());
+                preparedStatement.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public static UUID getInvitationGuild(UUID player) {
+        UUID pending = null;
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_invites` WHERE `player` = ? ");
+                preparedStatement.setString(1, player.toString());
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    pending = UUID.fromString(resultSet.getString("uuid"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+        return pending;
+    }
+
+    public static List<UUID> listInvitedPlayers(UUID guild) {
+        List<UUID> pending = new ArrayList<>();
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `player` FROM `mine_guilds_invites` WHERE `uuid` = ? ");
+                preparedStatement.setString(1, guild.toString());
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    pending.add(UUID.fromString(resultSet.getString("player")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+        return pending;
+    }
+
+    public static List<UUID> listInvitingGuilds(UUID playerUUID) {
+        List<UUID> pending = new ArrayList<>();
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds_invites` WHERE `player` = ? ");
+                preparedStatement.setString(1, playerUUID.toString());
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    pending.add(UUID.fromString(resultSet.getString("uuid")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close();
+        }
+        return pending;
+    }
 }

@@ -25,23 +25,33 @@ public class LockCommand extends SubCommandInterface implements CommandExecutor,
     }
 
     @Override
-    public boolean allowOp() {
-        return true;
+    public boolean denyConsole() {
+        return false;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.lock;
+        return Plugin.locks;
     }
 
     @Override
     public String getPermission() {
-        return "lock";
+        return "locks";
     }
 
     @Override
@@ -67,12 +77,14 @@ public class LockCommand extends SubCommandInterface implements CommandExecutor,
         List<String> list = new ArrayList<>();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
-            if (args[0].isEmpty()) {
-                list.add(name);
-            } else if (name.equalsIgnoreCase(args[0]) && args.length > 1) {
-                return subCommand.getTab(sender, args);
-            } else if (name.startsWith(args[0])) {
-                list.add(name);
+            if (subCommand.can(sender, false)) {
+                if (args[0].isEmpty()) {
+                    list.add(name);
+                } else if (name.equalsIgnoreCase(args[0]) && args.length > 1) {
+                    return subCommand.getTab(sender, args);
+                } else if (name.startsWith(args[0])) {
+                    list.add(name);
+                }
             }
         }
         return list;

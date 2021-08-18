@@ -60,24 +60,24 @@ public class TradeAcceptCommand extends SubCommand {
             return;
         }
 
-        Player player = (Player) sender;
+        Player bottomPlayer = (Player) sender;
 
-        Player tradeWith = Bukkit.getPlayer(args[1]);
+        Player topPlayer = Bukkit.getPlayer(args[1]);
 
-        if (tradeWith == null || !tradeWith.isOnline()) {
-            OddJob.getInstance().getMessageManager().tradeNotOnline(player);
+        if (topPlayer == null || !topPlayer.isOnline()) {
+            OddJob.getInstance().getMessageManager().tradeNotOnline(topPlayer);
             return;
         }
 
-        if (OddJob.getInstance().getPlayerManager().getRequestTrade().get(tradeWith.getUniqueId()) == player.getUniqueId()) {
-            Inventory trade = OddJob.getInstance().getPlayerManager().getTradeInventory();
-            player.openInventory(trade);
-            tradeWith.openInventory(trade);
-            OddJob.getInstance().getPlayerManager().getTradingPlayers().put(player.getUniqueId(), tradeWith.getUniqueId());
-
-            OddJob.getInstance().getPlayerManager().getRequestTrade().remove(player.getUniqueId());
+        if (OddJob.getInstance().getPlayerManager().getRequestTrade().get(topPlayer.getUniqueId()) == bottomPlayer.getUniqueId()) {
+            Inventory trade = OddJob.getInstance().getPlayerManager().getTradeInventory(topPlayer.getDisplayName(),bottomPlayer.getDisplayName());
+            OddJob.getInstance().getPlayerManager().addTrade(topPlayer.getUniqueId(),bottomPlayer.getUniqueId(),trade);
+            bottomPlayer.openInventory(trade);
+            topPlayer.openInventory(trade);
+            OddJob.getInstance().getPlayerManager().getTradingPlayers().put(topPlayer.getUniqueId(), bottomPlayer.getUniqueId());
+            OddJob.getInstance().getPlayerManager().getRequestTrade().remove(topPlayer.getUniqueId());
         } else {
-            OddJob.getInstance().getMessageManager().tradeNone(player);
+            OddJob.getInstance().getMessageManager().tradeNone(bottomPlayer);
         }
     }
 

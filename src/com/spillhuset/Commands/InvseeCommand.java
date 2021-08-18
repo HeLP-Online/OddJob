@@ -12,13 +12,25 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class InvseeCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
+
+
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
         return true;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 
@@ -49,7 +61,7 @@ public class InvseeCommand extends SubCommandInterface implements CommandExecuto
             return true;
         }
         Player player = (Player) sender;
-        if (can(sender,false)) {
+        if (can(sender, false)) {
             player.openInventory(target.getInventory());
         }
 

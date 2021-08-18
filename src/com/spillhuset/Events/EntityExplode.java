@@ -35,9 +35,9 @@ public class EntityExplode implements Listener {
             }
 
             // CHECK LOCKS
-            if (OddJob.getInstance().getLockManager().getLockable().contains(block.getType()) || OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {
+            if (OddJob.getInstance().getLocksManager().getLockable().contains(block.getType()) || OddJob.getInstance().getLocksManager().getDoors().contains(block.getType())) {
                 Location location = block.getLocation();
-                if (OddJob.getInstance().getLockManager().isLocked(location)) {
+                if (OddJob.getInstance().getLocksManager().isLocked(location)) {
                     event.setCancelled(true);
                 }
             }

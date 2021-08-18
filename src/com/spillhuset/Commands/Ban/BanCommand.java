@@ -21,13 +21,24 @@ public class BanCommand extends SubCommandInterface implements CommandExecutor, 
         subCommands.add(new BanRemoveCommand());
     }
 
+
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
         return false;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 

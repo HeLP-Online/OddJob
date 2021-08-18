@@ -25,7 +25,7 @@ public class GuildCreateCommand extends SubCommand implements GuildRole {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.guild;
+        return Plugin.guilds;
     }
 
     @Override
@@ -103,6 +103,11 @@ public class GuildCreateCommand extends SubCommand implements GuildRole {
     @Override
     public boolean needGuild() {
         return false;
+    }
+
+    @Override
+    public boolean needNoGuild() {
+        return true;
     }
 
 }

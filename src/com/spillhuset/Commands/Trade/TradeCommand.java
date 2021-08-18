@@ -13,20 +13,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TradeCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
-    private ArrayList<SubCommand> subCommands = new ArrayList<>();
+    private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
-    public TradeCommand(){
+    public TradeCommand() {
         subCommands.add(new TradeRequestCommand());
         subCommands.add(new TradeAcceptCommand());
     }
 
+
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
+        return true;
+    }
+
+    @Override
+    public boolean onlyConsole() {
         return false;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 

@@ -14,14 +14,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OpCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
+
+
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
         return false;
     }
 
     @Override
-    public boolean allowConsole() {
-        return true;
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
+        return false;
     }
 
     @Override

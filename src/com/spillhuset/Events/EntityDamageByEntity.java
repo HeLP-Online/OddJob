@@ -2,7 +2,6 @@ package com.spillhuset.Events;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Zone;
-import com.spillhuset.Utils.Guild;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -77,19 +76,19 @@ public class EntityDamageByEntity implements Listener {
             Entity entity = event.getEntity();
 
             // The armor_stand is Locked
-            if (OddJob.getInstance().getLockManager().isLocked(entity)) {
-                UUID locked = OddJob.getInstance().getLockManager().getLockOwner(entity);
+            if (OddJob.getInstance().getLocksManager().isLocked(entity)) {
+                UUID locked = OddJob.getInstance().getLocksManager().getLockOwner(entity);
 
                 // Weapon is InfoWand
-                if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().infoWand)) {
+                if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLocksManager().infoWand)) {
                     OddJob.getInstance().getMessageManager().lockEntityDamage(OddJob.getInstance().getPlayerManager().getName(locked), damager);
                     event.setCancelled(true);
                 } else
                     // Weapon is UnlockWand
-                    if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().unlockWand)) {
-                        OddJob.getInstance().getLockManager().unlock(entity);
+                    if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLocksManager().unlockWand)) {
+                        OddJob.getInstance().getLocksManager().unlock(entity);
                         OddJob.getInstance().getMessageManager().lockEntityUnlock(damager);
-                        OddJob.getInstance().getLockManager().remove(damager.getUniqueId());
+                        OddJob.getInstance().getLocksManager().remove(damager.getUniqueId());
                         event.setCancelled(true);
                     }
                     // Not your target_dummy
@@ -101,10 +100,10 @@ public class EntityDamageByEntity implements Listener {
             // Armor_stand is not locked
             else {
                 // Weapon is LockTool
-                if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLockManager().lockWand)) {
-                    OddJob.getInstance().getLockManager().lock(damager.getUniqueId(), entity);
+                if (OddJob.getInstance().getPlayerManager().getPlayer(damager.getUniqueId()).getInventory().getItemInMainHand().equals(OddJob.getInstance().getLocksManager().lockWand)) {
+                    OddJob.getInstance().getLocksManager().lock(damager.getUniqueId(), entity);
                     OddJob.getInstance().getMessageManager().lockEntityLock(damager);
-                    OddJob.getInstance().getLockManager().remove(damager.getUniqueId());
+                    OddJob.getInstance().getLocksManager().remove(damager.getUniqueId());
                     event.setCancelled(true);
                 }
             }

@@ -1,4 +1,5 @@
 package com.spillhuset.Commands.Lock;
+
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
@@ -20,12 +21,12 @@ public class LockRemoveCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.lock;
+        return Plugin.locks;
     }
 
     @Override
     public String getName() {
-        return "RemoveMaterial";
+        return "remove";
     }
 
     @Override
@@ -45,15 +46,15 @@ public class LockRemoveCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (checkArgs(1,1,args,sender,getPlugin())) {
+        if (checkArgs(1, 1, args, sender, getPlugin())) {
             return;
         }
-        if (!can(sender,false)) {
-            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return;
         }
         Player player = (Player) sender;
-        OddJob.getInstance().getLockManager().delLockMaterial(player.getUniqueId());
+        OddJob.getInstance().getLocksManager().delLockMaterial(player.getUniqueId());
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.spillhuset.Commands.Tp;
+package com.spillhuset.Commands.Teleport;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.SubCommand;
 import com.spillhuset.Utils.Enum.Plugin;
@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 
 import java.util.List;
 
-public class TpAllCommand extends SubCommand {
+public class TeleportAllCommand extends SubCommand {
     @Override
     public boolean allowConsole() {
         return false;
@@ -22,7 +22,7 @@ public class TpAllCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.tp;
+        return Plugin.teleport;
     }
 
     @Override
@@ -37,12 +37,12 @@ public class TpAllCommand extends SubCommand {
 
     @Override
     public String getSyntax() {
-        return "/tp all";
+        return "/teleport all";
     }
 
     @Override
     public String getPermission() {
-        return "tp.all";
+        return "teleport.all";
     }
 
     @Override

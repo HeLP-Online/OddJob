@@ -3,10 +3,8 @@ package com.spillhuset.Managers;
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.HomeSQL;
 import com.spillhuset.Utils.Enum.Zone;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
@@ -18,6 +16,7 @@ public class HomesManager {
 
     /**
      * Adds a given Home to the collection of a given Player
+     * Chunk must be WILD or your own guild!
      *
      * @param uuid     UUID of the Player
      * @param name     String name of the Home
@@ -26,6 +25,7 @@ public class HomesManager {
      */
     public boolean add(UUID uuid, String name, Location location) {
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(location.getChunk());
+        // Chunk is owned by a guild, you are not a member in the guild, the guild is not WILD
         if (guild != null &&
                 !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid)) &&
                 !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
@@ -38,8 +38,10 @@ public class HomesManager {
             HomeSQL.change(uuid, name, location);
             OddJob.getInstance().getMessageManager().homesChangedSuccess(name, uuid);
         } else {
-            HomeSQL.add(uuid, name, location);
-            OddJob.getInstance().getMessageManager().homesSetSuccess(name, uuid);
+            if (CostManager.cost(uuid, "homes.set")) {
+                HomeSQL.add(uuid, name, location);
+                OddJob.getInstance().getMessageManager().homesSetSuccess(name, uuid);
+            }
         }
 
         return true;
@@ -71,13 +73,9 @@ public class HomesManager {
      * Returns a String List of the Home names of a Player
      *
      * @param player UUID of the Player
-     * @return
+     * @return List of home names
      */
     public List<String> getList(UUID player) {
-        /*
-        if (homes.isEmpty()) return null;
-        return homes.get(uuid).list();*/
-
         return HomeSQL.getList(player);
     }
 
@@ -85,44 +83,41 @@ public class HomesManager {
      * Returns a List of the Homes of a Player
      *
      * @param uuid   UUID of the Player
-     * @param sender
-     * @return
+     * @param sender CommandSender
      */
     public void list(UUID uuid, CommandSender sender) {
-        OddJob.getInstance().getMessageManager().homesCount(getList(uuid),OddJob.getInstance().getPlayerManager().getName(uuid), getMaxHomes(uuid), sender,false);
+        OddJob.getInstance().getMessageManager().homesCount(getList(uuid), OddJob.getInstance().getPlayerManager().getName(uuid), getMax(uuid), sender, false);
     }
 
-    public int getMaxHomes(UUID uuid) {
-        int i = OddJob.getInstance().getConfig().getInt("default.player.maxHomes");
-        i += ConfigManager.maxHomes(uuid);
-        i += OddJob.getInstance().getPlayerManager().getMaxHomes(uuid);
-        return i;
+    /**
+     * Returns the max homes can be set by player
+     *
+     * @param uuid UUID of player
+     * @return int max homes
+     */
+    public int getMax(UUID uuid) {
+        // max homes from config -> default -> player
+        int config = OddJob.getInstance().getConfig().getInt("homes.max");
+        OddJob.getInstance().log("config: " + config);
+        // max homes from permissions -> group
+        int permission = ConfigManager.maxHomes(uuid);
+        OddJob.getInstance().log("permission: " + permission);
+        // max homes from granted -> player
+        int player = OddJob.getInstance().getPlayerManager().getMaxHomes(uuid);
+        OddJob.getInstance().log("player: " + player);
+
+        return config + permission + player;
     }
 
     public void teleport(Player player, UUID uuid, String string) {
         for (String name : getList(uuid)) {
             if (name.equalsIgnoreCase(string)) {
-                OddJob.getInstance().getMessageManager().homesTeleportSuccess(player.getUniqueId(), name);
-                OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), PlayerTeleportEvent.TeleportCause.COMMAND, !player.hasPermission("teleport.now"));
-            }
-        }
-    }
-
-    public int getMax(UUID target) {
-        int config = OddJob.getInstance().getConfig().getInt("homes.max", 5);
-        int player = OddJob.getInstance().getPlayerManager().getMaxHomes(target);
-        int permission = 0;
-        Player bukkit_player = Bukkit.getPlayer(target);
-        String[] tracks = {"moderators", "vip", "emerald", "diamond", "gold", "iron", "stone", "wood", "default", "operators"};
-        for (String i : tracks) {
-            if (OddJob.getInstance().getConfig().isConfigurationSection("homes." + i)) {
-                ConfigurationSection cf = OddJob.getInstance().getConfig().getConfigurationSection("homes." + i);
-                if (cf != null && bukkit_player != null && bukkit_player.hasPermission("homes." + i)) {
-                    permission = Math.max(cf.getInt("maxHomes"), permission);
+                if ((!player.isOp() || player.hasPermission("homes.free")) && CostManager.cost(player.getUniqueId(), "homes.teleport")) {
+                    OddJob.getInstance().getTeleportManager().teleport(player, get(uuid, name), PlayerTeleportEvent.TeleportCause.COMMAND, true);
+                    return;
                 }
             }
         }
-        return config + player + permission;
     }
 }
 /**

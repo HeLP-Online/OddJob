@@ -2,18 +2,12 @@ package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.SQL.PlayerSQL;
+import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.Odd.OddPlayer;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.network.protocol.game.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.libs.org.codehaus.plexus.util.ReflectionUtils;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -22,7 +16,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.lang.invoke.MethodHandles;
 import java.util.*;
 
 public class PlayerManager {
@@ -32,25 +25,27 @@ public class PlayerManager {
     public HashMap<UUID, UUID> in = new HashMap<>();
 
     private HashMap<UUID, OddPlayer> players = new HashMap<>();
+
     /**
-     * Request from UUID | Trade with UUID
+     * topPlayer UUID | bottomPlayer UUID
      */
     private final HashMap<UUID, UUID> requestTrade;
+
     /**
-     * Requested trade from UUID | Trading with UUID
+     * topPlayer UUID | bottomPlayer UUID
      */
     private final HashMap<UUID, UUID> tradingPlayers;
+
     /**
      * Combat log for UUID started from LONG
      */
     private final HashMap<UUID, Long> inCombat = new HashMap<>();
+
     /**
      * UUID timing out of combat with BukkitTask
      */
     private final HashMap<UUID, BukkitTask> timerCombat = new HashMap<>();
-    /**
-     * UUID Player - UUID Guild
-     */
+    private HashMap<UUID, Inventory> trades = new HashMap<>();
 
     public PlayerManager() {
         requestTrade = new HashMap<>();
@@ -150,12 +145,62 @@ public class PlayerManager {
         }.runTaskLater(OddJob.getInstance(), 40L)); // 40 = 2s (20 ticks/s)
     }
 
+    /**
+     * topPlayer | bottomPlayer
+     *
+     * @return HashMap
+     */
     public HashMap<UUID, UUID> getRequestTrade() {
         return requestTrade;
     }
 
+    /**
+     * topPlayer UUID | bottomPlayer UUID
+     */
     public HashMap<UUID, UUID> getTradingPlayers() {
         return tradingPlayers;
+    }
+
+    public void tradeBalance(ItemStack item, Player player) {
+        Inventory inventory = player.getOpenInventory().getTopInventory();
+        boolean top = tradingPlayers.containsKey(player.getUniqueId());
+        int value = 0;
+        int old = 0;
+        boolean negative = false;
+        switch (item.getType()) {
+            case GOLD_NUGGET -> value = 1;
+            case RAW_GOLD -> value = 10;
+            case RAW_GOLD_BLOCK -> value = 100;
+            case IRON_NUGGET -> {
+                value = 1;
+                negative = true;
+            }
+            case RAW_IRON -> {
+                value = 10;
+                negative = true;
+            }
+            case RAW_IRON_BLOCK -> {
+                value = 100;
+                negative = true;
+            }
+        }
+        ItemStack change = inventory.getItem((top) ? 13 : 22);
+        if (change != null) {
+            ItemMeta meta = change.getItemMeta();
+            if (meta != null) {
+                old = Integer.parseInt(meta.getDisplayName());
+                if (negative && old >= value) {
+                    old -= value;
+                } else if (!negative) {
+                    if (OddJob.getInstance().getCurrencyManager().get(player.getUniqueId()).get(Types.AccountType.pocket) >= (old + value)) {
+                        old += value;
+                    }
+                }
+                meta.setDisplayName("" + old);
+            }
+            change.setItemMeta(meta);
+        }
+        inventory.setItem((top) ? 13 : 22, change);
     }
 
     public void acceptTrade(Player player, ItemStack item) {
@@ -181,44 +226,158 @@ public class PlayerManager {
 
     private void finishTrade(Inventory inv) {
         List<HumanEntity> viewers = inv.getViewers();
-        Player one;
-        Player two;
+        Player topPlayer;
+        Player bottomPlayer;
         if (tradingPlayers.containsKey(viewers.get(0).getUniqueId())) {
-            one = (Player) viewers.get(0);
-            two = (Player) viewers.get(1);
+            topPlayer = (Player) viewers.get(0);
+            bottomPlayer = (Player) viewers.get(1);
         } else {
-            one = (Player) viewers.get(1);
-            two = (Player) viewers.get(0);
+            topPlayer = (Player) viewers.get(1);
+            bottomPlayer = (Player) viewers.get(0);
         }
 
-        one.closeInventory();
-        two.closeInventory();
+        topPlayer.closeInventory();
+        bottomPlayer.closeInventory();
 
         for (int i = 0; i < 9; i++) {
             if (inv.getItem(i) != null) {
-                two.getInventory().addItem(inv.getItem(i));
+                bottomPlayer.getInventory().addItem(inv.getItem(i));
             }
-            if (inv.getItem(i + 18) != null) {
-                one.getInventory().addItem(inv.getItem(i + 18));
+            if (inv.getItem(i + 27) != null) {
+                topPlayer.getInventory().addItem(inv.getItem(i + 27));
             }
         }
-        tradingPlayers.remove(one.getUniqueId());
+        ItemStack topItem = inv.getItem(13);
+        if (topItem != null) {
+            ItemMeta topMeta = topItem.getItemMeta();
+            if (topMeta != null) {
+                double topMoney = topMeta.hasDisplayName() ? Double.parseDouble(topMeta.getDisplayName()) : 0.0d;
+                if (topMoney > 0.0) {
+                    OddJob.getInstance().getCurrencyManager().transfer(topPlayer.getUniqueId(), bottomPlayer.getUniqueId(), topMoney);
+                    OddJob.getInstance().getMessageManager().tradedTopPlayer(topPlayer, bottomPlayer, topMoney);
+                }
+            }
+        }
+
+        ItemStack bottomItem = inv.getItem(22);
+        if (bottomItem != null) {
+            ItemMeta bottomMeta = bottomItem.getItemMeta();
+            if (bottomMeta != null) {
+                double bottomMoney = bottomMeta.hasDisplayName() ? Double.parseDouble(bottomMeta.getDisplayName()) : 0.0d;
+                if (bottomMoney > 0.0) {
+                    OddJob.getInstance().getCurrencyManager().transfer(bottomPlayer.getUniqueId(), topPlayer.getUniqueId(), bottomMoney);
+                    OddJob.getInstance().getMessageManager().tradedBottomPlayer(topPlayer, bottomPlayer, bottomMoney);
+                }
+            }
+        }
+        tradingPlayers.remove(topPlayer.getUniqueId());
     }
 
-    public Inventory getTradeInventory() {
-        Inventory trade = Bukkit.createInventory(null, 27, "FAIR TRADE");
+    public Inventory getTradeInventory(String topName, String with) {
+        Inventory trade = Bukkit.createInventory(null, 36, "FAIR TRADE");
         ItemStack button = new ItemStack(Material.BARRIER);
         ItemStack glass = new ItemStack(Material.GLASS_PANE);
+        //** One
+        ItemStack subOne = new ItemStack(Material.IRON_NUGGET);
+        ItemMeta subOneMeta = subOne.getItemMeta();
+        if (subOneMeta != null) {
+            subOneMeta.setDisplayName("-1");
+            List<String> lore = new ArrayList<>();
+            lore.add("-1 from the trade back to you pocket");
+            subOneMeta.setLore(lore);
+            subOne.setItemMeta(subOneMeta);
+        }
+        //** Ten
+        ItemStack subTen = new ItemStack(Material.RAW_IRON);
+        ItemMeta subTenMeta = subTen.getItemMeta();
+        if (subTenMeta != null) {
+            subTenMeta.setDisplayName("-10");
+            List<String> lore = new ArrayList<>();
+            lore.add("-10 from the trade back to your pocket");
+            subTenMeta.setLore(lore);
+            subTen.setItemMeta(subTenMeta);
+        }
+        //** Ten
+        ItemStack subHundred = new ItemStack(Material.RAW_IRON_BLOCK);
+        ItemMeta subHundredMeta = subHundred.getItemMeta();
+        if (subHundredMeta != null) {
+            subHundredMeta.setDisplayName("-100");
+            List<String> lore = new ArrayList<>();
+            lore.add("-100 from the trade back to the pocket");
+            subHundredMeta.setLore(lore);
+            subHundred.setItemMeta(subHundredMeta);
+        }
+        //** One
+        ItemStack addOne = new ItemStack(Material.GOLD_NUGGET);
+        ItemMeta addOneMeta = addOne.getItemMeta();
+        if (addOneMeta != null) {
+            addOneMeta.setDisplayName("+1");
+            List<String> lore = new ArrayList<>();
+            lore.add("+1 to the trade from your pocket");
+            addOneMeta.setLore(lore);
+            addOne.setItemMeta(addOneMeta);
+        }
+        //** Ten
+        ItemStack addTen = new ItemStack(Material.RAW_GOLD);
+        ItemMeta addTenMeta = addTen.getItemMeta();
+        if (addTenMeta != null) {
+            addTenMeta.setDisplayName("+10");
+            List<String> lore = new ArrayList<>();
+            lore.add("+10 to the trade from your pocket");
+            addTenMeta.setLore(lore);
+            addTen.setItemMeta(addTenMeta);
+        }
+        //** addHundred
+        ItemStack addHundred = new ItemStack(Material.RAW_GOLD_BLOCK);
+        ItemMeta addHundredMeta = addHundred.getItemMeta();
+        if (addHundredMeta != null) {
+            addHundredMeta.setDisplayName("+100");
+            List<String> lore = new ArrayList<>();
+            lore.add("+100 to the trade from your pocket");
+            addHundredMeta.setLore(lore);
+            addHundred.setItemMeta(addHundredMeta);
+        }
 
-        trade.setItem(9, glass);
-        trade.setItem(10, glass);
-        trade.setItem(11, glass);
+        //** TOP offer
+        ItemStack topOffer = new ItemStack(Material.DIAMOND_BLOCK);
+        ItemMeta topOfferMeta = topOffer.getItemMeta();
+        if (topOfferMeta != null) {
+            topOfferMeta.setDisplayName("0");
+            List<String> lore = new ArrayList<>();
+            lore.add("Offer from " + topName);
+            topOfferMeta.setLore(lore);
+            topOffer.setItemMeta(topOfferMeta);
+        }
+
+        //** BOTTOM offer
+        ItemStack bottomOffer = new ItemStack(Material.COPPER_BLOCK);
+        ItemMeta bottomOfferMeta = bottomOffer.getItemMeta();
+        if (bottomOfferMeta != null) {
+            bottomOfferMeta.setDisplayName("0");
+            List<String> lore = new ArrayList<>();
+            lore.add("Offer from " + with);
+            bottomOfferMeta.setLore(lore);
+            bottomOffer.setItemMeta(bottomOfferMeta);
+        }
+
+        trade.setItem(9, addOne);
+        trade.setItem(10, addTen);
+        trade.setItem(11, addHundred);
         trade.setItem(12, glass);
-        trade.setItem(13, glass);
+        trade.setItem(13, topOffer);
         trade.setItem(14, glass);
         trade.setItem(15, glass);
         trade.setItem(16, glass);
         trade.setItem(17, button);
+        trade.setItem(18, subOne);
+        trade.setItem(19, subTen);
+        trade.setItem(20, subHundred);
+        trade.setItem(21, glass);
+        trade.setItem(22, bottomOffer);
+        trade.setItem(23, glass);
+        trade.setItem(24, glass);
+        trade.setItem(25, glass);
+        trade.setItem(26, glass);
 
         return trade;
     }
@@ -243,6 +402,7 @@ public class PlayerManager {
 
     public void setGameMode(Player target, GameMode gm) {
         target.setGameMode(gm);
+        getOddPlayer(target.getUniqueId()).setGameMode(gm);
     }
 
     public void load() {
@@ -255,4 +415,15 @@ public class PlayerManager {
             PlayerSQL.save(oddPlayer);
         }
     }
+
+    public GameMode getGameMode(UUID uuid) {
+        return getOddPlayer(uuid).getGameMode();
+    }
+
+    public void addTrade(UUID topPlayer, UUID bottomPlayer, Inventory trade) {
+        trades.put(topPlayer, trade);
+        trades.put(bottomPlayer, trade);
+    }
+
+
 }

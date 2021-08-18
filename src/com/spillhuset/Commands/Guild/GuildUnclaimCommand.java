@@ -25,7 +25,7 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.guild;
+        return Plugin.guilds;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getPermission() {
-        return "guild";
+        return "guild.use";
     }
 
     @Override
@@ -97,5 +97,10 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
     @Override
     public boolean needGuild() {
         return true;
+    }
+
+    @Override
+    public boolean needNoGuild() {
+        return false;
     }
 }

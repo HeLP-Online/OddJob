@@ -129,8 +129,10 @@ public class LockManager {
             return;
         }
         remove(uniqueId);
-        OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(lockWand);
-        OddJob.getInstance().getMessageManager().lockToolLock(uniqueId);
+        if(CostManager.cost(uniqueId,"lock.lock")) {
+            OddJob.getInstance().getPlayerManager().getPlayer(uniqueId).getInventory().addItem(lockWand);
+            OddJob.getInstance().getMessageManager().lockToolLock(uniqueId);
+        }
     }
 
     public void lockUnlocking(UUID uniqueId) {
@@ -193,16 +195,23 @@ public class LockManager {
         return armor;
     }
 
-    public ItemStack makeKey(UUID target) {
+    public void getKey(Player player) {
         ItemStack newKey = key;
         ItemMeta meta = newKey.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "Key to " + OddJob.getInstance().getPlayerManager().getName(target));
-        List<String> list = new ArrayList<>();
-        list.add(ChatColor.YELLOW + "This key will open a lock owned by " + OddJob.getInstance().getPlayerManager().getName(target));
-        list.add(ChatColor.GRAY + target.toString());
-        meta.setLore(list);
-        newKey.setItemMeta(meta);
-        return newKey;
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.GOLD + "Key to " + player.getName());
+            List<String> list = new ArrayList<>();
+            list.add(ChatColor.YELLOW + "This key will open a lock owned by " + player.getName());
+            list.add(""+ChatColor.GRAY + player.getUniqueId());
+            meta.setLore(list);
+            newKey.setItemMeta(meta);
+        }
+
+        if (CostManager.cost(player.getUniqueId(), "locks.make")) {
+            OddJob.getInstance().getMessageManager().locksKey(player);
+            player.getInventory().addItem(newKey);
+        }
+
     }
 
     public List<Material> getDoors() {

@@ -1,4 +1,5 @@
 package com.spillhuset.Commands.Lock;
+
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
@@ -21,7 +22,7 @@ public class LockLockCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.lock;
+        return Plugin.locks;
     }
 
     @Override
@@ -41,21 +42,22 @@ public class LockLockCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "locks.lock";
+        return "locks.use";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (checkArgs(1,1,args,sender,getPlugin())) {
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return;
         }
 
-        if (can(sender,false)) {
-            Player player = (Player) sender;
-            OddJob.getInstance().getLockManager().lockLocking(player.getUniqueId());
-        } else {
-            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+        if (checkArgs(1, 1, args, sender, getPlugin())) {
+            return;
         }
+
+        Player player = (Player) sender;
+        OddJob.getInstance().getLocksManager().lockLocking(player.getUniqueId());
     }
 
     @Override

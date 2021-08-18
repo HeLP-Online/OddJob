@@ -3,6 +3,7 @@ package com.spillhuset.Utils.Odd;
 import com.spillhuset.SQL.PlayerSQL;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -18,8 +19,9 @@ public class OddPlayer {
     private ScoreBoard scoreBoard;
     private boolean denyTrade;
     private int maxHomes;
+    private GameMode gameMode;
 
-    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean denyTpa, String name, String banned, ScoreBoard scoreBoard, boolean denyTrade, int maxHomes) {
+    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean denyTpa, String name, String banned, ScoreBoard scoreBoard, boolean denyTrade, int maxHomes,GameMode gm) {
         this.uuid = uuid;
         this.blacklist = blacklist;
         this.whitelist = whitelist;
@@ -29,6 +31,7 @@ public class OddPlayer {
         this.scoreBoard = scoreBoard;
         this.denyTrade = denyTrade;
         this.maxHomes = maxHomes;
+        this.gameMode = gm;
     }
 
     public UUID getUuid() {
@@ -106,5 +109,14 @@ public class OddPlayer {
     public void setScoreboard(ScoreBoard score) {
         scoreBoard = score;
         PlayerSQL.setScoreboard(uuid, score);
+    }
+
+    public void setGameMode(GameMode gm) {
+        this.gameMode = gm;
+        PlayerSQL.setGameMode(uuid,gm);
+    }
+
+    public GameMode getGameMode() {
+        return this.gameMode;
     }
 }

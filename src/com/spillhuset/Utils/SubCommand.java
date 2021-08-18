@@ -49,29 +49,34 @@ public abstract class SubCommand {
 
     /**
      * Checks if the sender has access/permission to perform
+     *
      * @param sender CommandSender to check
      * @param others Boolean for administration of other players
      * @return Boolean if has access/permission
      */
     public boolean can(CommandSender sender, boolean others) {
         if (!(sender instanceof Player)) {
-            OddJob.getInstance().log("console = "+allowConsole());
+            OddJob.getInstance().log("console = " + allowConsole());
             return allowConsole();
         } else if (sender.isOp()) {
-            OddJob.getInstance().log("op = "+allowOp());
+            OddJob.getInstance().log("op = " + allowOp());
             return allowOp();
         } else {
             if (others) {
-                OddJob.getInstance().log("others = "+sender.hasPermission(getPermission()+".others"));
+                OddJob.getInstance().log("others = " + sender.hasPermission(getPermission() + ".others"));
                 return sender.hasPermission(getPermission() + ".others");
             } else {
-                OddJob.getInstance().log("permission = "+sender.hasPermission(getPermission()));
+                OddJob.getInstance().log("permission = " + sender.hasPermission(getPermission()));
                 return sender.hasPermission(getPermission());
             }
         }
     }
 
     public boolean needGuild() {
+        return true;
+    }
+
+    public boolean needNoGuild() {
         return true;
     }
 }

@@ -32,7 +32,7 @@ public class PlayerJoin implements Listener {
             //(((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
 
             // Remove locking items if the player has any
-            OddJob.getInstance().getLockManager().remove(uuid);
+            OddJob.getInstance().getLocksManager().remove(uuid);
 
             // Player is in a guild
             player.sendMessage("Hi " + player.getName() + ". We are using our own plugin named OddJob to manage 'homes', 'guild' and 'warp'.\nYou may find more information at our Facebook group: https://www.facebook.com/groups/help.online.minecraft/");

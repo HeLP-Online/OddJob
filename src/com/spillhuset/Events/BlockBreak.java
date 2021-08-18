@@ -1,7 +1,6 @@
 package com.spillhuset.Events;
 
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Utility;
 import com.spillhuset.Utils.Enum.Zone;
 import org.bukkit.Chunk;
@@ -26,18 +25,18 @@ public class BlockBreak implements Listener {
         Chunk chunk = location.getChunk();
 
         // CHECK DOOR LOCK
-        if (OddJob.getInstance().getLockManager().getDoors().contains(block.getType())) {
+        if (OddJob.getInstance().getLocksManager().getDoors().contains(block.getType())) {
             // Door has a Lock
             block = Utility.getLowerLeftDoor(block).getBlock();
         }
 
         // CHECK BLOCK LOCK
-        if (OddJob.getInstance().getLockManager().isLocked(block.getLocation())) {
+        if (OddJob.getInstance().getLocksManager().isLocked(block.getLocation())) {
             // Block is Locked
-            UUID uuid = OddJob.getInstance().getLockManager().getLockOwner(block.getLocation());
+            UUID uuid = OddJob.getInstance().getLocksManager().getLockOwner(block.getLocation());
             if (uuid.equals(event.getPlayer().getUniqueId())) {
                 // I own it
-                OddJob.getInstance().getLockManager().unlock(block.getLocation());
+                OddJob.getInstance().getLocksManager().unlock(block.getLocation());
                 OddJob.getInstance().getMessageManager().broken(uuid);
             } else {
                 // Someone else owns it

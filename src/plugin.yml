@@ -39,10 +39,11 @@ commands:
   #  description: Kill a given player
   #  usage: /<command> <Player>
   #  permission: essentials.kill
-  tp:
+  teleport:
     description: Teleports a player to another player
     usage: /<command> <Player> [OtherPlayer]
-    permission: tp
+    permission: teleport
+    aliases: [ 'tp' ]
   tpall:
     description: Teleports all online players to your location
     usage: /<command>

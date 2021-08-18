@@ -42,7 +42,7 @@ public class HomeListCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "homes.list";
+        return "homes.use";
     }
 
     @Override

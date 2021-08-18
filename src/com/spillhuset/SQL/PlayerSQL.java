@@ -5,6 +5,7 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import com.spillhuset.Utils.Odd.OddPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class PlayerSQL extends MySQLManager {
         ScoreBoard scoreboard = ScoreBoard.Player;
         OddPlayer oddPlayer = null;
         int maxHomes = 0;
+        GameMode gameMode = GameMode.SURVIVAL;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players` WHERE `uuid` = ?");
@@ -45,6 +47,8 @@ public class PlayerSQL extends MySQLManager {
 
                     scoreboard = ScoreBoard.valueOf(resultSet.getString("scoreboard"));
                     maxHomes = resultSet.getInt("maxhomes");
+
+                    gameMode = GameMode.valueOf(resultSet.getString("gm"));
 
                 }
             } else {
@@ -76,13 +80,15 @@ public class PlayerSQL extends MySQLManager {
 
                             scoreboard = ScoreBoard.valueOf(cs.getString("scoreboard"));
                             maxHomes = cs.getInt("maxhomes");
+
+                            gameMode = GameMode.valueOf(cs.getString("gm",GameMode.SURVIVAL.name()));
                         }
                     }
                 } else {
                     name = Objects.requireNonNull(Bukkit.getPlayer(uuid)).getName();
                 }
             }
-            oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade, maxHomes);
+            oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade, maxHomes,gameMode);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -109,7 +115,7 @@ public class PlayerSQL extends MySQLManager {
                     blacklist.deleteCharAt(blacklist.lastIndexOf(","));
                 }
 
-                preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?,`whitelist` = ?,`scoreboard` = ?,`maxhomes` = ?,`denytpa` = ?,`denytrade` = ?,`banned` =? WHERE `uuid` =?");
+                preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `blacklist` = ?,`whitelist` = ?,`scoreboard` = ?,`maxhomes` = ?,`denytpa` = ?,`denytrade` = ?,`banned` =?,`gm` =? WHERE `uuid` =?");
                 preparedStatement.setString(1, blacklist.toString());
                 preparedStatement.setString(2, whitelist.toString());
                 preparedStatement.setString(3, oddPlayer.getScoreboard().name());
@@ -117,7 +123,8 @@ public class PlayerSQL extends MySQLManager {
                 preparedStatement.setBoolean(5, oddPlayer.getDenyTpa());
                 preparedStatement.setBoolean(6, oddPlayer.getDenyTrade());
                 preparedStatement.setString(7, oddPlayer.getBanned());
-                preparedStatement.setString(8, oddPlayer.getUuid().toString());
+                preparedStatement.setString(8,oddPlayer.getGameMode().name());
+                preparedStatement.setString(9, oddPlayer.getUuid().toString());
                 preparedStatement.executeUpdate();
             } else {
                 String string = oddPlayer.getUuid().toString();
@@ -129,11 +136,26 @@ public class PlayerSQL extends MySQLManager {
                 oddjobConfig.set("players." + string + ".denytrade", oddPlayer.getDenyTrade());
                 oddjobConfig.set("players." + string + ".banned", oddPlayer.getBanned());
                 oddjobConfig.set("players." + string + ".name", oddPlayer.getName());
+                oddjobConfig.set("players."+string+".gm",oddPlayer.getGameMode());
 
                 oddjobConfig.save(oddjobConfigFile);
             }
         } catch (SQLException | IOException e) {
             e.printStackTrace();
+        } finally {
+            close();
+        }
+    }
+
+    public static void setGameMode(UUID uuid, GameMode gameMode) {
+        try {
+            connect();
+            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `gm` = ? WHERE `uuid` = ?");
+            preparedStatement.setString(1, gameMode.name());
+            preparedStatement.setString(2, uuid.toString());
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         } finally {
             close();
         }

@@ -10,9 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SubCommandInterface {
-    public abstract boolean allowOp();
+    public abstract boolean denyConsole();
 
-    public abstract boolean allowConsole();
+    public abstract boolean onlyConsole();
+
+    public abstract boolean denyOp();
+
+    public abstract boolean onlyOp();
 
     public abstract Plugin getPlugin();
 
@@ -25,27 +29,35 @@ public abstract class SubCommandInterface {
     public abstract List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args);
 
     /**
-     *
      * @param sender CommandSender should be checked
      * @param others boolean others...
-     * @return boolean true if access/permission
+     * @return boolean  if access/permission
      */
     public boolean can(CommandSender sender, boolean others) {
-        if (!(sender instanceof Player)) {
-            OddJob.getInstance().log("console = "+allowConsole());
-            return allowConsole();
-        } else if (sender.isOp()) {
-            OddJob.getInstance().log("op = "+allowOp());
-            return allowOp();
+        if (onlyConsole() && sender instanceof Player) {
+            OddJob.getInstance().log("Only console allowed");
+            return false;
+        } else if (onlyOp() && !sender.isOp()) {
+            OddJob.getInstance().log("Only op allowed");
+            return false;
+        } else if (denyConsole() && !(sender instanceof Player)) {
+            OddJob.getInstance().log("Console is denied");
+            return false;
+        } else if (denyOp() && sender.isOp()) {
+            OddJob.getInstance().log("Op is denied");
+            return false;
         } else {
             if (others) {
-                OddJob.getInstance().log("others = "+sender.hasPermission(getPermission()+".others"));
+                OddJob.getInstance().log("Has permission.others " + sender.hasPermission(getPermission() + ".others"));
                 return sender.hasPermission(getPermission() + ".others");
             } else {
-                OddJob.getInstance().log("permission = "+sender.hasPermission(getPermission()));
+                OddJob.getInstance().log("Has permission " + sender.hasPermission(getPermission()));
                 return sender.hasPermission(getPermission());
             }
         }
+    }
+    public boolean can(String permission,CommandSender sender) {
+        return sender.hasPermission(permission);
     }
 
     public boolean checkArgs(int min, int max, String[] args, CommandSender sender, Plugin type) {

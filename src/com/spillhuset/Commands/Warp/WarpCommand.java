@@ -27,12 +27,22 @@ public class WarpCommand extends SubCommandInterface implements CommandExecutor,
     }
 
     @Override
-    public boolean allowOp() {
-        return true;
+    public boolean denyConsole() {
+        return false;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 

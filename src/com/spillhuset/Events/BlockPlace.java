@@ -39,11 +39,11 @@ public class BlockPlace implements Listener {
         }
 
         // Prevent placement of the Locking tools and keys
-        if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().unlockWand) ||
-                event.getItemInHand().equals(OddJob.getInstance().getLockManager().lockWand) ||
-                event.getItemInHand().equals(OddJob.getInstance().getLockManager().infoWand) ||
-                event.getItemInHand().equals(OddJob.getInstance().getLockManager().addMaterialWand) ||
-                event.getItemInHand().equals(OddJob.getInstance().getLockManager().delMaterialWand)) {
+        if (event.getItemInHand().equals(OddJob.getInstance().getLocksManager().unlockWand) ||
+                event.getItemInHand().equals(OddJob.getInstance().getLocksManager().lockWand) ||
+                event.getItemInHand().equals(OddJob.getInstance().getLocksManager().infoWand) ||
+                event.getItemInHand().equals(OddJob.getInstance().getLocksManager().addMaterialWand) ||
+                event.getItemInHand().equals(OddJob.getInstance().getLocksManager().delMaterialWand)) {
             event.setCancelled(true);
             return;
         } else if (event.getItemInHand().getType().equals(Material.TRIPWIRE_HOOK)) {
@@ -52,7 +52,7 @@ public class BlockPlace implements Listener {
                 event.setCancelled(true);
                 return;
             }
-        } else if (event.getItemInHand().equals(OddJob.getInstance().getLockManager().skeletonKey)) {
+        } else if (event.getItemInHand().equals(OddJob.getInstance().getLocksManager().skeletonKey)) {
             OddJob.getInstance().getMessageManager().skeleton(player.getUniqueId());
             event.setCancelled(true);
             return;

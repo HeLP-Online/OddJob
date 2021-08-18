@@ -1,12 +1,17 @@
 package com.spillhuset.Commands.Guild;
 
+import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Role;
+import com.spillhuset.Utils.Guild;
 import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class GuildDenyCommand extends SubCommand implements GuildRole {
     @Override
@@ -21,7 +26,7 @@ public class GuildDenyCommand extends SubCommand implements GuildRole {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.guild;
+        return Plugin.guilds;
     }
 
     @Override
@@ -31,35 +36,100 @@ public class GuildDenyCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getDescription() {
-        return null;
+        return "Denies a request to join the guild | Denies a guild invitation";
     }
 
     @Override
     public String getSyntax() {
-        return null;
+        return "/guild deny [player|guild]";
     }
 
     @Override
     public String getPermission() {
-        return null;
+        return "guild.use";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        if (!can(sender,false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+            return;
+        }
 
+        if (checkArgs(1,2,args,sender,getPlugin())) {
+            return;
+        }
+
+        UUID uuid = ((Player) sender).getUniqueId();
+        UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid);
+
+        if (guildUUID != null) {
+            Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
+            List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendingList(guildUUID);
+            if (pending.size() == 0) {
+                OddJob.getInstance().getMessageManager().guildsNoPending(guild.getName(), uuid);
+            } else if (pending.size() == 1) {
+                if ((args.length == 2 && args[1].equalsIgnoreCase(OddJob.getInstance().getPlayerManager().getName(pending.get(0)))) || args.length == 1) {
+                    OddJob.getInstance().getGuildManager().denyRequest(sender);
+                } else {
+                    OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
+                }
+            } else {
+                OddJob.getInstance().getMessageManager().guildsListPending(guild.getName(), pending, sender);
+            }
+        } else {
+            List<UUID> invites = OddJob.getInstance().getGuildManager().getGuildInvites(uuid);
+            if (invites.size() == 0) {
+                OddJob.getInstance().getMessageManager().guildNoInvitation(uuid);
+            } else if (invites.size() == 1) {
+                if ((args.length == 2 && args[1].equalsIgnoreCase(OddJob.getInstance().getGuildManager().getGuildNameByUUID(invites.get(0)))) || args.length == 1) {
+                    OddJob.getInstance().getGuildManager().denyInvite(sender);
+                } else {
+                    OddJob.getInstance().getMessageManager().errorGuild(args[1], sender);
+                }
+            } else {
+                OddJob.getInstance().getMessageManager().guildsListInvites(invites, sender);
+            }
+        }
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
-        return null;
+        List<String>list = new ArrayList<>();
+        UUID uuid = ((Player) sender).getUniqueId();
+        UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid);
+
+
+        if(guildUUID != null) {
+            for (UUID string : OddJob.getInstance().getGuildManager().getGuildPendingList(guildUUID)) {
+                String name = OddJob.getInstance().getPlayerManager().getName(string);
+                if (args.length == 2 && args[1].isEmpty() || name.toLowerCase().startsWith(args[1].toLowerCase())) {
+                    list.add(name);
+                }
+            }
+        } else {
+            for (UUID string : OddJob.getInstance().getGuildManager().getGuildInvites(uuid)) {
+                String name = OddJob.getInstance().getGuildManager().getGuildNameByUUID(string);
+                if (args.length == 2 && args[1].isEmpty() || name.toLowerCase().startsWith(args[1].toLowerCase())) {
+                    list.add(name);
+                }
+            }
+        }
+        return list;
     }
 
     @Override
     public Role getRole() {
         return Role.all;
     }
+
     @Override
     public boolean needGuild() {
+        return false;
+    }
+
+    @Override
+    public boolean needNoGuild() {
         return false;
     }
 }

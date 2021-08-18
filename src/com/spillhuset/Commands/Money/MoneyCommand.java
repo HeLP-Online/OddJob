@@ -3,8 +3,8 @@ package com.spillhuset.Commands.Money;
 import com.spillhuset.Commands.Money.Bank.BankCommand;
 import com.spillhuset.Commands.Money.Pocket.PocketCommand;
 import com.spillhuset.OddJob;
-import com.spillhuset.Utils.Enum.Types.AccountType;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.Types.AccountType;
 import com.spillhuset.Utils.SubCommand;
 import com.spillhuset.Utils.SubCommandInterface;
 import org.bukkit.ChatColor;
@@ -26,13 +26,24 @@ public class MoneyCommand extends SubCommandInterface implements CommandExecutor
         subCommands.add(new BankCommand());
     }
 
+
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
         return false;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 

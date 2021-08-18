@@ -40,7 +40,7 @@ public class MySQLManager {
             prefix = OddJob.getInstance().getConfig().getString("sql.prefix");
             if (use) {
                 try {
-                    Class.forName("com.mysql.jdbc.Driver");
+                    Class.forName("com.mysql.cj.jdbc.Driver");
                     connection = DriverManager.getConnection("jdbc:" + type + "://" + hostname + ":" + port + "/" + database, username, password);
                 } catch (ClassNotFoundException e) {
                     OddJob.getInstance().getLogger().severe("Error: database driver not found");
@@ -308,25 +308,30 @@ public class MySQLManager {
 
     public Location getBack(UUID player) {
         Location location = null;
+        World world = null;
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_teleport` WHERE `uuid` = ?");
                 preparedStatement.setString(1, player.toString());
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
-                    location = new Location(Bukkit.getWorld(UUID.fromString(resultSet.getString("world"))),
+                    world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
+                    location = new Location(world,
                             resultSet.getDouble("x"), resultSet.getDouble("y"), resultSet.getDouble("z"),
                             resultSet.getFloat("yaw"), resultSet.getFloat("pitch"));
                 }
             } else {
                 if (oddjobConfig.get("players.teleport." + player.toString()) != null) {
-                    location = new Location(
-                            Bukkit.getWorld(UUID.fromString(oddjobConfig.getString("players.teleport." + player.toString() + ".world"))),
-                            oddjobConfig.getDouble("players.teleport." + player.toString() + ".x"),
-                            oddjobConfig.getDouble("players.teleport." + player.toString() + ".y"),
-                            oddjobConfig.getDouble("players.teleport." + player.toString() + ".z"),
-                            Float.parseFloat(oddjobConfig.getString("players.teleport." + player.toString() + ".yaw")),
-                            Float.parseFloat(oddjobConfig.getString("players.teleport." + player.toString() + ".pitch")));
+                    world = Bukkit.getWorld(UUID.fromString(oddjobConfig.getString("players.teleport." + player.toString() + ".world")));
+                    if (world != null) {
+                        location = new Location(
+                                world,
+                                oddjobConfig.getDouble("players.teleport." + player.toString() + ".x"),
+                                oddjobConfig.getDouble("players.teleport." + player.toString() + ".y"),
+                                oddjobConfig.getDouble("players.teleport." + player.toString() + ".z"),
+                                oddjobConfig.getInt("players.teleport." + player.toString() + ".yaw"),
+                                oddjobConfig.getInt("players.teleport." + player.toString() + ".pitch"));
+                    }
                 }
             }
         } catch (SQLException ex) {
@@ -338,92 +343,26 @@ public class MySQLManager {
     }
 
     public void setPlayerInJail(UUID playerUUID, UUID worldUUID) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("INSERT INTO `mine_players_jailed` (`world`,`uuid`,`caught`,`free`) VALUES (?,?,UNIX_TIMESTAMP(),?)");
-            preparedStatement.setString(1, worldUUID.toString());
-            preparedStatement.setString(2, playerUUID.toString());
-            preparedStatement.setInt(3, Math.toIntExact((System.currentTimeMillis() / 1000)));
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-        } finally {
-            close();
-        }
+
     }
 
     public void deletePlayerJail(UUID player) {
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("DELETE FROM `mine_players_jailed` WHERE `uuid` = ? ");
-            preparedStatement.setString(1, player.toString());
-            preparedStatement.execute();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
+
     }
 
     public World playerInJail(UUID player) {
-        World world = null;
-        try {
-            if(connect()) {
-                preparedStatement = connection.prepareStatement("SELECT `world` FROM `mine_players_jailed` WHERE `uuid` = ?");
-                preparedStatement.setString(1, player.toString());
-                resultSet = preparedStatement.executeQuery();
 
-                if (resultSet.next()) {
-                    world = Bukkit.getWorld(UUID.fromString(resultSet.getString("world")));
-                    OddJob.getInstance().getMessageManager().console(resultSet.getString("world"));
-                }
-            }else {
-                if (oddjobConfig.getConfigurationSection("players_jailed") != null) {
-                    OddJob.getInstance().log("");
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return world;
+        return null;
     }
 
     public void setJail(UUID world, String name, Location location) {
-        boolean ret = false;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_worlds` SET `mine_jail` = ? WHERE `uuid` = ?");
-            preparedStatement.setString(1, Utility.serializeLoc(location));
-            preparedStatement.setString(2, world.toString());
-            preparedStatement.executeUpdate();
-            ret = true;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
+
 
     }
 
     public Location getJail(UUID world, String name) {
-        Location location = null;
-        try {
-            connect();
-            preparedStatement = connection.prepareStatement("SELECT `mine_jail` FROM `mine_worlds` WHERE `uuid` = ?");
-            preparedStatement.setString(1, world.toString());
-            resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                String s = resultSet.getString("jail_" + name);
-                location = Utility.deserializeLoc(s);
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } finally {
-            close();
-        }
-        return location;
+        return null;
     }
 
     public void updateWorld(World world) {

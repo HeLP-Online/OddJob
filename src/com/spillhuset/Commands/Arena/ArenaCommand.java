@@ -21,14 +21,25 @@ public class ArenaCommand extends SubCommandInterface implements CommandExecutor
         subCommands.add(new ArenaListCommand());
     }
 
+
     @Override
-    public boolean allowOp() {
-        return true;
+    public boolean denyConsole() {
+        return false;
     }
 
     @Override
-    public boolean allowConsole() {
-        return true;
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
+        return false;
     }
 
     @Override

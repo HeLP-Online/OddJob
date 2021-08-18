@@ -43,7 +43,7 @@ public class HomeDelCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "homes.del";
+        return "homes.use";
     }
 
     @Override

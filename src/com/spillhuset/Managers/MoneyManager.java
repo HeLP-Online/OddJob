@@ -40,16 +40,15 @@ public class MoneyManager {
     }
 
     /**
-     *
-     * @param uuid UUID of target account
-     * @param value Double Transaction value
-     * @param negative Boolean value can be negative
-     * @param type Type of transaction
+     * @param uuid        UUID of target account
+     * @param value       Double Transaction value
+     * @param canNegative Boolean value can be negative
+     * @param type        Type of transaction
      * @return Boolean if success
      */
-    public boolean subtract(UUID uuid, double value, boolean negative, Types.AccountType type) {
+    public boolean subtract(UUID uuid, double value, boolean canNegative, Types.AccountType type) {
         // Check if negative value is ok?
-        if (!negative || get(uuid).get(type) > value) {
+        if (!canNegative || get(uuid).get(type) > value) {
             // Set amount
             set(uuid, get(uuid).get(type) - value, type);
             return true;
@@ -58,7 +57,6 @@ public class MoneyManager {
     }
 
     /**
-     *
      * @param name String of transaction
      * @return Double value
      */
@@ -77,10 +75,9 @@ public class MoneyManager {
     }
 
     /**
-     *
-     * @param uuid UUID of target account
+     * @param uuid  UUID of target account
      * @param value Double Transaction value
-     * @param type Type of transaction
+     * @param type  Type of transaction
      */
     public void add(UUID uuid, double value, Types.AccountType type) {
         set(uuid, get(uuid).get(type) + value, type);
@@ -96,5 +93,10 @@ public class MoneyManager {
 
     public Account get(UUID uuid) {
         return accounts.get(uuid);
+    }
+
+    public void transfer(UUID from, UUID to, double value) {
+        subtract(from, value, true, Types.AccountType.pocket);
+        add(to, value, Types.AccountType.pocket);
     }
 }

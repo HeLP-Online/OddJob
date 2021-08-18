@@ -2,7 +2,6 @@ package com.spillhuset.Commands.Lock;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
-import com.spillhuset.Utils.Enum.Types;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -22,7 +21,7 @@ public class LockMakeCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.lock;
+        return Plugin.locks;
     }
 
     @Override
@@ -42,31 +41,21 @@ public class LockMakeCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "locks.make";
+        return "locks.use";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (checkArgs(1, 2, args, sender, getPlugin())) {
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return;
         }
-        Player player = (Player) sender;
+        if (checkArgs(1, 1, args, sender, getPlugin())) {
+            return;
+        }
 
-        if (args.length == 2 && args[1].equalsIgnoreCase("skeleton") && can(sender, true)) {
-            player.getInventory().addItem(OddJob.getInstance().getLockManager().skeletonKey);
-            OddJob.getInstance().getMessageManager().lockSkeleton(sender);
-            return;
-        } else {
-            double cost = OddJob.getInstance().getConfig().getDouble("default.lock.make", 100d);
-            if (OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId()
-                    , cost, player.hasPermission("currency.negative"), Types.AccountType.pocket)) {
-                OddJob.getInstance().getMessageManager().locksKey(sender);
-            } else {
-                OddJob.getInstance().getMessageManager().insufficientFunds(sender);
-                return;
-            }
-        }
-        player.getInventory().addItem(OddJob.getInstance().getLockManager().makeKey(player.getUniqueId()));
+        Player player = (Player) sender;
+        OddJob.getInstance().getLocksManager().getKey(player);
     }
 
     @Override

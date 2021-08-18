@@ -4,6 +4,7 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Role;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -37,9 +38,9 @@ public class ConfigManager {
         config.addDefault("arena.use-permission", true);
         config.addDefault("arena.broadcast-win", true);
 
-        config.addDefault("currency.initial.pocket",200D);
-        config.addDefault("currency.initial.bank",200D);
-        config.addDefault("currency.initial.guild",200D);
+        config.addDefault("currency.initial.pocket", 200D);
+        config.addDefault("currency.initial.bank", 200D);
+        config.addDefault("currency.initial.guild", 200D);
 
         config.addDefault("sql.type", "mysql");
         config.addDefault("sql.prefix", "mine_");
@@ -96,21 +97,28 @@ public class ConfigManager {
     public static double getCurrencyInitialGuild() {
         return config.getDouble("currency.initial.guild", 200D);
     }
+
     public static double getCurrencyInitialBank() {
         return config.getDouble("currency.initial.bank", 200D);
     }
+
     public static double getCurrencyInitialPocket() {
         return config.getDouble("currency.initial.pocket", 200D);
     }
 
     public static int maxHomes(UUID uuid) {
-        for (String permission : permissions) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player == null) return 0;
-            if (OddJob.getInstance().getPlayerManager().getPlayer(uuid).hasPermission("homes." + permission)) {
-                return config.getInt("homes." + permission + ".maxHomes");
+        int max = 0;
+
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) {
+            return 0;
+        } else {
+            for (String permission : permissions) {
+                if (player.hasPermission("homes." + permission)) {
+                    max = Integer.max(config.getInt("homes." + permission + ".maxHomes",0),max);
+                }
             }
         }
-        return 0;
+        return max;
     }
 }

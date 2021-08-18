@@ -26,14 +26,25 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
         subCommands.add(new HomeListCommand());
     }
 
+
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
         return true;
     }
 
     @Override
-    public boolean allowConsole() {
-        return true;
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
+        return false;
     }
 
     @Override
@@ -72,7 +83,7 @@ public class HomesCommand extends SubCommandInterface implements CommandExecutor
                 OddJob.getInstance().getMessageManager().homesNotSet(sender);
                 return true;
             }
-            OddJob.getInstance().getMessageManager().homesCount(test, sender.getName(), OddJob.getInstance().getHomesManager().getMaxHomes(target), sender, true);
+            OddJob.getInstance().getMessageManager().homesCount(test, sender.getName(), OddJob.getInstance().getHomesManager().getMax(target), sender, true);
             return true;
         }
 

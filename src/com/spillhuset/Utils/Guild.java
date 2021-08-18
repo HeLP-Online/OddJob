@@ -3,11 +3,13 @@ package com.spillhuset.Utils;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
+import org.bukkit.Location;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class Guild {
+    private Location spawn;
     String name;
     Zone zone;
     UUID guildUUID;
@@ -139,7 +141,7 @@ public class Guild {
         this.open = open;
     }
 
-    public boolean getOpen() {
+    public boolean isOpen() {
         return this.open;
     }
 
@@ -151,5 +153,7 @@ public class Guild {
         return maxClaims + (members.size() * 5);
     }
 
-
+    public Location getSpawn() {
+        return spawn;
+    }
 }

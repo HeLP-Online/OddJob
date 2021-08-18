@@ -22,7 +22,7 @@ public class LockUnlockCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.lock;
+        return Plugin.locks;
     }
 
     @Override
@@ -42,21 +42,20 @@ public class LockUnlockCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "locks.unlock";
+        return "locks.use";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
+        }
         if (checkArgs(1, 1, args, sender, getPlugin())) {
             return;
         }
 
-        if (can(sender,false)) {
-            Player player = (Player) sender;
-            OddJob.getInstance().getLockManager().lockUnlocking(player.getUniqueId());
-        } else {
-            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
-        }
+        Player player = (Player) sender;
+        OddJob.getInstance().getLocksManager().lockUnlocking(player.getUniqueId());
     }
 
     @Override

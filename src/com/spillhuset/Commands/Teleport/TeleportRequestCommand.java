@@ -1,4 +1,4 @@
-package com.spillhuset.Commands.Tp;
+package com.spillhuset.Commands.Teleport;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class TpRequestCommand extends SubCommand {
+public class TeleportRequestCommand extends SubCommand {
     @Override
     public boolean allowConsole() {
         return false;
@@ -25,7 +25,7 @@ public class TpRequestCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.tp;
+        return Plugin.teleport;
     }
 
     @Override
@@ -40,12 +40,12 @@ public class TpRequestCommand extends SubCommand {
 
     @Override
     public String getSyntax() {
-        return "/tp request <player>";
+        return "/teleport request <player>";
     }
 
     @Override
     public String getPermission() {
-        return "tp";
+        return "teleport";
     }
 
     @Override
@@ -59,43 +59,42 @@ public class TpRequestCommand extends SubCommand {
             return;
         }
 
-        Player player = (Player) sender;
+        Player topPlayer = (Player) sender;
 
         // Find player
-        Player destinationPlayer = Bukkit.getPlayer(args[1]);
-        if (destinationPlayer == null) {
+        Player bottomPlayer = Bukkit.getPlayer(args[1]);
+        if (bottomPlayer == null) {
             OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
             return;
         }
 
-        UUID destinationUUID = player.getUniqueId();
-        OddPlayer destinationOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(destinationUUID);
+        UUID bottomUUID = bottomPlayer.getUniqueId();
+        OddPlayer bottomOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(bottomUUID);
 
-        if (!destinationPlayer.isOnline()) {
+        if (!bottomPlayer.isOnline()) {
             OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
             return;
         }
         // Check: Blacklist Whitelist DenyTPA
-        else if ((destinationOddPlayer.getBlacklist().contains(player.getUniqueId()) || destinationOddPlayer.getDenyTpa()) && (destinationOddPlayer.getDenyTpa() && !destinationOddPlayer.getWhitelist().contains(player.getUniqueId()))) {
+        else if ((bottomOddPlayer.getBlacklist().contains(topPlayer.getUniqueId()) || bottomOddPlayer.getDenyTpa()) && (bottomOddPlayer.getDenyTpa() && !bottomOddPlayer.getWhitelist().contains(topPlayer.getUniqueId()))) {
             OddJob.getInstance().getMessageManager().tpDenied(args[1], sender);
             return;
         }
 
         // Check Request queue
-        if (OddJob.getInstance().getTeleportManager().hasRequest(player.getUniqueId())) {
-            OddJob.getInstance().getMessageManager().tpAlreadySent(destinationOddPlayer.getName(), sender);
+        if (OddJob.getInstance().getTeleportManager().hasRequest(topPlayer.getUniqueId())) {
+            OddJob.getInstance().getMessageManager().tpAlreadySent(bottomOddPlayer.getName(), sender);
             return;
         }
-        if (OddJob.getInstance().getTeleportManager().request(player.getUniqueId(), destinationUUID)) {
-            OddJob.getInstance().getMessageManager().tpRequestPlayer(destinationPlayer.getName(), sender);
-        }
+        OddJob.getInstance().getTeleportManager().addRequest(topPlayer.getUniqueId(), bottomUUID);
+        OddJob.getInstance().getMessageManager().teleportRequestPlayer(topPlayer, bottomPlayer);
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!player.isOp() || sender.hasPermission("tp.op")) {
+            if ((!player.isOp() || sender.hasPermission("teleport.op")) && (sender != player)) {
                 if (args[1].isEmpty() || player.getName().startsWith(args[1])) {
                     list.add(player.getName());
                 }

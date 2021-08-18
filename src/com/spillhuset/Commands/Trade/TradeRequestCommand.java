@@ -4,11 +4,8 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,45 +48,37 @@ public class TradeRequestCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!can(sender,false)) {
-            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return;
         }
 
-        Player player = (Player) sender;
+        Player topPlayer = (Player) sender;
 
-        if (checkArgs(2,2,args,sender,getPlugin())) {
-            OddJob.getInstance().getMessageManager().sendSyntax(getPlugin(),getSyntax(),sender);
+        if (checkArgs(2, 2, args, sender, getPlugin())) {
+            OddJob.getInstance().getMessageManager().sendSyntax(getPlugin(), getSyntax(), sender);
             return;
         }
 
-        Player tradeWith = Bukkit.getPlayer(args[1]);
-        if (tradeWith == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(),args[1],sender);
+        Player bottomPlayer = Bukkit.getPlayer(args[1]);
+        if (bottomPlayer == null) {
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
             return;
         }
 
-        OddJob.getInstance().getPlayerManager().getRequestTrade().put(player.getUniqueId(),tradeWith.getUniqueId());
-        OddJob.getInstance().getMessageManager().tradeRequest(tradeWith,player);
+        OddJob.getInstance().getPlayerManager().getRequestTrade().put(topPlayer.getUniqueId(), bottomPlayer.getUniqueId());
+        OddJob.getInstance().getMessageManager().tradeRequest(topPlayer, bottomPlayer);
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (sender.getName().equalsIgnoreCase(player.getName())) {
+            if (((Player)sender).getUniqueId().equals(player.getUniqueId())) {
                 OddJob.getInstance().log("me");
-                continue;
-            }
-            if (args.length == 2 && args[0].equalsIgnoreCase(args[1])) {
-                OddJob.getInstance().log("same");
-                continue;
-            }
-            if (!sender.isOp() && player.isOp()) {
+            } else if (!sender.isOp() && player.isOp()) {
                 OddJob.getInstance().log("op/noop");
-                continue;
-            }
-            if (args.length == 1 && player.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+            } else if (args.length == 2 && player.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
                 list.add(player.getName());
             }
         }

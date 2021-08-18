@@ -40,18 +40,6 @@ public class GuildManager {
      */
     private HashMap<Chunk, UUID> chunks = new HashMap<>();    // Chunk        | GuildUUID
 
-    /**
-     * List of Players with a pending invitation to a Guild
-     * <p>
-     * HashMap<UUID,UUID> Player , Guild
-     */
-    private HashMap<UUID, UUID> guildPending = new HashMap<>();   // PlayerUUID   | GuildUUID
-
-    /**
-     * List of Players UUID invited to a Guild UUID
-     */
-    private HashMap<UUID, UUID> guildInvite = new HashMap<>();    // PlayerUUID   | GuildUUID
-
     public GuildManager() {
         dynmapInit();
     }
@@ -95,12 +83,10 @@ public class GuildManager {
             create("JailZone", Zone.JAIL, false, false);
             create("WarZone", Zone.WAR, false, false);
             create("ArenaZone", Zone.ARENA, false, false);
-            create("QuestZone", Zone.QUEST,false,false);
+            create("QuestZone", Zone.QUEST, false, false);
             saveGuilds();
             loadGuilds();
         }
-        guildPending = GuildSQL.loadGuildsPending();
-        guildInvite = GuildSQL.loadGuildsInvites();
     }
 
     /**
@@ -109,7 +95,7 @@ public class GuildManager {
     public void loadChunks() {
         chunks.clear();
         chunks = GuildSQL.loadChunks();
-        OddJob.getInstance().log("Loaded Chunks: "+chunks.size());
+        OddJob.getInstance().log("Loaded Chunks: " + chunks.size());
         if (chunks.size() >= 1) {
             clearDynmap();
             updateDynmap();
@@ -195,13 +181,6 @@ public class GuildManager {
     }
 
     /**
-     * Saving the Chunk-list to the Database
-     */
-    public void saveChunks() {
-        //GuildSQL.saveChunks(chunks);
-    }
-
-    /**
      * Creating a new Guild
      *
      * @param player UUID of the Player
@@ -224,12 +203,6 @@ public class GuildManager {
                 guild,
                 player,
                 Role.Master));
-
-        Player p = Bukkit.getPlayer(player);
-        if (p != null) {
-            // Gives the Player the Guild Scoreboard
-            //OddJob.getInstance().getScoreManager().create(p, ScoreBoard.Guild);
-        }
         return true;
     }
 
@@ -347,7 +320,7 @@ public class GuildManager {
     public void unClaim(@Nonnull Chunk chunk, Player player) {
         // UnClaim the Chunk
         if (GuildSQL.deleteGuildsChunks(chunk)) {
-            OddJob.getInstance().getGuildManager().chunks.remove(chunk);
+            chunks.remove(chunk);
             removeDynmapChunk(chunk);
             if (player != null)
                 OddJob.getInstance().getMessageManager().guildUnclaimed(chunk.getX(), chunk.getZ(), player);
@@ -363,9 +336,7 @@ public class GuildManager {
      * @return UUID of the Guild who has claimed the Chunk
      */
     public UUID getGuildUUIDByChunk(Chunk chunk) {
-        UUID uuid = GuildSQL.getGuildUUIDByChunk(chunk);
-        return uuid != null ? uuid : getGuildUUIDByZone(Zone.WILD);
-        //return chunks.getOrDefault(chunk, getGuildUUIDByZone(Zone.WILD));
+        return GuildSQL.getGuildUUIDByChunk(chunk);
     }
 
     /**
@@ -376,19 +347,17 @@ public class GuildManager {
      */
     public void join(UUID guild, UUID player) {
         // Delete the Players invitation to the Guild
-        guildInvite.remove(player);
+        //guildInvite.remove(player);
+        GuildSQL.deleteInvite(guild, player);
 
         // Delete the Players pending invitations to Guilds
-        guildPending.remove(player);
+        //guildPending.remove(player);
+        GuildSQL.deletePending(guild, player);
 
         // Add a Player to Guild as Member
         guilds.get(guild).getMembers().put(player, Role.Members);
 
-        Player p = Bukkit.getPlayer(player);
-        if (p != null) {
-            // Give the Player the Guild Scoreboard
-            //TODO OddJob.getInstance().getScoreManager().guild(p);
-        }
+        saveGuilds();
     }
 
     /**
@@ -616,17 +585,20 @@ public class GuildManager {
      * @param player UUID of the Player
      */
     public void inviteToGuild(UUID guild, UUID player, UUID sender) {
-        guildInvite.put(player, guild);
+        GuildSQL.addInvite(player, guild);
         OddJob.getInstance().getMessageManager().guildInvitedToGuild(getGuild(guild), player, sender);
     }
 
     /**
-     * Removes an Guild invitation
+     * Removes a Guild invitation sent to Player
      *
-     * @param player UUID of the Player
+     * @param target UUID of the Player targeted
+     * @param guild  UUID of the Guild
+     * @param sender CommandSender
      */
-    public void unInviteToGuild(UUID player) {
-        guildInvite.remove(player);
+    public void unInviteToGuild(UUID target, UUID guild, CommandSender sender) {
+        GuildSQL.deleteInvite(guild, target);
+        OddJob.getInstance().getMessageManager().guildsUnInvited(getGuild(guild), target, sender);
     }
 
     /**
@@ -658,7 +630,7 @@ public class GuildManager {
      * @return UUID of the Guild
      */
     public UUID getGuildInvitation(UUID player) {
-        return guildInvite.get(player);
+        return GuildSQL.getInvitationGuild(player);
     }
 
     /**
@@ -668,7 +640,7 @@ public class GuildManager {
      * @return UUID of the Guild
      */
     public UUID getGuildPending(UUID player) {
-        return guildPending.get(player);
+        return GuildSQL.getPendingGuild(player);
     }
 
     /**
@@ -709,13 +681,8 @@ public class GuildManager {
      * @param guild UUID of the Guild
      * @return List
      */
-    public List<UUID> getGuildInvitations(UUID guild) {
-        List<UUID> list = new ArrayList<>();
-        for (UUID uuid : guildInvite.keySet()) {
-            if (guildInvite.get(uuid).equals(guild))
-                list.add(uuid);
-        }
-        return list;
+    public void listInvitedPlayers(UUID guild, CommandSender sender) {
+        OddJob.getInstance().getMessageManager().guildsListInvitedPlayers(GuildSQL.listInvitedPlayers(guild), sender);
     }
 
     /**
@@ -724,8 +691,9 @@ public class GuildManager {
      * @param guild  UUID of the Guild
      * @param player UUID of the Player
      */
-    public void addGuildPending(UUID guild, UUID player) {
-        guildPending.put(player, guild);
+    public void addPending(UUID guild, UUID player) {
+        GuildSQL.addPending(guild, player);
+        //guildPending.put(player, guild);
     }
 
     /**
@@ -778,12 +746,7 @@ public class GuildManager {
      * @return List
      */
     public List<UUID> getGuildPendingList(UUID guild) {
-        List<UUID> list = new ArrayList<>();
-        for (UUID uuid : guildPending.keySet()) {
-            if (guildPending.get(uuid).equals(guild))
-                list.add(uuid);
-        }
-        return list;
+        return GuildSQL.listPendingPlayers(guild);
     }
 
 
@@ -812,12 +775,19 @@ public class GuildManager {
         guild.getMembers().put(uuid, Role.Admins);
     }
 
-    public void denyRequest(UUID uuid) {
-        guildPending.remove(uuid);
+    public void denyRequest(CommandSender sender) {
+        Player player = (Player) sender;
+        UUID guild = getGuildUUIDByMember(player.getUniqueId());
+        UUID target = GuildSQL.getPendingPlayer(guild);
+        GuildSQL.deletePending(guild, target);
+        OddJob.getInstance().getMessageManager().guildsDenyRequest(getGuild(guild), target, player.getUniqueId());
     }
 
-    public void denyInvite(UUID uuid) {
-        guildInvite.remove(uuid);
+    public void denyInvite(CommandSender sender) {
+        Player player = (Player) sender;
+        UUID guild = getGuildInvitation(player.getUniqueId());
+        GuildSQL.deleteInvite(guild, player.getUniqueId());
+        OddJob.getInstance().getMessageManager().guildsDenyInvite(getGuild(guild), player.getUniqueId());
     }
 
     public void map(Player player) {
@@ -1036,7 +1006,7 @@ public class GuildManager {
             ChatColor c = ChatColor.YELLOW;
             Guild guild = getGuild(guildUUID);
             if (guild.getInvitedOnly()) c = ChatColor.RED;
-            if (guild.getOpen()) c = ChatColor.GREEN;
+            if (guild.isOpen()) c = ChatColor.GREEN;
             list.add(c + guild.getName());
         }
     }
@@ -1050,7 +1020,6 @@ public class GuildManager {
     }
 
     public void save() {
-        saveChunks();
         saveGuilds();
     }
 
@@ -1071,10 +1040,10 @@ public class GuildManager {
 
         int i = 0;
         for (UUID uuid : chunks.values()) {
-            OddJob.getInstance().log("uuid="+uuid.toString()+"; guild="+guild.toString());
+            OddJob.getInstance().log("uuid=" + uuid.toString() + "; guild=" + guild.toString());
             if (uuid.equals(guild)) i++;
         }
-        OddJob.getInstance().log("SUM: "+OddJob.getInstance().getGuildManager().getGuild(guild).getName()+" - "+i);
+        OddJob.getInstance().log("SUM: " + OddJob.getInstance().getGuildManager().getGuild(guild).getName() + " - " + i);
         return i;
     }
 
@@ -1084,5 +1053,13 @@ public class GuildManager {
             list.add(guilds.get(uuid).getName());
         }
         return list;
+    }
+
+    public List<UUID> getGuildInvites(UUID playerUUID) {
+        return GuildSQL.listInvitingGuilds(playerUUID);
+    }
+
+    public List<UUID> getGuildInvited(UUID guild) {
+        return GuildSQL.listInvitedPlayers(guild);
     }
 }

@@ -24,7 +24,7 @@ public class GuildLeaveCommand extends SubCommand implements GuildRole {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.guild;
+        return Plugin.guilds;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class GuildLeaveCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getPermission() {
-        return "guild";
+        return "guild.use";
     }
 
     @Override
@@ -71,11 +71,11 @@ public class GuildLeaveCommand extends SubCommand implements GuildRole {
         if (args.length == 2) {
             UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
             if (target == null) {
-                OddJob.getInstance().getMessageManager().errorPlayer(Plugin.guild, args[1], sender);
+                OddJob.getInstance().getMessageManager().errorPlayer(Plugin.guilds, args[1], sender);
                 return;
             }
-            Role role = OddJob.getInstance().getGuildManager().promoteMember(guild,target, Role.Master);
-            OddJob.getInstance().getMessageManager().changeRole(role,target,sender);
+            Role role = OddJob.getInstance().getGuildManager().promoteMember(guild, target, Role.Master);
+            OddJob.getInstance().getMessageManager().changeRole(role, target, sender);
             OddJob.getInstance().getGuildManager().leave(player.getUniqueId());
 
         }
@@ -91,8 +91,14 @@ public class GuildLeaveCommand extends SubCommand implements GuildRole {
     public Role getRole() {
         return Role.Members;
     }
+
     @Override
     public boolean needGuild() {
         return true;
+    }
+
+    @Override
+    public boolean needNoGuild() {
+        return false;
     }
 }

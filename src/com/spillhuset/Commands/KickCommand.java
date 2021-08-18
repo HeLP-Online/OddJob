@@ -14,14 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KickCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
+
     @Override
-    public boolean allowOp() {
-        return true;
+    public boolean denyConsole() {
+        return false;
     }
 
     @Override
-    public boolean allowConsole() {
-        return true;
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
+        return false;
     }
 
     @Override
@@ -55,8 +66,8 @@ public class KickCommand extends SubCommandInterface implements CommandExecutor,
             message.append(OddJob.getInstance().getConfig().getString("default.kick_message", "kicked"));
         }
 
-        if (!can(sender,false)) {
-            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return true;
         }
         OddJob.getInstance().getBanManager().kick(target, message.toString());

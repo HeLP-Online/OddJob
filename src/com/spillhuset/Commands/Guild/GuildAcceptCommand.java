@@ -6,7 +6,6 @@ import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Guild;
 import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -27,7 +26,7 @@ public class GuildAcceptCommand extends SubCommand implements GuildRole {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.guild;
+        return Plugin.guilds;
     }
 
     @Override
@@ -37,125 +36,66 @@ public class GuildAcceptCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getDescription() {
-        return "Accepts an invitation to a guild, or accepts a pending request to join the guild";
+        return "Accept an incoming invite to a guild or Accept an request to join the guild";
     }
 
     @Override
     public String getSyntax() {
-        return "/guild accept <name>|<guild>";
+        return "/guild accept [player|guild]";
     }
 
     @Override
     public String getPermission() {
-        return "guild";
+        return "guild.use";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        // guild accept <name>  -- pending
-        // guild accept <guild>  -- invite
-
-        // Check console
-        if (!(sender instanceof Player player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return;
         }
 
-        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-        UUID invitation = OddJob.getInstance().getGuildManager().getGuildInvitation(player.getUniqueId());
-        UUID target = null;
+        if (checkArgs(1, 2, args, sender, getPlugin())) {
+            return;
+        }
 
-        // Find guild
-        if (guild != null) {
-            Guild Guild = OddJob.getInstance().getGuildManager().getGuild(guild);
+        UUID uuid = ((Player) sender).getUniqueId();
+        UUID guildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid);
 
-            // Check Role
-            Role role = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
-            if (role.level() >= Guild.getPermissionInvite().level()) {
-
-                // Check pending - want to join the guild!
-                List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendingList(guild);
-                if (pending.size() == 0) {
-                    OddJob.getInstance().getMessageManager().guildNoPending(player.getUniqueId());
-                } else if (pending.size() == 1 && args.length == 1) {
-                    invitation = pending.get(0);
-                    OddJob.getInstance().getGuildManager().join(guild, invitation);
-                    OddJob.getInstance().getMessageManager().guildWelcome(Guild, Bukkit.getOfflinePlayer(invitation));
+        if (guildUUID != null) {
+            Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
+            List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendingList(guildUUID);
+            if (pending.size() == 0) {
+                OddJob.getInstance().getMessageManager().guildsNoPending(guild.getName(), uuid);
+            } else if (pending.size() == 1) {
+                if ((args.length == 2 && args[1].equalsIgnoreCase(OddJob.getInstance().getPlayerManager().getName(pending.get(0)))) || args.length == 1) {
+                    OddJob.getInstance().getGuildManager().acceptPending(pending.get(0), uuid);
                 } else {
-                    if (args.length == 1) {
-                        // Send a list of requests
-                        OddJob.getInstance().getMessageManager().pendingList(pending, sender);
-                    } else if (args.length == 2) {
-                        // Accepts a request
-                        for (UUID uuid : pending) {
-                            if (OddJob.getInstance().getPlayerManager().getPlayer(uuid).getName().equalsIgnoreCase(args[1])) {
-                                target = uuid;
-                                break;
-                            }
-                        }
-                        if (target != null) {
-                            OddJob.getInstance().getGuildManager().join(guild, invitation);
-                            OddJob.getInstance().getMessageManager().guildWelcome(Guild, Bukkit.getOfflinePlayer(invitation));
-                        }
-                    }
+                    OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
                 }
-
             } else {
-                OddJob.getInstance().getMessageManager().permissionDenied(Plugin.guild, sender);
+                OddJob.getInstance().getMessageManager().guildsListPending(guild.getName(), pending, sender);
             }
         } else {
-            // Not belonging to any guild
-            guild = OddJob.getInstance().getGuildManager().getGuildInvitation(player.getUniqueId());
-            if (guild != null) {
-                // Is invited
-                Guild Guild = OddJob.getInstance().getGuildManager().getGuild(guild);
-                OddJob.getInstance().getGuildManager().join(guild, player.getUniqueId());
-                OddJob.getInstance().getMessageManager().guildWelcome(Guild, player);
+            List<UUID> invites = OddJob.getInstance().getGuildManager().getGuildInvites(uuid);
+            if (invites.size() == 0) {
+                OddJob.getInstance().getMessageManager().guildNoInvitation(uuid);
+            } else if (invites.size() == 1) {
+                if ((args.length == 2 && args[1].equalsIgnoreCase(OddJob.getInstance().getGuildManager().getGuildNameByUUID(invites.get(0)))) || args.length == 1) {
+                    OddJob.getInstance().getGuildManager().acceptInvite(sender);
+                } else {
+                    OddJob.getInstance().getMessageManager().errorGuild(args[1], sender);
+                }
             } else {
-                // Has no invite
-                OddJob.getInstance().getMessageManager().guildNoInvitation(player.getUniqueId());
+                OddJob.getInstance().getMessageManager().guildsListInvites(invites, sender);
             }
         }
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
-        List<String> list = new ArrayList<>();
-        // Check console
-        if (!(sender instanceof Player player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
-            return list;
-        }
-
-        UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId());
-
-        // Find guild
-        if (guild != null) {
-            Guild Guild = OddJob.getInstance().getGuildManager().getGuild(guild);
-
-            // Check Role
-            Role role = OddJob.getInstance().getGuildManager().getGuildMemberRole(player.getUniqueId());
-            if (role.level() >= Guild.getPermissionInvite().level()) {
-
-                // Check pending - want to join the guild!
-                List<UUID> pending = OddJob.getInstance().getGuildManager().getGuildPendingList(guild);
-
-                if (args.length == 1) {
-                    for (UUID uuid : pending) {
-                        list.add(OddJob.getInstance().getPlayerManager().getName(uuid));
-                    }
-                } else if (args.length == 2) {
-                    for (UUID uuid : pending) {
-                        String name = OddJob.getInstance().getPlayerManager().getName(uuid);
-                        if (name.startsWith(args[1])) {
-                            list.add(name);
-                        }
-                    }
-                }
-
-            }
-        }
-        return list;
+        return new ArrayList<>();
     }
 
     @Override
@@ -163,7 +103,13 @@ public class GuildAcceptCommand extends SubCommand implements GuildRole {
         return Role.all;
     }
 
+    @Override
     public boolean needGuild() {
+        return false;
+    }
+
+    @Override
+    public boolean needNoGuild() {
         return false;
     }
 }

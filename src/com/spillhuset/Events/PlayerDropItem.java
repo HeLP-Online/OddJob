@@ -29,12 +29,12 @@ public class PlayerDropItem implements Listener {
             OddJob.getInstance().getMySQLManager().addLog(player.getUniqueId(), itemStack, "drop");
 
         // Locks prevent drop of Skeletonkey
-        if (event.getItemDrop().getItemStack().equals(OddJob.getInstance().getLockManager().skeletonKey)) {
+        if (event.getItemDrop().getItemStack().equals(OddJob.getInstance().getLocksManager().skeletonKey)) {
             OddJob.getInstance().getMessageManager().skeleton(event.getPlayer().getUniqueId());
             event.setCancelled(true);
-        } else if (itemStack.equals(OddJob.getInstance().getLockManager().unlockWand) ||
-                itemStack.equals(OddJob.getInstance().getLockManager().lockWand) ||
-                itemStack.equals(OddJob.getInstance().getLockManager().infoWand)) {
+        } else if (itemStack.equals(OddJob.getInstance().getLocksManager().unlockWand) ||
+                itemStack.equals(OddJob.getInstance().getLocksManager().lockWand) ||
+                itemStack.equals(OddJob.getInstance().getLocksManager().infoWand)) {
             event.setCancelled(true);
         }
     }

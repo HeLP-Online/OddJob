@@ -17,14 +17,25 @@ import java.util.List;
 import java.util.UUID;
 
 public class GiveCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
+
     @Override
-    public boolean allowOp() {
-        return true;
+    public boolean denyConsole() {
+        return false;
     }
 
     @Override
-    public boolean allowConsole() {
-        return true;
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
+        return false;
     }
 
     @Override
@@ -85,12 +96,12 @@ public class GiveCommand extends SubCommandInterface implements CommandExecutor,
                 if (args[0].isEmpty()) list.add(player.getName());
                 if (player.getName().startsWith(args[0])) list.add(player.getName());
             }
-        }else if (args.length == 2) {
+        } else if (args.length == 2) {
             for (Material material : Material.values()) {
                 if (args[1].isEmpty()) list.add(material.name());
                 if (material.name().startsWith(args[1])) list.add(material.name());
             }
-        } else if (args.length == 3){
+        } else if (args.length == 3) {
             list.add("Amount");
         }
         return list;

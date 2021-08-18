@@ -1,5 +1,6 @@
 package com.spillhuset.Commands.Guild;
 
+import com.spillhuset.Commands.Guild.Set.GuildSetCommand;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Zone;
@@ -26,26 +27,39 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
         subCommands.add(new GuildDisbandCommand());
         subCommands.add(new GuildLeaveCommand());
         subCommands.add(new GuildMapCommand());
+        subCommands.add(new GuildSetCommand());
+        subCommands.add(new GuildInviteCommand());
+        subCommands.add(new GuildUninviteCommand());
     }
 
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
         return false;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.guild;
+        return Plugin.guilds;
     }
 
     @Override
     public String getPermission() {
-        return null;
+        return "guild";
     }
 
     @Override
@@ -118,12 +132,14 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
         // SubCommands
         StringBuilder nameBuilder = new StringBuilder();
         for (SubCommand subcommand : subCommands) {
-            String name = subcommand.getName();
-            if (args.length >= 1 && name.equalsIgnoreCase(args[0])) {
-                subcommand.perform(sender, args);
-                return true;
+            if (subcommand.can(sender, false)) {
+                String name = subcommand.getName();
+                if (args.length >= 1 && name.equalsIgnoreCase(args[0])) {
+                    subcommand.perform(sender, args);
+                    return true;
+                }
+                nameBuilder.append(name).append(",");
             }
-            nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
         if (args.length == 0) {
@@ -144,12 +160,12 @@ public class GuildCommand extends SubCommandInterface implements CommandExecutor
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(((Player) sender).getUniqueId());
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
-            if (subCommand.needGuild() && guild != null) {
+            if (subCommand.can(sender, false) && ((subCommand.needGuild() && guild != null) || (subCommand.needNoGuild() && guild == null) || !subCommand.needNoGuild() && !subCommand.needGuild())) {
                 if (args[0].isEmpty()) {
                     list.add(name);
-                } else if (name.equalsIgnoreCase(args[0]) && args.length > 1) {
+                } else if (name.equals(args[0].toLowerCase()) && args.length > 1) {
                     return subCommand.getTab(sender, args);
-                } else if (name.startsWith(args[0])) {
+                } else if (name.toLowerCase().startsWith(args[0].toLowerCase())) {
                     list.add(name);
                 }
             }

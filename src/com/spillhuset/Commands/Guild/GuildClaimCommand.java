@@ -27,7 +27,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.guild;
+        return Plugin.guilds;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getPermission() {
-        return "guild";
+        return "guild.use";
     }
 
     @Override
@@ -74,7 +74,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
                     // Setting zone
                     String[] value = args[i].split("=");
                     if (value.length != 2) {
-                        OddJob.getInstance().getMessageManager().syntaxError(Plugin.guild, "args=value", sender);
+                        OddJob.getInstance().getMessageManager().syntaxError(Plugin.guilds, "args=value", sender);
                         return;
                     }
                     for (Zone z : Zone.values()) {
@@ -83,7 +83,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
                         }
                     }
                     if (zone == Zone.GUILD) {
-                        OddJob.getInstance().getMessageManager().errorZone(Plugin.guild, args[1], sender);
+                        OddJob.getInstance().getMessageManager().errorZone(Plugin.guilds, args[1], sender);
                         return;
                     }
 
@@ -92,7 +92,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
                     // Setting auto claim
                     String[] value = args[i].split("=");
                     if (value.length != 2) {
-                        OddJob.getInstance().getMessageManager().syntaxError(Plugin.guild, "args=value", sender);
+                        OddJob.getInstance().getMessageManager().syntaxError(Plugin.guilds, "args=value", sender);
                         return;
                     }
                     auto = value[1].equalsIgnoreCase("1") || value[1].equalsIgnoreCase("on") || value[1].equalsIgnoreCase("true");
@@ -141,7 +141,13 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
         return Role.Admins;
     }
 
+    @Override
     public boolean needGuild() {
         return true;
+    }
+
+    @Override
+    public boolean needNoGuild() {
+        return false;
     }
 }

@@ -33,7 +33,7 @@ public class BlockExplode implements Listener {
             }
 
             // CHECK LOCK
-            if (OddJob.getInstance().getLockManager().getLockable().contains(block.getType())) {
+            if (OddJob.getInstance().getLocksManager().getLockable().contains(block.getType())) {
 
             }
         }

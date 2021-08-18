@@ -45,13 +45,13 @@ public class HomeSetCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "homes.set";
+        return "homes.use";
     }
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
+        if (!can(sender,false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
             return;
         }
 
@@ -83,7 +83,7 @@ public class HomeSetCommand extends SubCommand {
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
-        list.add("<name>");
+        list.add("[name]");
         return list;
     }
 }

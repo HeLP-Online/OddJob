@@ -21,7 +21,7 @@ public class SpawnCommand implements CommandExecutor {
                 try {
                     spawn = Bukkit.getWorld(strings[0]).getSpawnLocation();
                 } catch (NullPointerException ex) {
-                    OddJob.getInstance().getMessageManager().errorWorld(strings[0], commandSender, Plugin.tp);
+                    OddJob.getInstance().getMessageManager().errorWorld(strings[0], commandSender, Plugin.teleport);
                     return true;
                 }
             } else {
@@ -33,7 +33,7 @@ public class SpawnCommand implements CommandExecutor {
                 try {
                     spawn = Bukkit.getWorld(strings[1]).getSpawnLocation();
                 } catch (Exception ex) {
-                    OddJob.getInstance().getMessageManager().errorWorld(strings[1], commandSender, Plugin.tp);
+                    OddJob.getInstance().getMessageManager().errorWorld(strings[1], commandSender, Plugin.teleport);
                     return true;
                 }
             } else {

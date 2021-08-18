@@ -19,12 +19,22 @@ public class AuctionCommand extends SubCommandInterface implements CommandExecut
     }
 
     @Override
-    public boolean allowOp() {
+    public boolean denyConsole() {
         return true;
     }
 
     @Override
-    public boolean allowConsole() {
+    public boolean onlyConsole() {
+        return false;
+    }
+
+    @Override
+    public boolean denyOp() {
+        return false;
+    }
+
+    @Override
+    public boolean onlyOp() {
         return false;
     }
 
