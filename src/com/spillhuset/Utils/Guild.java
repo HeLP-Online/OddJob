@@ -137,8 +137,9 @@ public class Guild {
         members.put(member, Role.Master);
     }
 
-    public void setOpen(boolean open) {
+    public boolean setOpen(boolean open) {
         this.open = open;
+        return true;
     }
 
     public boolean isOpen() {

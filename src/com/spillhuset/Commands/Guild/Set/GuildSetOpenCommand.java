@@ -66,8 +66,9 @@ public class GuildSetOpenCommand extends SubCommand implements GuildRole {
         Guild guild = OddJob.getInstance().getGuildManager().getGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()));
         boolean value = (args[2].equalsIgnoreCase("1") || args[2].equalsIgnoreCase("true") || args[2].equalsIgnoreCase("on"));
 
-        guild.setOpen(value);
-        OddJob.getInstance().getMessageManager().guildsSet(getName(),guild,value,sender);
+        if (guild.setOpen(value)) {
+            OddJob.getInstance().getMessageManager().guildsSet(getName(), guild, value, sender);
+        } else OddJob.getInstance().getMessageManager().errorGuild(guild.getName(), sender);
     }
 
     @Override
