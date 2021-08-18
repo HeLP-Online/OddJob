@@ -426,4 +426,16 @@ public class PlayerManager {
     }
 
 
+    public void tradeAccept(Player topPlayer, Player bottomPlayer) {
+        if (OddJob.getInstance().getPlayerManager().getRequestTrade().get(topPlayer.getUniqueId()) == bottomPlayer.getUniqueId()) {
+            Inventory trade = OddJob.getInstance().getPlayerManager().getTradeInventory(topPlayer.getDisplayName(),bottomPlayer.getDisplayName());
+            OddJob.getInstance().getPlayerManager().addTrade(topPlayer.getUniqueId(),bottomPlayer.getUniqueId(),trade);
+            bottomPlayer.openInventory(trade);
+            topPlayer.openInventory(trade);
+            OddJob.getInstance().getPlayerManager().getTradingPlayers().put(topPlayer.getUniqueId(), bottomPlayer.getUniqueId());
+            OddJob.getInstance().getPlayerManager().getRequestTrade().remove(topPlayer.getUniqueId());
+        } else {
+            OddJob.getInstance().getMessageManager().tradeNone(bottomPlayer);
+        }
+    }
 }

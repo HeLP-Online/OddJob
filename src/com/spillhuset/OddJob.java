@@ -168,6 +168,7 @@ public class OddJob extends JavaPlugin {
 
         saver = Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), () -> {
             OddJob.getInstance().save();
+            OddJob.getInstance().getAuctionManager().checkBids(System.currentTimeMillis()/1000);
         }, 7200, 7200);
 
         signManager.updateSigns();
@@ -182,7 +183,6 @@ public class OddJob extends JavaPlugin {
 
 
     public void onDisable() {
-        getGuildManager().saveChunks();
         getGuildManager().saveGuilds();
         getPlayerManager().save();
         for (World world : Bukkit.getWorlds()) {

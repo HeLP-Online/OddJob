@@ -1,5 +1,4 @@
 package com.spillhuset.Commands.Auction;
-
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
@@ -8,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class AuctionBuyoutCommand extends SubCommand {
+public class AuctionBidCommand extends SubCommand {
     @Override
     public boolean allowConsole() {
         return false;
@@ -16,7 +15,7 @@ public class AuctionBuyoutCommand extends SubCommand {
 
     @Override
     public boolean allowOp() {
-        return true;
+        return false;
     }
 
     @Override
@@ -26,17 +25,17 @@ public class AuctionBuyoutCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "buy";
+        return "bid";
     }
 
     @Override
     public String getDescription() {
-        return "Buy a listed stack of items";
+        return "Placing a bid on an item for sale";
     }
 
     @Override
     public String getSyntax() {
-        return "/auction buyout <item>";
+        return "/auction bid <item> <offer>";
     }
 
     @Override
@@ -46,24 +45,28 @@ public class AuctionBuyoutCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (!can(sender, false)) {
-            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
+        if (!can(sender,false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
             return;
         }
 
-        if (checkArgs(2, 2, args, sender, getPlugin())) {
+        if (checkArgs(3,3,args,sender,getPlugin())) {
             return;
         }
 
         int item = 0;
+        double offer = 0;
 
         try {
             item = Integer.parseInt(args[1]);
+            offer = Double.parseDouble(args[2]);
         } catch (NumberFormatException ignored) {
-            OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(), args[1], sender);
+            OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(),args[1]+" or "+args[2],sender);
+            return;
         }
 
-        OddJob.getInstance().getAuctionManager().buyout(item, (Player) sender);
+        Player player = (Player) sender;
+        OddJob.getInstance().getAuctionManager().bid(item,offer,player);
     }
 
     @Override

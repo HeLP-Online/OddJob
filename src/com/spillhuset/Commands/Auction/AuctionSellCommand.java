@@ -23,7 +23,7 @@ public class AuctionSellCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.auction;
+        return Plugin.auctions;
     }
 
     @Override

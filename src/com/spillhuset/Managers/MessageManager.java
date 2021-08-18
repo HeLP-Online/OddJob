@@ -1346,4 +1346,16 @@ public class MessageManager {
     public void guildsSet(String name,Guild guild, boolean value, CommandSender sender) {
         success(type(Plugin.guilds),"Successfully "+cValue+name+cSuccess+" set to "+cValue+value+cSuccess+" for the "+cGuild+guild.getName(),sender,false);
     }
+
+    public void auctionsBidSet(int item, double offer, Player player) {
+    }
+
+    public void auctionsBidNotHighEnough(double offer, double bid, Player player) {
+    }
+
+    public void auctionsItemAlreadySold(Player player) {
+    }
+
+    public void auctionsCantAfford(double offer, Player player) {
+    }
 }

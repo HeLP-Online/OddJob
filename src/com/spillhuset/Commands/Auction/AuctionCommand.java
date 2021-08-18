@@ -16,11 +16,13 @@ public class AuctionCommand extends SubCommandInterface implements CommandExecut
     public AuctionCommand() {
         subCommands.add(new AuctionSellCommand());
         subCommands.add(new AuctionBuyoutCommand());
+        subCommands.add(new AuctionBidCommand());
+        subCommands.add(new AuctionAutoCommand());
     }
 
     @Override
     public boolean denyConsole() {
-        return true;
+        return false;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class AuctionCommand extends SubCommandInterface implements CommandExecut
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.auction;
+        return Plugin.auctions;
     }
 
     @Override

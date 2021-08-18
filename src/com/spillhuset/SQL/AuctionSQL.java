@@ -4,7 +4,6 @@ import com.spillhuset.Managers.MySQLManager;
 import com.spillhuset.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +13,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class AuctionSQL extends MySQLManager {
     public static String toBase64(ItemStack item) throws IOException {
@@ -34,7 +36,7 @@ public class AuctionSQL extends MySQLManager {
             sb.append("enchantment").append("={");
             if (item.getType() == Material.ENCHANTED_BOOK) {
                 EnchantmentStorageMeta enchantmentMeta = (EnchantmentStorageMeta) im;
-                for(Enchantment enchantment : enchantmentMeta.getStoredEnchants().keySet()) {
+                for (Enchantment enchantment : enchantmentMeta.getStoredEnchants().keySet()) {
                     sb.append(enchantment.toString()).append("=").append(enchantmentMeta.getStoredEnchants().get(enchantment));
                 }
             } else {
@@ -69,7 +71,7 @@ public class AuctionSQL extends MySQLManager {
             }
             if (string.startsWith("enchantment=")) {
                 OddJob.getInstance().log(string);
-                string = string.substring(string.indexOf("{")+1, string.lastIndexOf("}"));
+                string = string.substring(string.indexOf("{") + 1, string.lastIndexOf("}"));
                 String[] encase = string.split(";");
                 for (String enc : encase) {
                     OddJob.getInstance().log(enc);
@@ -77,7 +79,7 @@ public class AuctionSQL extends MySQLManager {
                     for (Enchantment en : Enchantment.values()) {
                         OddJob.getInstance().log(en.toString());
                         if (en.toString().equals(e[0])) {
-                            OddJob.getInstance().log("enchant: "+e[0]+" level: "+e[1]);
+                            OddJob.getInstance().log("enchant: " + e[0] + " level: " + e[1]);
                             enchantments.put(en, Integer.parseInt(e[1]));
                         }
                     }
@@ -97,12 +99,12 @@ public class AuctionSQL extends MySQLManager {
                     if (enchantment == null || enchantments.get(enchantment) == null) continue;
                     enchantmentMeta.addStoredEnchant(enchantment, enchantments.get(enchantment), false);
                 }
-            } else{
+            } else {
                 for (Enchantment enchantment : enchantments.keySet()) {
                     if (enchantment == null || enchantments.get(enchantment) == null) continue;
                     meta.addEnchant(enchantment, enchantments.get(enchantment), false);
                 }
-        }
+            }
             if (!name.equals("")) meta.setDisplayName(name);
             meta.setLore(lore);
             item.setItemMeta(meta);
@@ -158,5 +160,82 @@ public class AuctionSQL extends MySQLManager {
         }
 
         return ret;
+    }
+
+    public static double getHighestBid(int item) {
+        double bid = 0;
+
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_auction_bids` WHERE `item` = ?");
+                preparedStatement.setInt(1, item);
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    bid = Double.max(bid, resultSet.getInt("bid"));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return bid;
+    }
+
+    public static void placeBid(int item, double offer, Player player) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_auction_bids` (`item`,`bid`,`bidder`,`time`) VALUES (?,?,?,?)");
+                preparedStatement.setInt(1, item);
+                preparedStatement.setDouble(2, offer);
+                preparedStatement.setString(3, player.getUniqueId().toString());
+                preparedStatement.setLong(4, System.currentTimeMillis() / 1000);
+                preparedStatement.execute();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static boolean isSold(int item) {
+        boolean sold = false;
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `sold` FROM `mine_auction` WHERE `item` = ?");
+                preparedStatement.setInt(1, item);
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    sold = !(resultSet.getInt("sold") == 0);
+                    sold = sold && !resultSet.wasNull();
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return sold;
+    }
+
+    public static List<Integer> findExpired(long exp) {
+        List<Integer> expired = new ArrayList<>();
+        try {
+            if (connect()) {
+                OddJob.getInstance().log("test");
+                preparedStatement = connection.prepareStatement("SELECT `id`,`expire`,`time` FROM `mine_auction` WHERE `sold` IS NULL OR `sold` = 0");
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    OddJob.getInstance().log("t");
+                    int expire = resultSet.getInt("expire");
+                    int time = resultSet.getInt("time");
+                    int i = expire + (time * 60 * 60);
+                    int n = i - (int) exp;
+                    if (n <= 0) expired.add(resultSet.getInt("id"));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return expired;
     }
 }
