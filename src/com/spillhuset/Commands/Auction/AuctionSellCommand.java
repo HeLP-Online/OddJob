@@ -38,7 +38,7 @@ public class AuctionSellCommand extends SubCommand {
 
     @Override
     public String getSyntax() {
-        return "/ah sell <value> [buyout]";
+        return "/ah sell <value> [buyout] [hours]";
     }
 
     @Override
@@ -53,11 +53,10 @@ public class AuctionSellCommand extends SubCommand {
             return;
         }
         if (checkArgs(2, 4, args, sender, getPlugin())) {
-            OddJob.getInstance().log("Test");
             return;
         }
         double value = 0.0, buyout = 0.0;
-        int expire = 24;
+        int expire = 72;
         Player player = (Player) sender;
 
         try {
@@ -71,7 +70,7 @@ public class AuctionSellCommand extends SubCommand {
                 expire = Integer.parseInt(args[3]);
             }
         } catch (NumberFormatException ex) {
-            OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(), "", sender);
+            OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(), args[1]+" or "+args[2]+" or "+args[3], sender);
             return;
         }
 

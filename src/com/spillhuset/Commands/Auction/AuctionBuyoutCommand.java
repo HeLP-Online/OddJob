@@ -63,7 +63,7 @@ public class AuctionBuyoutCommand extends SubCommand {
             OddJob.getInstance().getMessageManager().invalidNumber(getPlugin(), args[1], sender);
         }
 
-        OddJob.getInstance().getAuctionManager().buyout(item, (Player) sender);
+        //OddJob.getInstance().getAuctionManager().buyout(item, (Player) sender);
     }
 
     @Override

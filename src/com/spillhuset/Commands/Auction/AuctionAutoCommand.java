@@ -44,7 +44,7 @@ public class AuctionAutoCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        OddJob.getInstance().getAuctionManager().checkBids(System.currentTimeMillis()/1000);
+        OddJob.getInstance().getAuctionManager().checkExpiredBids();
     }
 
     @Override

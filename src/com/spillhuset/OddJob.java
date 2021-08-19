@@ -168,7 +168,7 @@ public class OddJob extends JavaPlugin {
 
         saver = Bukkit.getScheduler().scheduleSyncRepeatingTask(OddJob.getInstance(), () -> {
             OddJob.getInstance().save();
-            OddJob.getInstance().getAuctionManager().checkBids(System.currentTimeMillis()/1000);
+            OddJob.getInstance().getAuctionManager().checkExpiredBids();
         }, 7200, 7200);
 
         signManager.updateSigns();

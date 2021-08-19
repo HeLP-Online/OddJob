@@ -1,6 +1,8 @@
 package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
+import com.spillhuset.Utils.AuctionBid;
+import com.spillhuset.Utils.AuctionItem;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Types;
@@ -1343,19 +1345,51 @@ public class MessageManager {
         }
     }
 
-    public void guildsSet(String name,Guild guild, boolean value, CommandSender sender) {
-        success(type(Plugin.guilds),"Successfully "+cValue+name+cSuccess+" set to "+cValue+value+cSuccess+" for the "+cGuild+guild.getName(),sender,false);
+    public void guildsSet(String name, Guild guild, boolean value, CommandSender sender) {
+        success(type(Plugin.guilds), "Successfully " + cValue + name + cSuccess + " set to " + cValue + value + cSuccess + " for the " + cGuild + guild.getName(), sender, false);
     }
 
     public void auctionsBidSet(int item, double offer, Player player) {
+        success(type(Plugin.auctions), "Bid successfully set, " + cCurrency + offer + cSuccess + " for item " + cValue + item, player, false);
     }
 
     public void auctionsBidNotHighEnough(double offer, double bid, Player player) {
+        warning(type(Plugin.auctions), "So, the item is more expensive than " + cCurrency + offer + cWarning + ", current bid is on " + cCurrency + bid, player, false);
     }
 
     public void auctionsItemAlreadySold(Player player) {
+        danger(type(Plugin.auctions), "Sorry, the item is already sold.", player, false);
     }
 
     public void auctionsCantAfford(double offer, Player player) {
+        danger(type(Plugin.auctions), "Sorry, but you don't have " + cCurrency + offer + cDanger + " in your " + cValue + "pocket", player, false);
+    }
+
+    public void auctionsItemSetToSale(int id, double value, double buyout, double fee, int expire, Player player) {
+        success(type(Plugin.auctions), "Auction id:" + cValue + id + cSuccess + "set for auction, start-bid:" + cCurrency + value + cSuccess + " buyout:" + cCurrency + buyout + cSuccess + ", the auction will expire in " + cValue + expire + cSuccess + " hours", player, false);
+    }
+
+    public void auctionsReceiverWon(AuctionItem auctionItem, Player receiver) {
+        success(type(Plugin.auctions), "Your bid on item " + cValue + auctionItem.getId() + cSuccess + " won after " + cValue + auctionItem.getBids().size() + cSuccess + " bids, start-bid was " + cCurrency + auctionItem.getValue() + cSuccess + " and ended at " + cCurrency + auctionItem.getHighestValue(), receiver, false);
+        warning(type(Plugin.auctions), "Please visit an auction-house to receive your item", receiver, false);
+    }
+
+    public void auctionsSoldWinner(AuctionItem auctionItem, AuctionBid highestBid, Player seller) {
+        success(type(Plugin.auctions), "We found a winner for your action id:" + cValue + auctionItem.getId() + cSuccess + " after " + cValue + auctionItem.getBids().size() + cSuccess + " bids, " + cPlayer + OddJob.getInstance().getPlayerManager().getName(highestBid.getBidder()) + cSuccess + " won with an offer of " + cCurrency + highestBid.getBid(), seller, false);
+        success(type(Plugin.auctions), "Your earning has been transferred to you " + cValue + Types.AccountType.bank.name() + cSuccess + ", please visit a bank to transfer to your " + cValue + Types.AccountType.pocket.name(), seller, false);
+    }
+
+    public void auctionsReceiverBuyout(AuctionItem auctionItem, Player receiver) {
+        success(type(Plugin.auctions), "Yes, you took it right in front of everyone. Auction id:" + cValue + auctionItem.getId() + cSuccess + " sold on buyout:" + cCurrency + auctionItem.getBuyout() + cSuccess, receiver, false);
+        warning(type(Plugin.auctions), "Please visit an auction-house to receive your item", receiver, false);
+    }
+
+    public void auctionsSoldBuyout(AuctionItem auctionItem, Player seller) {
+        success(type(Plugin.auctions), "Ops your action id:" + cValue + auctionItem.getId() + cSuccess + " sold on buyout " + cCurrency + auctionItem.getBuyout(), seller, false);
+        success(type(Plugin.auctions), "Your earning has been transferred to you " + cValue + Types.AccountType.bank.name() + cSuccess + ", please visit a bank to transfer to your " + cValue + Types.AccountType.pocket.name(), seller, false);
+    }
+
+    public void auctionsNoBidsOrBuyout(AuctionItem auctionItem, Player player) {
+        warning(type(Plugin.auctions), "Sorry to say, but your auction-id:" + cValue + auctionItem.getId() + cSuccess + " didn't satisfy any players. Please visit an auction-house to receive your item", player, false);
     }
 }
