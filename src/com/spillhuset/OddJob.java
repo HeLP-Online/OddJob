@@ -110,7 +110,6 @@ public class OddJob extends JavaPlugin {
         getCommand("rollback").setExecutor(new RollbackCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
         getCommand("trade").setExecutor(new TradeCommand()); // SubCommand
-        getCommand("shop").setExecutor(new ShopCommand());
         getCommand("spawnmob").setExecutor(new SpawnMobCommand());
         getCommand("map").setExecutor(new MapCommand());
         getCommand("sudo").setExecutor(new SudoCommand());
