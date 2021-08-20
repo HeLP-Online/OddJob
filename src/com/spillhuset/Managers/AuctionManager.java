@@ -22,8 +22,8 @@ public class AuctionManager {
         }
         int id = AuctionSQL.sell(player, player.getInventory().getItemInMainHand(), value, buyout, expire);
         if (id != 0) {
-            OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(),fee,false, Types.AccountType.pocket);
-            OddJob.getInstance().getMessageManager().auctionsItemSetToSale(id,value,buyout,fee,expire,player);
+            OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), fee, false, Types.AccountType.pocket);
+            OddJob.getInstance().getMessageManager().auctionsItemSetToSale(id, value, buyout, fee, expire, player);
         }
     }
 
@@ -112,7 +112,7 @@ public class AuctionManager {
         List<AuctionItem> expired = getExpiredItems();
         int now = (int) (System.currentTimeMillis() / 1000);
         for (AuctionItem item : expired) {
-            int expire = ((item.getExpire() * 60 * 24) + item.getTime());
+            int expire = ((item.getExpire() * 60 * 60) + item.getTime());
             expire = now - expire;
             if (expire > 0) {
                 expired(item);
@@ -122,10 +122,13 @@ public class AuctionManager {
 
     private void expired(AuctionItem auctionItem) {
         if (auctionItem.getBids().size() > 0) {
-            receiveItemBid(auctionItem, getHighestBid(auctionItem.getId()));
+            receiveItemBid(auctionItem, getHighestBid(auctionItem));
+            auctionItem.setBuyer(getHighestBid(auctionItem).getBidder());
         } else {
             refundItem(auctionItem);
         }
+        auctionItem.setSold((int)System.currentTimeMillis()/1000);
+        AuctionSQL.saveItem(auctionItem);
     }
 
     private void receiveItemBid(AuctionItem auctionItem, AuctionBid highestBid) {
@@ -180,7 +183,18 @@ public class AuctionManager {
         return AuctionSQL.getBids(item);
     }
 
-    public AuctionBid getHighestBid(int item) {
-        return AuctionSQL.getHighestBid(item);
+    /**
+     *
+     * @param item AuctionItem
+     * @return AuctionBid
+     */
+    public AuctionBid getHighestBid(AuctionItem item) {
+        AuctionBid auctionBid = null;
+        for (AuctionBid bid :item.getBids()) {
+            if (auctionBid == null || bid.getBid() > auctionBid.getBid()) {
+                auctionBid = bid;
+            }
+        }
+        return auctionBid;
     }
 }

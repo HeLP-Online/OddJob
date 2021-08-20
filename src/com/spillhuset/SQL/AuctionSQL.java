@@ -327,7 +327,18 @@ public class AuctionSQL extends MySQLManager {
         }
     }
 
-    public static AuctionBid getHighestBid(int item) {
-        return null;
+    public static void saveItem(AuctionItem auctionItem) {
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("UPDATE `mine_auction` SET `picked_up` = ?,`sold` = ?,`buyer` = ? WHERE `id` = ?");
+                preparedStatement.setInt(1,auctionItem.getPicked_up());
+                preparedStatement.setInt(2,auctionItem.getSold());
+                preparedStatement.setString(3,auctionItem.getBuyer().toString());
+                preparedStatement.setInt(4,auctionItem.getId());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 }

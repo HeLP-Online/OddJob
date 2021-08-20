@@ -42,6 +42,7 @@ public class PlayerMove implements Listener {
 
         // Who owns the chunk the Player is going to?
         movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingToChunk);
+        if (movingToGuild == null) movingToGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD);
         OddJob.getInstance().log("Moving to "+OddJob.getInstance().getGuildManager().getGuildNameByUUID(movingToGuild));
         //OddJob.getInstance().getMessageManager().console("x="+movingToChunk.getX()+" z="+movingToChunk.getZ()+" world="+movingToChunk.getWorld().getName());
 

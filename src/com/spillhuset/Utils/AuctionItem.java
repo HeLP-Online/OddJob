@@ -35,46 +35,90 @@ public class AuctionItem {
         this.bids = bids;
     }
 
+    /**
+     *
+     * @return int auction id
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     *
+     * @return List of AuctionBid
+     */
     public List<AuctionBid> getBids() {
         return bids;
     }
 
+    /**
+     *
+     * @return int hours till expiring after time was set
+     */
     public int getExpire() {
         return expire;
     }
 
+    /**
+     *
+     * @return int time the auction was set
+     */
     public int getTime() {
         return time;
     }
 
+    /**
+     *
+     * @return double start-bid
+     */
     public double getValue() {
         return value;
     }
 
+    /**
+     *
+     * @return int number of items
+     */
     public int getNum() {
         return num;
     }
 
+    /**
+     *
+     * @return double buyout value
+     */
     public double getBuyout() {
         return buyout;
     }
 
+    /**
+     *
+     * @return int time when item was given
+     */
     public int getPicked_up() {
         return picked_up;
     }
 
+    /**
+     *
+     * @return time when item was sold either buyout or bid
+     */
     public int getSold() {
         return sold;
     }
 
+    /**
+     *
+     * @return UUID of player who won
+     */
     public UUID getBuyer() {
         return buyer;
     }
 
+    /**
+     *
+     * @return UUID of player who sells
+     */
     public UUID getSeller() {
         return seller;
     }
@@ -110,4 +154,5 @@ public class AuctionItem {
         }
         return value;
     }
+
 }
