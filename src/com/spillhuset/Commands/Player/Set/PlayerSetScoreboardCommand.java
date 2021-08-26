@@ -3,7 +3,6 @@ package com.spillhuset.Commands.Player.Set;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.ScoreBoard;
-import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,7 +24,7 @@ public class PlayerSetScoreboardCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.player;
+        return Plugin.players;
     }
 
     @Override

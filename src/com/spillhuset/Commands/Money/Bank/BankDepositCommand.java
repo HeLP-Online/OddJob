@@ -4,8 +4,6 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Types.BankType;
 import com.spillhuset.Utils.Enum.Types.AccountType;
 import com.spillhuset.Utils.Enum.Plugin;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -75,7 +73,7 @@ public class BankDepositCommand extends com.spillhuset.Utils.SubCommand {
             case player -> {
                 target = OddJob.getInstance().getPlayerManager().getUUID(args[3]);
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[3], sender);
+                    OddJob.getInstance().getMessageManager().errorPlayer(Plugin.players, args[3], sender);
                     return;
                 }
             }

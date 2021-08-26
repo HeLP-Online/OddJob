@@ -44,7 +44,7 @@ public class MessageManager {
             case home -> tHome;
             case warp -> tWarp;
             case guilds -> tGuild;
-            case player -> tPlayer;
+            case players -> tPlayer;
             default -> "[*] ";
         };
     }
@@ -736,31 +736,31 @@ public class MessageManager {
     }
 
     public void whitelistAdd(String name, CommandSender sender) {
-        success(type(Plugin.player), "You have added " + name + " to your Whitelist", sender, true);
+        success(type(Plugin.players), "You have added " + name + " to your Whitelist", sender, true);
     }
 
     public void whitelistDel(String name, CommandSender sender) {
-        success(type(Plugin.player), "You have removed " + name + " from your Whitelist", sender, true);
+        success(type(Plugin.players), "You have removed " + name + " from your Whitelist", sender, true);
     }
 
     public void blacklistAdd(String name, CommandSender sender) {
-        success(type(Plugin.player), "You have added " + name + " to your Blacklist", sender, true);
+        success(type(Plugin.players), "You have added " + name + " to your Blacklist", sender, true);
     }
 
     public void blacklistDel(String name, CommandSender sender) {
-        success(type(Plugin.player), "You have removed " + name + " from your Blacklist", sender, true);
+        success(type(Plugin.players), "You have removed " + name + " from your Blacklist", sender, true);
     }
 
-    public void playerSetDenyTPA(String arg, boolean deny, Player player) {
-        success(type(Plugin.player), "SET " + arg + " to " + deny, player, true);
+    public void playerSetDenyTPA(boolean deny, CommandSender player) {
+        success(type(Plugin.players), "SET " + cValue + "denyTPA" + cSuccess + "to " + cValue + deny, player, true);
     }
 
-    public void playerSetDenyTrade(String arg, boolean deny, Player player) {
-        success(type(Plugin.player), "SET " + arg + " to " + deny, player, true);
+    public void playerSetDenyTrade(boolean deny, CommandSender player) {
+        success(type(Plugin.players), "SET " + cValue + "denyTrade" + cSuccess + "to " + cValue + deny, player, true);
     }
 
     public void playerSetScoreboard(String arg, String name, Player player) {
-        success(type(Plugin.player), "SET " + arg + " to " + name, player, true);
+        success(type(Plugin.players), "SET " + arg + " to " + name, player, true);
     }
 
 
@@ -816,8 +816,9 @@ public class MessageManager {
         info(type(Plugin.locks), "! Stolen item or lost keys will not be refunded.", sender, false);
     }
 
-    public void tpAlreadySent(String arg, CommandSender sender) {
-        danger(type(Plugin.teleport), "You have already sent an request to " + cPlayer + arg, sender, false);
+    public void tpAlreadySent(OddPlayer previous, CommandSender sender) {
+        danger(type(Plugin.teleport), cPlayer + sender.getName() + cDanger + " has changed his mind. Request cancelled.", previous.getPlayer(), false);
+        danger(type(Plugin.teleport), "You have already sent an request, this changes your request.", sender, false);
     }
 
     public void tpDenied(String name, CommandSender sender) {
@@ -1056,7 +1057,7 @@ public class MessageManager {
     }
 
     public void playerDenying(String name, UUID player) {
-        warning(type(Plugin.player), name + " is denying all request!", player, false);
+        warning(type(Plugin.players), name + " is denying all request!", player, false);
     }
 
     public void lockNotCorrectPlayer(Player player) {
@@ -1072,7 +1073,7 @@ public class MessageManager {
     }
 
     public void errorScoreboard(CommandSender sender) {
-        danger(type(Plugin.player), "Something went wrong!", sender, false);
+        danger(type(Plugin.players), "Something went wrong!", sender, false);
     }
 
     public void cannotIdentify(String name, String account, Plugin type, CommandSender sender) {
@@ -1146,19 +1147,16 @@ public class MessageManager {
     }
 
     public void opSet(Player player, CommandSender sender, boolean self) {
-        success(type(Plugin.op), "Successfully op'ed " + cPlayer + player, sender, false);
+        success(type(Plugin.op), "Successfully op'ed " + cPlayer + player.getName(), sender, false);
     }
 
     public void deopSet(Player player, CommandSender sender, boolean self) {
-        success(type(Plugin.deop), "Successfully deop'ed " + cPlayer + player, sender, false);
+        success(type(Plugin.deop), "Successfully deop'ed " + cPlayer + player.getName(), sender, false);
     }
 
-    public void areOp(CommandSender sender) {
-        danger(type(Plugin.player), "You are an " + cValue + "OP", sender, false);
-    }
-
-    public void notOp(CommandSender sender) {
-        success(type(Plugin.player), "You are " + cDanger + "NOT" + cSuccess + " an " + cValue + "OP", sender, false);
+    public void areOp(OddPlayer target, CommandSender sender) {
+        String op = target.isOp() ? cDanger + "OP" + cSuccess : cWarning + "NO OP" + cSuccess;
+        success(type(Plugin.players), "You are " + op, sender, false);
     }
 
     public void lockList(List<String> list, CommandSender sender) {
@@ -1190,7 +1188,7 @@ public class MessageManager {
     }
 
     public void playerErrorScoreboard(CommandSender sender, String board) {
-        danger(type(Plugin.player), "Scoreboard " + cValue + board + cDanger + " not found", sender, false);
+        danger(type(Plugin.players), "Scoreboard " + cValue + board + cDanger + " not found", sender, false);
     }
 
     public void guildMaxClaimsReached(CommandSender sender) {
@@ -1277,11 +1275,12 @@ public class MessageManager {
         danger(type(Plugin.teleport), "Target teleport is no longer online", uuid, false);
     }
 
-    public void teleportDenied(Player topPlayer, Player bottomPlayer) {
+    public void teleportDenied(OddPlayer topPlayer, OddPlayer bottomPlayer) {
+        OddJob.getInstance().log("2");
         if (topPlayer != null)
-            warning(type(Plugin.teleport), cPlayer + bottomPlayer.getName() + cWarning + " did not accept your request", topPlayer, false);
-        if (bottomPlayer != null)
-            success(type(Plugin.teleport), "You have rejected teleport request from " + cPlayer + topPlayer.getName(), bottomPlayer, false);
+            warning(type(Plugin.teleport), cPlayer + bottomPlayer.getName() + cWarning + " did not accept your request", topPlayer.getPlayer(), false);
+        if (bottomPlayer != null && topPlayer != null)
+            success(type(Plugin.teleport), "You have rejected teleport request from " + cPlayer + topPlayer.getName(), bottomPlayer.getPlayer(), false);
     }
 
     public void teleportTimedOut(UUID topUUID, UUID bottomUUID) {
@@ -1391,5 +1390,33 @@ public class MessageManager {
 
     public void auctionsNoBidsOrBuyout(AuctionItem auctionItem, Player player) {
         warning(type(Plugin.auctions), "Sorry to say, but your auction-id:" + cValue + auctionItem.getId() + cSuccess + " didn't satisfy any players. Please visit an auction-house to receive your item", player, false);
+    }
+
+    public void teleRequestAlready(String player, CommandSender sender) {
+        warning(type(Plugin.teleport), "Request to " + cPlayer + player + cWarning + " is already sent", sender, false);
+    }
+
+    public void teleportLeft(UUID sender, UUID player) {
+        warning(type(Plugin.teleport), cPlayer + OddJob.getInstance().getPlayerManager().getName(player) + cWarning + " left the server, teleport aborted", sender, false);
+    }
+
+    public void teleportAccepted(Player topPlayer, Player bottomPlayer) {
+        success(type(Plugin.teleport), cPlayer + topPlayer.getName() + cSuccess + " is coming for you!", bottomPlayer, false);
+        success(type(Plugin.teleport), cPlayer + bottomPlayer.getName() + cSuccess + " accepted your request.", topPlayer, false);
+    }
+
+    public void errorBoolean(Plugin type, String arg, CommandSender sender) {
+        danger(type(type), cValue + arg + cDanger + " is not a valid Boolean, valid values are " + cValue + "true|on|1|false|off|0", sender, false);
+    }
+
+    public void denyTPA(OddPlayer target, CommandSender sender) {
+        String receiver = (target.getUuid() == ((Player)sender).getUniqueId())?"You ":cPlayer+target.getName()+cInfo+" " ;
+        String deny = !target.getDenyTpa() ? cSuccess+"ACCEPTING"+cInfo : cDanger+"NOT ACCEPTING"+cInfo;
+        info(type(Plugin.players),receiver+" are "+deny+" Teleport requests (tpa)",sender,false);
+    }
+    public void denyTrade(OddPlayer target, CommandSender sender) {
+        String receiver = (target.getUuid() == ((Player)sender).getUniqueId())?"You ":cPlayer+target.getName()+cInfo+" " ;
+        String deny = !target.getDenyTrade() ? cSuccess+"ACCEPTING"+cInfo : cDanger+"NOT ACCEPTING"+cInfo;
+        info(type(Plugin.players),receiver+" are "+deny+" Trade requests",sender,false);
     }
 }

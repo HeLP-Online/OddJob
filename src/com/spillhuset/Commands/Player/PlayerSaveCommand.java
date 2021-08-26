@@ -20,7 +20,7 @@ public class PlayerSaveCommand extends com.spillhuset.Utils.SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.player;
+        return Plugin.players;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class PlayerSaveCommand extends com.spillhuset.Utils.SubCommand {
         }
 
         if (args.length == 1) {
-            OddJob.getInstance().getPlayerManager().load();
+            OddJob.getInstance().getPlayerManager().save();
             return;
         }
 

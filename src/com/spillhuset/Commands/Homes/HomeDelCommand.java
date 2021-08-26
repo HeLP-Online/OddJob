@@ -83,7 +83,7 @@ public class HomeDelCommand extends SubCommand {
             }
         }
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[0], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.players, args[0], sender);
             return;
         }
 

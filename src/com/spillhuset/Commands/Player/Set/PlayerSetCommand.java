@@ -12,7 +12,9 @@ public class PlayerSetCommand extends SubCommand {
     private final ArrayList<SubCommand> subCommands = new ArrayList<>();
 
     public PlayerSetCommand() {
-        subCommands.add(new PlayerSetScoreboardCommand());
+        //subCommands.add(new PlayerSetScoreboardCommand());
+        subCommands.add(new PlayerSetDenyTPACommand());
+        subCommands.add(new PlayerSetDenyTradeCommand());
     }
 
     @Override
@@ -27,7 +29,7 @@ public class PlayerSetCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.player;
+        return Plugin.players;
     }
 
     @Override
@@ -63,7 +65,7 @@ public class PlayerSetCommand extends SubCommand {
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player, nameBuilder.toString(), sender);
+        OddJob.getInstance().getMessageManager().infoArgs(Plugin.players, nameBuilder.toString(), sender);
     }
 
     @Override

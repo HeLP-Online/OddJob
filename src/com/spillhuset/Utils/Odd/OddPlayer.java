@@ -74,8 +74,8 @@ public class OddPlayer {
         this.banned = banned;
     }
 
-    public void setDenyTpa(boolean tpaDeny) {
-        this.denyTpa = tpaDeny;
+    public void setDenyTpa(boolean denyTpa) {
+        this.denyTpa = denyTpa;
     }
 
     public ScoreBoard getScoreboard() {
@@ -118,5 +118,8 @@ public class OddPlayer {
 
     public GameMode getGameMode() {
         return this.gameMode;
+    }
+    public boolean isOp() {
+        return getPlayer().isOp();
     }
 }

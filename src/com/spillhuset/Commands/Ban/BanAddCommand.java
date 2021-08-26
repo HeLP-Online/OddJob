@@ -55,7 +55,7 @@ public class BanAddCommand extends SubCommand {
         // Find Player
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[1], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.players, args[1], sender);
             return;
         }
 

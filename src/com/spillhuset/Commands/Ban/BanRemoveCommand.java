@@ -3,7 +3,6 @@ package com.spillhuset.Commands.Ban;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommand;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -57,7 +56,7 @@ public class BanRemoveCommand extends SubCommand {
         // Find Player
         UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[1], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.players, args[1], sender);
             return;
         }
 

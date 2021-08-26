@@ -14,5 +14,6 @@ public class PlayerQuit implements Listener {
         UUID uuid = event.getPlayer().getUniqueId();
         OddJob.getInstance().getScoreManager().clear(event.getPlayer());
 
+        OddJob.getInstance().getTeleportManager().leave(uuid);
     }
 }

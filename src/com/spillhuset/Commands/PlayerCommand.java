@@ -59,7 +59,7 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                 // Find target Player
                 UUID target = OddJob.getInstance().getPlayerManager().getUUID(args[2]);
                 if (target == null) {
-                    OddJob.getInstance().getMessageManager().errorPlayer(Plugin.player, args[2], sender);
+                    OddJob.getInstance().getMessageManager().errorPlayer(Plugin.players, args[2], sender);
                     return true;
                 }
 
@@ -99,11 +99,11 @@ public class PlayerCommand implements CommandExecutor, TabCompleter {
                     if (args[1].equalsIgnoreCase("denytpa")) {
                         boolean deny = Boolean.parseBoolean(args[2]);
                         oddPlayer.setDenyTpa(deny);
-                        OddJob.getInstance().getMessageManager().playerSetDenyTPA(args[1],deny,player);
+                        //OddJob.getInstance().getMessageManager().playerSetDenyTPA(args[1],deny,player);
                     } else if (args[1].equalsIgnoreCase("denytrade")) {
                         boolean deny = Boolean.parseBoolean(args[2]);
                         oddPlayer.setDenyTrade(deny);
-                        OddJob.getInstance().getMessageManager().playerSetDenyTrade(args[1],deny,player);
+                        //OddJob.getInstance().getMessageManager().playerSetDenyTrade(args[1],deny,player);
                     } else if (args[1].equalsIgnoreCase("scoreboard")) {
                         ScoreBoard score = ScoreBoard.valueOf(args[2]);
                         if (score == ScoreBoard.None) OddJob.getInstance().getScoreManager().clear(player);

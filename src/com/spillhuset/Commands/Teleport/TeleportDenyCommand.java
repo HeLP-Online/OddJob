@@ -2,8 +2,8 @@ package com.spillhuset.Commands.Teleport;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.SubCommand;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -53,37 +53,43 @@ public class TeleportDenyCommand extends SubCommand {
             return;
         }
 
-        Player topPlayer = null;
-        Player bottomPlayer = (Player) sender;
         UUID topUUID = null;
+        UUID bottomUUID = ((Player) sender).getUniqueId();
+        OddPlayer topOddPlayer = null;
+        OddPlayer bottomOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(bottomUUID);
 
-        int count = OddJob.getInstance().getTeleportManager().hasRequests(bottomPlayer.getUniqueId());
+
+        int count = OddJob.getInstance().getTeleportManager().hasRequests(bottomUUID);
 
         if (count == 0) {
             // No requests
             OddJob.getInstance().getMessageManager().teleportNoRequest(sender);
         } else if (count == 1) {
             // Has one request
-            topUUID = OddJob.getInstance().getTeleportManager().getRequest(bottomPlayer.getUniqueId());
-            topPlayer = Bukkit.getPlayer(topUUID);
-            if (topPlayer == null) {
-                OddJob.getInstance().getMessageManager().teleportNotOnline(bottomPlayer.getUniqueId());
+            topUUID = OddJob.getInstance().getTeleportManager().getRequestTop(bottomUUID);
+            topOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(topUUID);
+            if (topOddPlayer == null) {
+                OddJob.getInstance().log("null");
+                OddJob.getInstance().getMessageManager().teleportNotOnline(bottomUUID);
+                return;
             } else {
+                OddJob.getInstance().log("deny");
                 OddJob.getInstance().getTeleportManager().deny(topUUID);
             }
+            OddJob.getInstance().log("here");
             OddJob.getInstance().getTeleportManager().delRequest(topUUID);
-            OddJob.getInstance().getMessageManager().teleportDenied(topPlayer, bottomPlayer);
+            OddJob.getInstance().getMessageManager().teleportDenied(topOddPlayer, bottomOddPlayer);
         } else {
             if (!checkArgs(2, 2, args, sender, getPlugin())) {
                 topUUID = OddJob.getInstance().getPlayerManager().getUUID(args[1]);
-
+                topOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(topUUID);
                 // Targeting player
                 OddJob.getInstance().getTeleportManager().deny(topUUID);
                 OddJob.getInstance().getTeleportManager().delRequest(topUUID);
-                OddJob.getInstance().getMessageManager().teleportDenied(topPlayer, bottomPlayer);
-            }else if (args.length == 1) {
+                OddJob.getInstance().getMessageManager().teleportDenied(topOddPlayer, bottomOddPlayer);
+            } else if (args.length == 1) {
                 // No name given, listing up
-                OddJob.getInstance().getMessageManager().teleportRequestList(sender, OddJob.getInstance().getTeleportManager().getRequestList(bottomPlayer.getUniqueId()));
+                OddJob.getInstance().getMessageManager().teleportRequestList(sender, OddJob.getInstance().getTeleportManager().getRequestList(bottomUUID));
             }
         }
     }

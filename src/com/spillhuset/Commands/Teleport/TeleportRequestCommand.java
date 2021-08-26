@@ -59,32 +59,32 @@ public class TeleportRequestCommand extends SubCommand {
             return;
         }
 
+        // Requesting player
         Player topPlayer = (Player) sender;
 
-        // Find player
+        // Target player
         Player bottomPlayer = Bukkit.getPlayer(args[1]);
         if (bottomPlayer == null) {
             OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
             return;
         }
-
         UUID bottomUUID = bottomPlayer.getUniqueId();
         OddPlayer bottomOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(bottomUUID);
 
-        if (!bottomPlayer.isOnline()) {
-            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[1], sender);
-            return;
-        }
         // Check: Blacklist Whitelist DenyTPA
-        else if ((bottomOddPlayer.getBlacklist().contains(topPlayer.getUniqueId()) || bottomOddPlayer.getDenyTpa()) && (bottomOddPlayer.getDenyTpa() && !bottomOddPlayer.getWhitelist().contains(topPlayer.getUniqueId()))) {
+        if ((bottomOddPlayer.getBlacklist().contains(topPlayer.getUniqueId()) || bottomOddPlayer.getDenyTpa()) && (bottomOddPlayer.getDenyTpa() && !bottomOddPlayer.getWhitelist().contains(topPlayer.getUniqueId()))) {
             OddJob.getInstance().getMessageManager().tpDenied(args[1], sender);
             return;
         }
 
         // Check Request queue
         if (OddJob.getInstance().getTeleportManager().hasRequest(topPlayer.getUniqueId())) {
-            OddJob.getInstance().getMessageManager().tpAlreadySent(bottomOddPlayer.getName(), sender);
-            return;
+            OddPlayer prevOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(OddJob.getInstance().getTeleportManager().getRequestBottom(topPlayer.getUniqueId()));
+            if (prevOddPlayer == bottomOddPlayer) {
+                OddJob.getInstance().getMessageManager().teleRequestAlready(bottomPlayer.getName(),sender);
+                return;
+            }
+            OddJob.getInstance().getMessageManager().tpAlreadySent(prevOddPlayer, sender);
         }
         OddJob.getInstance().getTeleportManager().addRequest(topPlayer.getUniqueId(), bottomUUID);
         OddJob.getInstance().getMessageManager().teleportRequestPlayer(topPlayer, bottomPlayer);

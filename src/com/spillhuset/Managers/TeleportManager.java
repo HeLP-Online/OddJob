@@ -51,7 +51,7 @@ public class TeleportManager extends CostManager {
     /**
      * Check if a player got has a request.
      *
-     * @param topPlayer UUID of the sender of /tpa
+     * @param topPlayer UUID of the sender of request
      * @return boolean true if exists
      */
     public boolean hasRequest(UUID topPlayer) {
@@ -237,8 +237,8 @@ public class TeleportManager extends CostManager {
             for (UUID topUUID : request.keySet()) {
                 if (request.get(topUUID).equals(bottomUUID)) {
                     // topPlayer | bottomPlayer
-                    removeRequest(topUUID);
                     if (reset.containsKey(topUUID)) reset.get(topUUID).cancel();
+                    removeRequest(topUUID);
                 }
             }
         }
@@ -254,14 +254,17 @@ public class TeleportManager extends CostManager {
                     Player bottomPlayer = Bukkit.getPlayer(topUUID);
                     if (bottomPlayer == null) {
                         OddJob.getInstance().getMessageManager().teleportNotOnline(topUUID);
+                        cancel();
                         return;
                     }
                     bottomPlayer = Bukkit.getPlayer(bottomUUID);
                     if (bottomPlayer == null) {
                         OddJob.getInstance().getMessageManager().teleportNotOnline(bottomUUID);
+                        cancel();
                         return;
                     }
                     OddJob.getInstance().getMessageManager().teleportTimedOut(topUUID, bottomUUID);
+                    cancel();
                 }
             }
         };
@@ -300,7 +303,7 @@ public class TeleportManager extends CostManager {
     }
 
     public void spawn(Player player, Location location) {
-        if(CostManager.cost(player.getUniqueId(),"teleport.spawn")) {
+        if (CostManager.cost(player.getUniqueId(), "teleport.spawn")) {
             teleport(player, location, PlayerTeleportEvent.TeleportCause.COMMAND, true);
             OddJob.getInstance().getMessageManager().teleportSpawn(player);
         }
@@ -314,6 +317,10 @@ public class TeleportManager extends CostManager {
         return Bukkit.getWorld("world").getSpawnLocation();
     }
 
+    /**
+     * @param bottomUUID UUID destination
+     * @return Integer count of requests
+     */
     public int hasRequests(UUID bottomUUID) {
         int i = 0;
         for (UUID uuid : request.values()) {
@@ -322,7 +329,11 @@ public class TeleportManager extends CostManager {
         return i;
     }
 
-    public UUID getRequest(UUID bottomUUID) {
+    /**
+     * @param bottomUUID UUID of destination
+     * @return UUID of requester
+     */
+    public UUID getRequestTop(UUID bottomUUID) {
         for (UUID uuid : request.keySet()) {
             if (request.get(uuid) == bottomUUID) {
                 return uuid;
@@ -346,6 +357,7 @@ public class TeleportManager extends CostManager {
     }
 
     public void addRequest(UUID topUUID, UUID bottomUUID) {
+        if (reset.get(topUUID) != null) reset.get(topUUID).cancel();
         if (CostManager.cost(topUUID, bottomUUID, "teleport.request")) {
             request.put(topUUID, bottomUUID);
             startTimer(topUUID, bottomUUID);
@@ -354,10 +366,32 @@ public class TeleportManager extends CostManager {
 
     public void acceptRequest(Player topPlayer, Player bottomPlayer) {
         if (CostManager.cost(bottomPlayer.getUniqueId(), topPlayer.getUniqueId(), "teleport.accept")) {
+            teleport(topPlayer,bottomPlayer, PlayerTeleportEvent.TeleportCause.COMMAND,true);
             if (reset.containsKey(topPlayer.getUniqueId())) {
                 reset.get(topPlayer.getUniqueId()).cancel();
             }
             removeRequest(topPlayer.getUniqueId());
         }
+    }
+
+    public UUID getRequestBottom(UUID uniqueId) {
+        return request.get(uniqueId);
+    }
+
+    public void leave(UUID uuid) {
+        UUID bottom;
+        UUID top;
+        if (hasRequest(uuid)) {
+            // Top
+            bottom = getRequestBottom(uuid);
+            top = uuid;
+            OddJob.getInstance().getMessageManager().teleportLeft(bottom, top);
+        } else {
+            // Bottom
+            top = getRequestTop(uuid);
+            bottom = uuid;
+            OddJob.getInstance().getMessageManager().teleportLeft(top, bottom);
+        }
+        removeRequest(bottom);
     }
 }

@@ -1,4 +1,4 @@
-package com.spillhuset.Commands;
+package com.spillhuset.Commands.Teleport;
 
 import com.spillhuset.OddJob;
 import org.bukkit.Bukkit;
@@ -16,7 +16,7 @@ public class TpaCommand implements CommandExecutor {
                 OddJob.getInstance().getMessageManager().sendSyntax(Plugin.teleport,"/tp request <player>",sender);
                 return true;
             }
-            Bukkit.dispatchCommand(sender,"/tp request "+args[0]);
+            Bukkit.dispatchCommand(sender,"teleport request "+args[0]);
         } else {
             OddJob.getInstance().getMessageManager().errorConsole(Plugin.teleport);
         }

@@ -21,7 +21,7 @@ public class PlayerLoadCommand extends SubCommand {
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.player;
+        return Plugin.players;
     }
 
     @Override

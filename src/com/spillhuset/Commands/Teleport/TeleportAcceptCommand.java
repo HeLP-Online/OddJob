@@ -69,7 +69,7 @@ public class TeleportAcceptCommand extends SubCommand {
             OddJob.getInstance().getMessageManager().teleportNoRequest(sender);
         } else if (count == 1) {
             // Has one request
-            topUUID = OddJob.getInstance().getTeleportManager().getRequest(bottomPlayer.getUniqueId());
+            topUUID = OddJob.getInstance().getTeleportManager().getRequestTop(bottomPlayer.getUniqueId());
             topPlayer = Bukkit.getPlayer(topUUID);
             if (topPlayer == null) {
                 // Target not online
@@ -78,6 +78,7 @@ public class TeleportAcceptCommand extends SubCommand {
             }
             // Targeting
             OddJob.getInstance().getTeleportManager().acceptRequest(topPlayer,bottomPlayer);
+            OddJob.getInstance().getMessageManager().teleportAccepted(topPlayer,bottomPlayer);
         } else {
             // Has two or more
             if (!checkArgs(2, 2, args, sender, getPlugin())) {

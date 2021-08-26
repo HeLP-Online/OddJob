@@ -3,12 +3,14 @@ package com.spillhuset.Commands.Player;
 import com.spillhuset.Commands.Player.Set.PlayerSetCommand;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.SubCommand;
 import com.spillhuset.Utils.SubCommandInterface;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +48,12 @@ public class PlayerCommand extends SubCommandInterface implements CommandExecuto
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.player;
+        return Plugin.players;
     }
 
     @Override
     public String getPermission() {
-        return null;
+        return "players";
     }
 
     @Override
@@ -66,12 +68,26 @@ public class PlayerCommand extends SubCommandInterface implements CommandExecuto
             nameBuilder.append(name).append(",");
         }
         nameBuilder.deleteCharAt(nameBuilder.lastIndexOf(","));
-        if (sender.isOp()) {
-            OddJob.getInstance().getMessageManager().areOp(sender);
-        } else {
-            OddJob.getInstance().getMessageManager().notOp(sender);
+        OddPlayer target = null;
+        if (args.length == 1 && !args[0].isEmpty()) {
+            if (can(sender, true)) {
+                target = OddJob.getInstance().getPlayerManager().getOddPlayer(OddJob.getInstance().getPlayerManager().getUUID(args[0]));
+            } else {
+                OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+                return true;
+            }
+        } else if (sender instanceof Player) {
+            target = OddJob.getInstance().getPlayerManager().getOddPlayer(((Player) sender).getUniqueId());
         }
-        OddJob.getInstance().getMessageManager().infoArgs(Plugin.player, nameBuilder.toString(), sender);
+
+        if (target != null) {
+            OddJob.getInstance().getMessageManager().areOp(target, sender);
+            OddJob.getInstance().getMessageManager().denyTPA(target, sender);
+            OddJob.getInstance().getMessageManager().denyTrade(target, sender);
+        } else {
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[0], sender);
+        }
+        OddJob.getInstance().getMessageManager().infoArgs(getPlugin(), nameBuilder.toString(), sender);
         return true;
     }
 
@@ -80,7 +96,7 @@ public class PlayerCommand extends SubCommandInterface implements CommandExecuto
         List<String> list = new ArrayList<>();
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
-            if (!subCommand.can(sender,false)) {
+            if (!subCommand.can(sender, false)) {
                 continue;
             }
             if (args[0].isEmpty()) {

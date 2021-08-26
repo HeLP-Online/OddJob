@@ -48,10 +48,6 @@ commands:
     description: Teleports all online players to your location
     usage: /<command>
     permission: tpall
-  tppos:
-    description: Teleport you to a given coordinate
-    usage: /<command> <player> <X> <Y> <Z> [World]
-    permission: tppos
   kick:
     description: Kicks a given player from the server
     usage: /<command> <Player> [message]
