@@ -47,7 +47,7 @@ public class GuildJoinCommand extends SubCommand implements GuildRole {
 
     @Override
     public String getPermission() {
-        return "guild.use";
+        return "guild.join";
     }
 
     @Override

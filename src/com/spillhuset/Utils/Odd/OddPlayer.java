@@ -1,6 +1,5 @@
 package com.spillhuset.Utils.Odd;
 
-import com.spillhuset.SQL.PlayerSQL;
 import com.spillhuset.Utils.Enum.ScoreBoard;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -20,8 +19,9 @@ public class OddPlayer {
     private boolean denyTrade;
     private int maxHomes;
     private GameMode gameMode;
+    public boolean save = false;
 
-    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean denyTpa, String name, String banned, ScoreBoard scoreBoard, boolean denyTrade, int maxHomes,GameMode gm) {
+    public OddPlayer(UUID uuid, List<UUID> blacklist, List<UUID> whitelist, boolean denyTpa, String name, String banned, ScoreBoard scoreBoard, boolean denyTrade, int maxHomes, GameMode gm) {
         this.uuid = uuid;
         this.blacklist = blacklist;
         this.whitelist = whitelist;
@@ -40,18 +40,22 @@ public class OddPlayer {
 
     public void addBlacklist(UUID uuid) {
         blacklist.add(uuid);
+        this.save = true;
     }
 
     public void removeBlacklist(UUID uuid) {
         blacklist.remove(uuid);
+        this.save = true;
     }
 
     public void addWhitelist(UUID uuid) {
         whitelist.add(uuid);
+        this.save = true;
     }
 
     public void removeWhitelist(UUID uuid) {
         whitelist.remove(uuid);
+        this.save = true;
     }
 
     public List<UUID> getBlacklist() {
@@ -72,10 +76,12 @@ public class OddPlayer {
 
     public void setBanned(String banned) {
         this.banned = banned;
+        this.save = true;
     }
 
     public void setDenyTpa(boolean denyTpa) {
         this.denyTpa = denyTpa;
+        this.save = true;
     }
 
     public ScoreBoard getScoreboard() {
@@ -84,6 +90,7 @@ public class OddPlayer {
 
     public void setDenyTrade(boolean denyTrade) {
         this.denyTrade = denyTrade;
+        this.save = true;
     }
 
     public boolean getDenyTrade() {
@@ -104,22 +111,24 @@ public class OddPlayer {
 
     public void setMaxHomes(int i) {
         maxHomes = i;
+        this.save = true;
     }
 
     public void setScoreboard(ScoreBoard score) {
         scoreBoard = score;
-        PlayerSQL.setScoreboard(uuid, score);
+        this.save = true;
     }
 
     public void setGameMode(GameMode gm) {
         this.gameMode = gm;
-        PlayerSQL.setGameMode(uuid,gm);
+        this.save = true;
     }
 
     public GameMode getGameMode() {
         return this.gameMode;
     }
+
     public boolean isOp() {
-        return getPlayer().isOp();
+        return Bukkit.getOfflinePlayer(uuid).isOp();
     }
 }

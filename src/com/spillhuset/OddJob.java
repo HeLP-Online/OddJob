@@ -11,10 +11,7 @@ import com.spillhuset.Commands.Homes.HomesCommand;
 import com.spillhuset.Commands.Lock.LockCommand;
 import com.spillhuset.Commands.Money.MoneyCommand;
 import com.spillhuset.Commands.Player.PlayerCommand;
-import com.spillhuset.Commands.Teleport.TeleportCommand;
-import com.spillhuset.Commands.Teleport.TpAcceptCommand;
-import com.spillhuset.Commands.Teleport.TpDenyCommand;
-import com.spillhuset.Commands.Teleport.TpaCommand;
+import com.spillhuset.Commands.Teleport.*;
 import com.spillhuset.Commands.Trade.TradeCommand;
 import com.spillhuset.Commands.Warp.WarpCommand;
 import com.spillhuset.Events.*;
@@ -121,6 +118,7 @@ public class OddJob extends JavaPlugin {
         getCommand("tpa").setExecutor(new TpaCommand());
         getCommand("tpaccept").setExecutor(new TpAcceptCommand());
         getCommand("tpdeny").setExecutor(new TpDenyCommand());
+        getCommand("tpall").setExecutor(new TpAllCommand());
 
         ConfigManager.load(); // Checked
         playerManager.load();

@@ -1,5 +1,7 @@
 package com.spillhuset.Commands.Player;
 
+import com.spillhuset.Commands.Player.List.PlayerBlacklistCommand;
+import com.spillhuset.Commands.Player.List.PlayerWhitelistCommand;
 import com.spillhuset.Commands.Player.Set.PlayerSetCommand;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
@@ -20,8 +22,8 @@ public class PlayerCommand extends SubCommandInterface implements CommandExecuto
 
     public PlayerCommand() {
         subCommands.add(new PlayerSetCommand());
-        //subCommands.add(new PlayerWhitelistCommand());
-        //subCommands.add(new PlayerBlacklistCommand());
+        subCommands.add(new PlayerWhitelistCommand());
+        subCommands.add(new PlayerBlacklistCommand());
         subCommands.add(new PlayerLoadCommand());
         subCommands.add(new PlayerSaveCommand());
     }
@@ -81,9 +83,11 @@ public class PlayerCommand extends SubCommandInterface implements CommandExecuto
         }
 
         if (target != null) {
-            OddJob.getInstance().getMessageManager().areOp(target, sender);
-            OddJob.getInstance().getMessageManager().denyTPA(target, sender);
-            OddJob.getInstance().getMessageManager().denyTrade(target, sender);
+            OddJob.getInstance().getMessageManager().playerInfoAreOp(target, sender);
+            OddJob.getInstance().getMessageManager().playerInfoDenyTPA(target, sender);
+            OddJob.getInstance().getMessageManager().playerInfoDenyTrade(target, sender);
+            OddJob.getInstance().getMessageManager().playerInfoBlacklist(target,sender);
+            OddJob.getInstance().getMessageManager().playerInfoWhitelist(target,sender);
         } else {
             OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[0], sender);
         }

@@ -72,7 +72,7 @@ public class TeleportRequestCommand extends SubCommand {
         OddPlayer bottomOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(bottomUUID);
 
         // Check: Blacklist Whitelist DenyTPA
-        if ((bottomOddPlayer.getBlacklist().contains(topPlayer.getUniqueId()) || bottomOddPlayer.getDenyTpa()) && (bottomOddPlayer.getDenyTpa() && !bottomOddPlayer.getWhitelist().contains(topPlayer.getUniqueId()))) {
+        if (bottomOddPlayer.getBlacklist().contains(topPlayer.getUniqueId()) || (bottomOddPlayer.getDenyTpa() && !bottomOddPlayer.getWhitelist().contains(topPlayer.getUniqueId()))) {
             OddJob.getInstance().getMessageManager().tpDenied(args[1], sender);
             return;
         }

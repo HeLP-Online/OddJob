@@ -169,7 +169,7 @@ public class AuctionSQL extends MySQLManager {
         return itemStack;
     }
 
-    public static void placeBid(int item, double offer, Player player) {
+    public static void addBid(int item, double offer, Player player) {
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("INSERT INTO `mine_auction_bids` (`item`,`bid`,`bidder`,`time`) VALUES (?,?,?,?)");
@@ -340,5 +340,23 @@ public class AuctionSQL extends MySQLManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public static List<Integer> getUnRetrievedItems(UUID uniqueId) {
+        List<Integer> list = new ArrayList<>();
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `id` FROM `mine_auction` WHERE `picked_up` = ? AND `sold` < 0");
+                preparedStatement.setInt(1,0);
+                resultSet = preparedStatement.executeQuery();
+
+                while(resultSet.next()) {
+                    list.add(resultSet.getInt("id"));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return list;
     }
 }

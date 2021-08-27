@@ -14,7 +14,7 @@ import java.util.List;
 public class TeleportPositionCommand extends SubCommand {
     @Override
     public boolean allowConsole() {
-        return false;
+        return true;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class TeleportPositionCommand extends SubCommand {
 
     @Override
     public String getName() {
-        return "pos";
+        return "position";
     }
 
     @Override

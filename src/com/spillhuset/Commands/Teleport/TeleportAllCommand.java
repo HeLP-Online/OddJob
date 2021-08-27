@@ -47,8 +47,13 @@ public class TeleportAllCommand extends SubCommand {
 
     @Override
     public void perform(CommandSender sender, String[] args) {
-        if (can(sender,false)) {
+        if (!can(sender,false)) {
             OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(),sender);
+            return;
+        }
+
+        if (checkArgs(1,1,args,sender,getPlugin())) {
+            return;
         }
 
         for (Player target: Bukkit.getOnlinePlayers()) {

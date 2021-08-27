@@ -54,8 +54,8 @@ public class AuctionBidCommand extends SubCommand {
             return;
         }
 
-        int item = 0;
-        double offer = 0;
+        int item;
+        double offer;
 
         try {
             item = Integer.parseInt(args[1]);

@@ -1,6 +1,10 @@
 package com.spillhuset.Utils;
 
+import com.spillhuset.OddJob;
 import com.spillhuset.SQL.AuctionSQL;
+import com.spillhuset.Utils.Enum.Types;
+import com.spillhuset.Utils.Odd.OddPlayer;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -69,5 +73,15 @@ public class AuctionBid {
         this.bid = bid;
         this.time = time;
         this.refunded = refunded != 0;
+    }
+
+    /**
+     * Refunds the current bid
+     */
+    public void refund(double offer, Player target, boolean buyout,int item,UUID sender) {
+        // Refund to the bank
+        OddJob.getInstance().getCurrencyManager().add(bidder,bid, Types.AccountType.bank);
+
+        OddJob.getInstance().getMessageManager().auctionsOverBid(offer,target,buyout,item,sender);
     }
 }

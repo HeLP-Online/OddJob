@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AuctionSellCommand extends SubCommand {
@@ -80,6 +81,10 @@ public class AuctionSellCommand extends SubCommand {
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
-        return null;
+        List<String> list = new ArrayList<>();
+        if (args.length == 2) list.add("<start_bid>");
+        if (args.length == 3) list.add("<buyout>");
+        if (args.length == 4) list.add("[expire]");
+        return list;
     }
 }

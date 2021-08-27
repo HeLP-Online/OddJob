@@ -178,8 +178,11 @@ public class PlayerSQL extends MySQLManager {
     public static void save(HashMap<UUID, OddPlayer> players) {
         int i = 0;
         for (UUID uuid : players.keySet()) {
-            save(players.get(uuid));
-            i++;
+            if (players.get(uuid).save) {
+                save(players.get(uuid));
+                i++;
+                players.get(uuid).save = false;
+            }
         }
         OddJob.getInstance().log("Players Saved: " + i);
     }

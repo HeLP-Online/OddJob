@@ -60,7 +60,7 @@ public class PlayerSetDenyTradeCommand extends SubCommand {
         OddPlayer oddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(player.getUniqueId());
 
         boolean deny = Boolean.parseBoolean(args[2]);
-        oddPlayer.setDenyTpa(deny);
+        oddPlayer.setDenyTrade(deny);
         OddJob.getInstance().getMessageManager().playerSetDenyTrade(deny, sender);
     }
 

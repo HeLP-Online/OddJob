@@ -31,6 +31,9 @@ public class PlayerJoin implements Listener {
             //PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to Spillhuset\"}"), 40, 20, 20);
             //(((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);
 
+            // Check Auction
+            OddJob.getInstance().getAuctionManager().checkUnRetrievedItems(player);
+
             // Remove locking items if the player has any
             OddJob.getInstance().getLocksManager().remove(uuid);
 

@@ -2,6 +2,7 @@ package com.spillhuset.Commands.Trade;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Odd.OddPlayer;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -66,8 +67,19 @@ public class TradeRequestCommand extends SubCommand {
             return;
         }
 
-        OddJob.getInstance().getPlayerManager().getRequestTrade().put(topPlayer.getUniqueId(), bottomPlayer.getUniqueId());
-        OddJob.getInstance().getMessageManager().tradeRequest(topPlayer, bottomPlayer);
+        OddPlayer topOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(topPlayer.getUniqueId());
+        OddPlayer bottomOddPlayer = OddJob.getInstance().getPlayerManager().getOddPlayer(bottomPlayer.getUniqueId());
+        if (bottomOddPlayer.getBlacklist().contains(topPlayer.getUniqueId())) {
+            OddJob.getInstance().getMessageManager().tradeDenied(bottomPlayer,sender);
+        } else {
+            if (bottomOddPlayer.getDenyTrade() && !bottomOddPlayer.getWhitelist().contains(topOddPlayer.getUuid()))  {
+                OddJob.getInstance().getMessageManager().tradeDenied(bottomPlayer,sender);
+                return;
+            }
+            OddJob.getInstance().getPlayerManager().getRequestTrade().put(topPlayer.getUniqueId(), bottomPlayer.getUniqueId());
+            OddJob.getInstance().getMessageManager().tradeRequest(topPlayer, bottomPlayer);
+        }
+
     }
 
     @Override
