@@ -58,8 +58,8 @@ public class InventoryClick implements Listener {
                 OddJob.getInstance().log(">=36");
             } else if (event.getRawSlot() >= 0 && event.getRawSlot() <= 8 && player == topPlayer) {
                 OddJob.getInstance().log(">=0 && <=8");
-            } else if (event.getRawSlot() >= 27 && event.getRawSlot() <= 31 && player == bottomPlayer) {
-                OddJob.getInstance().log(">=27 && <=31");
+            } else if (event.getRawSlot() >= 27 && event.getRawSlot() <= 35 && player == bottomPlayer) {
+                OddJob.getInstance().log(">=27 && <=35");
             } else if (event.getRawSlot() == 17) {
                 OddJob.getInstance().log("== 17");
                 OddJob.getInstance().getPlayerManager().acceptTrade(player, event.getCurrentItem());

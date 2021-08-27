@@ -215,3 +215,5 @@ permissions:
         default: true
   guild:
     default: true
+  trade:
+    default: true
