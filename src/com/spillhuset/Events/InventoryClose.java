@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -53,7 +54,8 @@ public class InventoryClose implements Listener {
                     }
                 }
             }
-            if (event.getInventory().getItem(17).getType().equals(Material.BARRIER))
+            ItemStack itemStack = event.getInventory().getItem(17);
+            if (itemStack != null && itemStack.getType().equals(Material.BARRIER))
             for (int i = 0; i < 36; i++) {
                 if (i <= 8) {
                     if (topUUID != null) {
@@ -75,6 +77,7 @@ public class InventoryClose implements Listener {
                     }
                 }
             }
+            event.getInventory().clear();
         } else if (event.getView().getTitle().equals("DEATH CHEST")) {
             for (HumanEntity human : event.getViewers()) {
                 for (UUID entityUUID : OddJob.getInstance().getDeathManager().getOwners().keySet()) {

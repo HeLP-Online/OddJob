@@ -101,6 +101,7 @@ commands:
     description: Cleans up chests
   backup:
     usage: /<command>
+    permission: op
   rollback:
     usage: /<command>
   spawn:
