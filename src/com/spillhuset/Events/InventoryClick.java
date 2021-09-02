@@ -6,13 +6,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 
 import java.util.UUID;
 
 public class InventoryClick implements Listener {
+
     @EventHandler
     public void onPlayerInventoryClick(InventoryClickEvent event) {
-        // CHECK TRADE
+        // Find Trades
         if (event.getView().getTitle().equals("FAIR TRADE")) {
             // Is a trade inventory
             if (event.getCurrentItem() != null && (

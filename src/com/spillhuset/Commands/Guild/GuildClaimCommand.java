@@ -109,7 +109,7 @@ public class GuildClaimCommand extends SubCommand implements GuildRole {
         }
         OddJob.getInstance().log("Claiming for: " + OddJob.getInstance().getGuildManager().getGuildNameByUUID(guild));
         OddJob.getInstance().getGuildManager().claim(player, guild);
-        if ((!OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) && auto) || (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) && !auto)) {
+        if ((OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) == null && auto) || (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) != null && !auto)) {
             OddJob.getInstance().getGuildManager().toggleAutoClaim(player, guild, auto);
         }
     }

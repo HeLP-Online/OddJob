@@ -223,7 +223,8 @@ public class GuildManager {
      * @param chunk  Chunk the Player is in
      */
     public void autoClaim(Player player, Chunk chunk) {
-        if (getGuildUUIDByChunk(chunk) == (getGuildUUIDByZone(Zone.WILD))) {
+        UUID uuid = getGuildUUIDByChunk(chunk);
+        if (uuid == null || uuid == (getGuildUUIDByZone(Zone.WILD))) {
             // Chunk is not already claimed
             UUID claimingGuild = autoClaim.get(player.getUniqueId());
 
@@ -428,8 +429,8 @@ public class GuildManager {
      * @param player UUID of the Player
      * @return if the AutoClaim is toggled on for this Player
      */
-    public boolean hasAutoClaim(@Nonnull UUID player) {
-        return autoClaim.get(player) != null;
+    public UUID hasAutoClaim(@Nonnull UUID player) {
+        return autoClaim.get(player);
     }
 
     /**
@@ -1040,10 +1041,8 @@ public class GuildManager {
 
         int i = 0;
         for (UUID uuid : chunks.values()) {
-            OddJob.getInstance().log("uuid=" + uuid.toString() + "; guild=" + guild.toString());
             if (uuid.equals(guild)) i++;
         }
-        OddJob.getInstance().log("SUM: " + OddJob.getInstance().getGuildManager().getGuild(guild).getName() + " - " + i);
         return i;
     }
 

@@ -1500,4 +1500,8 @@ public class MessageManager {
             warning(type(Plugin.auctions), "Auction item: " + cValue + item + cWarning + " was overbid by " + cPlayer + target.getName() + cWarning + " with offer " + cValue + offer + cWarning + ".\nYour current bid has been refunded to your " + cValue + "bank" + cWarning + " account", sender, true);
         }
     }
+
+    public void movingInfo(String toString, CommandSender sender) {
+        info(type(Plugin.guilds),toString,sender);
+    }
 }

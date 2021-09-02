@@ -23,18 +23,19 @@ public class EntityExplode implements Listener {
     public void entityExplode(EntityExplodeEvent event) {
         List<Block> blocks = event.blockList();
         HashMap<Location, BlockData> keep = new HashMap<>();
+
+        // Every Block in the explosion
         for (Block block : blocks) {
-            // Every Block in the explosion
             Chunk chunk = block.getChunk();
 
+            // The Chunk is inside a Guild
             UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
             if (guild != null && !guild.equals(OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD))) {
-                // The Chunk is inside a Guild
                 event.setCancelled(true);
                 keep.put(block.getLocation(), block.getBlockData());
             }
 
-            // CHECK LOCKS
+            // Check if the block is locked
             if (OddJob.getInstance().getLocksManager().getLockable().contains(block.getType()) || OddJob.getInstance().getLocksManager().getDoors().contains(block.getType())) {
                 Location location = block.getLocation();
                 if (OddJob.getInstance().getLocksManager().isLocked(location)) {

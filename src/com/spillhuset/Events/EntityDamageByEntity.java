@@ -8,6 +8,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -31,7 +32,7 @@ public class EntityDamageByEntity implements Listener {
             OddJob.getInstance().getPlayerManager().setInCombat(event.getDamager().getUniqueId());
         }
 
-        // The on who receive damage is a Player
+        // The on whom receive damage is a Player
         if (event.getEntity() instanceof Player) {
             player = (Player) event.getEntity();
             entityGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(event.getEntity().getUniqueId());
