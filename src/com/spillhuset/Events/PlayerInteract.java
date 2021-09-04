@@ -90,7 +90,7 @@ public class PlayerInteract implements Listener {
         // Admin tool - end
 
         // Accessing a lockable block, with right click block or stepping on pressure_plate
-        if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (event.getAction().equals(Action.PHYSICAL)) && block != null) {
+        if (block != null && event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (event.getAction().equals(Action.PHYSICAL))) {
             material = block.getType();
             if (OddJob.getInstance().getLocksManager().getLockable().contains(material)) {
                 // It is a lockable Block
@@ -196,6 +196,10 @@ public class PlayerInteract implements Listener {
                     }
                 }
 
+                // Changing to the guild who owns the block
+                chunkGuildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(block.getChunk());
+                chunkGuild = OddJob.getInstance().getGuildManager().getGuild(chunkGuildUUID);
+
                 // Chunk owned by a guild, player is in a guild
                 if (chunkGuild != null && playerGuildUUID != null && zone != Zone.WILD) {
                     // Owned by your guild
@@ -227,6 +231,5 @@ public class PlayerInteract implements Listener {
                 }
             }
         }
-        if ((playerGuildUUID != null) && chunkGuildUUID == null) return;
     }
 }
