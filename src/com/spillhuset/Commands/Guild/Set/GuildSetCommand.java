@@ -83,25 +83,31 @@ public class GuildSetCommand extends SubCommand implements GuildRole {
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(((Player) sender).getUniqueId());
         for (SubCommand subCommand : subCommands) {
             String name = subCommand.getName();
-            if (subCommand.can(sender, false) && ((subCommand.needGuild() && guild != null) || (subCommand.needNoGuild() && guild == null) || !subCommand.needNoGuild() && !subCommand.needGuild())) {
-                if (args[0].isEmpty()) {
-                    list.add(name);
-                } else if (name.equals(args[0].toLowerCase()) && args.length > 1) {
-                    return subCommand.getTab(sender, args);
-                } else if (name.toLowerCase().startsWith(args[0].toLowerCase())) {
-                    list.add(name);
+            if (subCommand.can(sender, false)) {
+                OddJob.getInstance().log("sender can");
+                if ((subCommand.needGuild() && guild != null ) || (subCommand.needNoGuild() && guild == null) ) {
+                    OddJob.getInstance().log("can or can't");
+                    if (!subCommand.needNoGuild() && !subCommand.needGuild()) {
+                        OddJob.getInstance().log("need or not need");
+                            if (args[0].isEmpty()) {
+                                list.add(name);
+                            } else if (name.equals(args[0].toLowerCase()) && args.length > 1) {
+                                return subCommand.getTab(sender, args);
+                            } else if (name.toLowerCase().startsWith(args[0].toLowerCase())) {
+                                list.add(name);
+                            }
+                        }
+
                 }
             }
         }
         return list;
     }
 
-    @Override
     public boolean needNoGuild() {
         return false;
     }
 
-    @Override
     public boolean needGuild() {
         return true;
     }

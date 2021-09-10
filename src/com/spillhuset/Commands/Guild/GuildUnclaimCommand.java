@@ -20,7 +20,7 @@ public class GuildUnclaimCommand extends SubCommand implements GuildRole {
 
     @Override
     public boolean allowOp() {
-        return false;
+        return true;
     }
 
     @Override

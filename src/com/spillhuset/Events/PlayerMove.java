@@ -27,6 +27,7 @@ public class PlayerMove implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onGuildMove(PlayerMoveEvent event) {
+        if (event.getTo() == null) return;
         Chunk movingToChunk = event.getTo().getChunk();
         Chunk movingFromChunk = event.getFrom().getChunk();
         Player player = event.getPlayer();
@@ -35,7 +36,7 @@ public class PlayerMove implements Listener {
         boolean print = false;
 
         // Has the player changed chunk?
-        if (event.getTo() != null && movingFromChunk.getX() == movingToChunk.getX() && movingFromChunk.getZ() == movingToChunk.getZ()) {
+        if (movingFromChunk.getX() == movingToChunk.getX() && movingFromChunk.getZ() == movingToChunk.getZ()) {
             // Player is within the same chunk
             return;
         }
@@ -52,14 +53,15 @@ public class PlayerMove implements Listener {
 
         // Is it wild?
         Zone zoneTo = OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild);
-
         if (movingFromGuild == null || !movingFromGuild.equals(movingToGuild)) {
+            OddJob.getInstance().log("from: " + movingFromGuild.toString());
+            OddJob.getInstance().log("to:   " + movingToGuild.toString());
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), movingToGuild);
             print = true;
         }
 
         // Moving from not null
-        if (movingToGuild == null || movingToGuild == OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
+        if (movingToGuild == OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
             OddJob.getInstance().log("is wild");
             // Moving to is WILD
             if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) != null) {
@@ -80,7 +82,7 @@ public class PlayerMove implements Listener {
         if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), movingToGuild);
             print = true;
-        } else if (OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()) != (movingToGuild)) {
+        } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals((movingToGuild))) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), movingFromGuild);
             print = true;
         }
