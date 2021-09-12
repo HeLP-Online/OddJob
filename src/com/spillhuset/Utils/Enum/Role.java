@@ -7,7 +7,7 @@ public enum Role {
     Members(11),
     all(0);
 
-    private int level;
+    private final int level;
 
     Role(int level) {
         this.level = level;

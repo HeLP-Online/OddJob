@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class Guild {
-    private Location spawn;
+    private Location spawn = null;
     String name;
     Zone zone;
     UUID guildUUID;
@@ -20,6 +20,7 @@ public class Guild {
     Role permissionKick = Role.valueOf(OddJob.getInstance().getConfig().getString("guild.default.permissionKick"));
     boolean open = OddJob.getInstance().getConfig().getBoolean("guild.default.open");
     private int maxClaims = OddJob.getInstance().getConfig().getInt("guild.default.maxClaims");
+    private boolean spawns = false;
 
     /**
      * Creating a new Guild from the command
@@ -76,7 +77,9 @@ public class Guild {
             boolean open,
             Role permission_invite,
             Role permission_kick,
-            HashMap<UUID, Role> members) {
+            HashMap<UUID, Role> members,
+            boolean spawns,
+            Location spawn) {
         this.guildUUID = guildUUID;
         this.name = name;
         this.zone = zone;
@@ -86,6 +89,8 @@ public class Guild {
         this.permissionInvite = permission_invite;
         this.members = members;
         this.open = open;
+        this.spawns = spawns;
+        this.spawn = spawn;
     }
 
 
@@ -156,5 +161,17 @@ public class Guild {
 
     public Location getSpawn() {
         return spawn;
+    }
+
+    public void setSpawns(boolean spawns) {
+        this.spawns = spawns;
+    }
+
+    public boolean getSpawns() {
+        return spawns;
+    }
+
+    public void setSpawn(Location spawn) {
+        this.spawn = spawn;
     }
 }

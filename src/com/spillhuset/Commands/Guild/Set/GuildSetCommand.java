@@ -17,6 +17,8 @@ public class GuildSetCommand extends SubCommand implements GuildRole {
 
     public GuildSetCommand() {
         subCommands.add(new GuildSetOpenCommand());
+        subCommands.add(new GuildSetSpawnMobsCommand());
+        subCommands.add(new GuildSetSpawnCommand());
     }
 
     @Override
@@ -85,19 +87,15 @@ public class GuildSetCommand extends SubCommand implements GuildRole {
             String name = subCommand.getName();
             if (subCommand.can(sender, false)) {
                 OddJob.getInstance().log("sender can");
-                if ((subCommand.needGuild() && guild != null ) || (subCommand.needNoGuild() && guild == null) ) {
+                if ((subCommand.needGuild() && guild != null) || (subCommand.needNoGuild() && guild == null)) {
                     OddJob.getInstance().log("can or can't");
-                    if (!subCommand.needNoGuild() && !subCommand.needGuild()) {
-                        OddJob.getInstance().log("need or not need");
-                            if (args[0].isEmpty()) {
-                                list.add(name);
-                            } else if (name.equals(args[0].toLowerCase()) && args.length > 1) {
-                                return subCommand.getTab(sender, args);
-                            } else if (name.toLowerCase().startsWith(args[0].toLowerCase())) {
-                                list.add(name);
-                            }
-                        }
-
+                    if (args[0].isEmpty()) {
+                        list.add(name);
+                    } else if (name.equals(args[0].toLowerCase()) && args.length > 1) {
+                        return subCommand.getTab(sender, args);
+                    } else if (name.toLowerCase().startsWith(args[0].toLowerCase())) {
+                        list.add(name);
+                    }
                 }
             }
         }

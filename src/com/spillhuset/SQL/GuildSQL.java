@@ -7,16 +7,14 @@ import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class GuildSQL extends MySQLManager {
     public static HashMap<UUID, Guild> loadGuilds() {
@@ -29,6 +27,7 @@ public class GuildSQL extends MySQLManager {
 
                 while (resultSet.next()) {
                     HashMap<UUID, Role> members = new HashMap<>();
+                    Location location = null;
                     UUID guildUUID = UUID.fromString(resultSet.getString("uuid"));
                     preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `uuid` = ?");
                     preparedStatement.setString(1, resultSet.getString("uuid"));
@@ -37,6 +36,16 @@ public class GuildSQL extends MySQLManager {
                     while (resultSetSec.next()) {
                         members.put(UUID.fromString(resultSetSec.getString("player")), Role.valueOf(resultSetSec.getString("role")));
                     }
+
+                    if (!resultSet.getString("world").equals("")) {
+                        UUID worldUUID = UUID.fromString(resultSet.getString("world"));
+                        World world = Bukkit.getWorld(worldUUID);
+                        if (world != null) {
+                            location = new Location(world, resultSet.getDouble("x"), resultSet.getDouble("y"), resultSet.getDouble("z"), resultSet.getFloat("yaw"), resultSet.getFloat("pitch"));
+                        }
+                    }
+
+
                     guilds.put(guildUUID, new Guild(
                             guildUUID,
                             resultSet.getString("name"),
@@ -46,7 +55,9 @@ public class GuildSQL extends MySQLManager {
                             resultSet.getInt("open") == 1,
                             Role.valueOf(resultSet.getString("permission_invite")),
                             Role.valueOf(resultSet.getString("permission_kick")),
-                            members
+                            members,
+                            resultSet.getInt("spawns") == 1,
+                            location
                     ));
                     OddJob.getInstance().log(resultSet.getString("name"));
                 }
@@ -55,12 +66,20 @@ public class GuildSQL extends MySQLManager {
                     for (String string : oddjobConfig.getConfigurationSection("guilds").getKeys(false)) {
                         UUID uuid = UUID.fromString(string);
                         HashMap<UUID, Role> members = new HashMap<>();
+                        Location location = null;
                         OddJob.getInstance().log("here");
                         if (oddjobConfig.getConfigurationSection("guilds." + string + ".members") != null) {
 
                             for (String player : oddjobConfig.getConfigurationSection("guilds." + string + ".members").getKeys(false)) {
                                 OddJob.getInstance().log(player);
                                 members.put(UUID.fromString(player), Role.valueOf(oddjobConfig.getString("guilds." + string + ".members." + player)));
+                            }
+                        }
+                        if (!Objects.equals(oddjobConfig.getString("guilds." + string + ".world"), "")) {
+                            UUID worldUUID = UUID.fromString(oddjobConfig.getString("guilds." + string + ".world"));
+                            World world = Bukkit.getWorld(worldUUID);
+                            if (world != null) {
+                                location = new Location(world, oddjobConfig.getDouble("guilds." + string + ".x"), oddjobConfig.getDouble("guilds." + string + ".y"), oddjobConfig.getDouble("guilds." + string + ".z"), oddjobConfig.getInt("guilds." + string + ".yaw"), oddjobConfig.getInt("guilds." + string + ".pitch"));
                             }
                         }
                         guilds.put(uuid, new Guild(
@@ -72,7 +91,9 @@ public class GuildSQL extends MySQLManager {
                                 oddjobConfig.getBoolean("guilds." + string + ".open"),
                                 Role.valueOf(oddjobConfig.getString("guilds." + string + ".permission_invite")),
                                 Role.valueOf(oddjobConfig.getString("guilds." + string + ".permission_kick")),
-                                members
+                                members,
+                                oddjobConfig.getBoolean("guilds." + string + ".spawns"),
+                                location
                         ));
                     }
                 }
@@ -94,10 +115,19 @@ public class GuildSQL extends MySQLManager {
             boolean invitedOnly = guild.getInvitedOnly();
             boolean friendlyFire = guild.getFriendlyFire();
             boolean open = guild.isOpen();
+            boolean spawns = guild.getSpawns();
             Role permissionInviteRole = guild.getPermissionInvite();
             Role permissionKickRole = guild.getPermissionKick();
             HashMap<UUID, Role> members = guild.getMembers();
             int maxClaims = guild.getMaxClaims();
+
+            Location spawn = guild.getSpawn();
+            UUID worldUUID = spawn.getWorld() != null ? spawn.getWorld().getUID() : null;
+            double x = spawn.getX();
+            double y = spawn.getY();
+            double z = spawn.getZ();
+            float yaw = spawn.getYaw();
+            float pitch = spawn.getPitch();
 
             try {
                 if (connect()) {
@@ -108,7 +138,7 @@ public class GuildSQL extends MySQLManager {
                     resultSet = preparedStatement.executeQuery();
 
                     if (resultSet.next()) {
-                        preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? ,`maxclaims` = ? WHERE `uuid` = ?");
+                        preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? ,`maxclaims` = ?,`world` = ?,`x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ?,`spawnmobs` = ? WHERE `uuid` = ?");
                         preparedStatement.setString(1, name);
                         preparedStatement.setString(2, zone.name());
                         preparedStatement.setInt(3, invitedOnly ? 1 : 0);
@@ -117,10 +147,17 @@ public class GuildSQL extends MySQLManager {
                         preparedStatement.setString(6, permissionKickRole.name());
                         preparedStatement.setInt(7, open ? 1 : 0);
                         preparedStatement.setInt(8, maxClaims);
-                        preparedStatement.setString(9, guildUUID.toString());
+                        preparedStatement.setString(9, worldUUID.toString());
+                        preparedStatement.setDouble(10, x);
+                        preparedStatement.setDouble(11, y);
+                        preparedStatement.setDouble(12, z);
+                        preparedStatement.setFloat(13, yaw);
+                        preparedStatement.setFloat(14, pitch);
+                        preparedStatement.setInt(15, spawns ? 1 : 0);
+                        preparedStatement.setString(16, guildUUID.toString());
                         preparedStatement.executeUpdate();
                     } else {
-                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`) VALUES (?,?,?,?,?,?,?,?,?,?)");
+                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`,`world`,`x`,`y`,`z`,`yaw`,`pitch`,`spawnmobs`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                         preparedStatement.setString(1, guildUUID.toString());
                         preparedStatement.setString(2, name);
                         preparedStatement.setString(3, zone.name());
@@ -131,6 +168,13 @@ public class GuildSQL extends MySQLManager {
                         preparedStatement.setInt(8, open ? 1 : 0);
                         preparedStatement.setString(9, OddJob.getInstance().getServerId().toString());
                         preparedStatement.setInt(10, maxClaims);
+                        preparedStatement.setString(11,worldUUID.toString());
+                        preparedStatement.setDouble(12,x);
+                        preparedStatement.setDouble(13,y);
+                        preparedStatement.setDouble(14,z);
+                        preparedStatement.setFloat(15,yaw);
+                        preparedStatement.setFloat(16,pitch);
+                        preparedStatement.setInt(17,spawns ? 1:0);
                         preparedStatement.execute();
                     }
 

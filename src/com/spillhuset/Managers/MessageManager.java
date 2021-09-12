@@ -1373,6 +1373,9 @@ public class MessageManager {
     public void guildsSet(String name, Guild guild, boolean value, CommandSender sender) {
         success(type(Plugin.guilds), "Successfully " + cValue + name + cSuccess + " set to " + cValue + value + cSuccess + " for the " + cGuild + guild.getName(), sender);
     }
+    public void guildsSet(String name, Guild guild,  CommandSender sender) {
+        success(type(Plugin.guilds), "Successfully set new " + cValue + name + cSuccess + " for the " + cGuild + guild.getName(), sender);
+    }
 
     public void auctionsBidSet(int item, double offer, Player player) {
         success(type(Plugin.auctions), "Bid successfully set, " + cCurrency + offer + cSuccess + " for item " + cValue + item, player);
