@@ -3,14 +3,16 @@ import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Guild;
+import com.spillhuset.Utils.GuildRole;
 import com.spillhuset.Utils.SubCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class GuildSetSpawnMobsCommand extends SubCommand {
+public class GuildSetSpawnMobsCommand extends SubCommand implements GuildRole {
     @Override
     public boolean allowConsole() {
         return false;
@@ -82,6 +84,25 @@ public class GuildSetSpawnMobsCommand extends SubCommand {
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
-        return null;
+        List<String> list = new ArrayList<>();
+        String[] bool = {"true","false"};
+        for (String bol :bool) {
+            if (args[2].isEmpty()) {
+                list.add(bol);
+            } else if (args.length == 3 && bol.toLowerCase().startsWith(args[2].toLowerCase())) {
+                list.add(bol);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public Role getRole() {
+        return Role.Admins;
+    }
+
+    @Override
+    public boolean needNoGuild() {
+        return false;
     }
 }

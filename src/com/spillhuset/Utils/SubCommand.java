@@ -63,10 +63,10 @@ public abstract class SubCommand {
             return allowOp();
         } else {
             if (others) {
-                OddJob.getInstance().log("others = " + sender.hasPermission(getPermission() + ".others"));
+                OddJob.getInstance().log("others = " + getPermission()+".others: " + sender.hasPermission(getPermission() + ".others"));
                 return sender.hasPermission(getPermission() + ".others");
             } else {
-                OddJob.getInstance().log("permission = " + sender.hasPermission(getPermission()));
+                OddJob.getInstance().log("permission = " + getPermission()+": "+sender.hasPermission(getPermission()));
                 return sender.hasPermission(getPermission());
             }
         }

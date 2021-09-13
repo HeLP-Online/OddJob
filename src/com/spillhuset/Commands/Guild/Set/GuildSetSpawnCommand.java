@@ -43,7 +43,7 @@ public class GuildSetSpawnCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "guild.admin";
+        return "guild.use";
     }
 
     @Override
@@ -53,7 +53,7 @@ public class GuildSetSpawnCommand extends SubCommand {
             return;
         }
 
-        if (checkArgs(3,3,args,sender,getPlugin())) {
+        if (checkArgs(2,2,args,sender,getPlugin())) {
             return;
         }
         Player player = (Player) sender;

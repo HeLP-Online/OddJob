@@ -56,7 +56,7 @@ public class GuildSQL extends MySQLManager {
                             Role.valueOf(resultSet.getString("permission_invite")),
                             Role.valueOf(resultSet.getString("permission_kick")),
                             members,
-                            resultSet.getInt("spawns") == 1,
+                            resultSet.getInt("spawnmobs") == 1,
                             location
                     ));
                     OddJob.getInstance().log(resultSet.getString("name"));
@@ -92,13 +92,14 @@ public class GuildSQL extends MySQLManager {
                                 Role.valueOf(oddjobConfig.getString("guilds." + string + ".permission_invite")),
                                 Role.valueOf(oddjobConfig.getString("guilds." + string + ".permission_kick")),
                                 members,
-                                oddjobConfig.getBoolean("guilds." + string + ".spawns"),
+                                oddjobConfig.getBoolean("guilds." + string + ".spawnmobs"),
                                 location
                         ));
                     }
                 }
             }
-        } catch (SQLException ignored) {
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         } finally {
             close();
         }
@@ -106,123 +107,124 @@ public class GuildSQL extends MySQLManager {
         return guilds;
     }
 
-    public static void saveGuilds(HashMap<UUID, Guild> guilds) {
-        int i = 0;
-        for (UUID guildUUID : guilds.keySet()) {
-            Guild guild = OddJob.getInstance().getGuildManager().getGuild(guildUUID);
-            String name = guild.getName();
-            Zone zone = guild.getZone();
-            boolean invitedOnly = guild.getInvitedOnly();
-            boolean friendlyFire = guild.getFriendlyFire();
-            boolean open = guild.isOpen();
-            boolean spawns = guild.getSpawns();
-            Role permissionInviteRole = guild.getPermissionInvite();
-            Role permissionKickRole = guild.getPermissionKick();
-            HashMap<UUID, Role> members = guild.getMembers();
-            int maxClaims = guild.getMaxClaims();
-
+    public static void saveGuild(Guild guild) {
+        UUID guildUUID = guild.getGuildUUID();
+        String name = guild.getName();
+        Zone zone = guild.getZone();
+        boolean invitedOnly = guild.getInvitedOnly();
+        boolean friendlyFire = guild.getFriendlyFire();
+        boolean open = guild.isOpen();
+        boolean spawns = guild.getSpawns();
+        Role permissionInviteRole = guild.getPermissionInvite();
+        Role permissionKickRole = guild.getPermissionKick();
+        HashMap<UUID, Role> members = guild.getMembers();
+        int maxClaims = guild.getMaxClaims();
+        UUID worldUUID = null;
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        float yaw = 0;
+        float pitch = 0;
+        if (guild.getSpawn() != null) {
             Location spawn = guild.getSpawn();
-            UUID worldUUID = spawn.getWorld() != null ? spawn.getWorld().getUID() : null;
-            double x = spawn.getX();
-            double y = spawn.getY();
-            double z = spawn.getZ();
-            float yaw = spawn.getYaw();
-            float pitch = spawn.getPitch();
+            worldUUID = spawn.getWorld() != null ? spawn.getWorld().getUID() : null;
+            x = spawn.getX();
+            y = spawn.getY();
+            z = spawn.getZ();
+            yaw = spawn.getYaw();
+            pitch = spawn.getPitch();
+        }
+        try {
+            if (connect()) {
 
-            try {
-                if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `uuid` = ? AND `server` = ?");
+                preparedStatement.setString(1, guildUUID.toString());
+                preparedStatement.setString(2, OddJob.getInstance().getServerId().toString());
+                resultSet = preparedStatement.executeQuery();
 
-                    preparedStatement = connection.prepareStatement("SELECT `uuid` FROM `mine_guilds` WHERE `uuid` = ? AND `server` = ?");
+                if (resultSet.next()) {
+                    preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? ,`maxclaims` = ?,`world` = ?,`x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ?,`spawnmobs` = ? WHERE `uuid` = ?");
+                    preparedStatement.setString(1, name);
+                    preparedStatement.setString(2, zone.name());
+                    preparedStatement.setInt(3, invitedOnly ? 1 : 0);
+                    preparedStatement.setInt(4, friendlyFire ? 1 : 0);
+                    preparedStatement.setString(5, permissionInviteRole.name());
+                    preparedStatement.setString(6, permissionKickRole.name());
+                    preparedStatement.setInt(7, open ? 1 : 0);
+                    preparedStatement.setInt(8, maxClaims);
+                    preparedStatement.setString(9, worldUUID != null ? worldUUID.toString() : "");
+                    preparedStatement.setDouble(10, x);
+                    preparedStatement.setDouble(11, y);
+                    preparedStatement.setDouble(12, z);
+                    preparedStatement.setFloat(13, yaw);
+                    preparedStatement.setFloat(14, pitch);
+                    preparedStatement.setInt(15, spawns ? 1 : 0);
+                    preparedStatement.setString(16, guildUUID.toString());
+                    preparedStatement.executeUpdate();
+                } else {
+                    preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`,`world`,`x`,`y`,`z`,`yaw`,`pitch`,`spawnmobs`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                     preparedStatement.setString(1, guildUUID.toString());
-                    preparedStatement.setString(2, OddJob.getInstance().getServerId().toString());
+                    preparedStatement.setString(2, name);
+                    preparedStatement.setString(3, zone.name());
+                    preparedStatement.setInt(4, invitedOnly ? 1 : 0);
+                    preparedStatement.setInt(5, friendlyFire ? 1 : 0);
+                    preparedStatement.setString(6, permissionInviteRole.name());
+                    preparedStatement.setString(7, permissionKickRole.name());
+                    preparedStatement.setInt(8, open ? 1 : 0);
+                    preparedStatement.setString(9, OddJob.getInstance().getServerId().toString());
+                    preparedStatement.setInt(10, maxClaims);
+                    preparedStatement.setString(11, worldUUID != null ? worldUUID.toString() : "");
+                    preparedStatement.setDouble(12, x);
+                    preparedStatement.setDouble(13, y);
+                    preparedStatement.setDouble(14, z);
+                    preparedStatement.setFloat(15, yaw);
+                    preparedStatement.setFloat(16, pitch);
+                    preparedStatement.setInt(17, spawns ? 1 : 0);
+                    preparedStatement.execute();
+                }
+
+                for (UUID uuid : members.keySet()) {
+                    connect();
+                    preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `player` = ?");
+                    preparedStatement.setString(1, uuid.toString());
                     resultSet = preparedStatement.executeQuery();
 
                     if (resultSet.next()) {
-                        preparedStatement = connection.prepareStatement("UPDATE `mine_guilds` SET `name` = ?,`zone` = ?,`invited_only` = ?,`friendly_fire` = ?,`permission_invite` = ?,`permission_kick` = ?,`open` = ? ,`maxclaims` = ?,`world` = ?,`x` = ?,`y` = ?,`z` = ?,`yaw` = ?,`pitch` = ?,`spawnmobs` = ? WHERE `uuid` = ?");
-                        preparedStatement.setString(1, name);
-                        preparedStatement.setString(2, zone.name());
-                        preparedStatement.setInt(3, invitedOnly ? 1 : 0);
-                        preparedStatement.setInt(4, friendlyFire ? 1 : 0);
-                        preparedStatement.setString(5, permissionInviteRole.name());
-                        preparedStatement.setString(6, permissionKickRole.name());
-                        preparedStatement.setInt(7, open ? 1 : 0);
-                        preparedStatement.setInt(8, maxClaims);
-                        preparedStatement.setString(9, worldUUID.toString());
-                        preparedStatement.setDouble(10, x);
-                        preparedStatement.setDouble(11, y);
-                        preparedStatement.setDouble(12, z);
-                        preparedStatement.setFloat(13, yaw);
-                        preparedStatement.setFloat(14, pitch);
-                        preparedStatement.setInt(15, spawns ? 1 : 0);
-                        preparedStatement.setString(16, guildUUID.toString());
-                        preparedStatement.executeUpdate();
+                        if (!UUID.fromString(resultSet.getString("uuid")).equals(guildUUID) || !Role.valueOf(resultSet.getString("role")).equals(members.get(uuid))) {
+                            preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `uuid` = ?, `role` = ? WHERE `player` = ?");
+                            preparedStatement.setString(1, guildUUID.toString());
+                            preparedStatement.setString(2, members.get(uuid).name());
+                            preparedStatement.setString(3, uuid.toString());
+                            preparedStatement.executeUpdate();
+                        }
                     } else {
-                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds` (`uuid`,`name`,`zone`,`invited_only`,`friendly_fire`,`permission_invite`,`permission_kick`,`open`,`server`,`maxclaims`,`world`,`x`,`y`,`z`,`yaw`,`pitch`,`spawnmobs`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
                         preparedStatement.setString(1, guildUUID.toString());
-                        preparedStatement.setString(2, name);
-                        preparedStatement.setString(3, zone.name());
-                        preparedStatement.setInt(4, invitedOnly ? 1 : 0);
-                        preparedStatement.setInt(5, friendlyFire ? 1 : 0);
-                        preparedStatement.setString(6, permissionInviteRole.name());
-                        preparedStatement.setString(7, permissionKickRole.name());
-                        preparedStatement.setInt(8, open ? 1 : 0);
-                        preparedStatement.setString(9, OddJob.getInstance().getServerId().toString());
-                        preparedStatement.setInt(10, maxClaims);
-                        preparedStatement.setString(11,worldUUID.toString());
-                        preparedStatement.setDouble(12,x);
-                        preparedStatement.setDouble(13,y);
-                        preparedStatement.setDouble(14,z);
-                        preparedStatement.setFloat(15,yaw);
-                        preparedStatement.setFloat(16,pitch);
-                        preparedStatement.setInt(17,spawns ? 1:0);
+                        preparedStatement.setString(2, uuid.toString());
+                        preparedStatement.setString(3, members.get(uuid).name());
                         preparedStatement.execute();
                     }
-
-                    for (UUID uuid : members.keySet()) {
-                        connect();
-                        preparedStatement = connection.prepareStatement("SELECT * FROM `mine_guilds_members` WHERE `player` = ?");
-                        preparedStatement.setString(1, uuid.toString());
-                        resultSet = preparedStatement.executeQuery();
-
-                        if (resultSet.next()) {
-                            if (!UUID.fromString(resultSet.getString("uuid")).equals(guildUUID) || !Role.valueOf(resultSet.getString("role")).equals(members.get(uuid))) {
-                                preparedStatement = connection.prepareStatement("UPDATE `mine_guilds_members` SET `uuid` = ?, `role` = ? WHERE `player` = ?");
-                                preparedStatement.setString(1, guildUUID.toString());
-                                preparedStatement.setString(2, members.get(uuid).name());
-                                preparedStatement.setString(3, uuid.toString());
-                                preparedStatement.executeUpdate();
-                            }
-                        } else {
-                            preparedStatement = connection.prepareStatement("INSERT INTO `mine_guilds_members` (`uuid`,`player`,`role`) VALUES (?,?,?)");
-                            preparedStatement.setString(1, guildUUID.toString());
-                            preparedStatement.setString(2, uuid.toString());
-                            preparedStatement.setString(3, members.get(uuid).name());
-                            preparedStatement.execute();
-                        }
-                        i++;
-                        close();
-                    }
-                } else {
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".name", name);
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".zone", zone.name());
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".invited_only", invitedOnly);
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".friendly_fire", friendlyFire);
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".permission_invite", permissionInviteRole.name());
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".permission_kick", permissionKickRole.name());
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".open", open);
-                    oddjobConfig.set("guilds." + guildUUID.toString() + ".maxclaims", maxClaims);
-
-                    for (UUID uuid : members.keySet()) {
-                        oddjobConfig.set("guilds." + guildUUID.toString() + ".members." + uuid.toString(), members.get(uuid).name());
-                    }
-                    i++;
+                    close();
                 }
-            } catch (SQLException ignored) {
-            } finally {
-                close();
+            } else {
+                oddjobConfig.set("guilds." + guildUUID.toString() + ".name", name);
+                oddjobConfig.set("guilds." + guildUUID + ".zone", zone.name());
+                oddjobConfig.set("guilds." + guildUUID + ".invited_only", invitedOnly);
+                oddjobConfig.set("guilds." + guildUUID + ".friendly_fire", friendlyFire);
+                oddjobConfig.set("guilds." + guildUUID + ".permission_invite", permissionInviteRole.name());
+                oddjobConfig.set("guilds." + guildUUID + ".permission_kick", permissionKickRole.name());
+                oddjobConfig.set("guilds." + guildUUID + ".open", open);
+                oddjobConfig.set("guilds." + guildUUID + ".maxclaims", maxClaims);
+
+                for (UUID uuid : members.keySet()) {
+                    oddjobConfig.set("guilds." + guildUUID + ".members." + uuid.toString(), members.get(uuid).name());
+                }
             }
+        } catch (SQLException ignored) {
+        } finally {
+            close();
         }
-        OddJob.getInstance().log("Guilds Saves: " + i);
+
     }
 
     public static boolean deleteGuildsChunks(Chunk chunk) {
@@ -356,7 +358,7 @@ public class GuildSQL extends MySQLManager {
                         i++;
                     }
                 } else {
-                    oddjobConfig.set("guilds_chunks." + world.getUID().toString() + "." + x + "." + z, guild.toString());
+                    oddjobConfig.set("guilds_chunks." + world.getUID() + "." + x + "." + z, guild.toString());
                     i++;
                 }
 
@@ -486,7 +488,7 @@ public class GuildSQL extends MySQLManager {
                 preparedStatement.execute();
             } else {
 
-                oddjobConfig.set("guilds_chunks." + chunk.getWorld().getUID().toString() + "." + chunk.getX() + "." + chunk.getZ(), guild.toString());
+                oddjobConfig.set("guilds_chunks." + chunk.getWorld().getUID() + "." + chunk.getX() + "." + chunk.getZ(), guild.toString());
 
                 oddjobConfig.save(oddjobConfigFile);
             }
@@ -670,4 +672,5 @@ public class GuildSQL extends MySQLManager {
         }
         return pending;
     }
+
 }

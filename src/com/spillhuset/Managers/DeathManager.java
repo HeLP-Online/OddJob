@@ -31,7 +31,7 @@ public class DeathManager {
     /**
      * Holds the owner information Entity (ArmorStands) & Player UUID
      */
-    private HashMap<UUID, UUID> owner = new HashMap<>();
+    private final HashMap<UUID, UUID> owner = new HashMap<>();
 
     /**
      * Adds the Entity (ArmorStands) and Player
@@ -90,7 +90,7 @@ public class DeathManager {
                                 OddJob.getInstance().getMessageManager().death60(player);
                         } else if (i < 10 && i > 0) {
                             if (player.isOnline())
-                                OddJob.getInstance().getMessageManager().death10(i,player);
+                                OddJob.getInstance().getMessageManager().death10(i, player);
                         } else if (i < 1) {
                             OddJob.getInstance().getDeathManager().replace(entity, null);
                             if (player.isOnline())
@@ -119,7 +119,7 @@ public class DeathManager {
             if (findingPlayer != null && player != null && player.isOnline())
                 OddJob.getInstance().getMessageManager().spiritFoundSomeone(ownerOfArmor);
             if (findingPlayer != null)
-                OddJob.getInstance().getMessageManager().spiritFound(OddJob.getInstance().getPlayerManager().getName(findingPlayer),OddJob.getInstance().getPlayerManager().getName(ownerOfArmor));
+                OddJob.getInstance().getMessageManager().spiritFound(OddJob.getInstance().getPlayerManager().getName(findingPlayer), OddJob.getInstance().getPlayerManager().getName(ownerOfArmor));
         } else {
             OddJob.getInstance().getMessageManager().spiritFoundSelf(findingPlayer);
         }

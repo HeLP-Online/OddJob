@@ -89,11 +89,11 @@ public class GuildSetCommand extends SubCommand implements GuildRole {
                 OddJob.getInstance().log("sender can");
                 if ((subCommand.needGuild() && guild != null) || (subCommand.needNoGuild() && guild == null)) {
                     OddJob.getInstance().log("can or can't");
-                    if (args[0].isEmpty()) {
+                    if (args[1].isEmpty()) {
                         list.add(name);
-                    } else if (name.equals(args[0].toLowerCase()) && args.length > 1) {
+                    } else if (name.equals(args[1].toLowerCase()) && args.length > 2) {
                         return subCommand.getTab(sender, args);
-                    } else if (name.toLowerCase().startsWith(args[0].toLowerCase())) {
+                    } else if (name.toLowerCase().startsWith(args[1].toLowerCase())) {
                         list.add(name);
                     }
                 }
@@ -102,11 +102,9 @@ public class GuildSetCommand extends SubCommand implements GuildRole {
         return list;
     }
 
+    @Override
     public boolean needNoGuild() {
         return false;
     }
 
-    public boolean needGuild() {
-        return true;
-    }
 }

@@ -49,7 +49,10 @@ public class PlayerMove implements Listener {
         //OddJob.getInstance().getMessageManager().console("x="+movingToChunk.getX()+" z="+movingToChunk.getZ()+" world="+movingToChunk.getWorld().getName());
 
         // Who owns the chunk the Player is going from?
-        movingFromGuild = OddJob.getInstance().getPlayerManager().in.getOrDefault(player.getUniqueId(), movingToGuild);
+        movingFromGuild = OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId());
+        if (movingFromGuild == null) {
+            movingFromGuild = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(movingFromChunk);
+        }
 
         // Is it wild?
         Zone zoneTo = OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild);

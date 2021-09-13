@@ -112,14 +112,17 @@ public class Guild {
 
     public void setName(String name) {
         this.name = name;
+        OddJob.getInstance().getGuildManager().saveGuild(guildUUID);
     }
 
     public void setInvitedOnly(boolean bol) {
         this.invited_only = bol;
+        OddJob.getInstance().getGuildManager().saveGuild(guildUUID);
     }
 
     public void setFriendlyFire(boolean bol) {
         this.friendly_fire = bol;
+        OddJob.getInstance().getGuildManager().saveGuild(guildUUID);
     }
 
     public Role getPermissionInvite() {
@@ -140,11 +143,12 @@ public class Guild {
 
     public void setMaster(UUID member) {
         members.put(member, Role.Master);
+        OddJob.getInstance().getGuildManager().saveGuild(guildUUID);
     }
 
-    public boolean setOpen(boolean open) {
+    public void setOpen(boolean open) {
         this.open = open;
-        return true;
+        OddJob.getInstance().getGuildManager().saveGuild(guildUUID);
     }
 
     public boolean isOpen() {
@@ -165,6 +169,7 @@ public class Guild {
 
     public void setSpawns(boolean spawns) {
         this.spawns = spawns;
+        OddJob.getInstance().getGuildManager().saveGuild(guildUUID);
     }
 
     public boolean getSpawns() {
@@ -173,5 +178,6 @@ public class Guild {
 
     public void setSpawn(Location spawn) {
         this.spawn = spawn;
+        OddJob.getInstance().getGuildManager().saveGuild(guildUUID);
     }
 }

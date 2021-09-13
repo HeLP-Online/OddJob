@@ -259,8 +259,8 @@ public class MessageManager {
         warning(type(Plugin.warp), "No warps set on this server!", sender);
     }
 
-    public void save(String string, int i, int u) {
-        console("Saved " + string + ": inserted:" + i + "; updated:" + u + ";");
+    public void save(Plugin type, int i, CommandSender sender) {
+        success(type(type), "Saved: " + cValue + i, sender);
     }
 
     public void load(String string, int l) {
@@ -1373,7 +1373,8 @@ public class MessageManager {
     public void guildsSet(String name, Guild guild, boolean value, CommandSender sender) {
         success(type(Plugin.guilds), "Successfully " + cValue + name + cSuccess + " set to " + cValue + value + cSuccess + " for the " + cGuild + guild.getName(), sender);
     }
-    public void guildsSet(String name, Guild guild,  CommandSender sender) {
+
+    public void guildsSet(String name, Guild guild, CommandSender sender) {
         success(type(Plugin.guilds), "Successfully set new " + cValue + name + cSuccess + " for the " + cGuild + guild.getName(), sender);
     }
 
@@ -1505,6 +1506,6 @@ public class MessageManager {
     }
 
     public void movingInfo(String toString, CommandSender sender) {
-        info(type(Plugin.guilds),toString,sender);
+        info(type(Plugin.guilds), toString, sender);
     }
 }

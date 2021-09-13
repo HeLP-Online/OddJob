@@ -5,6 +5,7 @@ import com.spillhuset.SQL.GuildSQL;
 import com.spillhuset.Utils.Enum.Role;
 import com.spillhuset.Utils.Enum.Zone;
 import com.spillhuset.Utils.Guild;
+import com.spillhuset.Utils.Enum.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -39,6 +40,7 @@ public class GuildManager {
      * List of Chunks with Guild UUID
      */
     private HashMap<Chunk, UUID> chunks = new HashMap<>();    // Chunk        | GuildUUID
+    private final List<UUID> saveQueue = new ArrayList<>();
 
     public GuildManager() {
         dynmapInit();
@@ -177,7 +179,13 @@ public class GuildManager {
      * Saving the Guild-list to the Database
      */
     public void saveGuilds() {
-        GuildSQL.saveGuilds(guilds);
+        int i = 0;
+        for (UUID guildUUID:saveQueue) {
+            GuildSQL.saveGuild(getGuild(guildUUID));
+            i++;
+        }
+        saveQueue.clear();
+        OddJob.getInstance().getMessageManager().save(Plugin.guilds,i,Bukkit.getConsoleSender());
     }
 
     /**
@@ -1060,5 +1068,11 @@ public class GuildManager {
 
     public List<UUID> getGuildInvited(UUID guild) {
         return GuildSQL.listInvitedPlayers(guild);
+    }
+
+    public void saveGuild(UUID guildUUID) {
+        if (!saveQueue.contains(guildUUID)) {
+            saveQueue.add(guildUUID);
+        }
     }
 }

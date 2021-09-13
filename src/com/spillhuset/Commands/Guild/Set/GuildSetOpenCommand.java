@@ -15,7 +15,7 @@ import java.util.List;
 public class GuildSetOpenCommand extends SubCommand implements GuildRole {
     @Override
     public Role getRole() {
-        return null;
+        return Role.Admins;
     }
 
     @Override
@@ -64,17 +64,18 @@ public class GuildSetOpenCommand extends SubCommand implements GuildRole {
         }
         Player player = (Player) sender;
         Guild guild = OddJob.getInstance().getGuildManager().getGuild(OddJob.getInstance().getGuildManager().getGuildUUIDByMember(player.getUniqueId()));
-        boolean value = (args[2].equalsIgnoreCase("1") || args[2].equalsIgnoreCase("true") || args[2].equalsIgnoreCase("on"));
-
-        if (guild.setOpen(value)) {
-            OddJob.getInstance().getMessageManager().guildsSet(getName(), guild, value, sender);
-        } else OddJob.getInstance().getMessageManager().errorGuild(guild.getName(), sender);
+        boolean state = switch (args[2].toLowerCase()) {
+            case "1", "on", "true" -> true;
+            default -> false;
+        };
+        guild.setOpen(state);
+        OddJob.getInstance().getMessageManager().guildsSet(getName(), guild, state, sender);
     }
 
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
-        String[] bool = {"true","false","on","off","1","0"};
+        String[] bool = {"true","false"};
         for (String bol :bool) {
             if (args[2].isEmpty()) {
                 list.add(bol);
@@ -88,10 +89,5 @@ public class GuildSetOpenCommand extends SubCommand implements GuildRole {
     @Override
     public boolean needNoGuild() {
         return false;
-    }
-
-    @Override
-    public boolean needGuild() {
-        return true;
     }
 }
