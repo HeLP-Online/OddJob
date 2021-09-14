@@ -82,7 +82,7 @@ public class GameModeCommand extends SubCommandInterface implements CommandExecu
         }
 
         if (target != null && can(sender,false)) {
-            OddJob.getInstance().getPlayerManager().setGameMode(target, gm);
+            OddJob.getInstance().getPlayerManager().setGameMode(target, gm,true);
             OddJob.getInstance().getMessageManager().gamemmodeChanged(target,gm,sender,self);
         }
         return true;

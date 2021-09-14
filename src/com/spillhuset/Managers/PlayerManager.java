@@ -400,9 +400,14 @@ public class PlayerManager {
         savePlayer(target);
     }
 
-    public void setGameMode(Player target, GameMode gm) {
+    public void setGameMode(Player target, GameMode gm,boolean db) {
+        if (db) {
+            if (target.getLocation().getWorld() != null) {
+                PlayerSQL.setGameMode(target.getUniqueId(), target.getLocation().getWorld().getUID(), gm, OddJob.getInstance().getServerId());
+            }
+        }
         target.setGameMode(gm);
-        getOddPlayer(target.getUniqueId()).setGameMode(gm);
+
     }
 
     public void load() {
@@ -416,8 +421,8 @@ public class PlayerManager {
         }
     }
 
-    public GameMode getGameMode(UUID uuid) {
-        return getOddPlayer(uuid).getGameMode();
+    public GameMode getGameMode(UUID player, UUID world) {
+        return PlayerSQL.getGameMode(player,world,OddJob.getInstance().getServerId());
     }
 
     public void addTrade(UUID topPlayer, UUID bottomPlayer, Inventory trade) {

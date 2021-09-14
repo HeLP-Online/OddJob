@@ -81,14 +81,14 @@ public class PlayerSQL extends MySQLManager {
                             scoreboard = ScoreBoard.valueOf(cs.getString("scoreboard"));
                             maxHomes = cs.getInt("maxhomes");
 
-                            gameMode = GameMode.valueOf(cs.getString("gm",GameMode.SURVIVAL.name()));
+                            gameMode = GameMode.valueOf(cs.getString("gm", GameMode.SURVIVAL.name()));
                         }
                     }
                 } else {
                     name = Objects.requireNonNull(Bukkit.getPlayer(uuid)).getName();
                 }
             }
-            oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade, maxHomes,gameMode);
+            oddPlayer = new OddPlayer(uuid, blacklist, whitelist, denyTpa, name, banned, scoreboard, denyTrade, maxHomes, gameMode);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -123,7 +123,7 @@ public class PlayerSQL extends MySQLManager {
                 preparedStatement.setBoolean(5, oddPlayer.getDenyTpa());
                 preparedStatement.setBoolean(6, oddPlayer.getDenyTrade());
                 preparedStatement.setString(7, oddPlayer.getBanned());
-                preparedStatement.setString(8,oddPlayer.getGameMode().name());
+                preparedStatement.setString(8, oddPlayer.getGameMode().name());
                 preparedStatement.setString(9, oddPlayer.getUuid().toString());
                 preparedStatement.executeUpdate();
             } else {
@@ -136,7 +136,7 @@ public class PlayerSQL extends MySQLManager {
                 oddjobConfig.set("players." + string + ".denytrade", oddPlayer.getDenyTrade());
                 oddjobConfig.set("players." + string + ".banned", oddPlayer.getBanned());
                 oddjobConfig.set("players." + string + ".name", oddPlayer.getName());
-                oddjobConfig.set("players."+string+".gm",oddPlayer.getGameMode());
+                oddjobConfig.set("players." + string + ".gm", oddPlayer.getGameMode());
 
                 oddjobConfig.save(oddjobConfigFile);
             }
@@ -147,13 +147,30 @@ public class PlayerSQL extends MySQLManager {
         }
     }
 
-    public static void setGameMode(UUID uuid, GameMode gameMode) {
+    public static void setGameMode(UUID uuid, UUID world, GameMode gameMode,UUID server) {
         try {
             connect();
-            preparedStatement = connection.prepareStatement("UPDATE `mine_players` SET `gm` = ? WHERE `uuid` = ?");
-            preparedStatement.setString(1, gameMode.name());
-            preparedStatement.setString(2, uuid.toString());
-            preparedStatement.executeUpdate();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_gamemodes` WHERE `uuid`  = ? AND `world` = ? AND `server` = ?");
+            preparedStatement.setString(2, world.toString());
+            preparedStatement.setString(1, uuid.toString());
+            preparedStatement.setString(3, server.toString());
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                preparedStatement = connection.prepareStatement("UPDATE `mine_players_gamemodes` SET `gamemode` = ? WHERE `uuid` = ? AND `world` = ? AND `server` = ?");
+                preparedStatement.setString(1, gameMode.name());
+                preparedStatement.setString(3, world.toString());
+                preparedStatement.setString(2, uuid.toString());
+                preparedStatement.setString(4, server.toString());
+                preparedStatement.executeUpdate();
+            } else {
+                preparedStatement = connection.prepareStatement("INSERT `mine_players_gamemodes` (`uuid`,`world`,`gamemode`,`server`) VALUES (?,?,?,?)");
+                preparedStatement.setString(3, gameMode.name());
+                preparedStatement.setString(2, world.toString());
+                preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setString(4, server.toString());
+                preparedStatement.execute();
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
@@ -219,5 +236,30 @@ public class PlayerSQL extends MySQLManager {
         }
         OddJob.getInstance().log("Players Loaded: " + i);
         return players;
+    }
+
+    public static GameMode getGameMode(UUID player, UUID world, UUID server) {
+        GameMode gameMode = GameMode.SURVIVAL;
+
+        try {
+            if(connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_players_gamemodes` WHERE `uuid` = ? AND `world` = ? AND `server` = ?");
+                preparedStatement.setString(1,player.toString());
+                preparedStatement.setString(2,world.toString());
+                preparedStatement.setString(3,server.toString());
+                resultSet = preparedStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    gameMode = GameMode.valueOf(resultSet.getString("gamemode"));
+                    OddJob.getInstance().log("Loaded:"+resultSet.getString("gamemode"));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+
+        return gameMode;
     }
 }

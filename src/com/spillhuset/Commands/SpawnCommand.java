@@ -2,7 +2,6 @@ package com.spillhuset.Commands;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
-import com.spillhuset.Utils.SubCommand;
 import com.spillhuset.Utils.SubCommandInterface;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,17 +14,17 @@ import java.util.List;
 
 public class SpawnCommand extends SubCommandInterface implements CommandExecutor {
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         Player player = null;
         Location spawn = null;
-        if (commandSender instanceof Player) {
-            player = (Player) commandSender;
+        if (sender instanceof Player) {
+            player = (Player) sender;
 
-            if (can(commandSender,true) && strings.length == 1) {
+            if (can(sender, true) && args.length == 1) {
                 try {
-                    spawn = Bukkit.getWorld(strings[0]).getSpawnLocation();
+                    spawn = Bukkit.getWorld(args[0]).getSpawnLocation();
                 } catch (NullPointerException ex) {
-                    OddJob.getInstance().getMessageManager().errorWorld(strings[0], commandSender, Plugin.teleport);
+                    OddJob.getInstance().getMessageManager().errorWorld(args[0], sender, getPlugin());
                     return true;
                 }
             } else {
@@ -33,20 +32,20 @@ public class SpawnCommand extends SubCommandInterface implements CommandExecutor
             }
             OddJob.getInstance().getTeleportManager().spawn(player, spawn);
         } else {
-            if (can(commandSender,true) && strings.length == 2) {
+            if (can(sender, true) && args.length == 2) {
                 try {
-                    spawn = Bukkit.getWorld(strings[1]).getSpawnLocation();
+                    spawn = Bukkit.getWorld(args[1]).getSpawnLocation();
                 } catch (Exception ex) {
-                    OddJob.getInstance().getMessageManager().errorWorld(strings[1], commandSender, Plugin.teleport);
+                    OddJob.getInstance().getMessageManager().errorWorld(args[1], sender, getPlugin());
                     return true;
                 }
             } else {
                 spawn = Bukkit.getWorld("world").getSpawnLocation();
             }
-            if (strings.length >= 1) {
-                player = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(strings[0]));
+            if (args.length >= 1) {
+                player = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(args[0]));
                 if (player == null) {
-                    OddJob.getInstance().getMessageManager().errorPlayer(Plugin.ban, strings[0], commandSender);
+                    OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[0], sender);
                     return true;
                 }
 
@@ -60,7 +59,6 @@ public class SpawnCommand extends SubCommandInterface implements CommandExecutor
     public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args) {
         return null;
     }
-
 
     @Override
     public boolean denyConsole() {
@@ -84,14 +82,12 @@ public class SpawnCommand extends SubCommandInterface implements CommandExecutor
 
     @Override
     public Plugin getPlugin() {
-        return null;
+        return Plugin.players;
     }
-
-
 
     @Override
     public String getPermission() {
-        return null;
+        return "spawn";
     }
 
 }

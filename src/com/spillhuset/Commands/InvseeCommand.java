@@ -3,12 +3,14 @@ package com.spillhuset.Commands;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
 import com.spillhuset.Utils.SubCommandInterface;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class InvseeCommand extends SubCommandInterface implements CommandExecutor, TabCompleter {
@@ -36,7 +38,7 @@ public class InvseeCommand extends SubCommandInterface implements CommandExecuto
 
     @Override
     public Plugin getPlugin() {
-        return Plugin.invsee;
+        return Plugin.players;
     }
 
     @Override
@@ -46,31 +48,38 @@ public class InvseeCommand extends SubCommandInterface implements CommandExecuto
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        if (!(sender instanceof Player)) {
-            OddJob.getInstance().getMessageManager().errorConsole(getPlugin());
+        if (!can(sender, false)) {
+            OddJob.getInstance().getMessageManager().permissionDenied(getPlugin(), sender);
             return true;
         }
+
         if (checkArgs(1, 1, args, sender, getPlugin())) {
             return true;
         }
 
 
-        Player target = OddJob.getInstance().getPlayerManager().getPlayer(OddJob.getInstance().getPlayerManager().getUUID(args[0]));
+        Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            OddJob.getInstance().getMessageManager().errorPlayer(Plugin.invsee, args[0], sender);
+            OddJob.getInstance().getMessageManager().errorPlayer(getPlugin(), args[0], sender);
             return true;
         }
+
         Player player = (Player) sender;
-        if (can(sender, false)) {
-            player.openInventory(target.getInventory());
-        }
+        player.openInventory(target.getInventory());
 
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        //TODO
-        return null;
+    public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args) {
+        List<String> list = new ArrayList<>();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!player.isOp() || !player.hasPermission("op")) {
+                list.add(player.getName());
+            }
+        }
+
+        return list;
     }
 }

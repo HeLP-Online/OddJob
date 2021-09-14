@@ -149,7 +149,9 @@ public class OddJob extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerMove(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerPortal(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerSpawnLocation(), this);
         Bukkit.getPluginManager().registerEvents(new ChunkLoad(), this);
+
 
         if (Bukkit.getPluginManager().isPluginEnabled("worldedit")) {
             Bukkit.getConsoleSender().sendMessage("WorldEdit found");

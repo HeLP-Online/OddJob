@@ -14,7 +14,7 @@ public class PlayerChangesWorld implements Listener {
         Player player = event.getPlayer();
 
         if (player.isOp() || player.hasPermission("gameMode.keep")) {
-            GameMode gm = OddJob.getInstance().getPlayerManager().getGameMode(player.getUniqueId());
+            GameMode gm = OddJob.getInstance().getPlayerManager().getGameMode(player.getUniqueId(), player.getUniqueId());
             player.setGameMode(gm);
         }
     }
