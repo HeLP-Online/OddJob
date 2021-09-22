@@ -2,6 +2,8 @@ package com.spillhuset.Events;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Zone;
+import net.luckperms.api.model.user.User;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,15 +26,22 @@ public class PlayerJoin implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
-
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
+        User user = OddJob.getInstance().getLuckPermsApi().getUserManager().getUser(uuid);
+        if (user != null) {
+            player.setCustomName("[" + user.getPrimaryGroup() + "] " + player.getName());
+        } else {
+            player.setCustomName(player.getName());
+        }
+        event.setJoinMessage("["+ ChatColor.GREEN +"+"+ChatColor.RESET+"] " + event.getPlayer().getCustomName());
         UUID guild = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(uuid); // nullable
 
         OddJob.getInstance().getPlayerManager().loadPlayer(player.getUniqueId());
         OddJob.getInstance().getCurrencyManager().get(uuid, false);
 
 
+        player.sendTitle("Welcome to Spillhuset","Be nice, or get out!",10,70,20);
         // Welcome message
         //PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a("{\"text\":\"§aWelcome to Spillhuset\"}"), 40, 20, 20);
         //(((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);

@@ -17,12 +17,15 @@ import com.spillhuset.Commands.Warp.WarpCommand;
 import com.spillhuset.Events.*;
 import com.spillhuset.Managers.*;
 import com.spillhuset.Utils.SignManager;
+import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.ezapi.inventory.EzInventory;
 
 import java.sql.SQLException;
 import java.util.UUID;
@@ -52,6 +55,8 @@ public class OddJob extends JavaPlugin {
     private WarpManager warpManager;
     private int saver;
     private AuctionManager auctionManager;
+    // API's
+    private LuckPerms luckPermsApi;
 
     public static OddJob getInstance() {
         return instance;
@@ -59,6 +64,11 @@ public class OddJob extends JavaPlugin {
 
     public void onEnable() {
         instance = this;
+
+        RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        if (provider != null) {
+            luckPermsApi = provider.getProvider();
+        }
 
         messageManager = new MessageManager();
         arenaManager = new ArenaManager();
@@ -290,5 +300,9 @@ public class OddJob extends JavaPlugin {
 
     public AuctionManager getAuctionManager() {
         return auctionManager;
+    }
+
+    public LuckPerms getLuckPermsApi() {
+        return luckPermsApi;
     }
 }

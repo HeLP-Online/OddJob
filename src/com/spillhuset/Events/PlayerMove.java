@@ -2,14 +2,18 @@ package com.spillhuset.Events;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Zone;
+import net.minecraft.network.chat.IChatBaseComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.ezapi.chat.ChatMessage;
+import org.ezapi.util.PlayerUtils;
 
 import java.util.UUID;
 
@@ -57,18 +61,14 @@ public class PlayerMove implements Listener {
         // Is it wild?
         Zone zoneTo = OddJob.getInstance().getGuildManager().getZoneByGuild(movingToGuild);
         if (movingFromGuild == null || !movingFromGuild.equals(movingToGuild)) {
-            OddJob.getInstance().log("from: " + movingFromGuild.toString());
-            OddJob.getInstance().log("to:   " + movingToGuild.toString());
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), movingToGuild);
             print = true;
         }
 
         // Moving from not null
         if (movingToGuild == OddJob.getInstance().getGuildManager().getGuildUUIDByZone(Zone.WILD)) {
-            OddJob.getInstance().log("is wild");
             // Moving to is WILD
             if (OddJob.getInstance().getGuildManager().hasAutoClaim(player.getUniqueId()) != null) {
-                OddJob.getInstance().log("has auto");
                 // Auto Claim is on
                 OddJob.getInstance().getGuildManager().autoClaim(player, movingToChunk);
             }
@@ -85,7 +85,7 @@ public class PlayerMove implements Listener {
         if (!OddJob.getInstance().getPlayerManager().in.containsKey(player.getUniqueId())) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), movingToGuild);
             print = true;
-        } else if (!OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()).equals((movingToGuild))) {
+        } else if (OddJob.getInstance().getPlayerManager().in.get(player.getUniqueId()) != ((movingToGuild))) {
             OddJob.getInstance().getPlayerManager().in.put(player.getUniqueId(), movingFromGuild);
             print = true;
         }
@@ -99,10 +99,12 @@ public class PlayerMove implements Listener {
                 case SAFE -> s.append(ChatColor.GREEN).append("Take a break and prepare!");
                 default -> s.append(ChatColor.YELLOW).append("Welcome to the wild!");
             }
-            OddJob.getInstance().getMessageManager().movingInfo(s.toString(), player);
-            /*
-            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + s + "\"}"), 40, 20, 20);
-            (((CraftPlayer) player).getHandle()).playerConnection.sendPacket(title);*/
+            //OddJob.getInstance().getMessageManager().movingInfo(s.toString(), player);
+
+            ChatMessage message = new ChatMessage(s.toString(),false);
+            PlayerUtils.actionbar(message,player);
+            /*PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.ACTIONBAR, IChatBaseComponent.ChatSerializer.b("{\"text\":\"" + s + "\"}"), 40, 20, 20);
+            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(title);*/
         }
     }
 }
