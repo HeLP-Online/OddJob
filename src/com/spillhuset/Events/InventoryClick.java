@@ -4,6 +4,7 @@ import com.spillhuset.OddJob;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
@@ -13,7 +14,7 @@ import java.util.UUID;
 
 public class InventoryClick implements Listener {
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerInventoryClick(InventoryClickEvent event) {
         // Find Trades
         if (event.getView().getTitle().equals("FAIR TRADE")) {

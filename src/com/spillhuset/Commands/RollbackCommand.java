@@ -1,6 +1,5 @@
 package com.spillhuset.Commands;
 
-import com.spillhuset.Utils.Rollback;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -24,7 +23,7 @@ public class RollbackCommand implements CommandExecutor, TabCompleter {
                 world = Bukkit.getWorld(strings[0]);
             }
             if (world != null) {
-                Rollback.backup(world);
+                //Rollback.backup(world);
             }
         } else if (command.getName().equalsIgnoreCase("rollback")) {
             World world;
@@ -35,7 +34,7 @@ public class RollbackCommand implements CommandExecutor, TabCompleter {
                 world = Bukkit.getWorld(strings[0]);
             }
             if (world != null) {
-                Rollback.rollback(world);
+                //Rollback.rollback(world);
             }
         }
         return true;

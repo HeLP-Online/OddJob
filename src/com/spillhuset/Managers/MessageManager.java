@@ -1497,11 +1497,11 @@ public class MessageManager {
         }
     }
 
-    public void auctionsOverBid(double offer, Player target, boolean buyout, int item, UUID sender) {
+    public void auctionsOverBid(double offer, Player new_buyer, boolean buyout, int item, UUID sender) {
         if (buyout) {
-            danger(type(Plugin.auctions), "Auction item: " + cValue + item + cDanger + " was bought by " + cPlayer + target.getName() + cDanger + " with buyout.\nYour current bid has been refunded to your " + cValue + "bank" + cDanger + " account", sender, true);
+            danger(type(Plugin.auctions), "Auction item: " + cValue + item + cDanger + " was bought by " + cPlayer + new_buyer.getName() + cDanger + " with buyout.\nYour current bid has been refunded to your " + cValue + Types.AccountType.bank.name() + cDanger + " account", sender, true);
         } else {
-            warning(type(Plugin.auctions), "Auction item: " + cValue + item + cWarning + " was overbid by " + cPlayer + target.getName() + cWarning + " with offer " + cValue + offer + cWarning + ".\nYour current bid has been refunded to your " + cValue + "bank" + cWarning + " account", sender, true);
+            warning(type(Plugin.auctions), "Auction item: " + cValue + item + cWarning + " was overbid by " + cPlayer + new_buyer.getName() + cWarning + " with offer " + cValue + offer + cWarning + ".\nYour current bid has been refunded to your " + cValue + Types.AccountType.bank.name() + cWarning + " account", sender, true);
         }
     }
 

@@ -1,10 +1,14 @@
 package com.spillhuset.SQL;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.spillhuset.Managers.MySQLManager;
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.AuctionBid;
 import com.spillhuset.Utils.AuctionItem;
+import net.minecraft.nbt.MojangsonParser;
+import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +25,26 @@ import java.util.List;
 import java.util.UUID;
 
 public class AuctionSQL extends MySQLManager {
+    public static String serialize(final ItemStack item) {
+        NBTTagCompound tag = new NBTTagCompound();
+        CraftItemStack.asNMSCopy(item).save(tag);
+        return tag.toString();
+    }
+
+    public static ItemStack deserialize(final String string) {
+        if (string == null || string.equals("empty")) {
+            return null;
+        }
+        try {
+            NBTTagCompound comp = MojangsonParser.parse(string);
+            net.minecraft.world.item.ItemStack cis = net.minecraft.world.item.ItemStack.a(comp);
+            return CraftItemStack.asBukkitCopy(cis);
+        } catch (CommandSyntaxException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
     public static String toBase64(ItemStack item) throws IOException {
         StringBuilder sb = new StringBuilder();
         ItemMeta im = item.getItemMeta();
@@ -120,22 +144,23 @@ public class AuctionSQL extends MySQLManager {
         return item;
     }
 
-    public static int sell(Player player, ItemStack itemInMainHand, double value, double buyout, int expire) {
+    public static int sell(Player player, ItemStack itemInMainHand, double value, double buyout, int expire, double fee) {
 
         int num = itemInMainHand.getAmount();
         String item = "";
         int result = 0;
         try {
-            item = toBase64(itemInMainHand);
+            item = serialize(itemInMainHand);
             if (connect()) {
-                preparedStatement = connection.prepareStatement("INSERT INTO `mine_auction` (`id`,`seller`,`item`,`num`,`value`,`expire`,`buyout`,`fee`) VALUES ('',?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                preparedStatement = connection.prepareStatement("INSERT INTO `mine_auction` (`seller`,`item`,`num`,`value`,`expire`,`buyout`,`fee`) VALUES (?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setString(1, player.getUniqueId().toString());
                 preparedStatement.setString(2, item);
                 preparedStatement.setInt(3, num);
                 preparedStatement.setDouble(4, value);
                 preparedStatement.setInt(5, expire);
                 preparedStatement.setDouble(6, buyout);
-                preparedStatement.executeUpdate();
+                preparedStatement.setDouble(7, fee);
+                preparedStatement.execute();
 
                 resultSet = preparedStatement.getGeneratedKeys();
                 if (resultSet.next()) {
@@ -143,7 +168,7 @@ public class AuctionSQL extends MySQLManager {
                 }
 
             }
-        } catch (SQLException | IOException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
         return result;
@@ -159,10 +184,10 @@ public class AuctionSQL extends MySQLManager {
                 resultSet = preparedStatement.executeQuery();
 
                 if (resultSet.next()) {
-                    itemStack = fromBase64(resultSet.getString("item"));
+                    itemStack = deserialize(resultSet.getString("item"));
                 }
             }
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -182,56 +207,6 @@ public class AuctionSQL extends MySQLManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-    }
-
-    public static boolean isSold(int item) {
-        boolean sold = false;
-        try {
-            if (connect()) {
-                preparedStatement = connection.prepareStatement("SELECT `sold` FROM `mine_auction` WHERE `item` = ?");
-                preparedStatement.setInt(1, item);
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    sold = !(resultSet.getInt("sold") == 0);
-                    sold = sold && !resultSet.wasNull();
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return sold;
-    }
-
-    public static List<AuctionItem> findExpired() {
-        List<AuctionItem> expired = new ArrayList<>();
-        try {
-            if (connect()) {
-                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_auction` WHERE `sold` = 0");
-                resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    int id = resultSet.getInt("id");
-                    List<AuctionBid> bids = getBids(id);
-                    expired.add(new AuctionItem(
-                            id,
-                            resultSet.getInt("expire"),
-                            resultSet.getInt("time"),
-                            resultSet.getDouble("value"),
-                            resultSet.getInt("num"),
-                            resultSet.getDouble("buyout"),
-                            resultSet.getInt("picked_up"),
-                            resultSet.getInt("sold"),
-                            resultSet.getString("buyer"),
-                            resultSet.getString("seller"),
-                            resultSet.getDouble("fee"),
-                            bids));
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return expired;
     }
 
     public static List<AuctionBid> getBids(int item) {
@@ -259,6 +234,7 @@ public class AuctionSQL extends MySQLManager {
     }
 
     public static AuctionItem getAuctionItem(int item) {
+        findExpired();
         AuctionItem auctionItem = null;
         try {
             if (connect()) {
@@ -269,18 +245,18 @@ public class AuctionSQL extends MySQLManager {
                     int id = resultSet.getInt("id");
                     auctionItem = new AuctionItem(
                             id,
-                            resultSet.getString("item"),
+                            deserialize(resultSet.getString("item")),
                             resultSet.getInt("expire"),
                             resultSet.getInt("time"),
                             resultSet.getDouble("value"),
-                            resultSet.getInt("num"),
                             resultSet.getDouble("buyout"),
                             resultSet.getInt("picked_up"),
                             resultSet.getInt("sold"),
                             resultSet.getString("buyer"),
                             resultSet.getString("seller"),
                             resultSet.getDouble("fee"),
-                            getBids(id)
+                            getBids(id),
+                            resultSet.getInt("notified") == 1
                     );
                 }
             }
@@ -290,12 +266,10 @@ public class AuctionSQL extends MySQLManager {
         return auctionItem;
     }
 
-    public static AuctionBid getBid(int item, boolean highest) {
+    public static AuctionBid getBid(int item) {
         AuctionBid bid = null;
         for (AuctionBid auctionBid : getBids(item)) {
-            if (bid == null) {
-                bid = auctionBid;
-            } else if (bid.getBid() < auctionBid.getBid()) {
+            if (bid == null || (bid.getBid() < auctionBid.getBid() && !bid.isRefunded())) {
                 bid = auctionBid;
             }
         }
@@ -316,10 +290,10 @@ public class AuctionSQL extends MySQLManager {
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("UPDATE `mine_auction_bids` SET `refunded` = ?,`bid` = ?,`bidder` = ? WHERE `id` = ?");
-                preparedStatement.setInt(1,auctionBid.isRefunded() ? 1:0);
-                preparedStatement.setDouble(2,auctionBid.getBid());
-                preparedStatement.setString(3,auctionBid.getBidder().toString());
-                preparedStatement.setInt(4,auctionBid.getId());
+                preparedStatement.setInt(1, auctionBid.isRefunded() ? 1 : 0);
+                preparedStatement.setDouble(2, auctionBid.getBid());
+                preparedStatement.setString(3, auctionBid.getBidder().toString());
+                preparedStatement.setInt(4, auctionBid.getId());
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException ex) {
@@ -331,10 +305,10 @@ public class AuctionSQL extends MySQLManager {
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("UPDATE `mine_auction` SET `picked_up` = ?,`sold` = ?,`buyer` = ? WHERE `id` = ?");
-                preparedStatement.setInt(1,auctionItem.getPicked_up());
-                preparedStatement.setInt(2,auctionItem.getSold());
-                preparedStatement.setString(3,auctionItem.getBuyer().toString());
-                preparedStatement.setInt(4,auctionItem.getId());
+                preparedStatement.setInt(1, auctionItem.getPicked_up());
+                preparedStatement.setInt(2, auctionItem.getSold());
+                preparedStatement.setString(3, (auctionItem.getBuyer() == null) ? "" : auctionItem.getBuyer().toString());
+                preparedStatement.setInt(4, auctionItem.getId());
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException ex) {
@@ -347,10 +321,10 @@ public class AuctionSQL extends MySQLManager {
         try {
             if (connect()) {
                 preparedStatement = connection.prepareStatement("SELECT `id` FROM `mine_auction` WHERE `picked_up` = ? AND `sold` < 0");
-                preparedStatement.setInt(1,0);
+                preparedStatement.setInt(1, 0);
                 resultSet = preparedStatement.executeQuery();
 
-                while(resultSet.next()) {
+                while (resultSet.next()) {
                     list.add(resultSet.getInt("id"));
                 }
             }
@@ -358,5 +332,29 @@ public class AuctionSQL extends MySQLManager {
             ex.printStackTrace();
         }
         return list;
+    }
+
+    public static List<Integer> findExpired() {
+        List<Integer> notify = new ArrayList<>();
+        try {
+            if (connect()) {
+                preparedStatement = connection.prepareStatement("SELECT * FROM `mine_auction` WHERE UNIX_TIMESTAMP() > ((`expire` * 60 * 60) + `time`)");
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    if (resultSet.getInt("picked_up") != 0) {
+                        continue;
+                    }
+                    if (resultSet.getInt("notified") == 0) {
+                        notify.add(resultSet.getInt("id"));
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            close();
+        }
+        return notify;
     }
 }

@@ -12,92 +12,99 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class AuctionManager {
-    public void sell(Player player, double value, double buyout, int expire) {
+    /**
+     * Making an AuctionItem
+     *
+     * @param player Player
+     * @param value  Double starting bid
+     * @param buyout Double buyout value
+     * @param expire Integer time defined as hours
+     * @return Integer the ID of the AuctionItem
+     */
+    public int sell(Player player, double value, double buyout, int expire) {
         // Find current pocket value
-        double inPocket = OddJob.getInstance().getCurrencyManager().get(player.getUniqueId()).get(Types.AccountType.pocket);
         // Check if player can afford the fee
         /* 5% of buyout or 20% of value */
         double fee = (buyout != 0) ? buyout / 20 : value / 5;
-        if (fee > inPocket) {
-            OddJob.getInstance().getMessageManager().auctionsCantAfford(fee, player);
-            return;
-        }
 
         // Place the item into the database
-        int id = AuctionSQL.sell(player, player.getInventory().getItemInMainHand(), value, buyout, expire);
-        if (id != 0) {
-            // Take the fee
-            OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), fee, false, Types.AccountType.pocket);
-
+        // Take the fee
+        if (OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), fee, false, Types.AccountType.pocket)) {
+            int id = AuctionSQL.sell(player, player.getInventory().getItemInMainHand(), value, buyout, expire, fee);
             OddJob.getInstance().getMessageManager().auctionsItemSetToSale(id, value, buyout, fee, expire, player);
+            // Return the ID of the AuctionItem
+            return id;
         }
+
+        // Player can't afford to start an auction
+        OddJob.getInstance().getMessageManager().auctionsCantAfford(fee, player);
+        return 0;
     }
 
+    /**
+     * Buyout without defining a buyout value
+     *
+     * @param item   Integer the ID of the AuctionItem
+     * @param player Player buyer
+     */
     public void buyout(int item, Player player) {
-        // Find the item
+        // Find the item in the AuctionItem
         AuctionItem auctionItem = AuctionSQL.getAuctionItem(item);
         double offer = auctionItem.getBuyout();
 
-        // Buyout!
+        // Buyout the AuctionItem with the buyout value
         buyout(item, offer, player);
     }
 
+    /**
+     * Buyout the AuctionItem with a defined buyout value
+     *
+     * @param item   Integer the ID of the AuctionItem
+     * @param offer  Double offer value
+     * @param player Player the buyer
+     */
     public void buyout(int item, double offer, Player player) {
         // Find the item
         AuctionItem auctionItem = AuctionSQL.getAuctionItem(item);
 
-        // Check if you can afford the item
-        double inPocket = OddJob.getInstance().getCurrencyManager().get(player.getUniqueId()).get(Types.AccountType.pocket);
-        if (offer > inPocket) {
-            OddJob.getInstance().getMessageManager().auctionsCantAfford(offer, player);
+        // Check if the item is already sold
+        if (auctionItem.isSold()) {
+            OddJob.getInstance().getMessageManager().auctionsItemAlreadySold(player);
             return;
         }
 
-        // Check if the item is already sold
-        boolean isSold = AuctionSQL.isSold(item);
-        if (isSold) {
-            OddJob.getInstance().getMessageManager().auctionsItemAlreadySold(player);
+        // Check if you can afford the item
+        // Pay the bid for the item
+        if (!OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), offer, false, Types.AccountType.pocket)) {
+            OddJob.getInstance().getMessageManager().auctionsCantAfford(offer, player);
             return;
         }
 
         // If there is any bids given, lesser than your, refund the previous bid
         for (AuctionBid auctionBid : auctionItem.getBids()) {
             if (!auctionBid.isRefunded()) {
-                auctionBid.refund(offer,player,true,item,auctionBid.getBidder());
+                auctionBid.refund(offer, player, true, item, auctionBid.getBidder());
             }
         }
 
-        // Pay the bid for the item
-        OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), offer, false, Types.AccountType.pocket);
         // Mark the item as sold
         auctionItem.setSold((int) System.currentTimeMillis() / 1000);
     }
 
+    /**
+     * Placing an AuctionBid on a AuctionItem
+     *
+     * @param item   Integer the ID of the AuctionItem
+     * @param offer  Double offer value for the AuctionItem
+     * @param player Player the buyer
+     */
     public void bid(int item, double offer, Player player) {
-        // Checks if any auctions has expired
-        checkExpiredBids();
-
         // Fetch item
         AuctionItem auctionItem = AuctionSQL.getAuctionItem(item);
 
         // Check if the item is already sold
-        boolean isSold = AuctionSQL.isSold(item);
-        if (isSold) {
+        if (auctionItem.isSold()) {
             OddJob.getInstance().getMessageManager().auctionsItemAlreadySold(player);
-            return;
-        }
-
-        // Check if you can afford your own offer
-        double inPocket = OddJob.getInstance().getCurrencyManager().get(player.getUniqueId()).get(Types.AccountType.pocket);
-        if (offer > inPocket) {
-            OddJob.getInstance().getMessageManager().auctionsCantAfford(offer, player);
-            return;
-        }
-
-        // Check if your offer are more than current bid
-        AuctionBid auctionBid = AuctionSQL.getBid(item, true);
-        if (auctionBid.getBid() >= offer) {
-            OddJob.getInstance().getMessageManager().auctionsBidNotHighEnough(offer, auctionBid.getBid(), player);
             return;
         }
 
@@ -107,22 +114,39 @@ public class AuctionManager {
             return;
         }
 
-        // Refund highest bidder
-        refundBid(auctionBid);
-
+        // Check if you can afford your own offer
         // Take the money for the bid
-        OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), offer, false, Types.AccountType.pocket);
+        if (OddJob.getInstance().getCurrencyManager().subtract(player.getUniqueId(), offer, false, Types.AccountType.pocket)) {
+            OddJob.getInstance().getMessageManager().auctionsCantAfford(offer, player);
+            return;
+        }
+
+        // Check if your offer are more than current bid
+        AuctionBid auctionBid = AuctionSQL.getBid(item);
+        if (auctionBid != null) {
+            // Found earlier bids
+            if (auctionBid.getBid() >= offer) {
+                // Bid not high enough
+                OddJob.getInstance().getMessageManager().auctionsBidNotHighEnough(offer, auctionBid.getBid(), player);
+                return;
+            }
+
+            // Refund highest bidder
+            refundBid(auctionBid);
+            OddJob.getInstance().getMessageManager().auctionsOverBid(offer,player,false,item,auctionBid.getBidder());
+        }
 
         // Place bid on the item
         AuctionSQL.addBid(item, offer, player);
-
         OddJob.getInstance().getMessageManager().auctionsBidSet(item, offer, player);
     }
 
+    /**
+     * Refunding the bid
+     *
+     * @param auctionBid AuctionBid to be refunded
+     */
     private void refundBid(AuctionBid auctionBid) {
-        // Find player (might be offline)
-        OddPlayer highest = OddJob.getInstance().getPlayerManager().getOddPlayer(auctionBid.getBidder());
-
         // Refund the player
         OddJob.getInstance().getCurrencyManager().add(auctionBid.getBidder(), auctionBid.getBid(), Types.AccountType.bank);
 
@@ -130,32 +154,32 @@ public class AuctionManager {
         auctionBid.setRefunded(true);
     }
 
-    public void checkExpiredBids() {
+    /**
+     * Maintaining the Auction list.
+     */
+    public void checkExpiredAuctions() {
         // List of expired items
-        List<AuctionItem> expired = getExpiredItems();
-
-        // Timestamp now
-        int now = (int) (System.currentTimeMillis() / 1000);
+        List<Integer> notify = AuctionSQL.findExpired();
 
         // The check loop
-        for (AuctionItem item : expired) {
-            // Expiring time (count hours down to second, and add the start time)
-            int expire = ((item.getExpire() * 60 * 60) + item.getTime());
-            // Subtract timestamp with expiration
-            expire = now - expire;
-            if (expire > 0) {
-                // The item has expired
-                expired(item);
-            }
+        for (int item : notify) {
+            AuctionItem auctionItem = getItem(item);
         }
     }
 
+    /**
+     * Timer has expired
+     *
+     * @param auctionItem AuctionItem
+     */
     private void expired(AuctionItem auctionItem) {
         if (auctionItem.getBids().size() > 0) {
+            // Item have one or more bids
             receiveItemBid(auctionItem, getHighestBid(auctionItem));
             auctionItem.setBuyer(getHighestBid(auctionItem).getBidder());
         } else {
-            refundItem(auctionItem);
+            // There were no bids
+            if (!auctionItem.getNotified() && refundItem(auctionItem)) auctionItem.setNotified(true);
         }
         auctionItem.setSold((int) System.currentTimeMillis() / 1000);
         AuctionSQL.saveItem(auctionItem);
@@ -186,11 +210,9 @@ public class AuctionManager {
         }
     }
 
-    private void refundItem(AuctionItem auctionItem) {
+    private boolean refundItem(AuctionItem auctionItem) {
         Player player = Bukkit.getPlayer(auctionItem.getSeller());
-        if (player != null) {
-            OddJob.getInstance().getMessageManager().auctionsNoBidsOrBuyout(auctionItem, player);
-        }
+        return player != null;
     }
 
     public AuctionItem getItem(int item) {
@@ -203,10 +225,6 @@ public class AuctionManager {
 
     public List<AuctionItem> getAllItems() {
         return AuctionSQL.getAllItems();
-    }
-
-    public List<AuctionItem> getExpiredItems() {
-        return AuctionSQL.findExpired();
     }
 
     public List<AuctionBid> getBids(int item) {

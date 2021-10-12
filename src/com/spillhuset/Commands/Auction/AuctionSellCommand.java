@@ -82,7 +82,7 @@ public class AuctionSellCommand extends SubCommand {
     @Override
     public List<String> getTab(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
-        if (args.length == 2) list.add("<start_bid>");
+        if (args.length == 2) list.add("[start_bid]");
         if (args.length == 3) list.add("<buyout>");
         if (args.length == 4) list.add("[expire]");
         return list;

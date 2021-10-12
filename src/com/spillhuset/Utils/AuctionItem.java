@@ -1,5 +1,7 @@
 package com.spillhuset.Utils;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -9,23 +11,36 @@ public class AuctionItem {
     int expire;
     int time;
     double value;
-    int num;
     double buyout;
     int picked_up;
     int sold;
     UUID buyer;
     UUID seller;
-    String item;
-    double fee;
-    List<AuctionBid> bids = new ArrayList<>();
 
-    public AuctionItem(int id, String item, int expire, int time, double value, int num, double buyout, int picked_up, int sold, String buyer, String seller, double fee, List<AuctionBid> bids) {
+    public ItemStack getItem() {
+        return item;
+    }
+
+    public double getFee() {
+        return fee;
+    }
+
+    public boolean isNotified() {
+        return notified;
+    }
+
+    ItemStack item;
+    double fee;
+    List<AuctionBid> bids;
+    boolean notified;
+
+    // Get AuctionItem
+    public AuctionItem(int id, ItemStack item, int expire, int time, double value, double buyout, int picked_up, int sold, String buyer, String seller, double fee, List<AuctionBid> bids, boolean notified) {
         this.item = item;
         this.id = id;
         this.expire = expire;
         this.time = time;
         this.value = value;
-        this.num = num;
         this.buyout = buyout;
         this.picked_up = picked_up;
         this.sold = sold;
@@ -33,6 +48,7 @@ public class AuctionItem {
         this.seller = UUID.fromString(seller);
         this.fee = fee;
         this.bids = bids;
+        this.notified = notified;
     }
 
     /**
@@ -80,7 +96,7 @@ public class AuctionItem {
      * @return int number of items
      */
     public int getNum() {
-        return num;
+        return item.getAmount();
     }
 
     /**
@@ -103,6 +119,9 @@ public class AuctionItem {
      *
      * @return time when item was sold either buyout or bid
      */
+    public boolean isSold() {
+        return (sold != 0);
+    }
     public int getSold() {
         return sold;
     }
@@ -124,12 +143,12 @@ public class AuctionItem {
     }
 
 
-    public AuctionItem(int id, int expire, int time, double value, int num, double buyout, int picked_up, int sold, String buyer, String seller, double fee, List<AuctionBid> bids) {
+    // Find expired
+    public AuctionItem(int id, int expire, int time, double value, double buyout, int picked_up, int sold, String buyer, String seller, double fee, List<AuctionBid> bids, boolean notified) {
         this.id = id;
         this.expire = expire;
         this.time = time;
         this.value = value;
-        this.num = num;
         this.buyout = buyout;
         this.picked_up = picked_up;
         this.sold = sold;
@@ -137,6 +156,7 @@ public class AuctionItem {
         this.seller = (seller != null && !seller.equals("")) ? UUID.fromString(seller) : null;
         this.bids = bids;
         this.fee = fee;
+        this.notified = notified;
     }
 
     public void setBuyer(UUID buyer) {
@@ -155,4 +175,14 @@ public class AuctionItem {
         return value;
     }
 
+    public void setNotified(boolean notified) {
+        this.notified = notified;
+    }
+
+    public boolean getNotified() {
+        return notified;
+    }
+    public boolean isExpired() {
+        return ((int) System.currentTimeMillis()/1000) > expire;
+    }
 }

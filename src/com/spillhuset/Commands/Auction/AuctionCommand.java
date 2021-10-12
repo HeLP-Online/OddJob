@@ -52,7 +52,7 @@ public class AuctionCommand extends SubCommandInterface implements CommandExecut
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
+        OddJob.getInstance().log("auctioneer");
         if (checkArgs(1,0,args,sender,getPlugin())) {
             OddJob.getInstance().log("args");
             return true;
