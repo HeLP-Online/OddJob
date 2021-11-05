@@ -59,33 +59,35 @@ public class PlayerInteract implements Listener {
 
         // Admin tool
         // admin a lockable material -> need op, and use of right-click against a block
-        if (player.isOp() && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            block = event.getClickedBlock();
-            material = block.getType();
-            // use of delete lockable tool
-            if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLocksManager().delMaterialWand)) {
-                uuid = event.getPlayer().getUniqueId();
-                OddJob.getInstance().getLocksManager().remove(material);
-                OddJob.getInstance().getLocksManager().remove(uuid);
-                OddJob.getInstance().getMessageManager().locksMaterialAdded(material.name(), player);
-                event.setCancelled(true);
-                return;
-            }
-            // use of add lockable tool
-            if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLocksManager().addMaterialWand)) {
-                // is it already lockable?
-                if (OddJob.getInstance().getLocksManager().getLockable().contains(material)) {
-                    OddJob.getInstance().getMessageManager().lockMaterialAlready(material.name(), player);
+        if (OddJob.getInstance().getLocksManager().getAdminTools().contains(event.getItem())) {
+            if (player.isOp() && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+                block = event.getClickedBlock();
+                material = block.getType();
+                // use of delete lockable tool
+                if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLocksManager().delMaterialWand)) {
+                    uuid = event.getPlayer().getUniqueId();
+                    OddJob.getInstance().getLocksManager().remove(material);
+                    OddJob.getInstance().getLocksManager().remove(uuid);
+                    OddJob.getInstance().getMessageManager().locksMaterialAdded(material.name(), player);
+                    event.setCancelled(true);
                     return;
                 }
-                uuid = event.getPlayer().getUniqueId();
-                OddJob.getInstance().getLocksManager().add(material);
-                OddJob.getInstance().getLocksManager().remove(uuid);
-                OddJob.getInstance().getMessageManager().lockMaterialRemoved(material.name(), player);
-                event.setCancelled(true);
+                // use of add lockable tool
+                if (player.getInventory().getItemInMainHand().equals(OddJob.getInstance().getLocksManager().addMaterialWand)) {
+                    // is it already lockable?
+                    if (OddJob.getInstance().getLocksManager().getLockable().contains(material)) {
+                        OddJob.getInstance().getMessageManager().lockMaterialAlready(material.name(), player);
+                        return;
+                    }
+                    uuid = event.getPlayer().getUniqueId();
+                    OddJob.getInstance().getLocksManager().add(material);
+                    OddJob.getInstance().getLocksManager().remove(uuid);
+                    OddJob.getInstance().getMessageManager().lockMaterialRemoved(material.name(), player);
+                    event.setCancelled(true);
+                    return;
+                }
                 return;
             }
-            return;
         }
         // Admin tool - end
 
