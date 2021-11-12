@@ -249,4 +249,5 @@ public class AuctionManager {
         List<Integer> list = AuctionSQL.getUnRetrievedItems(player.getUniqueId());
 
     }
+
 }

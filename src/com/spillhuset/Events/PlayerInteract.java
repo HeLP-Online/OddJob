@@ -28,9 +28,13 @@ public class PlayerInteract implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteractEvent(PlayerInteractEvent event) {
         Player player = event.getPlayer();
+
         ItemStack item = event.getItem();
+
         Chunk chunk = player.getLocation().getChunk();
+
         UUID playerUUID = player.getUniqueId();
+
         UUID chunkGuildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByChunk(chunk);
         UUID playerGuildUUID = OddJob.getInstance().getGuildManager().getGuildUUIDByMember(playerUUID);
         Guild chunkGuild = OddJob.getInstance().getGuildManager().getGuild(chunkGuildUUID);
@@ -48,8 +52,9 @@ public class PlayerInteract implements Listener {
         }
 
         // Prevent generating map from InfoLockTool
-        if (item != null && item.equals(OddJob.getInstance().getLocksManager().infoWand))
+        if (item != null && item.equals(OddJob.getInstance().getLocksManager().infoWand)) {
             event.setUseItemInHand(Event.Result.DENY);
+        }
 
         // Check Authorization
         // ignore if nothing in hand, in hand is air, or use of offhand
