@@ -266,4 +266,23 @@ public class LockManager {
     public void save() {
 
     }
+
+    public List<ItemStack> getAdminTools() {
+        List<ItemStack> tools = new ArrayList<>();
+
+        tools.add(addMaterialWand);
+        tools.add(delMaterialWand);
+
+        return tools;
+    }
+
+    public List<ItemStack> getTools() {
+        List<ItemStack> tools = getAdminTools();
+
+        tools.add(lockWand);
+        tools.add(infoWand);
+        tools.add(unlockWand);
+
+        return tools;
+    }
 }

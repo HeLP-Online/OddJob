@@ -7,18 +7,29 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class InventoryClick implements Listener {
+    List<ItemStack> tools = new ArrayList<>();
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    public InventoryClick() {
+        tools = OddJob.getInstance().getLocksManager().getTools();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerInventoryClick(InventoryClickEvent event) {
+        if (tools.contains(event.getCurrentItem())) {
+            OddJob.getInstance().getLocksManager().remove(event.getWhoClicked().getUniqueId());
+            event.setCancelled(true);
+            return;
+        }
         // Find Trades
         if (event.getView().getTitle().equals("FAIR TRADE")) {
-            // Is a trade inventory
+            /* Is a trade inventory
             if (event.getCurrentItem() != null && (
                     event.getCurrentItem().equals(OddJob.getInstance().getLocksManager().lockWand) ||
                             event.getCurrentItem().equals(OddJob.getInstance().getLocksManager().infoWand) ||
@@ -28,7 +39,7 @@ public class InventoryClick implements Listener {
                 // Prevent trading of the Lock tools
                 event.setCancelled(true);
             }
-
+            */
             Player player = (Player) event.getWhoClicked();
             UUID topUUID = null;
             UUID bottomUUID = null;
@@ -59,20 +70,26 @@ public class InventoryClick implements Listener {
             }
 
             if (event.getRawSlot() >= 36) {
+                // Own inventory
                 OddJob.getInstance().log(">=36");
             } else if (event.getRawSlot() >= 0 && event.getRawSlot() <= 8 && player == topPlayer) {
+                // Player top inventory
                 OddJob.getInstance().log(">=0 && <=8");
             } else if (event.getRawSlot() >= 27 && event.getRawSlot() <= 35 && player == bottomPlayer) {
+                // Player bottom inventory
                 OddJob.getInstance().log(">=27 && <=35");
             } else if (event.getRawSlot() == 17) {
+                // Accept button
                 OddJob.getInstance().log("== 17");
                 OddJob.getInstance().getPlayerManager().acceptTrade(player, event.getCurrentItem());
                 event.setCancelled(true);
             } else if ((event.getRawSlot() >= 9 && event.getRawSlot() <= 11) || (event.getRawSlot() >= 18 && event.getRawSlot() <= 20)) {
+                // Currency buttons
                 OddJob.getInstance().log("(>=9 && <=11) || (>=18 && <=20)");
                 OddJob.getInstance().getPlayerManager().tradeBalance(event.getCurrentItem(), player);
                 event.setCancelled(true);
             } else {
+                // anything else
                 event.setCancelled(true);
             }
             OddJob.getInstance().log(player.getName() + ": " + event.getRawSlot() + " c:" + event.isCancelled());

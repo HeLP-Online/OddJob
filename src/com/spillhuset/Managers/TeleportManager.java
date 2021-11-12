@@ -2,6 +2,8 @@ package com.spillhuset.Managers;
 
 import com.spillhuset.OddJob;
 import com.spillhuset.Utils.Enum.Plugin;
+import com.spillhuset.Utils.Enum.TeleportType;
+import com.spillhuset.Utils.TeleportRequest;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -18,22 +20,22 @@ import java.util.UUID;
 
 public class TeleportManager extends CostManager {
     /**
-     * topPlayer | bottomPlayer
+     * HashMap topPlayer | bottomPlayer
      */
-    private final HashMap<UUID, UUID> request = new HashMap<>();
+    private final HashMap<UUID, UUID> teleportRequestMap = new HashMap<>();
 
     /**
      * topPlayer | TPATimer
      */
-    private final HashMap<UUID, BukkitRunnable> reset = new HashMap<>();
+    private final HashMap<UUID, BukkitRunnable> teleportRequestResetMap = new HashMap<>();
 
     /**
      * topPlayer | teleportTimer
      */
-    private final HashMap<UUID, BukkitTask> teleportTimer;
+    private final HashMap<UUID, BukkitTask> teleportCountdownMap = new HashMap<>();
+    private HashMap<UUID, TeleportRequest> requests = new HashMap<>();
 
     public TeleportManager() {
-        teleportTimer = new HashMap<>();
     }
 
     /**
@@ -55,14 +57,14 @@ public class TeleportManager extends CostManager {
      * @return boolean true if exists
      */
     public boolean hasRequest(UUID topPlayer) {
-        return request.containsKey(topPlayer);
+        return teleportRequestMap.containsKey(topPlayer);
     }
 
     // TODO Tpa cost?
     public void accept(UUID topUUID) {
         if (hasRequest(topUUID)) {
             // Find the request
-            UUID bottomUUID = request.get(topUUID);
+            UUID bottomUUID = teleportRequestMap.get(topUUID);
 
             // player (sends request) // target (teleport to)
             Player topPlayer = Bukkit.getPlayer(topUUID);
@@ -80,8 +82,8 @@ public class TeleportManager extends CostManager {
             // Performing
             OddJob.getInstance().getMessageManager().tpAccepted(bottomUUID, bottomPlayer.getName(), topUUID, topPlayer.getName());
             teleport(topPlayer, bottomPlayer, PlayerTeleportEvent.TeleportCause.COMMAND, true);
-            if (reset.containsKey(topUUID)) {
-                reset.get(topUUID).cancel();
+            if (teleportRequestResetMap.containsKey(topUUID)) {
+                teleportRequestResetMap.get(topUUID).cancel();
             }
             removeRequest(topUUID);
         }
@@ -90,10 +92,10 @@ public class TeleportManager extends CostManager {
 
 
     public void cancel(UUID uuid) {
-        if (teleportTimer.containsKey(uuid)) {
-            BukkitTask task = teleportTimer.get(uuid);
+        if (teleportCountdownMap.containsKey(uuid)) {
+            BukkitTask task = teleportCountdownMap.get(uuid);
             task.cancel();
-            teleportTimer.remove(uuid);
+            teleportCountdownMap.remove(uuid);
         }
     }
 
@@ -128,15 +130,15 @@ public class TeleportManager extends CostManager {
                 movingPlayer.teleport((Player) destinationPlayer, cause);
                 return;
             }
-            if (teleportTimer.containsKey(movingUUID)) {
+            if (teleportCountdownMap.containsKey(movingUUID)) {
                 // Changing teleport location
-                teleportTimer.get(movingUUID).cancel();
-                teleportTimer.remove(movingUUID);
+                teleportCountdownMap.get(movingUUID).cancel();
+                teleportCountdownMap.remove(movingUUID);
                 OddJob.getInstance().getMessageManager().tpChanging(movingUUID);
             }
             // Start timer
             if (countdown) {
-                teleportTimer.put(movingUUID, new BukkitRunnable() {
+                teleportCountdownMap.put(movingUUID, new BukkitRunnable() {
                     int i = 10;
 
                     @Override
@@ -195,13 +197,13 @@ public class TeleportManager extends CostManager {
                 movingPlayer.teleport(destination, cause);
                 return true;
             } else {
-                if (teleportTimer.containsKey(movingUUID)) {
-                    teleportTimer.get(movingUUID).cancel();
-                    teleportTimer.remove(movingUUID);
+                if (teleportCountdownMap.containsKey(movingUUID)) {
+                    teleportCountdownMap.get(movingUUID).cancel();
+                    teleportCountdownMap.remove(movingUUID);
                     OddJob.getInstance().getMessageManager().tpChanging(movingUUID);
                 }
                 if (countdown) {
-                    teleportTimer.put(movingPlayer.getUniqueId(), new BukkitRunnable() {
+                    teleportCountdownMap.put(movingPlayer.getUniqueId(), new BukkitRunnable() {
                         int i = 10;
 
                         @Override
@@ -215,7 +217,7 @@ public class TeleportManager extends CostManager {
                             if (i > 0) {
                                 OddJob.getInstance().getMessageManager().tpCountdown(i, movingUUID);
                             } else {
-                                teleportTimer.remove(movingUUID);
+                                teleportCountdownMap.remove(movingUUID);
                                 OddJob.getInstance().getMessageManager().tpTeleporting(movingUUID);
                                 movingPlayer.teleport(destination, cause);
 
@@ -233,11 +235,11 @@ public class TeleportManager extends CostManager {
     }
 
     public void deny(UUID bottomUUID) {
-        if (request.containsValue(bottomUUID)) {
-            for (UUID topUUID : request.keySet()) {
-                if (request.get(topUUID).equals(bottomUUID)) {
+        if (teleportRequestMap.containsValue(bottomUUID)) {
+            for (UUID topUUID : teleportRequestMap.keySet()) {
+                if (teleportRequestMap.get(topUUID).equals(bottomUUID)) {
                     // topPlayer | bottomPlayer
-                    if (reset.containsKey(topUUID)) reset.get(topUUID).cancel();
+                    if (teleportRequestResetMap.containsKey(topUUID)) teleportRequestResetMap.get(topUUID).cancel();
                     removeRequest(topUUID);
                 }
             }
@@ -250,7 +252,7 @@ public class TeleportManager extends CostManager {
             public void run() {
                 if (hasRequest(topUUID)) {
                     removeRequest(topUUID);
-                    reset.remove(topUUID);
+                    teleportRequestResetMap.remove(topUUID);
                     Player bottomPlayer = Bukkit.getPlayer(topUUID);
                     if (bottomPlayer == null) {
                         OddJob.getInstance().getMessageManager().teleportNotOnline(topUUID);
@@ -269,12 +271,12 @@ public class TeleportManager extends CostManager {
             }
         };
         task.runTaskLater(OddJob.getInstance(), 1200L);
-        reset.put(topUUID, task);
+        teleportRequestResetMap.put(topUUID, task);
     }
 
     private void removeRequest(UUID topUUID) {
-        request.remove(topUUID);
-        reset.remove(topUUID);
+        teleportRequestMap.remove(topUUID);
+        teleportRequestResetMap.remove(topUUID);
     }
 
     // back <player>
@@ -323,7 +325,7 @@ public class TeleportManager extends CostManager {
      */
     public int hasRequests(UUID bottomUUID) {
         int i = 0;
-        for (UUID uuid : request.values()) {
+        for (UUID uuid : teleportRequestMap.values()) {
             if (uuid.equals(bottomUUID)) i++;
         }
         return i;
@@ -334,8 +336,8 @@ public class TeleportManager extends CostManager {
      * @return UUID of requester
      */
     public UUID getRequestTop(UUID bottomUUID) {
-        for (UUID uuid : request.keySet()) {
-            if (request.get(uuid) == bottomUUID) {
+        for (UUID uuid : teleportRequestMap.keySet()) {
+            if (teleportRequestMap.get(uuid) == bottomUUID) {
                 return uuid;
             }
         }
@@ -343,13 +345,13 @@ public class TeleportManager extends CostManager {
     }
 
     public void delRequest(UUID topPlayer) {
-        request.remove(topPlayer);
+        teleportRequestMap.remove(topPlayer);
     }
 
     public List<String> getRequestList(UUID bottomPlayer) {
         List<String> list = new ArrayList<>();
-        for (UUID uuid : request.keySet()) {
-            if (request.get(uuid) == bottomPlayer) {
+        for (UUID uuid : teleportRequestMap.keySet()) {
+            if (teleportRequestMap.get(uuid) == bottomPlayer) {
                 list.add(OddJob.getInstance().getPlayerManager().getName(uuid));
             }
         }
@@ -357,9 +359,9 @@ public class TeleportManager extends CostManager {
     }
 
     public void addRequest(UUID topUUID, UUID bottomUUID) {
-        if (reset.get(topUUID) != null) reset.get(topUUID).cancel();
+        if (teleportRequestResetMap.get(topUUID) != null) teleportRequestResetMap.get(topUUID).cancel();
         if (CostManager.cost(topUUID, bottomUUID, "teleport.request")) {
-            request.put(topUUID, bottomUUID);
+            teleportRequestMap.put(topUUID, bottomUUID);
             startTimer(topUUID, bottomUUID);
         }
     }
@@ -367,15 +369,15 @@ public class TeleportManager extends CostManager {
     public void acceptRequest(Player topPlayer, Player bottomPlayer) {
         if (CostManager.cost(bottomPlayer.getUniqueId(), topPlayer.getUniqueId(), "teleport.accept")) {
             teleport(topPlayer,bottomPlayer, PlayerTeleportEvent.TeleportCause.COMMAND,true);
-            if (reset.containsKey(topPlayer.getUniqueId())) {
-                reset.get(topPlayer.getUniqueId()).cancel();
+            if (teleportRequestResetMap.containsKey(topPlayer.getUniqueId())) {
+                teleportRequestResetMap.get(topPlayer.getUniqueId()).cancel();
             }
             removeRequest(topPlayer.getUniqueId());
         }
     }
 
     public UUID getRequestBottom(UUID uniqueId) {
-        return request.get(uniqueId);
+        return teleportRequestMap.get(uniqueId);
     }
 
     public void leave(UUID uuid) {
@@ -393,5 +395,20 @@ public class TeleportManager extends CostManager {
             OddJob.getInstance().getMessageManager().teleportLeft(top, bottom);
         }
         removeRequest(bottom);
+    }
+
+    public void update(Player target, TeleportType type, Object destination) {
+        boolean countdown = !(target.isOp() || target.hasPermission("teleport.now"));
+        long timeout = System.currentTimeMillis() + 300000;
+
+        if (requests.containsKey(target.getUniqueId())) {
+            TeleportRequest requestOld = requests.get(target.getUniqueId());
+            TeleportRequest requestNew = new TeleportRequest(target,type,destination,timeout,countdown);
+            OddJob.getInstance().getMessageManager().teleportChanged(requestOld,requestNew);
+            requests.put(target.getUniqueId(),requestNew);
+        }
+        if (type.equals(TeleportType.PLAYER)) {
+            requests.put(target.getUniqueId(), new TeleportRequest(target,type,destination,timeout,countdown));
+        }
     }
 }

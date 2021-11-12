@@ -13,6 +13,8 @@ import com.spillhuset.Utils.Warp;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.ezapi.chat.ChatMessage;
+import org.ezapi.util.PlayerUtils;
 
 import java.util.*;
 
@@ -861,19 +863,23 @@ public class MessageManager {
     }
 
     public void tpNow(UUID movingUUID) {
-        success(type(Plugin.teleport), "Teleporting now!", movingUUID);
+        PlayerUtils.actionbar(new ChatMessage(cSuccess+type(Plugin.teleport)+"Teleporting now!",false),Bukkit.getPlayer(movingUUID));
+        //success(type(Plugin.teleport), "Teleporting now!", movingUUID);
     }
 
     public void tpInterrupt(UUID movingUUID) {
-        danger(type(Plugin.teleport), "Interrupted, in combat!", movingUUID);
+        PlayerUtils.actionbar(new ChatMessage(cDanger+type(Plugin.teleport)+"Interrupted, in combat!",false),Bukkit.getPlayer(movingUUID));
+        //danger(type(Plugin.teleport), "Interrupted, in combat!", movingUUID);
     }
 
     public void tpCountdown(int i, UUID movingUUID) {
-        info(type(Plugin.teleport), "Teleporting in " + cReset + i, movingUUID);
+        PlayerUtils.actionbar(new ChatMessage(cInfo+type(Plugin.teleport)+"Teleporting in "+cReset+i,false),Bukkit.getPlayer(movingUUID));
+        //info(type(Plugin.teleport), "Teleporting in " + cReset + i, movingUUID);
     }
 
     public void tpTeleporting(UUID movingUUID) {
-        success(type(Plugin.teleport), "Teleporting!", movingUUID);
+        PlayerUtils.actionbar(new ChatMessage(cSuccess+type(Plugin.teleport)+"Teleporting!", false),Bukkit.getPlayer(movingUUID));
+        //success(type(Plugin.teleport), "Teleporting!", movingUUID);
     }
 
     public void tpChanging(UUID movingUUID) {
@@ -1140,7 +1146,12 @@ public class MessageManager {
     }
 
     public void permissionDenied(Plugin type, CommandSender sender) {
-        danger(type(type), "Permission denied!", sender);
+        if (sender instanceof Player) {
+            PlayerUtils.actionbar(new ChatMessage(type(type)+ "Permission denied!",false), (Player) sender);
+        } else {
+            danger(type(type), "Permission denied!", sender);
+        }
+
     }
 
     public void guildZoneError(String arg, Player player) {
